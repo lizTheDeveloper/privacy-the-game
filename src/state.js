@@ -1,3 +1,5 @@
+import { captureError } from './utils/errors.js';
+
 export const STATE_VERSION = 1;
 const STORAGE_KEY = 'reclaim-city-state';
 
@@ -30,7 +32,8 @@ export function loadState(storage = localStorage) {
     const parsed = JSON.parse(raw);
     if (parsed.version !== STATE_VERSION) return createInitialState();
     return parsed;
-  } catch {
+  } catch (error) {
+    captureError(error, { operation: 'loadState' });
     return createInitialState();
   }
 }
@@ -46,7 +49,11 @@ export function hasSavedState(storage = localStorage) {
 }
 
 export function saveState(state, storage = localStorage) {
-  storage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    captureError(error, { operation: 'saveState' });
+  }
 }
 
 export function updateMission(state, missionId, update) {

@@ -11,6 +11,9 @@ import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderMilestone } from './screens/milestone.js';
+import { initErrorTracking, captureError } from './utils/errors.js';
+
+initErrorTracking();
 
 let state = loadState();
 let started = hasSavedState();
@@ -44,8 +47,9 @@ function render(route) {
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
+    if (typeof umami !== 'undefined' && umami.track) umami.track(() => ({ url: location.hash, title: route.screen }));
   } catch (error) {
-    console.error('Render failed', error);
+    captureError(error, { screen: route.screen, params: route.params });
     app.innerHTML = `<div style="padding: 40px; text-align: center;">
       <h2 style="color: var(--magenta);">Something broke</h2>
       <p>The error has been reported. <a href="#/city">Return to city</a></p>
@@ -61,9 +65,8 @@ function setState(next) {
   state = next;
   try {
     saveState(state);
-  } catch {
-    console.error('saveState failed; state kept in memory only');
-    // TODO(telemetry): captureError here
+  } catch (error) {
+    captureError(error, { screen: 'saveState' });
   }
 }
 
@@ -79,16 +82,27 @@ function submitDebrief(missionId) {
   if (Object.keys(answers).length === 0) return;
 
   const deferred = Object.values(answers).some((v) => v === 'skip' || v === 'later');
+  const status = deferred ? 'skipped' : 'completed';
   const updated = updateMission(state, missionId, {
-    status: deferred ? 'skipped' : 'completed',
+    status,
     finding: answers.finding,
     action: answers.action,
   });
   setState(updateStreak(updated));
 
   const districtId = ACCOUNTS[mission.accountId]?.district;
+  if (typeof umami !== 'undefined' && umami.track) {
+    umami.track('mission-completed', {
+      mission: missionId,
+      district: districtId,
+      finding: answers.finding,
+      phase: mission.phase,
+      status,
+    });
+  }
   const progress = calcDistrictProgress(state, districtId);
   if (progress.total > 0 && progress.percent === 100) {
+    if (typeof umami !== 'undefined' && umami.track) umami.track('district-completed', { district: districtId });
     navigate(`#/milestone/${districtId}`);
   } else {
     navigate(`#/district/${districtId}`);
@@ -134,14 +148,18 @@ app.addEventListener('click', (e) => {
   const action = el.dataset.action;
 
   if (action === 'go-do-it') {
+    const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
+    if (typeof umami !== 'undefined' && umami.track) umami.track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     navigate(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
   } else if (action === 'toggle-account') {
     const id = el.dataset.account;
     if (state.accounts[id]) {
-      setState(toggleAccount(state, id, !state.accounts[id].enabled));
+      const enabled = !state.accounts[id].enabled;
+      setState(toggleAccount(state, id, enabled));
+      if (typeof umami !== 'undefined' && umami.track) umami.track('account-toggled', { account: id, enabled });
       renderCurrentRoute();
     }
   } else if (action === 'share-card') {
@@ -150,9 +168,8 @@ app.addEventListener('click', (e) => {
     started = true;
     try {
       saveState(state);
-    } catch {
-      console.error('saveState failed; state kept in memory only');
-      // TODO(telemetry): captureError here
+    } catch (error) {
+      captureError(error, { screen: 'saveState' });
     }
     renderCurrentRoute();
   }

@@ -1,6 +1,6 @@
 # Reclaim City v1 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a playable v1 of Reclaim City — Chapter 1 (The Master Keys) fully playable with all 4 mission phases, campaign mode, stats dashboard, and milestone cards.
 
@@ -75,7 +75,7 @@ package.json              — dev dependencies only (vitest, serve)
 **Interfaces:**
 - Produces: HTML entry point with `<div id="app">`, CSS design tokens as custom properties, dev server and test commands
 
-- [ ] **Step 1: Create package.json with dev dependencies**
+- [x] **Step 1: Create package.json with dev dependencies**
 
 ```json
 {
@@ -94,7 +94,7 @@ package.json              — dev dependencies only (vitest, serve)
 }
 ```
 
-- [ ] **Step 2: Create vitest config**
+- [x] **Step 2: Create vitest config**
 
 ```js
 // vitest.config.js
@@ -108,7 +108,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Create index.html**
+- [x] **Step 3: Create index.html**
 
 ```html
 <!DOCTYPE html>
@@ -127,7 +127,7 @@ export default defineConfig({
 </html>
 ```
 
-- [ ] **Step 4: Create style.css with design system tokens**
+- [x] **Step 4: Create style.css with design system tokens**
 
 All cyberpunk design tokens as CSS custom properties on `:root`. Global resets. Typography classes. Panel/border utilities. Scanline overlay. Neon glow utilities. Derive all values from the design screens (Main.dc.html etc.).
 
@@ -194,13 +194,13 @@ img { image-rendering: pixelated; }
 }
 ```
 
-- [ ] **Step 5: Install dependencies and verify dev server starts**
+- [x] **Step 5: Install dependencies and verify dev server starts**
 
 Run: `npm install && npx serve src -l 3000 &`
 Open: `http://localhost:3000` — should show a blank dark page.
 Kill the server.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add package.json vitest.config.js src/index.html src/style.css
@@ -225,7 +225,7 @@ git commit -m "feat: project scaffold with cyberpunk design system"
   - `updateStreak(state)` → `State`
   - `STATE_VERSION` → `number` (current: `1`)
 
-- [ ] **Step 1: Write failing tests for state management**
+- [x] **Step 1: Write failing tests for state management**
 
 ```js
 // tests/state.test.js
@@ -340,12 +340,12 @@ describe('updateStreak', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run tests/state.test.js`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: Implement state.js**
+- [x] **Step 3: Implement state.js**
 
 ```js
 // src/state.js
@@ -432,12 +432,12 @@ export function updateStreak(state) {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/state.test.js`
 Expected: All PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/state.js tests/state.test.js
@@ -463,7 +463,7 @@ git commit -m "feat: state management with localStorage persistence"
   - `getMissionsForDistrict(districtId)` → `Mission[]`
   - `getMissionsForAccount(accountId)` → `Mission[]`
 
-- [ ] **Step 1: Write data integrity tests**
+- [x] **Step 1: Write data integrity tests**
 
 ```js
 // tests/data.test.js
@@ -541,12 +541,12 @@ describe('MISSIONS', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run tests/data.test.js`
 Expected: FAIL — modules not found
 
-- [ ] **Step 3: Create districts.js**
+- [x] **Step 3: Create districts.js**
 
 ```js
 // src/data/districts.js
@@ -610,7 +610,7 @@ export const DISTRICTS = [
 ];
 ```
 
-- [ ] **Step 4: Create accounts.js with Chapter 1 accounts and building mappings**
+- [x] **Step 4: Create accounts.js with Chapter 1 accounts and building mappings**
 
 Define all 9 Master Keys accounts with their building asset paths, security URLs, and risk levels. Chapters 2-8 get stub accounts (id, name, district only — no building assets yet).
 
@@ -713,7 +713,7 @@ export const ACCOUNTS = {
 };
 ```
 
-- [ ] **Step 5: Create missions.js with full Chapter 1 missions**
+- [x] **Step 5: Create missions.js with full Chapter 1 missions**
 
 Define the complete set of missions for all 9 Master Keys accounts across all 4 phases. Helper functions at the bottom. Each mission follows this schema (example for Gmail breach recon):
 
@@ -787,12 +787,12 @@ export function getMissionsForAccount(accountId) {
 
 Write every mission for all 9 Master Keys accounts following this exact schema. Mission IDs use the pattern `{accountId}-{phase}-{action}` (e.g. `gmail-recon-breach`, `gmail-fortify-password`, `icloud-reclaim-privacy`). Each recon mission gets per-finding Scout dialog variants in `scoutDialog.debrief`. The `skip` debrief option always sets status to `'skipped'` — the mission stays available for retry.
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run tests/data.test.js`
 Expected: All PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/data/ tests/data.test.js
@@ -816,7 +816,7 @@ git commit -m "feat: content data model with Chapter 1 missions"
   - `initRouter(renderFn)` — listens for hash changes, calls `renderFn(route)` on change
   - Routes: `/city`, `/district/:id`, `/mission/:id/briefing`, `/mission/:id/debrief`, `/milestone/:districtId`, `/stats`
 
-- [ ] **Step 1: Write router tests**
+- [x] **Step 1: Write router tests**
 
 ```js
 // tests/router.test.js
@@ -867,12 +867,12 @@ describe('parseRoute', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run tests/router.test.js`
 Expected: FAIL
 
-- [ ] **Step 3: Implement router.js**
+- [x] **Step 3: Implement router.js**
 
 ```js
 // src/router.js
@@ -905,7 +905,7 @@ export function initRouter(onRoute) {
 }
 ```
 
-- [ ] **Step 4: Implement app.js — wires router to screen rendering**
+- [x] **Step 4: Implement app.js — wires router to screen rendering**
 
 ```js
 // src/app.js
@@ -939,19 +939,19 @@ window.reclaimCity = { navigate, state, saveState };
 initRouter(render);
 ```
 
-- [ ] **Step 5: Run router tests**
+- [x] **Step 5: Run router tests**
 
 Run: `npx vitest run tests/router.test.js`
 Expected: All PASS
 
-- [ ] **Step 6: Manual test — start dev server, verify routing works**
+- [x] **Step 6: Manual test — start dev server, verify routing works**
 
 Run: `npx serve src -l 3000`
 Navigate to `http://localhost:3000/#/city` — should show "RECLAIM CITY" placeholder.
 Navigate to `http://localhost:3000/#/district/master-keys` — should show "District: master-keys".
 Navigate to `http://localhost:3000/#/stats` — should show "Stats dashboard".
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/router.js src/app.js tests/router.test.js
@@ -975,7 +975,7 @@ git commit -m "feat: hash router and app shell with screen stubs"
   - `calcFindings(state)` → `{breachesFound, passwordsReset, twoFactorEnabled, optOutsFiled}`
   - `getBuildingState(state, accountId)` → `'occupied' | 'in-progress' | 'liberated' | 'liberated-scarred'` (scarred = breach was found and fixed; visual trophy mark)
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```js
 // tests/calc.test.js
@@ -1036,9 +1036,9 @@ describe('getBuildingState', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- [x] **Step 2: Run tests — expect FAIL**
 
-- [ ] **Step 3: Implement calc.js**
+- [x] **Step 3: Implement calc.js**
 
 ```js
 // src/utils/calc.js
@@ -1093,9 +1093,9 @@ export function getBuildingState(state, accountId) {
 }
 ```
 
-- [ ] **Step 4: Run tests — expect PASS**
+- [x] **Step 4: Run tests — expect PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/utils/calc.js tests/calc.test.js
@@ -1118,21 +1118,21 @@ git commit -m "feat: stats calculation engine"
   - `renderScout(message, options?)` → HTML string for Scout dialog
   - `renderBuilding(accountId, buildingState, size?)` → HTML string for a building sprite
 
-- [ ] **Step 1: Implement hud.js**
+- [x] **Step 1: Implement hud.js**
 
 Renders the top HUD bar matching the cyberpunk design: Orbitron "RECLAIM CITY" title, lime Integrity %, magenta Exposure score, amber Streak. Uses CSS classes from style.css. Returns an HTML string.
 
-- [ ] **Step 2: Implement scout.js**
+- [x] **Step 2: Implement scout.js**
 
 Renders Scout's avatar (scout_0.png at 64px with cyan drop-shadow) plus a dialog box with cyan border. Accepts a message string and optional action button text/href. Returns HTML string.
 
-- [ ] **Step 3: Implement building.js**
+- [x] **Step 3: Implement building.js**
 
 Renders a building sprite based on account ID and state. Uses `ACCOUNTS[accountId].building` for liberated, `ACCOUNTS[accountId].buildingDark` for occupied. Applies CSS filters: `brightness(1.1) drop-shadow(0 0 8px cyan)` for liberated, `brightness(1.1) drop-shadow(0 0 8px cyan)` + a small magenta scar badge overlay for `liberated-scarred` (spec: "battle scar/trophy mark — pride, not shame"), `brightness(0.5)` for occupied, `brightness(0.8) saturate(0.7)` for in-progress. Returns HTML string with the `<img>` and account label.
 
-- [ ] **Step 4: Manual test — import components into app.js stub screens, verify rendering**
+- [x] **Step 4: Manual test — import components into app.js stub screens, verify rendering**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/
@@ -1151,7 +1151,7 @@ git commit -m "feat: HUD, Scout, and building sprite components"
 - Consumes: `renderHud`, `renderScout`, `renderBuilding`, `DISTRICTS`, `calcDistrictProgress`, `getBuildingState`, `State`
 - Produces: `renderCityMap(state)` → full HTML string for the isometric city map screen
 
-- [ ] **Step 1: Implement city-map.js**
+- [x] **Step 1: Implement city-map.js**
 
 Render the isometric city map matching Main.dc.html's design. Use the generic isometric building sprites (`iso_occupied.png`, `iso_liberated.png`, `iso_tower_occ.png`, `iso_tower_lib.png`, `iso_progress.png`) arranged in staggered rows. The building states for the foreground rows are driven by `getBuildingState` for accounts in each district. District labels float above with progress bars. Scout dialog at the bottom with "Next Mission" button. HUD at top.
 
@@ -1159,11 +1159,11 @@ Render the isometric city map matching Main.dc.html's design. Use the generic is
 
 Click handlers: clicking a district label navigates to `#/district/{id}`. "Next Mission" navigates to the next available mission's briefing. "Stats" button navigates to `#/stats`.
 
-- [ ] **Step 2: Wire into app.js — replace the city stub**
+- [x] **Step 2: Wire into app.js — replace the city stub**
 
-- [ ] **Step 3: Manual test — start dev server, verify city map renders with pixel art**
+- [x] **Step 3: Manual test — start dev server, verify city map renders with pixel art**
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/screens/city-map.js src/app.js
@@ -1182,17 +1182,17 @@ git commit -m "feat: isometric city map screen"
 - Consumes: `renderHud`, `renderBuilding`, `DISTRICTS`, `ACCOUNTS`, `getMissionsForDistrict`, `State`, `getBuildingState`, `calcDistrictProgress`
 - Produces: `renderDistrict(state, districtId)` → full HTML string
 
-- [ ] **Step 1: Implement district.js**
+- [x] **Step 1: Implement district.js**
 
 Matching District.dc.html: header with back button + district name + integrity %, building skyline row showing each account's unique sprite in its current state, phase tabs (Survey/Recon/Fortify/Reclaim) with active tab highlighting, mission list with per-mission status (completed/active/upcoming), per-mission building thumbnail.
 
 Click handlers: back button → `#/city`. Phase tabs filter the mission list. Clicking "Start" on an available mission → `#/mission/{id}/briefing`. Clicking a completed mission shows its debrief summary.
 
-- [ ] **Step 2: Wire into app.js**
+- [x] **Step 2: Wire into app.js**
 
-- [ ] **Step 3: Manual test — navigate to `#/district/master-keys`, verify building row and mission list**
+- [x] **Step 3: Manual test — navigate to `#/district/master-keys`, verify building row and mission list**
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/screens/district.js src/app.js
@@ -1214,17 +1214,17 @@ git commit -m "feat: district screen with building row and mission list"
   - `renderBriefing(state, missionId)` → HTML string
   - `renderDebrief(state, missionId)` → HTML string
 
-- [ ] **Step 1: Implement briefing.js**
+- [x] **Step 1: Implement briefing.js**
 
 Matching Briefing.dc.html: header with breadcrumb (district/phase), mission title in Orbitron with cyan glow, "THREAT INTEL" panel with briefing text, "YOUR MOVE" panel with numbered steps (01/02/03 in JetBrains Mono), "GO DO IT" button that opens the external URL in a new tab and then navigates to `#/mission/{id}/debrief`, "Not now" that goes back to the district. Scout sidebar with portrait, dialog, and building transformation preview (dark → liberated using that account's specific building sprites).
 
-- [ ] **Step 2: Implement debrief.js**
+- [x] **Step 2: Implement debrief.js**
 
 Matching Debrief.dc.html: header "MISSION DEBRIEF", Scout message asking what was found, radio-style choice groups for each debrief question (findings + action), severity tags (SAFE/WARN/CRIT/SKIP), "SUBMIT REPORT" button that calls `updateMission` + `updateStreak` + `saveState` and then navigates back to the district.
 
 The "Couldn't check right now" option sets status to `'skipped'` — the mission stays available.
 
-- [ ] **Step 3: Wire into app.js with state mutation on submit**
+- [x] **Step 3: Wire into app.js with state mutation on submit**
 
 The debrief submit handler must:
 1. Call `updateMission(state, missionId, {status, finding, action})`
@@ -1233,9 +1233,9 @@ The debrief submit handler must:
 4. Check if district is now 100% — if so, navigate to `#/milestone/{districtId}`
 5. Otherwise navigate to `#/district/{districtId}`
 
-- [ ] **Step 4: Manual test — complete a full mission cycle: district → briefing → external link → debrief → submit → back to district with updated state**
+- [x] **Step 4: Manual test — complete a full mission cycle: district → briefing → external link → debrief → submit → back to district with updated state**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/screens/briefing.js src/screens/debrief.js src/app.js
@@ -1254,17 +1254,17 @@ git commit -m "feat: mission briefing and debrief screens with state updates"
 - Consumes: `calcIntegrity`, `calcExposure`, `calcDistrictProgress`, `calcFindings`, `DISTRICTS`, `State`
 - Produces: `renderStats(state)` → HTML string
 
-- [ ] **Step 1: Implement stats.js**
+- [x] **Step 1: Implement stats.js**
 
 Matching Stats.dc.html: header "YOUR CITY", three stat cards (Integrity ring in lime/cyan, Exposure ring in magenta, Streak in amber), district progress bars for all 8 districts with cyan fill, findings log (breaches found, passwords reset, 2FA enabled, opt-outs filed) with neon stat counters. Back button to city map.
 
 The ring charts use inline SVG with `stroke-dasharray`/`stroke-dashoffset` to show percentage fill, matching the design screens.
 
-- [ ] **Step 2: Wire into app.js**
+- [x] **Step 2: Wire into app.js**
 
-- [ ] **Step 3: Manual test — navigate to `#/stats`, verify rings and progress bars update based on completed missions**
+- [x] **Step 3: Manual test — navigate to `#/stats`, verify rings and progress bars update based on completed missions**
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/screens/stats.js src/app.js
@@ -1286,19 +1286,19 @@ git commit -m "feat: stats dashboard with ring charts and progress bars"
   - `renderMilestone(state, districtId)` → HTML string
   - `generateMilestoneCard(districtName, stats)` → `HTMLCanvasElement` (for sharing)
 
-- [ ] **Step 1: Implement milestone.js**
+- [x] **Step 1: Implement milestone.js**
 
 Matching Milestone.dc.html: celebration header "LIBERATED" with cyan neon glow, liberated building skyline using account sprites, stats row (accounts secured, breaches fixed, percent), shareable card preview, "Share Card" button (copies card image to clipboard or opens share dialog), "Continue to next chapter" button.
 
-- [ ] **Step 2: Implement milestone-card.js**
+- [x] **Step 2: Implement milestone-card.js**
 
 Uses the Canvas API to generate a 600x315 card image (social media OG dimensions) with the cyberpunk styling: dark background, "RECLAIM CITY" branding, district name, stats, and "themultiverse.school/reclaim" URL. Returns a canvas element. The "Share" button converts this to a blob and uses `navigator.clipboard.write` (with PNG ClipboardItem) or falls back to `navigator.share` where available.
 
-- [ ] **Step 3: Wire into app.js**
+- [x] **Step 3: Wire into app.js**
 
-- [ ] **Step 4: Manual test — complete all Chapter 1 missions, verify milestone screen appears, verify card generation and share**
+- [x] **Step 4: Manual test — complete all Chapter 1 missions, verify milestone screen appears, verify card generation and share**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/screens/milestone.js src/utils/milestone-card.js src/app.js
@@ -1317,13 +1317,13 @@ git commit -m "feat: milestone celebration screen with shareable cards"
 - Consumes: `toggleAccount`, `saveState`, `ACCOUNTS`
 - Produces: Survey phase in district screen — toggle switches for "Do you use this account?"
 
-- [ ] **Step 1: Add survey phase to district.js**
+- [x] **Step 1: Add survey phase to district.js**
 
 When the Survey tab is active, show each account with a toggle: "Do you use [Account Name]?" Toggling off sets `accounts[id].enabled = false` and removes it from the city/mission list. Toggling on re-enables it. Changes persist immediately via `saveState`. Survey is always "complete" — it's the setup step. Add a "Done with survey — start recon" button that switches to the Recon tab.
 
-- [ ] **Step 2: Manual test — toggle accounts on/off, verify mission counts update, verify city map reflects disabled accounts**
+- [x] **Step 2: Manual test — toggle accounts on/off, verify mission counts update, verify city map reflects disabled accounts**
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/screens/district.js src/app.js
@@ -1343,23 +1343,23 @@ git commit -m "feat: survey phase with account toggle flow"
 - Consumes: all modules
 - Produces: polished, playable v1
 
-- [ ] **Step 1: First-visit welcome flow**
+- [x] **Step 1: First-visit welcome flow**
 
 On first visit (no localStorage state), show a brief intro screen: "RECLAIM CITY / TAKE BACK YOUR DATA / Your city has been taken by data brokers. Take it back, building by building." with a "Begin" button that creates initial state and navigates to `#/city`.
 
-- [ ] **Step 2: Responsive CSS**
+- [x] **Step 2: Responsive CSS**
 
 Add `@media` queries for `max-width: 768px`: stack HUD stats vertically, reduce building sizes in city map, make mission list full-width, adjust font sizes. The game should be usable on a phone browser even if it's designed desktop-first.
 
-- [ ] **Step 3: Navigation consistency**
+- [x] **Step 3: Navigation consistency**
 
 Verify all back buttons work. Verify browser back/forward works with hash routing. Verify refreshing any screen restores correctly from localStorage.
 
-- [ ] **Step 4: Edge cases**
+- [x] **Step 4: Edge cases**
 
 Handle: all accounts disabled (show "Enable some accounts in Survey to get started"), all missions completed (show celebration on city map), localStorage full or unavailable (graceful degradation), invalid mission/district IDs in URL (redirect to city).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1380,7 +1380,7 @@ git commit -m "feat: welcome flow, responsive layout, edge cases"
 - Consumes: `initRouter` from `router.js`
 - Produces: Analytics tracking on every screen view + custom events for mission completions
 
-- [ ] **Step 1: Add Umami script tag to index.html**
+- [x] **Step 1: Add Umami script tag to index.html**
 
 Add the Umami tracking script to `<head>`. The `data-website-id` comes from the Umami dashboard after creating the site. Use `defer` so it doesn't block rendering.
 
@@ -1390,7 +1390,7 @@ Add the Umami tracking script to `<head>`. The `data-website-id` comes from the 
 
 Note: Replace `SITE_ID_HERE` with the actual ID from Umami after creating the site. The analytics host may differ — check the Multiverse School's Umami instance URL.
 
-- [ ] **Step 2: Track route changes as page views**
+- [x] **Step 2: Track route changes as page views**
 
 In `app.js`, after each route render, call Umami's track function. Umami auto-tracks page views on SPAs via `hashchange` events when `data-auto-track` is enabled, but we want explicit custom events too.
 
@@ -1401,7 +1401,7 @@ if (typeof umami !== 'undefined') {
 }
 ```
 
-- [ ] **Step 3: Track custom game events**
+- [x] **Step 3: Track custom game events**
 
 Add event tracking for key actions: mission started, mission completed (with finding severity), district completed, account toggled. These go in the debrief submit handler and survey toggle handler.
 
@@ -1417,9 +1417,9 @@ if (typeof umami !== 'undefined') {
 }
 ```
 
-- [ ] **Step 4: Verify in dev — open Network tab, confirm Umami requests fire on navigation and mission completion**
+- [x] **Step 4: Verify in dev — open Network tab, confirm Umami requests fire on navigation and mission completion**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/index.html src/app.js
@@ -1441,7 +1441,7 @@ git commit -m "feat: Umami analytics for page views and game events"
   - Global `window.onerror` and `unhandledrejection` capture
   - Manual `captureError(error, context?)` for caught errors
 
-- [ ] **Step 1: Add Sentry browser SDK via CDN**
+- [x] **Step 1: Add Sentry browser SDK via CDN**
 
 GlitchTip is Sentry-compatible, so use the Sentry browser SDK. Add to index.html `<head>`:
 
@@ -1452,7 +1452,7 @@ GlitchTip is Sentry-compatible, so use the Sentry browser SDK. Add to index.html
 Note: Look up the SRI hash from cdnjs.cloudflare.com at build time — the hash changes per version. Pin the exact version.
 ```
 
-- [ ] **Step 2: Create errors.js with initialization**
+- [x] **Step 2: Create errors.js with initialization**
 
 ```js
 // src/utils/errors.js
@@ -1488,7 +1488,7 @@ export function captureError(error, context) {
 
 Note: Replace DSN with the actual GlitchTip DSN after creating the project. `sendDefaultPii: false` is critical — this is a privacy game, we do not send user data to error trackers.
 
-- [ ] **Step 3: Initialize in app.js and wrap screen rendering**
+- [x] **Step 3: Initialize in app.js and wrap screen rendering**
 
 ```js
 import { initErrorTracking, captureError } from './utils/errors.js';
@@ -1508,13 +1508,13 @@ function render(route) {
 }
 ```
 
-- [ ] **Step 4: Wrap localStorage operations in state.js with error capture**
+- [x] **Step 4: Wrap localStorage operations in state.js with error capture**
 
 Add try/catch around `loadState` and `saveState` with `captureError` calls — localStorage can throw (quota exceeded, private browsing, disabled). These are the most likely runtime errors in a browser-local game.
 
-- [ ] **Step 5: Manual test — throw a deliberate error, verify it appears in GlitchTip dashboard**
+- [x] **Step 5: Manual test — throw a deliberate error, verify it appears in GlitchTip dashboard**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/index.html src/utils/errors.js src/app.js src/state.js
