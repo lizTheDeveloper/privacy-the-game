@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <style>
+    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #050810; color: #f1f5f9; }
+    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    * { box-sizing: border-box; }
+    img { image-rendering: pixelated; }
+  </style>
+</helmet>
+
+<div style="width: 960px; min-height: 820px; background: linear-gradient(180deg, #050810 0%, #0a0e17 40%, #111827 100%); position: relative; overflow: hidden;">
+
+  <!-- ═══ HUD HEADER ═══ -->
+  <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(5,8,16,0.97); border-bottom: 2px solid rgba(245,158,11,0.2);">
+    <div style="width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="flex: 1;">
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #f59e0b; letter-spacing: 1px;">THE MASTER KEYS</div>
+      <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Email &amp; Identity Providers</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; background: rgba(245,158,11,0.1); border: 2px solid rgba(245,158,11,0.3); padding: 4px 14px;">
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #f59e0b;">45%</div>
+      <div style="font-size: 10px; color: #64748b;">LIB</div>
+    </div>
+  </div>
+
+  <!-- ═══ ISOMETRIC BUILDING ROW — unique per account ═══ -->
+  <div style="padding: 20px 24px 16px; border-bottom: 2px solid rgba(255,255,255,0.04); background: rgba(8,12,22,0.6);">
+    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 14px; letter-spacing: 1px;">DISTRICT BUILDINGS</div>
+    <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; padding-bottom: 4px;">
+
+      <!-- Gmail — LIBERATED ✓ -->
+      <div style="text-align: center; cursor: pointer; position: relative;">
+        <img src="gmail.png" style="width: 72px; height: auto; filter: brightness(1.1) drop-shadow(0 0 6px rgba(245,158,11,0.25));">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #34d399; margin-top: 4px;">Gmail</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399;">&#10003;</div>
+      </div>
+
+      <!-- Outlook — LIBERATED ✓ -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="outlook.png" style="width: 72px; height: auto; filter: brightness(1.1) drop-shadow(0 0 6px rgba(245,158,11,0.25));">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #34d399; margin-top: 4px;">Outlook</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399;">&#10003;</div>
+      </div>
+
+      <!-- iCloud — IN PROGRESS -->
+      <div style="text-align: center; cursor: pointer; position: relative;">
+        <img src="icloud.png" style="width: 72px; height: auto; filter: brightness(0.8) saturate(0.7);">
+        <div style="position: absolute; top: 2px; right: 6px; width: 16px; height: 16px; background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Press Start 2P', monospace; font-size: 5px; color: #f59e0b;">2</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #f59e0b; margin-top: 4px;">iCloud</div>
+        <div style="font-size: 8px; color: #64748b;">2/4</div>
+      </div>
+
+      <!-- Yahoo — OCCUPIED -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="yahoo_dark.png" style="width: 72px; height: auto; filter: brightness(0.55);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #64748b; margin-top: 4px;">Yahoo</div>
+      </div>
+
+      <!-- ProtonMail — OCCUPIED -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="protonmail_dark.png" style="width: 72px; height: auto; filter: brightness(0.5);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #64748b; margin-top: 4px;">Proton</div>
+      </div>
+
+      <!-- divider -->
+      <div style="width: 2px; background: rgba(245,158,11,0.15); align-self: stretch; margin: 0 4px; flex-shrink: 0;"></div>
+
+      <!-- Apple ID — LIBERATED ✓ -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="apple_id.png" style="width: 48px; height: auto; filter: brightness(1.1) drop-shadow(0 0 5px rgba(245,158,11,0.2));">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #34d399; margin-top: 4px;">Apple</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399;">&#10003;</div>
+      </div>
+
+      <!-- Google — IN PROGRESS -->
+      <div style="text-align: center; cursor: pointer; position: relative;">
+        <img src="google.png" style="width: 72px; height: auto; filter: brightness(0.75) saturate(0.6);">
+        <div style="position: absolute; top: 2px; right: 6px; width: 16px; height: 16px; background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Press Start 2P', monospace; font-size: 5px; color: #f59e0b;">1</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #f59e0b; margin-top: 4px;">Google</div>
+        <div style="font-size: 8px; color: #64748b;">1/4</div>
+      </div>
+
+      <!-- Microsoft — OCCUPIED -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="microsoft_dark.png" style="width: 48px; height: auto; filter: brightness(0.5);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #64748b; margin-top: 4px;">MS</div>
+      </div>
+
+      <!-- Facebook — OCCUPIED -->
+      <div style="text-align: center; cursor: pointer;">
+        <img src="facebook_dark.png" style="width: 72px; height: auto; filter: brightness(0.45);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #64748b; margin-top: 4px;">FB</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ PHASE TABS ═══ -->
+  <div style="display: flex; gap: 0; padding: 0 24px; border-bottom: 2px solid rgba(255,255,255,0.04);">
+    <div style="padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399; border-bottom: 2px solid #34d399; cursor: pointer;">&#10003; SURVEY</div>
+    <div style="padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; border-bottom: 2px solid #f59e0b; cursor: pointer; background: rgba(245,158,11,0.04);">&#9654; RECON</div>
+    <div style="padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; cursor: pointer;">FORTIFY</div>
+    <div style="padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; cursor: pointer;">RECLAIM</div>
+  </div>
+
+  <!-- ═══ MISSION LIST ═══ -->
+  <div style="padding: 12px 24px;">
+    <div style="background: rgba(15,22,35,0.7); border: 2px solid rgba(255,255,255,0.06); padding: 4px;">
+
+      <!-- Completed: Breach Recon Gmail -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer;">
+        <img src="gmail.png" style="width: 36px; height: auto; filter: brightness(1.05);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #34d399; flex-shrink: 0;">&#10003;</div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; color: #94a3b8;">Breach Recon: Gmail</div>
+          <div style="font-size: 11px; color: #64748b; margin-top: 2px;">No breaches found</div>
+        </div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #34d399; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); padding: 3px 8px;">CLEAR</div>
+      </div>
+
+      <!-- Completed with finding: Breach Recon Outlook -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer;">
+        <img src="outlook.png" style="width: 36px; height: auto; filter: brightness(1.05);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #34d399; flex-shrink: 0;">&#10003;</div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; color: #94a3b8;">Breach Recon: Outlook</div>
+          <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Found in 2 breaches &mdash; password reset</div>
+        </div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 3px 8px;">FIXED</div>
+      </div>
+
+      <!-- Current: Breach Recon iCloud -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid rgba(245,158,11,0.2); background: rgba(245,158,11,0.03); cursor: pointer;">
+        <img src="icloud.png" style="width: 36px; height: auto; filter: brightness(0.8);">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; flex-shrink: 0;">&#9654;</div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; font-weight: 600; color: #f1f5f9;">Breach Recon: iCloud Mail</div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Check if your iCloud password has been leaked</div>
+        </div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8;">~3 min</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; background: rgba(245,158,11,0.12); border: 2px solid #f59e0b; padding: 6px 12px; cursor: pointer;">START</div>
+      </div>
+
+      <!-- Upcoming: Yahoo -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); opacity: 0.6; cursor: pointer;">
+        <img src="yahoo_dark.png" style="width: 36px; height: auto; filter: brightness(0.4);">
+        <div style="width: 16px; height: 16px; border: 1.5px solid #475569; border-radius: 50%; flex-shrink: 0;"></div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; color: #94a3b8;">Breach Recon: Yahoo Mail</div>
+        </div>
+        <div style="font-size: 11px; color: #64748b;">~3 min</div>
+      </div>
+
+      <!-- Upcoming: Login History Gmail -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); opacity: 0.6; cursor: pointer;">
+        <img src="gmail.png" style="width: 36px; height: auto; filter: brightness(0.6) saturate(0.4);">
+        <div style="width: 16px; height: 16px; border: 1.5px solid #475569; border-radius: 50%; flex-shrink: 0;"></div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; color: #94a3b8;">Login History: Gmail</div>
+        </div>
+        <div style="font-size: 11px; color: #64748b;">~5 min</div>
+      </div>
+
+      <!-- Upcoming: Login History Outlook -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; opacity: 0.6; cursor: pointer;">
+        <img src="outlook.png" style="width: 36px; height: auto; filter: brightness(0.6) saturate(0.4);">
+        <div style="width: 16px; height: 16px; border: 1.5px solid #475569; border-radius: 50%; flex-shrink: 0;"></div>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; color: #94a3b8;">Login History: Outlook</div>
+        </div>
+        <div style="font-size: 11px; color: #64748b;">~5 min</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <style>
+    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #0a0e17; color: #f1f5f9; }
+    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    * { box-sizing: border-box; }
+    img { image-rendering: pixelated; }
+  </style>
+</helmet>
+
+<div style="width: 960px; min-height: 680px; background: linear-gradient(180deg, #060810 0%, #0a0e17 40%, #111827 100%); position: relative; overflow: hidden;">
+
+  <!-- ═══ HUD HEADER ═══ -->
+  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(10,14,23,0.95); border-bottom: 2px solid rgba(245,158,11,0.15);">
+    <div style="width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 2px;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="font-size: 12px; color: #64748b;">The Master Keys</div>
+    <div style="font-size: 12px; color: #475569;">/</div>
+    <div style="font-size: 12px; color: #94a3b8;">Recon</div>
+    <div style="flex: 1;"></div>
+    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 4px 10px; border-radius: 2px;">RECON MISSION</div>
+    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 2px;">~3 MIN</div>
+  </div>
+
+  <div style="display: flex; gap: 0; flex: 1;">
+
+    <!-- ═══ MAIN QUEST LOG PANEL ═══ -->
+    <div style="flex: 1; padding: 24px;">
+
+      <!-- Mission title -->
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 13px; color: #f1f5f9; line-height: 1.8; margin-bottom: 24px;">Breach Recon:<br><span style="color: #f59e0b;">iCloud Mail</span></div>
+
+      <!-- Quest dialog box -->
+      <div style="background: rgba(26,35,50,0.7); border: 2px solid rgba(255,255,255,0.08); padding: 20px; margin-bottom: 24px; border-radius: 2px;">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 10px; letter-spacing: 1px;">WHY THIS MATTERS</div>
+        <div style="font-size: 14px; color: #cbd5e1; line-height: 1.7;">Data brokers buy and sell leaked credentials by the million. If your iCloud password appeared in a breach, it&rsquo;s already loaded into automated attack scripts. Your iCloud account controls your Apple ID, iCloud Drive, photos, and any app you signed into with Apple.</div>
+      </div>
+
+      <!-- Steps -->
+      <div style="background: rgba(26,35,50,0.7); border: 2px solid rgba(245,158,11,0.15); padding: 20px; margin-bottom: 28px; border-radius: 2px;">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 14px; letter-spacing: 1px;">YOUR MOVE</div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">1</div>
+            <div style="font-size: 15px; color: #e2e8f0;">Open <span style="color: #f59e0b; font-weight: 600;">haveibeenpwned.com</span></div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">2</div>
+            <div style="font-size: 15px; color: #e2e8f0;">Enter your iCloud email address</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">3</div>
+            <div style="font-size: 15px; color: #e2e8f0;">Note how many breaches (if any) your email appears in</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #0a0e17; background: #f59e0b; padding: 14px 28px; cursor: pointer; border-radius: 2px; box-shadow: 0 4px 0 #b45309; position: relative; top: 0;">GO DO IT &#9654;</div>
+        <div style="font-size: 13px; color: #64748b; cursor: pointer;">Not now</div>
+      </div>
+
+    </div>
+
+    <!-- ═══ SCOUT SIDEBAR ═══ -->
+    <div style="width: 260px; background: rgba(26,35,50,0.5); border-left: 2px solid rgba(255,255,255,0.05); padding: 24px; display: flex; flex-direction: column; align-items: center;">
+      <!-- Scout portrait -->
+      <img src="scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px;">
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; margin-bottom: 16px;">SCOUT</div>
+
+      <!-- Scout says -->
+      <div style="background: rgba(10,14,23,0.6); border: 2px solid rgba(245,158,11,0.2); padding: 14px; width: 100%; margin-bottom: 20px; border-radius: 2px;">
+        <div style="font-size: 13px; color: #94a3b8; line-height: 1.6; font-style: italic;">&ldquo;iCloud is one of the big three identity providers. If someone gets these credentials, they get your photos, documents, location history, and can remote-wipe your devices.&rdquo;</div>
+      </div>
+
+      <!-- Building transformation — iCloud specific -->
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 12px; letter-spacing: 1px;">THIS LIBERATES</div>
+      <div style="display: flex; align-items: flex-end; gap: 12px;">
+        <div style="text-align: center;">
+          <img src="icloud_dark.png" style="width: 56px; height: auto; filter: brightness(0.6);">
+        </div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #64748b; padding-bottom: 20px;">&#9654;</div>
+        <div style="text-align: center;">
+          <img src="icloud.png" style="width: 56px; height: auto; filter: brightness(1.1) drop-shadow(0 0 4px rgba(245,158,11,0.25));">
+        </div>
+      </div>
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-top: 8px;">iCloud Mail</div>
+    </div>
+
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

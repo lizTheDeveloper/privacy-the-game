@@ -1,0 +1,16 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 960, "h": 720, "title": "City Map (Home)" },
+    { "file": "District.dc.html", "x": 1080, "y": 0, "w": 960, "h": 800, "title": "District View" },
+    { "file": "Briefing.dc.html", "x": 0, "y": 940, "w": 960, "h": 680, "title": "Mission Briefing" },
+    { "file": "Debrief.dc.html", "x": 1080, "y": 940, "w": 960, "h": 680, "title": "Mission Debrief" },
+    { "file": "Milestone.dc.html", "x": 0, "y": 1760, "w": 960, "h": 720, "title": "Chapter Complete" },
+    { "file": "Stats.dc.html", "x": 1080, "y": 1760, "w": 960, "h": 740, "title": "Stats Dashboard" }
+  ],
+  "annotations": [
+    { "id": "nav-flow", "x": 0, "y": -80, "w": 300, "text": "Navigation: Home → District" },
+    { "id": "mission-flow", "x": 0, "y": 860, "w": 300, "text": "Mission: Briefing → Do it → Debrief" },
+    { "id": "progress-flow", "x": 0, "y": 1680, "w": 300, "text": "Progress: Milestone + Stats" }
+  ],
+  "launch": { "view": "canvas" }
+}
