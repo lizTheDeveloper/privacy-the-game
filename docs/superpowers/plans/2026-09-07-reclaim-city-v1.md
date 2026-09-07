@@ -1368,6 +1368,161 @@ git commit -m "feat: welcome flow, responsive layout, edge cases"
 
 ---
 
+---
+
+### Task 14: Umami Analytics
+
+**Files:**
+- Modify: `src/index.html` — add Umami tracking script
+- Modify: `src/app.js` — track page views on route changes, track custom events
+
+**Interfaces:**
+- Consumes: `initRouter` from `router.js`
+- Produces: Analytics tracking on every screen view + custom events for mission completions
+
+- [ ] **Step 1: Add Umami script tag to index.html**
+
+Add the Umami tracking script to `<head>`. The `data-website-id` comes from the Umami dashboard after creating the site. Use `defer` so it doesn't block rendering.
+
+```html
+<script defer src="https://analytics.themultiverse.school/script.js" data-website-id="SITE_ID_HERE"></script>
+```
+
+Note: Replace `SITE_ID_HERE` with the actual ID from Umami after creating the site. The analytics host may differ — check the Multiverse School's Umami instance URL.
+
+- [ ] **Step 2: Track route changes as page views**
+
+In `app.js`, after each route render, call Umami's track function. Umami auto-tracks page views on SPAs via `hashchange` events when `data-auto-track` is enabled, but we want explicit custom events too.
+
+```js
+// In the render function, after mounting the screen:
+if (typeof umami !== 'undefined') {
+  umami.track(props => ({ ...props, url: location.hash, title: route.screen }));
+}
+```
+
+- [ ] **Step 3: Track custom game events**
+
+Add event tracking for key actions: mission started, mission completed (with finding severity), district completed, account toggled. These go in the debrief submit handler and survey toggle handler.
+
+```js
+// In debrief submit:
+if (typeof umami !== 'undefined') {
+  umami.track('mission-completed', {
+    mission: missionId,
+    district: districtId,
+    finding: selectedFinding,
+    phase: mission.phase,
+  });
+}
+```
+
+- [ ] **Step 4: Verify in dev — open Network tab, confirm Umami requests fire on navigation and mission completion**
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/index.html src/app.js
+git commit -m "feat: Umami analytics for page views and game events"
+```
+
+---
+
+### Task 15: GlitchTip Error Tracking
+
+**Files:**
+- Modify: `src/index.html` — add Sentry/GlitchTip SDK
+- Create: `src/utils/errors.js` — error capture initialization + helpers
+- Modify: `src/app.js` — initialize error tracking, wrap render in try/catch
+
+**Interfaces:**
+- Produces:
+  - `initErrorTracking()` — initializes Sentry SDK with GlitchTip DSN
+  - Global `window.onerror` and `unhandledrejection` capture
+  - Manual `captureError(error, context?)` for caught errors
+
+- [ ] **Step 1: Add Sentry browser SDK via CDN**
+
+GlitchTip is Sentry-compatible, so use the Sentry browser SDK. Add to index.html `<head>`:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sentry-browser/7.119.0/bundle.min.js" integrity="sha384-LOOKUP_HASH_AT_BUILD_TIME" crossorigin="anonymous"></script>
+```
+
+Note: Look up the SRI hash from cdnjs.cloudflare.com at build time — the hash changes per version. Pin the exact version.
+```
+
+- [ ] **Step 2: Create errors.js with initialization**
+
+```js
+// src/utils/errors.js
+const GLITCHTIP_DSN = 'https://YOUR_KEY@glitchtip.themultiverse.school/PROJECT_ID';
+
+export function initErrorTracking() {
+  if (typeof Sentry === 'undefined') return;
+
+  Sentry.init({
+    dsn: GLITCHTIP_DSN,
+    environment: location.hostname === 'localhost' ? 'development' : 'production',
+    // Do not capture PII — this is a privacy game
+    sendDefaultPii: false,
+    beforeSend(event) {
+      // Strip any localStorage data from breadcrumbs
+      if (event.breadcrumbs) {
+        event.breadcrumbs = event.breadcrumbs.filter(
+          (b) => b.category !== 'console' || !b.message?.includes('localStorage')
+        );
+      }
+      return event;
+    },
+  });
+}
+
+export function captureError(error, context) {
+  if (typeof Sentry !== 'undefined') {
+    Sentry.captureException(error, { extra: context });
+  }
+  console.error(error);
+}
+```
+
+Note: Replace DSN with the actual GlitchTip DSN after creating the project. `sendDefaultPii: false` is critical — this is a privacy game, we do not send user data to error trackers.
+
+- [ ] **Step 3: Initialize in app.js and wrap screen rendering**
+
+```js
+import { initErrorTracking, captureError } from './utils/errors.js';
+initErrorTracking();
+
+function render(route) {
+  try {
+    const renderFn = screens[route.screen] || screens.city;
+    app.innerHTML = renderFn(route.params);
+  } catch (error) {
+    captureError(error, { screen: route.screen, params: route.params });
+    app.innerHTML = `<div style="padding: 40px; text-align: center;">
+      <h2 style="color: var(--magenta);">Something broke</h2>
+      <p>The error has been reported. <a href="#/city">Return to city</a></p>
+    </div>`;
+  }
+}
+```
+
+- [ ] **Step 4: Wrap localStorage operations in state.js with error capture**
+
+Add try/catch around `loadState` and `saveState` with `captureError` calls — localStorage can throw (quota exceeded, private browsing, disabled). These are the most likely runtime errors in a browser-local game.
+
+- [ ] **Step 5: Manual test — throw a deliberate error, verify it appears in GlitchTip dashboard**
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/index.html src/utils/errors.js src/app.js src/state.js
+git commit -m "feat: GlitchTip error tracking with PII scrubbing"
+```
+
+---
+
 ### v2 Backlog (not in this plan)
 
 - Chapters 2-8: full mission content (requires reading remaining bench stations)
