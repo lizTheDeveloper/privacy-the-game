@@ -1,0 +1,58 @@
+export const DISTRICTS = [
+  {
+    id: 'master-keys',
+    name: 'The Master Keys',
+    chapter: 1,
+    description: 'Email & Identity Providers — the foundation everything else sits on',
+    flavor: 'Secure this first or nothing else matters.',
+  },
+  {
+    id: 'vault',
+    name: 'The Vault',
+    chapter: 2,
+    description: 'Financial — banks, payment apps, investments',
+    flavor: 'Your money lives here.',
+  },
+  {
+    id: 'square',
+    name: 'The Square',
+    chapter: 3,
+    description: 'Social media & messaging',
+    flavor: 'A hijacked social account impersonates you to people who trust you.',
+  },
+  {
+    id: 'archives',
+    name: 'The Archives',
+    chapter: 4,
+    description: 'Cloud storage & work accounts',
+    flavor: 'Your files, tax returns, ID scans, professional reputation.',
+  },
+  {
+    id: 'marketplace',
+    name: 'The Marketplace',
+    chapter: 5,
+    description: 'Shopping & streaming',
+    flavor: 'Lower stakes but real attack surface — stored payment methods, your address.',
+  },
+  {
+    id: 'capitol',
+    name: 'The Capitol',
+    chapter: 6,
+    description: 'Government accounts',
+    flavor: 'Legal identity. Compromise here is identity theft in the fullest sense.',
+  },
+  {
+    id: 'perimeter',
+    name: 'The Perimeter',
+    chapter: 7,
+    description: 'Borders & scam defense',
+    flavor: 'Cross-cutting defenses that protect the whole city.',
+  },
+  {
+    id: 'reclamation',
+    name: 'The Reclamation',
+    chapter: 8,
+    description: 'Data broker opt-outs',
+    flavor: 'The endgame: getting your data back from the brokers who sell it.',
+  },
+];
