@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   createInitialState,
+  hasSavedState,
   loadState,
   saveState,
   updateMission,
@@ -55,6 +56,28 @@ describe('loadState / saveState', () => {
     saveState(state, mockStorage);
     const loaded = loadState(mockStorage);
     expect(loaded.missions['gmail-recon-breach'].status).toBe('completed');
+  });
+});
+
+describe('hasSavedState', () => {
+  it('returns false when storage is empty', () => {
+    expect(hasSavedState(mockStorage)).toBe(false);
+  });
+
+  it('returns true when a valid state is saved', () => {
+    saveState(createInitialState(), mockStorage);
+    expect(hasSavedState(mockStorage)).toBe(true);
+  });
+
+  it('returns false when the stored value is not valid JSON', () => {
+    store['reclaim-city-state'] = '{not-json';
+    expect(hasSavedState(mockStorage)).toBe(false);
+  });
+
+  it('returns false when the stored version does not match', () => {
+    saveState(createInitialState(), mockStorage);
+    store['reclaim-city-state'] = JSON.stringify({ version: STATE_VERSION + 1 });
+    expect(hasSavedState(mockStorage)).toBe(false);
   });
 });
 

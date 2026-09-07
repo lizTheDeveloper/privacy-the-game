@@ -129,6 +129,45 @@ img { image-rendering: pixelated; }
 .badge--crit { color: var(--magenta); background: rgba(255, 45, 155, 0.1); border-color: rgba(255, 45, 155, 0.2); }
 .badge--skip { color: rgba(237, 239, 243, 0.4); background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
 
+.panel, a {
+  transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+}
+
+@keyframes app-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#app > * {
+  animation: app-fade-in 180ms ease-out;
+}
+
+::selection {
+  background: var(--cyan);
+  color: var(--midnight);
+}
+
 @media (max-width: 768px) {
   #app { max-width: 100%; }
+  div:has(> .hud-stat) { flex-wrap: wrap; gap: 8px !important; }
+  .hud-stat { padding: 3px 8px; }
+  .stat-value { font-size: 11px; }
+  .stat-label { font-size: 6px; }
+  div[style*="padding: 10px 20px"],
+  div[style*="padding: 16px 24px"],
+  div[style*="padding: 20px 24px"],
+  div[style*="padding: 12px 24px"] {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  div[style*="font-size: 16px"] { font-size: 14px !important; }
+  div[style*="font-size: 20px"] { font-size: 17px !important; }
+  div[style*="font-size: 42px"] { font-size: 30px !important; }
+  .mission-row { flex-wrap: wrap; row-gap: 8px; }
+  img[src*="iso_"],
+  img[src*="buildings/"] { transform: scale(0.8); transform-origin: bottom center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app > * { animation: none; }
 }

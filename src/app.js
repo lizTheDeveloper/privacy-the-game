@@ -1,5 +1,5 @@
 import { initRouter, navigate, parseRoute } from './router.js';
-import { loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
+import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS } from './data/missions.js';
 import { ACCOUNTS } from './data/accounts.js';
@@ -13,6 +13,7 @@ import { renderStats } from './screens/stats.js';
 import { renderMilestone } from './screens/milestone.js';
 
 let state = loadState();
+let started = hasSavedState();
 
 const app = document.getElementById('app');
 
@@ -25,7 +26,21 @@ const screens = {
   stats: () => renderStats(state),
 };
 
+function renderWelcome() {
+  return `
+  <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px;">
+    <div style="font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
+    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(0,229,255,0.6); letter-spacing: 5px; margin-top: 12px;">TAKE BACK YOUR DATA</div>
+    <p style="max-width: 440px; font-size: 14px; line-height: 1.7; color: rgba(237,239,243,0.65); margin-top: 32px;">Your city has been taken by data brokers. Take it back, building by building.</p>
+    <div data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">BEGIN</div>
+  </div>`;
+}
+
 function render(route) {
+  if (!started) {
+    app.innerHTML = renderWelcome();
+    return;
+  }
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
@@ -44,7 +59,12 @@ function renderCurrentRoute() {
 
 function setState(next) {
   state = next;
-  saveState(state);
+  try {
+    saveState(state);
+  } catch {
+    console.error('saveState failed; state kept in memory only');
+    // TODO(telemetry): captureError here
+  }
 }
 
 function submitDebrief(missionId) {
@@ -126,6 +146,15 @@ app.addEventListener('click', (e) => {
     }
   } else if (action === 'share-card') {
     handleShareCard(el.dataset.district);
+  } else if (action === 'begin-game') {
+    started = true;
+    try {
+      saveState(state);
+    } catch {
+      console.error('saveState failed; state kept in memory only');
+      // TODO(telemetry): captureError here
+    }
+    renderCurrentRoute();
   }
 });
 

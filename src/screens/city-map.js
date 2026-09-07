@@ -118,7 +118,23 @@ function renderCityScout(state) {
   );
 }
 
+function renderAllOffline() {
+  return `
+  <div class="scanlines" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="panel" style="max-width: 480px; margin: 48px 24px; padding: 48px 32px; text-align: center;">
+      <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">ALL ACCOUNTS OFFLINE</div>
+      <div style="font-size: 13px; line-height: 1.6; color: rgba(237,239,243,0.55); margin-top: 14px;">Enable some accounts in Survey to get started.</div>
+      <div style="margin-top: 28px;">
+        <a class="btn-primary" style="text-decoration: none;" href="#/district/master-keys?tab=survey">OPEN SURVEY</a>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function renderCityMap(state) {
+  if (Object.values(state.accounts).every((a) => !a.enabled)) {
+    return renderAllOffline();
+  }
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
   const rows = ROW_DEFS.map((def, i) => renderRow(def, i, state)).join('');
   return `

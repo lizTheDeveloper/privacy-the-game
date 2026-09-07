@@ -35,6 +35,16 @@ export function loadState(storage = localStorage) {
   }
 }
 
+export function hasSavedState(storage = localStorage) {
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    return JSON.parse(raw).version === STATE_VERSION;
+  } catch {
+    return false;
+  }
+}
+
 export function saveState(state, storage = localStorage) {
   storage.setItem(STORAGE_KEY, JSON.stringify(state));
 }

@@ -60,6 +60,16 @@ function renderTabs(districtId, activeTab) {
   </div>`;
 }
 
+function renderDisabledPanel(districtId) {
+  return `
+  <div style="padding: 12px 24px 24px;">
+    <div class="panel" style="padding: 32px; text-align: center;">
+      <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">ALL ACCOUNTS FOR THIS DISTRICT ARE DISABLED</div>
+      <div style="font-size: 13px; color: rgba(237,239,243,0.55); margin-top: 12px;">Re-enable them in <a href="#/district/${districtId}?tab=survey" style="color: var(--cyan); font-weight: 600;">Survey</a>.</div>
+    </div>
+  </div>`;
+}
+
 function renderMissionRow(state, mission) {
   const record = state.missions[mission.id];
   const completed = record?.status === 'completed';
@@ -79,7 +89,7 @@ function renderMissionRow(state, mission) {
   }
 
   return `
-  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05); ${dimmed ? 'opacity: 0.55;' : 'border: 1px solid rgba(0,229,255,0.2); background: rgba(0,229,255,0.03);'}">
+  <div class="mission-row" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05); ${dimmed ? 'opacity: 0.55;' : 'border: 1px solid rgba(0,229,255,0.2); background: rgba(0,229,255,0.03);'}">
     ${renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32)}
     <div style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
@@ -109,7 +119,7 @@ function renderMissionList(state, districtId, activeTab) {
   </div>`;
 }
 
-function renderSurvey(state, districtId, districtAccounts) {
+function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   const rows = districtAccounts
     .map(([id, account]) => {
       if (!state.accounts[id]) {
@@ -131,6 +141,7 @@ function renderSurvey(state, districtId, districtAccounts) {
   return `
   <div style="padding: 12px 24px 24px;">
     <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">INVENTORY SURVEY</div>
+    ${allDisabled ? `<div class="panel" style="padding: 14px 16px; margin-bottom: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: rgba(237,239,243,0.5);">All accounts for this district are disabled. Turn any of them back on to start recon.</div>` : ''}
     ${rows}
     <div style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
@@ -143,16 +154,22 @@ export function renderDistrict(state, districtId, activeTab = 'recon') {
   if (!district) return renderNotFound();
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
+  const knownAccounts = districtAccounts.filter(([id]) => state.accounts[id]);
+  const allDisabled = knownAccounts.length > 0 && knownAccounts.every(([id]) => !state.accounts[id].enabled);
   const progress = calcDistrictProgress(state, districtId);
 
   const buildings = districtAccounts
     .map(([id]) => renderBuilding(id, getBuildingState(state, id)))
     .join('');
 
-  const content =
-    activeTab === 'survey'
-      ? renderSurvey(state, districtId, districtAccounts)
-      : renderMissionList(state, districtId, activeTab);
+  let content;
+  if (allDisabled && activeTab !== 'survey') {
+    content = renderDisabledPanel(districtId);
+  } else if (activeTab === 'survey') {
+    content = renderSurvey(state, districtId, districtAccounts, allDisabled);
+  } else {
+    content = renderMissionList(state, districtId, activeTab);
+  }
 
   return `
   <div class="scanlines">
