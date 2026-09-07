@@ -639,7 +639,7 @@ export const ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/icloud.png',
     buildingDark: 'assets/buildings/icloud_dark.png',
-    securityUrl: 'https://appleid.apple.com/account/manage',
+    securityUrl: 'https://account.apple.com/account/manage',
     riskLevel: 'high',
   },
   yahoo: {
@@ -663,7 +663,7 @@ export const ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/apple_id.png',
     buildingDark: 'assets/buildings/apple_id_dark.png',
-    securityUrl: 'https://appleid.apple.com/account/manage',
+    securityUrl: 'https://account.apple.com/account/manage',
     riskLevel: 'high',
   },
   google: {
