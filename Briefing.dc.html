@@ -7,95 +7,93 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <style>
-    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #0a0e17; color: #f1f5f9; }
-    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #090B10; color: #EDEFF3; }
+    a { color: #00E5FF; } a:hover { color: #FF2D9B; }
     * { box-sizing: border-box; }
     img { image-rendering: pixelated; }
   </style>
 </helmet>
 
-<div style="width: 960px; min-height: 680px; background: linear-gradient(180deg, #060810 0%, #0a0e17 40%, #111827 100%); position: relative; overflow: hidden;">
+<div style="width: 960px; min-height: 680px; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%); position: relative; overflow: hidden;">
+
+  <!-- Scanline -->
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,229,255,0.012) 2px, rgba(0,229,255,0.012) 4px); pointer-events: none; z-index: 25;"></div>
 
   <!-- ═══ HUD HEADER ═══ -->
-  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(10,14,23,0.95); border-bottom: 2px solid rgba(245,158,11,0.15);">
-    <div style="width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 2px;">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
+    <div style="width: 32px; height: 32px; border: 1px solid rgba(0,229,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#00E5FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div style="font-size: 12px; color: #64748b;">The Master Keys</div>
-    <div style="font-size: 12px; color: #475569;">/</div>
-    <div style="font-size: 12px; color: #94a3b8;">Recon</div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.4);">The Master Keys</div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.2);">/</div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.6);">Recon</div>
     <div style="flex: 1;"></div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 4px 10px; border-radius: 2px;">RECON MISSION</div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 2px;">~3 MIN</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); padding: 4px 12px; letter-spacing: 1px;">RECON MISSION</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~3 MIN</div>
   </div>
 
   <div style="display: flex; gap: 0; flex: 1;">
 
-    <!-- ═══ MAIN QUEST LOG PANEL ═══ -->
+    <!-- ═══ QUEST LOG ═══ -->
     <div style="flex: 1; padding: 24px;">
 
-      <!-- Mission title -->
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 13px; color: #f1f5f9; line-height: 1.8; margin-bottom: 24px;">Breach Recon:<br><span style="color: #f59e0b;">iCloud Mail</span></div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #EDEFF3; line-height: 1.6; margin-bottom: 24px; letter-spacing: 1px;">Breach Recon:<br><span style="color: #00E5FF; text-shadow: 0 0 15px rgba(0,229,255,0.3);">iCloud Mail</span></div>
 
-      <!-- Quest dialog box -->
-      <div style="background: rgba(26,35,50,0.7); border: 2px solid rgba(255,255,255,0.08); padding: 20px; margin-bottom: 24px; border-radius: 2px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 10px; letter-spacing: 1px;">WHY THIS MATTERS</div>
-        <div style="font-size: 14px; color: #cbd5e1; line-height: 1.7;">Data brokers buy and sell leaked credentials by the million. If your iCloud password appeared in a breach, it&rsquo;s already loaded into automated attack scripts. Your iCloud account controls your Apple ID, iCloud Drive, photos, and any app you signed into with Apple.</div>
+      <!-- Intel panel -->
+      <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(0,229,255,0.1); padding: 20px; margin-bottom: 24px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.5); margin-bottom: 10px; letter-spacing: 3px;">THREAT INTEL</div>
+        <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">Data brokers buy and sell leaked credentials by the million. If your iCloud password appeared in a breach, it&rsquo;s already loaded into automated attack scripts. Your iCloud account controls your Apple ID, iCloud Drive, photos, and any app you signed into with Apple.</div>
       </div>
 
       <!-- Steps -->
-      <div style="background: rgba(26,35,50,0.7); border: 2px solid rgba(245,158,11,0.15); padding: 20px; margin-bottom: 28px; border-radius: 2px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 14px; letter-spacing: 1px;">YOUR MOVE</div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="display: flex; gap: 12px; align-items: flex-start;">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">1</div>
-            <div style="font-size: 15px; color: #e2e8f0;">Open <span style="color: #f59e0b; font-weight: 600;">haveibeenpwned.com</span></div>
+      <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(0,229,255,0.2); padding: 20px; margin-bottom: 28px; box-shadow: 0 0 15px rgba(0,229,255,0.03);">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: #00E5FF; margin-bottom: 14px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.3);">YOUR MOVE</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; gap: 14px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #00E5FF; width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">01</div>
+            <div style="font-size: 15px; color: #EDEFF3;">Open <span style="color: #00E5FF; font-weight: 600;">haveibeenpwned.com</span></div>
           </div>
-          <div style="display: flex; gap: 12px; align-items: flex-start;">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">2</div>
-            <div style="font-size: 15px; color: #e2e8f0;">Enter your iCloud email address</div>
+          <div style="display: flex; gap: 14px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #00E5FF; width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">02</div>
+            <div style="font-size: 15px; color: #EDEFF3;">Enter your iCloud email address</div>
           </div>
-          <div style="display: flex; gap: 12px; align-items: flex-start;">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b; width: 24px; text-align: center; flex-shrink: 0; padding-top: 2px;">3</div>
-            <div style="font-size: 15px; color: #e2e8f0;">Note how many breaches (if any) your email appears in</div>
+          <div style="display: flex; gap: 14px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #00E5FF; width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">03</div>
+            <div style="font-size: 15px; color: #EDEFF3;">Note how many breaches (if any) your email appears in</div>
           </div>
         </div>
       </div>
 
       <!-- CTA -->
       <div style="display: flex; gap: 16px; align-items: center;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #0a0e17; background: #f59e0b; padding: 14px 28px; cursor: pointer; border-radius: 2px; box-shadow: 0 4px 0 #b45309; position: relative; top: 0;">GO DO IT &#9654;</div>
-        <div style="font-size: 13px; color: #64748b; cursor: pointer;">Not now</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #090B10; background: #00E5FF; padding: 14px 28px; cursor: pointer; letter-spacing: 2px; box-shadow: 0 0 20px rgba(0,229,255,0.35), 0 4px 0 #009bb3;">GO DO IT &#9654;</div>
+        <div style="font-size: 13px; color: rgba(237,239,243,0.35); cursor: pointer;">Not now</div>
       </div>
 
     </div>
 
     <!-- ═══ SCOUT SIDEBAR ═══ -->
-    <div style="width: 260px; background: rgba(26,35,50,0.5); border-left: 2px solid rgba(255,255,255,0.05); padding: 24px; display: flex; flex-direction: column; align-items: center;">
-      <!-- Scout portrait -->
-      <img src="scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; margin-bottom: 16px;">SCOUT</div>
+    <div style="width: 260px; background: rgba(26,31,43,0.4); border-left: 1px solid rgba(0,229,255,0.1); padding: 24px; display: flex; flex-direction: column; align-items: center;">
+      <img src="scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; color: #00E5FF; margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
 
-      <!-- Scout says -->
-      <div style="background: rgba(10,14,23,0.6); border: 2px solid rgba(245,158,11,0.2); padding: 14px; width: 100%; margin-bottom: 20px; border-radius: 2px;">
-        <div style="font-size: 13px; color: #94a3b8; line-height: 1.6; font-style: italic;">&ldquo;iCloud is one of the big three identity providers. If someone gets these credentials, they get your photos, documents, location history, and can remote-wipe your devices.&rdquo;</div>
+      <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
+        <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">&ldquo;iCloud is one of the big three identity providers. If someone gets these credentials, they get your photos, documents, location history, and can remote-wipe your devices.&rdquo;</div>
       </div>
 
-      <!-- Building transformation — iCloud specific -->
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 12px; letter-spacing: 1px;">THIS LIBERATES</div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; color: rgba(0,229,255,0.4); margin-bottom: 12px; letter-spacing: 3px;">THIS LIBERATES</div>
       <div style="display: flex; align-items: flex-end; gap: 12px;">
         <div style="text-align: center;">
           <img src="icloud_dark.png" style="width: 56px; height: auto; filter: brightness(0.6);">
         </div>
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #64748b; padding-bottom: 20px;">&#9654;</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #00E5FF; padding-bottom: 20px; text-shadow: 0 0 6px rgba(0,229,255,0.4);">&#9654;</div>
         <div style="text-align: center;">
-          <img src="icloud.png" style="width: 56px; height: auto; filter: brightness(1.1) drop-shadow(0 0 4px rgba(245,158,11,0.25));">
+          <img src="icloud.png" style="width: 56px; height: auto; filter: brightness(1.1) drop-shadow(0 0 6px rgba(0,229,255,0.3));">
         </div>
       </div>
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-top: 8px;">iCloud Mail</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; color: #00E5FF; margin-top: 8px;">iCloud Mail</div>
     </div>
 
   </div>

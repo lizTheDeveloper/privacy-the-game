@@ -7,84 +7,85 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <style>
-    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #0a0e17; color: #f1f5f9; }
-    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #090B10; color: #EDEFF3; }
+    a { color: #00E5FF; } a:hover { color: #FF2D9B; }
     * { box-sizing: border-box; }
     img { image-rendering: pixelated; }
   </style>
 </helmet>
 
-<div style="width: 960px; height: 720px; background: linear-gradient(180deg, #060810 0%, #0a1210 30%, #0f1f14 60%, #111827 100%); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<div style="width: 960px; min-height: 720px; background: linear-gradient(180deg, #090B10 0%, #0a1020 30%, #121828 100%); padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
 
   <!-- Celebration glow -->
-  <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(52,211,153,0.12) 0%, transparent 60%); pointer-events: none;"></div>
+  <div style="position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, rgba(198,255,0,0.03) 40%, transparent 70%); pointer-events: none;"></div>
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,229,255,0.012) 2px, rgba(0,229,255,0.012) 4px); pointer-events: none; z-index: 25;"></div>
 
-  <!-- Stars -->
-  <div style="position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 80px 30px, rgba(52,211,153,0.5), transparent), radial-gradient(1px 1px at 250px 60px, rgba(245,158,11,0.4), transparent), radial-gradient(1px 1px at 500px 25px, rgba(52,211,153,0.4), transparent), radial-gradient(1px 1px at 750px 50px, rgba(245,158,11,0.3), transparent), radial-gradient(1px 1px at 400px 80px, rgba(52,211,153,0.3), transparent), radial-gradient(1px 1px at 880px 40px, rgba(255,255,255,0.3), transparent); pointer-events: none;"></div>
-
-  <!-- Badge -->
-  <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399; letter-spacing: 2px; margin-bottom: 12px; position: relative;">CHAPTER 1 COMPLETE</div>
-
-  <!-- Title -->
-  <div style="font-family: 'Press Start 2P', monospace; font-size: 20px; color: #f1f5f9; text-align: center; line-height: 1.8; margin-bottom: 8px; position: relative;">
-    THE MASTER KEYS:<br>
-    <span style="color: #34d399; text-shadow: 0 0 16px rgba(52,211,153,0.5);">LIBERATED</span>
+  <div style="position: relative; text-align: center; margin-bottom: 8px;">
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #C6FF00; letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER 1 COMPLETE</div>
   </div>
 
-  <div style="font-size: 14px; color: #94a3b8; margin-bottom: 28px; position: relative;">Your email and identity providers are secured.</div>
+  <div style="font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; text-align: center; margin-bottom: 6px; position: relative; letter-spacing: 2px; line-height: 1.2;">
+    <span style="color: #EDEFF3;">The Master Keys:</span><br>
+    <span style="color: #00E5FF; text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2);">LIBERATED</span>
+  </div>
+
+  <div style="font-size: 14px; color: rgba(237,239,243,0.5); text-align: center; margin-bottom: 36px; position: relative;">Your email and identity providers are secured.</div>
 
   <!-- Liberated skyline -->
-  <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; margin-bottom: 12px; position: relative;">
-    <img src="tower_liberated.png" style="width: 48px; height: auto; filter: brightness(1.15);">
-    <img src="liberated_building.png" style="width: 64px; height: auto; filter: brightness(1.15);">
-    <img src="tower_liberated.png" style="width: 40px; height: auto; filter: brightness(1.1);">
-    <img src="liberated_building.png" style="width: 56px; height: auto; filter: brightness(1.1);">
-    <img src="tower_liberated.png" style="width: 44px; height: auto; filter: brightness(1.05);">
+  <div style="display: flex; gap: 4px; align-items: flex-end; justify-content: center; margin-bottom: 8px; position: relative;">
+    <img src="iso_liberated.png" style="width: 56px; height: auto; filter: brightness(1.1) drop-shadow(0 0 8px rgba(0,229,255,0.3));">
+    <img src="iso_tower_lib.png" style="width: 40px; height: auto; filter: brightness(1.1) drop-shadow(0 0 8px rgba(198,255,0,0.3));">
+    <img src="iso_liberated.png" style="width: 64px; height: auto; filter: brightness(1.15) drop-shadow(0 0 10px rgba(0,229,255,0.35));">
+    <img src="iso_tower_lib.png" style="width: 44px; height: auto; filter: brightness(1.15) drop-shadow(0 0 10px rgba(198,255,0,0.35));">
+    <img src="iso_liberated.png" style="width: 52px; height: auto; filter: brightness(1.1) drop-shadow(0 0 8px rgba(0,229,255,0.3));">
   </div>
-  <!-- Ground glow -->
-  <div style="width: 300px; height: 4px; background: linear-gradient(90deg, transparent, #34d399, transparent); box-shadow: 0 0 12px rgba(52,211,153,0.5); margin-bottom: 32px; position: relative;"></div>
+  <div style="width: 300px; height: 3px; background: linear-gradient(90deg, transparent, #00E5FF, #C6FF00, #00E5FF, transparent); box-shadow: 0 0 12px rgba(0,229,255,0.4); margin-bottom: 36px; position: relative;"></div>
 
-  <!-- Stats row -->
-  <div style="display: flex; gap: 32px; margin-bottom: 32px; position: relative;">
-    <div style="text-align: center; background: rgba(26,35,50,0.6); border: 2px solid rgba(52,211,153,0.2); padding: 14px 20px; border-radius: 2px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 20px; color: #34d399;">5</div>
-      <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">accounts secured</div>
+  <!-- Stats -->
+  <div style="display: flex; gap: 40px; margin-bottom: 36px; position: relative;">
+    <div style="text-align: center;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; color: #C6FF00; text-shadow: 0 0 15px rgba(198,255,0,0.3);">5</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 2px;">accounts secured</div>
     </div>
-    <div style="text-align: center; background: rgba(26,35,50,0.6); border: 2px solid rgba(245,158,11,0.2); padding: 14px 20px; border-radius: 2px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 20px; color: #f59e0b;">2</div>
-      <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">breaches fixed</div>
+    <div style="width: 1px; background: rgba(0,229,255,0.15);"></div>
+    <div style="text-align: center;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; color: #FF9F00; text-shadow: 0 0 15px rgba(255,159,0,0.3);">2</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 2px;">breaches found &amp; fixed</div>
     </div>
-    <div style="text-align: center; background: rgba(26,35,50,0.6); border: 2px solid rgba(255,255,255,0.1); padding: 14px 20px; border-radius: 2px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 20px; color: #f1f5f9;">100%</div>
-      <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">liberation</div>
+    <div style="width: 1px; background: rgba(0,229,255,0.15);"></div>
+    <div style="text-align: center;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; color: #00E5FF; text-shadow: 0 0 15px rgba(0,229,255,0.3);">100<span style="font-size: 18px; color: rgba(237,239,243,0.3);">%</span></div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 2px;">liberation</div>
     </div>
   </div>
 
-  <!-- Share card preview -->
-  <div style="background: rgba(26,35,50,0.7); border: 2px solid rgba(52,211,153,0.15); padding: 20px 32px; width: 420px; text-align: center; position: relative; border-radius: 2px; margin-bottom: 28px;">
-    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #111827; padding: 2px 10px; font-family: 'Press Start 2P', monospace; font-size: 6px; color: #64748b; letter-spacing: 1px;">SHARE CARD</div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; letter-spacing: 2px; margin-bottom: 8px;">RECLAIM CITY</div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #34d399; margin-bottom: 12px;">MASTER KEYS: LIBERATED</div>
-    <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-      <div><span style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f1f5f9;">5</span> <span style="font-size: 11px; color: #94a3b8;">secured</span></div>
-      <div><span style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f1f5f9;">2</span> <span style="font-size: 11px; color: #94a3b8;">breaches fixed</span></div>
+  <!-- Share card -->
+  <div style="background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 24px 36px; width: 440px; margin-bottom: 28px; position: relative; box-shadow: 0 0 20px rgba(0,229,255,0.05);">
+    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #090B10; padding: 2px 12px; font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; color: rgba(0,229,255,0.4); letter-spacing: 3px;">SHARE CARD</div>
+    <div style="text-align: center;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: #00E5FF; letter-spacing: 3px; margin-bottom: 10px;">RECLAIM CITY</div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #C6FF00; margin-bottom: 14px; text-shadow: 0 0 10px rgba(198,255,0,0.25);">MASTER KEYS: LIBERATED</div>
+      <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 14px;">
+        <div><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #EDEFF3;">5</span> <span style="font-size: 12px; color: rgba(237,239,243,0.4);">secured</span></div>
+        <div><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #EDEFF3;">2</span> <span style="font-size: 12px; color: rgba(237,239,243,0.4);">breaches fixed</span></div>
+      </div>
+      <div style="height: 1px; background: rgba(0,229,255,0.1); margin-bottom: 10px;"></div>
+      <div style="font-size: 11px; color: rgba(237,239,243,0.3);">Reclaim your city &rarr; themultiverse.school/reclaim</div>
     </div>
-    <div style="height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 8px;"></div>
-    <div style="font-size: 11px; color: #64748b;">Reclaim your city &rarr; themultiverse.school/reclaim</div>
   </div>
 
   <!-- CTAs -->
   <div style="display: flex; gap: 16px; align-items: center; position: relative;">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399; background: rgba(52,211,153,0.1); border: 2px solid rgba(52,211,153,0.3); padding: 10px 20px; cursor: pointer; border-radius: 2px;">SHARE CARD</div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #0a0e17; background: #f59e0b; padding: 10px 20px; cursor: pointer; border-radius: 2px; box-shadow: 0 3px 0 #b45309;">THE VAULT &#9654;</div>
+    <div style="border: 1px solid rgba(0,229,255,0.3); color: #00E5FF; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 24px; cursor: pointer; letter-spacing: 1px;">SHARE CARD</div>
+    <div style="background: #00E5FF; color: #090B10; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 24px; cursor: pointer; letter-spacing: 1px; box-shadow: 0 0 20px rgba(0,229,255,0.3);">THE VAULT &rarr;</div>
   </div>
 
-  <!-- Scout (bottom corner) -->
-  <div style="position: absolute; bottom: 16px; left: 24px; display: flex; gap: 10px; align-items: flex-end;">
-    <img src="scout_0.png" style="width: 48px; height: 48px;">
-    <div style="font-size: 12px; color: #94a3b8; max-width: 280px;">That&rsquo;s your foundation secured. The Vault is next &mdash; your money&rsquo;s in there.</div>
+  <!-- Scout -->
+  <div style="position: absolute; bottom: 24px; left: 40px; display: flex; gap: 12px; align-items: center;">
+    <img src="scout_0.png" style="width: 40px; height: 40px; filter: drop-shadow(0 0 4px rgba(0,229,255,0.3));">
+    <div style="font-size: 13px; color: rgba(237,239,243,0.5); max-width: 300px;">That&rsquo;s your foundation secured. The Vault is next &mdash; your money&rsquo;s in there.</div>
   </div>
 
 </div>

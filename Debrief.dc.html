@@ -7,132 +7,138 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <style>
-    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #0a0e17; color: #f1f5f9; }
-    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #090B10; color: #EDEFF3; }
+    a { color: #00E5FF; } a:hover { color: #FF2D9B; }
     * { box-sizing: border-box; }
     img { image-rendering: pixelated; }
   </style>
 </helmet>
 
-<div style="width: 960px; min-height: 680px; background: linear-gradient(180deg, #060810 0%, #0a0e17 40%, #111827 100%); position: relative; overflow: hidden;">
+<div style="width: 960px; min-height: 680px; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%); padding: 0; display: flex; flex-direction: column; position: relative; overflow: hidden;">
 
-  <!-- ═══ HEADER ═══ -->
-  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(10,14,23,0.95); border-bottom: 2px solid rgba(245,158,11,0.15);">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 9px; color: #f59e0b; letter-spacing: 1px;">MISSION DEBRIEF</div>
-    <div style="flex: 1; height: 2px; background: rgba(245,158,11,0.15);"></div>
-    <div style="font-size: 12px; color: #64748b;">Breach Recon: iCloud Mail</div>
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,229,255,0.012) 2px, rgba(0,229,255,0.012) 4px); pointer-events: none; z-index: 25;"></div>
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">MISSION DEBRIEF</div>
+    <div style="flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,229,255,0.2), transparent);"></div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(237,239,243,0.4);">Breach Recon: iCloud Mail</div>
   </div>
 
-  <div style="display: flex; gap: 0;">
+  <div style="display: flex; gap: 0; flex: 1; padding: 0;">
 
-    <!-- ═══ LEFT: Scout + Questions ═══ -->
+    <!-- Left: Scout + questions -->
     <div style="flex: 1; padding: 24px;">
 
-      <!-- Scout dialog -->
-      <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 28px;">
-        <img src="scout_0.png" style="width: 64px; height: 64px; flex-shrink: 0;">
-        <div style="background: rgba(26,35,50,0.8); border: 2px solid rgba(245,158,11,0.25); padding: 12px 16px; flex: 1; border-radius: 2px; position: relative;">
-          <div style="position: absolute; left: -8px; top: 16px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 8px solid rgba(245,158,11,0.25);"></div>
-          <div style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">Welcome back. What did you find at haveibeenpwned?</div>
+      <!-- Scout message -->
+      <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px;">
+        <div style="flex-shrink: 0;">
+          <img src="scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+        </div>
+        <div style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; flex: 1;">
+          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">Welcome back. What did you find at haveibeenpwned?</div>
         </div>
       </div>
 
-      <!-- Question 1: RPG dialog-choice style -->
-      <div style="margin-bottom: 24px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 12px; letter-spacing: 1px;">WHAT DID YOU FIND?</div>
-
-        <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(255,255,255,0.08); padding: 4px; border-radius: 2px;">
-          <!-- Option (unselected) -->
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #e2e8f0;">No breaches found</div>
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #34d399;">SAFE</div>
-          </div>
-          <!-- Option (selected) -->
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b;">&#9654;</div>
+      <!-- Question 1 -->
+      <div style="margin-bottom: 28px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.5); margin-bottom: 14px; letter-spacing: 3px;">FINDINGS REPORT</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
             <div style="flex: 1;">
-              <div style="font-size: 14px; color: #f1f5f9; font-weight: 500;">Found in 1&ndash;2 breaches</div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Your credentials were exposed in a small number of leaks</div>
+              <div style="font-size: 14px; color: #EDEFF3;">No breaches found</div>
+              <div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Your email wasn&rsquo;t in any known leaks</div>
             </div>
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b;">WARN</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: #C6FF00; letter-spacing: 1px;">SAFE</div>
           </div>
-          <!-- Option -->
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #e2e8f0;">Found in 3+ breaches</div>
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #ef4444;">CRIT</div>
+
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.3); padding: 12px 16px; cursor: pointer; box-shadow: 0 0 12px rgba(0,229,255,0.05);">
+            <div style="width: 18px; height: 18px; border: 2px solid #00E5FF; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #00E5FF; box-shadow: 0 0 6px rgba(0,229,255,0.5);"></div>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 14px; color: #EDEFF3; font-weight: 500;">Found in 1&ndash;2 breaches</div>
+              <div style="font-size: 11px; color: rgba(237,239,243,0.5); margin-top: 2px;">Your credentials were exposed in a small number of leaks</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: #FF9F00; letter-spacing: 1px;">WARN</div>
           </div>
-          <!-- Skip option -->
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer;">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #94a3b8;">Couldn&rsquo;t check right now</div>
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #475569;">SKIP</div>
+
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="flex: 1;">
+              <div style="font-size: 14px; color: #EDEFF3;">Found in 3+ breaches</div>
+              <div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Your credentials are widely circulated</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: #FF2D9B; letter-spacing: 1px;">CRIT</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="flex: 1;">
+              <div style="font-size: 14px; color: rgba(237,239,243,0.5);">Couldn&rsquo;t check right now</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: rgba(237,239,243,0.3); letter-spacing: 1px;">SKIP</div>
           </div>
         </div>
       </div>
 
       <!-- Question 2 -->
       <div style="margin-bottom: 28px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-bottom: 12px; letter-spacing: 1px;">DID YOU RESET YOUR PASSWORD?</div>
-
-        <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(255,255,255,0.08); padding: 4px; border-radius: 2px;">
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #e2e8f0;">Yes, changed it to a new unique password</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.5); margin-bottom: 14px; letter-spacing: 3px;">ACTION TAKEN</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 10px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="font-size: 14px; color: #EDEFF3;">Yes, changed to a new unique password</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #e2e8f0;">It was already unique and strong</div>
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 10px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="font-size: 14px; color: #EDEFF3;">It was already unique and strong</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer;">
-            <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569;">&#9675;</div>
-            <div style="flex: 1; font-size: 14px; color: #94a3b8;">I&rsquo;ll come back to this</div>
+          <div style="display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 10px 16px; cursor: pointer;">
+            <div style="width: 18px; height: 18px; border: 1.5px solid rgba(237,239,243,0.2); border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="font-size: 14px; color: rgba(237,239,243,0.5);">I&rsquo;ll come back to this</div>
           </div>
         </div>
       </div>
 
       <!-- Submit -->
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #0a0e17; background: #f59e0b; padding: 14px 28px; cursor: pointer; border-radius: 2px; box-shadow: 0 4px 0 #b45309; display: inline-block;">SUBMIT REPORT</div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #090B10; background: #00E5FF; padding: 14px 32px; cursor: pointer; letter-spacing: 2px; box-shadow: 0 0 20px rgba(0,229,255,0.35), 0 4px 0 #009bb3; display: inline-block;">SUBMIT REPORT</div>
 
     </div>
 
-    <!-- ═══ RIGHT: Impact sidebar ═══ -->
-    <div style="width: 240px; background: rgba(26,35,50,0.5); border-left: 2px solid rgba(255,255,255,0.05); padding: 24px;">
+    <!-- Right sidebar -->
+    <div style="width: 220px; background: rgba(26,31,43,0.3); border-left: 1px solid rgba(0,229,255,0.08); padding: 20px;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; color: rgba(0,229,255,0.4); margin-bottom: 14px; letter-spacing: 3px;">IMPACT</div>
 
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 16px; letter-spacing: 1px;">MISSION IMPACT</div>
-
-      <!-- Building preview -->
       <div style="text-align: center; margin-bottom: 20px;">
-        <img src="progress_building.png" style="width: 72px; height: auto; filter: brightness(0.85);">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; margin-top: 6px;">iCloud Mail</div>
-        <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Recon: 2 of 4</div>
+        <img src="icloud.png" style="width: 56px; height: auto; filter: brightness(0.7);">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #FF9F00; margin-top: 4px;">iCloud Mail</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; color: rgba(237,239,243,0.3); margin-top: 2px;">Recon: 2 of 4</div>
       </div>
 
-      <div style="height: 2px; background: rgba(255,255,255,0.06); margin-bottom: 16px;"></div>
+      <div style="height: 1px; background: rgba(0,229,255,0.08); margin-bottom: 16px;"></div>
 
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 12px; letter-spacing: 1px;">YOUR RESPONSE SHAPES</div>
-
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; color: rgba(0,229,255,0.4); margin-bottom: 12px; letter-spacing: 3px;">AFFECTS</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; justify-content: space-between;">
-          <div style="font-size: 12px; color: #94a3b8;">Exposure</div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #ef4444;">847</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.5);">Exposure</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #FF2D9B;">847</div>
         </div>
         <div style="display: flex; justify-content: space-between;">
-          <div style="font-size: 12px; color: #94a3b8;">Building</div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b;">WIP</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.5);">Building</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: #FF9F00;">In progress</div>
         </div>
         <div style="display: flex; justify-content: space-between;">
-          <div style="font-size: 12px; color: #94a3b8;">Findings</div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #94a3b8;">3</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.5);">Findings</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.5);">3 entries</div>
         </div>
       </div>
 
-      <div style="height: 2px; background: rgba(255,255,255,0.06); margin-bottom: 16px;"></div>
-
-      <div style="font-size: 12px; color: #64748b; line-height: 1.5; font-style: italic;">&ldquo;No wrong answers here. Just tell me what you found.&rdquo;</div>
+      <div style="height: 1px; background: rgba(0,229,255,0.08); margin: 16px 0;"></div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.35); line-height: 1.5; font-style: italic;">&ldquo;No wrong answers here. Just tell me what you found.&rdquo;</div>
     </div>
 
   </div>

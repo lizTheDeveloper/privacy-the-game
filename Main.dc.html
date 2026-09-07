@@ -7,42 +7,48 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <style>
-    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #050810; color: #f1f5f9; }
-    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #090B10; color: #EDEFF3; }
+    a { color: #00E5FF; } a:hover { color: #FF2D9B; }
     * { box-sizing: border-box; }
     img { image-rendering: pixelated; }
   </style>
 </helmet>
 
-<div style="width: 960px; height: 720px; background: linear-gradient(180deg, #030508 0%, #060a14 25%, #0a1020 60%, #12182a 100%); position: relative; overflow: hidden;">
+<div style="width: 960px; height: 720px; background: linear-gradient(180deg, #050710 0%, #090B10 25%, #0d1018 60%, #121828 100%); position: relative; overflow: hidden;">
 
   <!-- Stars -->
-  <div style="position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 80px 25px, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 220px 55px, rgba(255,255,255,0.3), transparent), radial-gradient(1px 1px at 410px 15px, rgba(255,255,255,0.4), transparent), radial-gradient(1px 1px at 580px 40px, rgba(255,255,255,0.3), transparent), radial-gradient(1px 1px at 750px 20px, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 890px 48px, rgba(255,255,255,0.3), transparent), radial-gradient(1px 1px at 150px 70px, rgba(255,255,255,0.2), transparent), radial-gradient(1px 1px at 500px 8px, rgba(255,255,255,0.4), transparent), radial-gradient(1px 1px at 330px 62px, rgba(255,255,255,0.25), transparent), radial-gradient(1px 1px at 680px 32px, rgba(255,255,255,0.35), transparent); pointer-events: none;"></div>
+  <div style="position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 80px 25px, rgba(0,229,255,0.3), transparent), radial-gradient(1px 1px at 220px 55px, rgba(255,255,255,0.25), transparent), radial-gradient(1px 1px at 410px 15px, rgba(0,229,255,0.2), transparent), radial-gradient(1px 1px at 580px 40px, rgba(255,255,255,0.2), transparent), radial-gradient(1px 1px at 750px 20px, rgba(198,255,0,0.2), transparent), radial-gradient(1px 1px at 890px 48px, rgba(255,255,255,0.2), transparent), radial-gradient(1px 1px at 150px 70px, rgba(0,229,255,0.15), transparent), radial-gradient(1px 1px at 500px 8px, rgba(255,255,255,0.3), transparent), radial-gradient(1px 1px at 330px 62px, rgba(255,45,155,0.15), transparent), radial-gradient(1px 1px at 680px 32px, rgba(0,229,255,0.25), transparent); pointer-events: none;"></div>
+
+  <!-- Scanline overlay -->
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px); pointer-events: none; z-index: 25;"></div>
 
   <!-- ═══ HUD TOP BAR ═══ -->
-  <div style="position: absolute; top: 0; left: 0; right: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(180deg, rgba(3,5,8,0.97) 0%, rgba(3,5,8,0.7) 70%, transparent 100%);">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 13px; color: #f59e0b; letter-spacing: 1px;">RECLAIM CITY</div>
-    <div style="display: flex; gap: 14px; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 6px; background: rgba(52,211,153,0.08); border: 2px solid rgba(52,211,153,0.25); padding: 3px 12px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #34d399;">23%</div>
-        <div style="font-size: 9px; color: #64748b; letter-spacing: 1px;">LIB</div>
+  <div style="position: absolute; top: 0; left: 0; right: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
+    <div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">RECLAIM CITY</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-top: 1px;">TAKE BACK YOUR DATA</div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 6px; background: rgba(198,255,0,0.06); border: 1px solid rgba(198,255,0,0.25); padding: 4px 12px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #C6FF00; text-shadow: 0 0 8px rgba(198,255,0,0.3);">23%</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; color: rgba(198,255,0,0.5); letter-spacing: 1px;">INTEGRITY</div>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px; background: rgba(239,68,68,0.08); border: 2px solid rgba(239,68,68,0.25); padding: 3px 12px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #ef4444;">847</div>
-        <div style="font-size: 9px; color: #64748b; letter-spacing: 1px;">EXP</div>
+      <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,45,155,0.06); border: 1px solid rgba(255,45,155,0.25); padding: 4px 12px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #FF2D9B; text-shadow: 0 0 8px rgba(255,45,155,0.3);">847</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; color: rgba(255,45,155,0.5); letter-spacing: 1px;">EXPOSURE</div>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.08); border: 2px solid rgba(245,158,11,0.25); padding: 3px 12px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #f59e0b;">7d</div>
-        <div style="font-size: 9px; color: #64748b; letter-spacing: 1px;">STREAK</div>
+      <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,159,0,0.06); border: 1px solid rgba(255,159,0,0.25); padding: 4px 12px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #FF9F00; text-shadow: 0 0 8px rgba(255,159,0,0.3);">7d</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">STREAK</div>
       </div>
     </div>
   </div>
 
   <!-- ═══ ISOMETRIC CITY — staggered rows, back to front ═══ -->
 
-  <!-- ~~~ ROW 0 (farthest): tiny dark silhouettes ~~~ -->
+  <!-- ROW 0 (farthest) -->
   <div style="position: absolute; top: 90px; left: 50%; transform: translateX(-50%); z-index: 1; display: flex; gap: 2px; align-items: flex-end; opacity: 0.25; filter: brightness(0.25) saturate(0.05);">
     <img src="iso_occupied.png" style="width: 34px; height: auto;">
     <img src="iso_tower_occ.png" style="width: 20px; height: auto;">
@@ -56,7 +62,7 @@
     <img src="iso_occupied.png" style="width: 34px; height: auto;">
   </div>
 
-  <!-- ~~~ ROW 1: offset right, still far ~~~ -->
+  <!-- ROW 1 -->
   <div style="position: absolute; top: 130px; left: 50%; transform: translateX(calc(-50% + 40px)); z-index: 2; display: flex; gap: 2px; align-items: flex-end; opacity: 0.35; filter: brightness(0.3) saturate(0.1);">
     <img src="iso_tower_occ.png" style="width: 26px; height: auto;">
     <img src="iso_occupied.png" style="width: 42px; height: auto;">
@@ -69,17 +75,16 @@
     <img src="iso_tower_occ.png" style="width: 28px; height: auto;">
   </div>
 
-  <!-- Surveillance pulses in the far city -->
-  <div style="position: absolute; top: 100px; left: 380px; z-index: 3; width: 5px; height: 5px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 6px #ef4444;"></div>
-  <div style="position: absolute; top: 125px; right: 300px; z-index: 3; width: 4px; height: 4px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 5px #ef4444;"></div>
+  <!-- Surveillance pulses — magenta -->
+  <div style="position: absolute; top: 100px; left: 380px; z-index: 3; width: 5px; height: 5px; background: #FF2D9B; border-radius: 50%; box-shadow: 0 0 6px #FF2D9B, 0 0 12px rgba(255,45,155,0.3);"></div>
+  <div style="position: absolute; top: 125px; right: 300px; z-index: 3; width: 4px; height: 4px; background: #FF2D9B; border-radius: 50%; box-shadow: 0 0 5px #FF2D9B;"></div>
 
-  <!-- ~~~ ROW 2: mid-distance, denser, first liberated beacon ~~~ -->
+  <!-- ROW 2: first liberated beacon -->
   <div style="position: absolute; top: 175px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 1px; align-items: flex-end;">
     <img src="iso_occupied.png" style="width: 48px; height: auto; filter: brightness(0.35) saturate(0.15);">
     <img src="iso_tower_occ.png" style="width: 34px; height: auto; filter: brightness(0.32) saturate(0.15);">
     <img src="iso_occupied.png" style="width: 52px; height: auto; filter: brightness(0.38) saturate(0.15);">
-    <!-- A lone liberated building glowing in the distance -->
-    <img src="iso_liberated.png" style="width: 50px; height: auto; filter: brightness(0.9) drop-shadow(0 0 4px rgba(245,158,11,0.3));">
+    <img src="iso_liberated.png" style="width: 50px; height: auto; filter: brightness(0.9) drop-shadow(0 0 6px rgba(0,229,255,0.4));">
     <img src="iso_tower_occ.png" style="width: 36px; height: auto; filter: brightness(0.33) saturate(0.15);">
     <img src="iso_occupied.png" style="width: 46px; height: auto; filter: brightness(0.35) saturate(0.15);">
     <img src="iso_occupied.png" style="width: 50px; height: auto; filter: brightness(0.3) saturate(0.12);">
@@ -87,95 +92,87 @@
     <img src="iso_occupied.png" style="width: 44px; height: auto; filter: brightness(0.36) saturate(0.15);">
   </div>
 
-  <div style="position: absolute; top: 175px; right: 210px; z-index: 5; width: 7px; height: 7px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444, 0 0 14px rgba(239,68,68,0.3);"></div>
+  <div style="position: absolute; top: 175px; right: 210px; z-index: 5; width: 7px; height: 7px; background: #FF2D9B; border-radius: 50%; box-shadow: 0 0 8px #FF2D9B, 0 0 16px rgba(255,45,155,0.3);"></div>
 
-  <!-- ~~~ ROW 3: offset, closer, more detail, mixed states ~~~ -->
+  <!-- ROW 3: mixed states -->
   <div style="position: absolute; top: 240px; left: 50%; transform: translateX(calc(-50% + 35px)); z-index: 6; display: flex; gap: 0px; align-items: flex-end;">
     <img src="iso_tower_occ.png" style="width: 40px; height: auto; filter: brightness(0.4) saturate(0.2);">
     <img src="iso_occupied.png" style="width: 58px; height: auto; filter: brightness(0.42) saturate(0.2);">
-    <!-- Liberated tower beacon -->
-    <img src="iso_tower_lib.png" style="width: 46px; height: auto; filter: brightness(1.05) drop-shadow(0 0 6px rgba(245,158,11,0.35));">
+    <img src="iso_tower_lib.png" style="width: 46px; height: auto; filter: brightness(1.05) drop-shadow(0 0 8px rgba(0,229,255,0.4));">
     <img src="iso_occupied.png" style="width: 56px; height: auto; filter: brightness(0.38) saturate(0.18);">
     <img src="iso_tower_occ.png" style="width: 42px; height: auto; filter: brightness(0.4) saturate(0.2);">
-    <!-- In-progress building -->
     <img src="iso_progress.png" style="width: 60px; height: auto; filter: brightness(0.75);">
     <img src="iso_occupied.png" style="width: 54px; height: auto; filter: brightness(0.4) saturate(0.2);">
     <img src="iso_tower_occ.png" style="width: 38px; height: auto; filter: brightness(0.36) saturate(0.18);">
   </div>
 
-  <div style="position: absolute; top: 248px; left: 310px; z-index: 7; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444, 0 0 16px rgba(239,68,68,0.25);"></div>
+  <div style="position: absolute; top: 248px; left: 310px; z-index: 7; width: 8px; height: 8px; background: #FF2D9B; border-radius: 50%; box-shadow: 0 0 8px #FF2D9B, 0 0 16px rgba(255,45,155,0.25);"></div>
 
-  <!-- ~~~ ROW 4: close, large buildings, more liberated pockets ~~~ -->
+  <!-- ROW 4: large, more liberated -->
   <div style="position: absolute; top: 310px; left: 50%; transform: translateX(-50%); z-index: 8; display: flex; gap: -1px; align-items: flex-end;">
-    <!-- Liberated building -->
-    <img src="iso_liberated.png" style="width: 72px; height: auto; filter: brightness(1.1) drop-shadow(0 0 8px rgba(245,158,11,0.3));">
+    <img src="iso_liberated.png" style="width: 72px; height: auto; filter: brightness(1.1) drop-shadow(0 0 10px rgba(0,229,255,0.35));">
     <img src="iso_tower_occ.png" style="width: 48px; height: auto; filter: brightness(0.45) saturate(0.25);">
     <img src="iso_occupied.png" style="width: 66px; height: auto; filter: brightness(0.45) saturate(0.25);">
-    <!-- In-progress -->
     <img src="iso_progress.png" style="width: 70px; height: auto; filter: brightness(0.8);">
-    <!-- Liberated tower -->
-    <img src="iso_tower_lib.png" style="width: 54px; height: auto; filter: brightness(1.15) drop-shadow(0 0 10px rgba(245,158,11,0.4));">
+    <img src="iso_tower_lib.png" style="width: 54px; height: auto; filter: brightness(1.15) drop-shadow(0 0 12px rgba(198,255,0,0.35));">
     <img src="iso_occupied.png" style="width: 64px; height: auto; filter: brightness(0.42) saturate(0.22);">
     <img src="iso_tower_occ.png" style="width: 46px; height: auto; filter: brightness(0.44) saturate(0.25);">
   </div>
 
-  <!-- ~~~ ROW 5 (foreground): biggest, most detailed ~~~ -->
+  <!-- ROW 5 (foreground) -->
   <div style="position: absolute; top: 385px; left: 50%; transform: translateX(calc(-50% + 30px)); z-index: 10; display: flex; gap: -2px; align-items: flex-end;">
     <img src="iso_tower_occ.png" style="width: 54px; height: auto; filter: brightness(0.48) saturate(0.28);">
-    <!-- Big liberated building -->
-    <img src="iso_liberated.png" style="width: 84px; height: auto; filter: brightness(1.2) drop-shadow(0 0 12px rgba(245,158,11,0.4));">
+    <img src="iso_liberated.png" style="width: 84px; height: auto; filter: brightness(1.2) drop-shadow(0 0 14px rgba(0,229,255,0.45));">
     <img src="iso_occupied.png" style="width: 76px; height: auto; filter: brightness(0.48) saturate(0.28);">
-    <!-- Big liberated tower -->
-    <img src="iso_tower_lib.png" style="width: 60px; height: auto; filter: brightness(1.2) drop-shadow(0 0 12px rgba(245,158,11,0.45));">
-    <!-- In progress -->
+    <img src="iso_tower_lib.png" style="width: 60px; height: auto; filter: brightness(1.2) drop-shadow(0 0 14px rgba(198,255,0,0.4));">
     <img src="iso_progress.png" style="width: 78px; height: auto; filter: brightness(0.85);">
     <img src="iso_occupied.png" style="width: 70px; height: auto; filter: brightness(0.46) saturate(0.25);">
   </div>
 
-  <!-- Warm glow pools under liberated buildings -->
-  <div style="position: absolute; top: 430px; left: 240px; width: 120px; height: 50px; background: radial-gradient(ellipse, rgba(245,180,50,0.1) 0%, transparent 70%); z-index: 9; pointer-events: none;"></div>
-  <div style="position: absolute; top: 440px; left: 460px; width: 100px; height: 40px; background: radial-gradient(ellipse, rgba(245,180,50,0.08) 0%, transparent 70%); z-index: 9; pointer-events: none;"></div>
-  <div style="position: absolute; top: 360px; left: 350px; width: 80px; height: 35px; background: radial-gradient(ellipse, rgba(245,180,50,0.06) 0%, transparent 70%); z-index: 7; pointer-events: none;"></div>
+  <!-- Cyan/lime glow pools under liberated buildings -->
+  <div style="position: absolute; top: 430px; left: 240px; width: 120px; height: 50px; background: radial-gradient(ellipse, rgba(0,229,255,0.1) 0%, transparent 70%); z-index: 9; pointer-events: none;"></div>
+  <div style="position: absolute; top: 440px; left: 460px; width: 100px; height: 40px; background: radial-gradient(ellipse, rgba(198,255,0,0.08) 0%, transparent 70%); z-index: 9; pointer-events: none;"></div>
+  <div style="position: absolute; top: 360px; left: 350px; width: 80px; height: 35px; background: radial-gradient(ellipse, rgba(0,229,255,0.06) 0%, transparent 70%); z-index: 7; pointer-events: none;"></div>
 
-  <!-- ═══ DISTRICT LABELS — subtle, floating ═══ -->
+  <!-- ═══ DISTRICT LABELS ═══ -->
   <div style="position: absolute; top: 275px; left: 100px; z-index: 11;">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #f59e0b; text-shadow: 0 0 10px rgba(245,158,11,0.5); opacity: 0.9;">MASTER KEYS</div>
-    <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px;">
-      <div style="width: 60px; height: 4px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">
-        <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #34d399, #f59e0b);"></div>
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; color: #00E5FF; text-shadow: 0 0 12px rgba(0,229,255,0.5); letter-spacing: 2px;">MASTER KEYS</div>
+    <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+      <div style="width: 60px; height: 3px; background: rgba(255,255,255,0.06); border: 1px solid rgba(0,229,255,0.15);">
+        <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #00E5FF, #C6FF00);"></div>
       </div>
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #94a3b8;">45%</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; color: #C6FF00;">45%</div>
     </div>
   </div>
 
   <div style="position: absolute; top: 300px; right: 170px; z-index: 11; opacity: 0.6;">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #60a5fa; text-shadow: 0 0 6px rgba(96,165,250,0.3);">THE VAULT</div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 5px; color: #60a5fa; margin-top: 2px; opacity: 0.7;">READY</div>
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: #00E5FF; text-shadow: 0 0 8px rgba(0,229,255,0.3); letter-spacing: 2px;">THE VAULT</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; color: rgba(0,229,255,0.5); margin-top: 2px;">READY</div>
   </div>
 
   <div style="position: absolute; top: 155px; left: 160px; z-index: 5; opacity: 0.4;">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 5px; color: #ef4444; letter-spacing: 1px;">OCCUPIED</div>
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; color: #FF2D9B; letter-spacing: 2px;">OCCUPIED</div>
   </div>
 
   <div style="position: absolute; top: 210px; right: 140px; z-index: 5; opacity: 0.35;">
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 5px; color: #ef4444; letter-spacing: 1px;">OCCUPIED</div>
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; color: #FF2D9B; letter-spacing: 2px;">OCCUPIED</div>
   </div>
 
-  <!-- ═══ GROUND FOG ═══ -->
-  <div style="position: absolute; bottom: 95px; left: 0; right: 0; height: 80px; background: linear-gradient(180deg, transparent 0%, rgba(18,24,42,0.5) 60%, rgba(18,24,42,0.8) 100%); z-index: 11; pointer-events: none;"></div>
+  <!-- Ground fog -->
+  <div style="position: absolute; bottom: 95px; left: 0; right: 0; height: 80px; background: linear-gradient(180deg, transparent 0%, rgba(9,11,16,0.5) 60%, rgba(9,11,16,0.8) 100%); z-index: 11; pointer-events: none;"></div>
 
   <!-- ═══ SCOUT + DIALOG ═══ -->
-  <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 30; background: linear-gradient(180deg, transparent 0%, rgba(3,5,8,0.9) 25%, rgba(3,5,8,0.98) 100%); padding: 18px 20px 14px;">
+  <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 30; background: linear-gradient(180deg, transparent 0%, rgba(9,11,16,0.92) 25%, rgba(9,11,16,0.99) 100%); padding: 18px 20px 14px; border-top: 1px solid rgba(0,229,255,0.08);">
     <div style="display: flex; gap: 14px; align-items: flex-end;">
       <div style="flex-shrink: 0; text-align: center;">
-        <img src="scout_0.png" style="width: 64px; height: 64px;">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 6px; color: #f59e0b; margin-top: 2px;">SCOUT</div>
+        <img src="scout_0.png" style="width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 700; color: #00E5FF; margin-top: 3px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,229,255,0.4);">SCOUT</div>
       </div>
-      <div style="flex: 1; background: rgba(15,22,35,0.95); border: 2px solid rgba(245,158,11,0.3); padding: 12px 16px; position: relative;">
-        <div style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">The Master Keys district is 45% liberated. Next mission: <span style="color: #f59e0b; font-weight: 600;">Breach Recon on iCloud Mail</span>. Should take about 3 minutes.</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #f59e0b;"></div>
+      <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
+        <div style="font-size: 14px; color: #EDEFF3; line-height: 1.6;">The Master Keys district is 45% liberated. Next mission: <span style="color: #00E5FF; font-weight: 600;">Breach Recon on iCloud Mail</span>. Should take about 3 minutes.</div>
+        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #00E5FF;"></div>
       </div>
-      <div style="flex-shrink: 0; background: rgba(245,158,11,0.12); border: 2px solid #f59e0b; padding: 10px 18px; font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; cursor: pointer; white-space: nowrap;">NEXT MISSION</div>
+      <div style="flex-shrink: 0; border: 1px solid #00E5FF; padding: 10px 18px; font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; color: #00E5FF; cursor: pointer; white-space: nowrap; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); box-shadow: 0 0 12px rgba(0,229,255,0.15), inset 0 0 12px rgba(0,229,255,0.05);">NEXT MISSION</div>
     </div>
   </div>
 

@@ -7,162 +7,150 @@
 <body>
 <x-dc>
 <helmet>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Press+Start+2P&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <style>
-    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #0a0e17; color: #f1f5f9; }
-    a { color: #f59e0b; } a:hover { color: #fbbf24; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #090B10; color: #EDEFF3; }
+    a { color: #00E5FF; } a:hover { color: #FF2D9B; }
     * { box-sizing: border-box; }
     img { image-rendering: pixelated; }
   </style>
 </helmet>
 
-<div style="width: 960px; min-height: 740px; background: linear-gradient(180deg, #060810 0%, #0a0e17 40%, #111827 100%); position: relative; overflow: hidden;">
+<div style="width: 960px; min-height: 740px; background: linear-gradient(180deg, #090B10 0%, #0d1018 50%, #121828 100%); padding: 0; position: relative; overflow: hidden;">
 
-  <!-- ═══ HUD HEADER ═══ -->
-  <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(10,14,23,0.95); border-bottom: 2px solid rgba(255,255,255,0.08);">
-    <div style="width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 2px;">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,229,255,0.012) 2px, rgba(0,229,255,0.012) 4px); pointer-events: none; z-index: 25;"></div>
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
+    <div style="width: 32px; height: 32px; border: 1px solid rgba(0,229,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#00E5FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #f1f5f9; letter-spacing: 1px;">YOUR CITY</div>
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">YOUR CITY</div>
     <div style="flex: 1;"></div>
-    <div style="font-size: 12px; color: #64748b;">Protecting for 12 days</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(237,239,243,0.3);">Protecting for 12 days</div>
   </div>
 
-  <!-- ═══ TOP STATS ROW ═══ -->
-  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 20px 24px;">
+  <div style="padding: 20px 24px;">
 
-    <!-- Liberation -->
-    <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(52,211,153,0.15); padding: 20px; text-align: center; border-radius: 2px;">
-      <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 12px;">
-        <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
-          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-          <circle cx="50" cy="50" r="42" fill="none" stroke="#34d399" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="203"/>
-        </svg>
-        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #34d399;">23%</div>
-        </div>
-      </div>
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; letter-spacing: 1px;">LIBERATION</div>
-    </div>
+    <!-- Top stats -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px;">
 
-    <!-- Exposure -->
-    <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(239,68,68,0.15); padding: 20px; text-align: center; border-radius: 2px;">
-      <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 12px;">
-        <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
-          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-          <circle cx="50" cy="50" r="42" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="40"/>
-        </svg>
-        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #ef4444;">847</div>
-        </div>
-      </div>
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; letter-spacing: 1px;">EXPOSURE</div>
-      <div style="font-size: 11px; color: #34d399; margin-top: 4px;">&#9650; Down 153</div>
-    </div>
-
-    <!-- Streak -->
-    <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(245,158,11,0.15); padding: 20px; text-align: center; border-radius: 2px;">
-      <div style="width: 100px; height: 100px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
-        <div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 28px; color: #f59e0b; line-height: 1;">7</div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; margin-top: 4px;">DAYS</div>
-        </div>
-      </div>
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #94a3b8; letter-spacing: 1px;">STREAK</div>
-      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Best: 12 days</div>
-    </div>
-
-  </div>
-
-  <!-- ═══ DISTRICT PROGRESS ═══ -->
-  <div style="padding: 0 24px 16px;">
-    <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(255,255,255,0.08); padding: 20px; border-radius: 2px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 16px; letter-spacing: 1px;">DISTRICT PROGRESS</div>
-
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <!-- Master Keys 100% -->
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="liberated_building.png" style="width: 20px; height: auto;">
-          <div style="width: 120px; font-size: 13px; color: #34d399; font-weight: 500;">Master Keys</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px; overflow: hidden;">
-            <div style="width: 100%; height: 100%; background: #34d399;"></div>
+      <!-- Integrity -->
+      <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(0,229,255,0.1); padding: 24px; text-align: center;">
+        <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 14px;">
+          <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,229,255,0.08)" stroke-width="6"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#00E5FF" stroke-width="6" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="203" style="filter: drop-shadow(0 0 6px rgba(0,229,255,0.4));"/>
+          </svg>
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #00E5FF; text-shadow: 0 0 10px rgba(0,229,255,0.3);">23<span style="font-size: 14px; color: rgba(237,239,243,0.3);">%</span></div>
           </div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #34d399; width: 44px; text-align: right;">100%</div>
         </div>
-        <!-- Vault 45% -->
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="progress_building.png" style="width: 20px; height: auto;">
-          <div style="width: 120px; font-size: 13px; color: #f59e0b; font-weight: 500;">The Vault</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px; overflow: hidden;">
-            <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #34d399, #f59e0b);"></div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.5); letter-spacing: 2px;">IDENTITY INTEGRITY</div>
+      </div>
+
+      <!-- Exposure -->
+      <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(255,45,155,0.1); padding: 24px; text-align: center;">
+        <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 14px;">
+          <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,45,155,0.08)" stroke-width="6"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#FF2D9B" stroke-width="6" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="40" style="filter: drop-shadow(0 0 6px rgba(255,45,155,0.4));"/>
+          </svg>
+          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #FF2D9B; text-shadow: 0 0 10px rgba(255,45,155,0.3);">847</div>
           </div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; width: 44px; text-align: right;">45%</div>
         </div>
-        <!-- Remaining 0% -->
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="occupied_building.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">The Square</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(255,45,155,0.5); letter-spacing: 2px;">EXPOSURE RISK</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #C6FF00; margin-top: 6px;">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="vertical-align: -1px;"><path d="M5 8V2M2.5 4.5L5 2l2.5 2.5" stroke="#C6FF00" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          -153 from start
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="occupied_building.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">The Archives</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+      </div>
+
+      <!-- Streak -->
+      <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(255,159,0,0.1); padding: 24px; text-align: center;">
+        <div style="width: 100px; height: 100px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;">
+          <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 48px; font-weight: 700; color: #FF9F00; line-height: 1; text-shadow: 0 0 15px rgba(255,159,0,0.3);">7</div>
+            <div style="font-size: 12px; color: rgba(237,239,243,0.4); margin-top: -4px;">days</div>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="tower_occupied.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">Marketplace</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(255,159,0,0.5); letter-spacing: 2px;">STREAK</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(237,239,243,0.3); margin-top: 6px;">Best: 12 days</div>
+      </div>
+
+    </div>
+
+    <!-- District Progress -->
+    <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(0,229,255,0.08); padding: 20px 24px; margin-bottom: 16px;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.4); letter-spacing: 3px; margin-bottom: 16px;">DISTRICT PROGRESS</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #C6FF00; flex-shrink: 0;">Master Keys</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"><div style="width: 100%; height: 100%; background: #C6FF00; box-shadow: 0 0 6px rgba(198,255,0,0.3);"></div></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #C6FF00; width: 44px; text-align: right;">100%</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="tower_occupied.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">The Capitol</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00E5FF; flex-shrink: 0;">The Vault</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"><div style="width: 45%; height: 100%; background: linear-gradient(90deg, #00E5FF, #C6FF00); box-shadow: 0 0 6px rgba(0,229,255,0.2);"></div></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #00E5FF; width: 44px; text-align: right;">45%</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="occupied_building.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">Perimeter</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">The Square</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="tower_occupied.png" style="width: 20px; height: auto; filter: brightness(0.4);">
-          <div style="width: 120px; font-size: 13px; color: #64748b;">Reclamation</div>
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 1px;"></div>
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #475569; width: 44px; text-align: right;">0%</div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">The Archives</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">Marketplace</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">The Capitol</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">Perimeter</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 130px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.3); flex-shrink: 0;">Reclamation</div>
+          <div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(237,239,243,0.2); width: 44px; text-align: right;">0%</div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ═══ FINDINGS LOG ═══ -->
-  <div style="padding: 0 24px 24px;">
-    <div style="background: rgba(26,35,50,0.6); border: 2px solid rgba(255,255,255,0.08); padding: 20px; border-radius: 2px;">
-      <div style="font-family: 'Press Start 2P', monospace; font-size: 7px; color: #64748b; margin-bottom: 14px; letter-spacing: 1px;">FINDINGS LOG</div>
-
-      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
-        <div style="text-align: center; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); padding: 14px 0; border-radius: 2px;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #f59e0b;">3</div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">Breaches</div>
+    <!-- Findings Log -->
+    <div style="background: rgba(26,31,43,0.5); border: 1px solid rgba(0,229,255,0.08); padding: 20px 24px;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; color: rgba(0,229,255,0.4); letter-spacing: 3px; margin-bottom: 16px;">FINDINGS LOG</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+        <div style="text-align: center; padding: 14px 0; border: 1px solid rgba(255,159,0,0.1);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: #FF9F00; text-shadow: 0 0 8px rgba(255,159,0,0.3);">3</div>
+          <div style="font-size: 11px; color: rgba(237,239,243,0.4); margin-top: 4px;">Breaches found</div>
         </div>
-        <div style="text-align: center; background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.15); padding: 14px 0; border-radius: 2px;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #34d399;">8</div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">PW Reset</div>
+        <div style="text-align: center; padding: 14px 0; border: 1px solid rgba(198,255,0,0.1);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: #C6FF00; text-shadow: 0 0 8px rgba(198,255,0,0.3);">8</div>
+          <div style="font-size: 11px; color: rgba(237,239,243,0.4); margin-top: 4px;">Passwords reset</div>
         </div>
-        <div style="text-align: center; background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.15); padding: 14px 0; border-radius: 2px;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #60a5fa;">5</div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">2FA On</div>
+        <div style="text-align: center; padding: 14px 0; border: 1px solid rgba(0,229,255,0.1);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: #00E5FF; text-shadow: 0 0 8px rgba(0,229,255,0.3);">5</div>
+          <div style="font-size: 11px; color: rgba(237,239,243,0.4); margin-top: 4px;">2FA enabled</div>
         </div>
-        <div style="text-align: center; background: rgba(167,139,250,0.06); border: 1px solid rgba(167,139,250,0.15); padding: 14px 0; border-radius: 2px;">
-          <div style="font-family: 'Press Start 2P', monospace; font-size: 16px; color: #a78bfa;">0</div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">Opt-outs</div>
+        <div style="text-align: center; padding: 14px 0; border: 1px solid rgba(255,45,155,0.1);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: rgba(255,45,155,0.4);">0</div>
+          <div style="font-size: 11px; color: rgba(237,239,243,0.4); margin-top: 4px;">Opt-outs filed</div>
         </div>
       </div>
     </div>
+
   </div>
 
 </div>
