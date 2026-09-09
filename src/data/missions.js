@@ -1,4 +1,8 @@
 import { ACCOUNTS } from './accounts.js';
+import { VAULT_CAPITOL_MISSIONS } from './missions-vault-capitol.js';
+import { MISSIONS_SQUARE_ARCHIVES_MARKETPLACE } from './missions-square-archives-marketplace.js';
+import { PERIMETER_MISSIONS } from './missions-perimeter.js';
+import { RECLAMATION_MISSIONS } from './missions-reclamation.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -80,7 +84,7 @@ function scoutLogin(clean, suspicious, confirmed) {
   };
 }
 
-export const MISSIONS = [
+const CHAPTER_1_MISSIONS = [
   // ══════════════════════════════════════════════════════
   // GMAIL
   // ══════════════════════════════════════════════════════
@@ -1112,6 +1116,16 @@ export const MISSIONS = [
     },
     estimatedMinutes: 15,
   },
+];
+
+// Merge all chapter missions into one array — exported as MISSIONS
+// so every existing import picks up the full set
+export const MISSIONS = [
+  ...CHAPTER_1_MISSIONS,
+  ...VAULT_CAPITOL_MISSIONS,
+  ...MISSIONS_SQUARE_ARCHIVES_MARKETPLACE,
+  ...PERIMETER_MISSIONS,
+  ...RECLAMATION_MISSIONS,
 ];
 
 export function getMissionsForDistrict(districtId) {

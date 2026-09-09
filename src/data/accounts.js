@@ -1,4 +1,9 @@
-export const ACCOUNTS = {
+import { VAULT_CAPITOL_ACCOUNTS } from './accounts-vault-capitol-additions.js';
+import { ACCOUNTS_SAM_ADDITIONS } from './accounts-sam-additions.js';
+import { PERIMETER_ACCOUNTS } from './accounts-perimeter.js';
+import { RECLAMATION_ACCOUNTS } from './accounts-reclamation.js';
+
+const BASE_ACCOUNTS = {
   // Chapter 1: The Master Keys
   gmail: {
     name: 'Gmail',
@@ -210,4 +215,12 @@ export const ACCOUNTS = {
     buildingDark: 'assets/buildings/irs_dark.png',
     riskLevel: 'high',
   },
+};
+
+export const ACCOUNTS = {
+  ...BASE_ACCOUNTS,
+  ...VAULT_CAPITOL_ACCOUNTS,
+  ...ACCOUNTS_SAM_ADDITIONS,
+  ...PERIMETER_ACCOUNTS,
+  ...RECLAMATION_ACCOUNTS,
 };
