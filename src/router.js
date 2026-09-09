@@ -1,7 +1,7 @@
 const ROUTES = [
   { pattern: /^#\/city$/, screen: 'city', params: () => ({}) },
   {
-    pattern: /^#\/district\/([^/]+)(?:\?(.*))?$/,
+    pattern: /^#\/district\/([^/?]+)(?:\?(.*))?$/,
     screen: 'district',
     params: (m) => ({
       id: m[1],
@@ -11,6 +11,7 @@ const ROUTES = [
   { pattern: /^#\/mission\/([^/]+)\/briefing$/, screen: 'briefing', params: (m) => ({ id: m[1] }) },
   { pattern: /^#\/mission\/([^/]+)\/debrief$/, screen: 'debrief', params: (m) => ({ id: m[1] }) },
   { pattern: /^#\/milestone\/([^/]+)$/, screen: 'milestone', params: (m) => ({ districtId: m[1] }) },
+  { pattern: /^#\/quickquest$/, screen: 'quickquest', params: () => ({}) },
   { pattern: /^#\/stats$/, screen: 'stats', params: () => ({}) },
 ];
 
