@@ -101,6 +101,8 @@ function renderMissionRow(state, mission) {
   </div>`;
 }
 
+const PHASE_PREREQ = { fortify: 'recon', reclaim: 'fortify' };
+
 function renderMissionList(state, districtId, activeTab) {
   const missions = getMissionsForDistrict(districtId).filter(
     (m) => m.phase === activeTab && state.accounts[m.accountId]?.enabled,
@@ -110,6 +112,24 @@ function renderMissionList(state, districtId, activeTab) {
     <div style="padding: 12px 24px 24px;">
       <div class="panel" style="padding: 32px; text-align: center; font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.4);">No missions available in this phase yet.</div>
     </div>`;
+  }
+  const prereq = PHASE_PREREQ[activeTab];
+  if (prereq) {
+    const prereqMissions = getMissionsForDistrict(districtId).filter(
+      (m) => m.phase === prereq && state.accounts[m.accountId]?.enabled,
+    );
+    const prereqDone = prereqMissions.length > 0 && prereqMissions.every((m) => state.missions[m.id]?.status === 'completed');
+    if (!prereqDone && prereqMissions.length > 0) {
+      const remaining = prereqMissions.filter((m) => state.missions[m.id]?.status !== 'completed').length;
+      return `
+      <div style="padding: 12px 24px 24px;">
+        <div class="panel" style="padding: 32px; text-align: center;">
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px;">COMPLETE ${prereq.toUpperCase()} FIRST</div>
+          <div style="font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6;">Finish the remaining ${remaining} ${prereq} mission${remaining === 1 ? '' : 's'} before moving to ${activeTab}.</div>
+          <div style="margin-top: 16px;"><a class="btn-secondary" style="text-decoration: none;" href="#/district/${districtId}?tab=${prereq}">GO TO ${prereq.toUpperCase()}</a></div>
+        </div>
+      </div>`;
+    }
   }
   return `
   <div style="padding: 12px 24px 24px;">
@@ -149,7 +169,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   </div>`;
 }
 
-export function renderDistrict(state, districtId, activeTab = 'recon') {
+export function renderDistrict(state, districtId, activeTab) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
 
@@ -157,6 +177,11 @@ export function renderDistrict(state, districtId, activeTab = 'recon') {
   const knownAccounts = districtAccounts.filter(([id]) => state.accounts[id]);
   const allDisabled = knownAccounts.length > 0 && knownAccounts.every(([id]) => !state.accounts[id].enabled);
   const progress = calcDistrictProgress(state, districtId);
+
+  if (!activeTab) {
+    const hasCompletedAny = getMissionsForDistrict(districtId).some((m) => state.missions[m.id]?.status === 'completed');
+    activeTab = hasCompletedAny ? 'recon' : 'survey';
+  }
 
   const buildings = districtAccounts
     .map(([id]) => renderBuilding(id, getBuildingState(state, id)))

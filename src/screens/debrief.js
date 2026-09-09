@@ -74,10 +74,9 @@ export function renderDebrief(state, missionId) {
   const districtId = account?.district || '';
   const stored = state.missions[missionId] || {};
   const completed = stored.status === 'completed';
-  const firstName = (account?.name || 'there').split(' ')[0];
 
   const scoutLine = completed
-    ? mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action] || 'Report received. Good work.'
+    ? mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action] || 'Report received. Good work, agent.'
     : mission.scoutDialog?.briefing || 'Report back — what did you find?';
 
   const questions = completed
@@ -111,7 +110,7 @@ export function renderDebrief(state, missionId) {
           <img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
         </div>
         <div style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; flex: 1;">
-          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? `Report filed, ${firstName}.` : `Welcome back. What did you find, ${firstName}?`}</div>
+          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? 'Report filed. Good work, agent.' : 'Welcome back, agent. What did you find?'}</div>
           <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; font-style: italic; margin-top: 8px;">${scoutLine}</div>
         </div>
       </div>
