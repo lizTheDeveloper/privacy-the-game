@@ -11,9 +11,12 @@ import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderMilestone } from './screens/milestone.js';
+import { renderQuickQuest } from './screens/quick-quest.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
+import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
 
 initErrorTracking();
+
 
 let state = loadState();
 let started = hasSavedState();
@@ -22,10 +25,11 @@ const app = document.getElementById('app');
 
 const screens = {
   city: () => renderCityMap(state),
-  district: ({ id, tab }) => renderDistrict(state, id, tab || 'recon'),
+  district: ({ id, tab }) => renderDistrict(state, id, tab),
   briefing: ({ id }) => renderBriefing(state, id),
   debrief: ({ id }) => renderDebrief(state, id),
   milestone: ({ districtId }) => renderMilestone(state, districtId),
+  quickquest: () => renderQuickQuest(state),
   stats: () => renderStats(state),
 };
 
@@ -100,6 +104,10 @@ function submitDebrief(missionId) {
       status,
     });
   }
+  if (status === 'completed' && shouldAskPermission(state)) {
+    requestPermission();
+  }
+
   const progress = calcDistrictProgress(state, districtId);
   if (progress.total > 0 && progress.percent === 100) {
     if (typeof umami !== 'undefined' && umami.track) umami.track('district-completed', { district: districtId });
@@ -188,3 +196,4 @@ window.reclaimCity = {
 };
 
 initRouter(render);
+checkStreakReminder(state);

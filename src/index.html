@@ -3,7 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050710">
+  <meta name="description" content="Take back your data, building by building.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reclaim City">
   <title>Reclaim City</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="style.css">
   <script src="https://browser.sentry-cdn.com/7.119.0/bundle.min.js" integrity="sha384-N/+t7zuoySxu9rbUlySpn5qv9w/rBT0D7HE35N2dXNy/1W68iV8i6hc13TPJnKOB" crossorigin="anonymous"></script>
@@ -12,5 +20,10 @@
 <body>
   <div id="app"></div>
   <script type="module" src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(function() {});
+    }
+  </script>
 </body>
 </html>
