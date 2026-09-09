@@ -1,7 +1,7 @@
 const ROUTES = [
   { pattern: /^#\/city$/, screen: 'city', params: () => ({}) },
   {
-    pattern: /^#\/district\/([^/]+)(?:\?(.*))?$/,
+    pattern: /^#\/district\/([^/?]+)(?:\?(.*))?$/,
     screen: 'district',
     params: (m) => ({
       id: m[1],

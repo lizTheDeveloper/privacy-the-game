@@ -105,7 +105,8 @@ function submitDebrief(missionId) {
     if (typeof umami !== 'undefined' && umami.track) umami.track('district-completed', { district: districtId });
     navigate(`#/milestone/${districtId}`);
   } else {
-    navigate(`#/district/${districtId}`);
+    const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
+    navigate(`#/district/${districtId}${targetTab}`);
   }
 }
 

@@ -84,11 +84,12 @@ export function renderDebrief(state, missionId) {
     ? `<div class="completed-marker">${mission.debriefQs.map((q) => completedGroup(q, stored)).join('')}</div>`
     : mission.debriefQs.map((q) => questionGroup(q)).join('');
 
+  const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const footer = completed
     ? `
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <span class="badge badge--safe">SECURED</span>
-      <a href="#/district/${districtId}" class="btn-primary" style="text-decoration: none;">BACK TO DISTRICT</a>
+      <a href="#/district/${districtId}${targetTab}" class="btn-primary" style="text-decoration: none;">BACK TO DISTRICT</a>
     </div>`
     : `<button class="btn-primary" data-action="submit-debrief" data-mission="${mission.id}">SUBMIT REPORT</button>`;
 
