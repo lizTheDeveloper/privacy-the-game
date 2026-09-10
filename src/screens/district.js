@@ -169,9 +169,121 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   </div>`;
 }
 
+function renderFacilitySection(state, facilityId, district) {
+  const account = ACCOUNTS[facilityId];
+  if (!account) return '';
+  const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId);
+  const completed = missions.filter((m) => state.missions[m.id]?.status === 'completed').length;
+  const total = missions.length;
+  const allDone = total > 0 && completed === total;
+  const buildingState = getBuildingState(state, facilityId);
+  const connection = district.facilityConnections?.[facilityId];
+
+  const pctWidth = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const statusColor = allDone ? 'var(--lime)' : completed > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
+  const statusText = allDone ? 'SECURED' : completed > 0 ? `${completed}/${total}` : 'LOCKED';
+
+  const missionRows = missions.map((m) => {
+    const record = state.missions[m.id];
+    const done = record?.status === 'completed';
+    const skipped = record?.status === 'skipped';
+    const summary = done ? missionSummary(m, record) : '';
+
+    let action;
+    if (done) {
+      action = `<div class="badge" style="letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);">DONE</div>`;
+    } else if (skipped) {
+      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">RETRY</a>`;
+    } else {
+      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">START</a>`;
+    }
+
+    return `
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(0,229,255,0.04); ${done ? 'opacity: 0.5;' : ''}">
+      <div style="font-family: var(--font-mono); font-size: 10px; color: ${done ? 'var(--lime)' : skipped ? 'rgba(237,239,243,0.3)' : 'var(--cyan)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="font-size: 13px; font-weight: ${done ? 400 : 500}; color: ${done ? 'rgba(237,239,243,0.5)' : 'var(--offwhite)'};">${esc(m.title)}</div>
+        ${summary ? `<div style="font-size: 10px; color: rgba(237,239,243,0.3); margin-top: 2px;">${esc(summary)}</div>` : ''}
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.25);">~${m.estimatedMinutes}m</div>
+      ${action}
+    </div>`;
+  }).join('');
+
+  return `
+  <div style="margin-bottom: 16px;">
+    ${connection ? `<div style="padding: 0 24px 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">↳ ${esc(connection)}</div>` : ''}
+    <div class="panel" style="margin: 0 16px; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
+        ${renderBuilding(facilityId, buildingState, 40)}
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}</div>
+          <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
+            <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
+          </div>
+        </div>
+        <div class="badge" style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${statusText}</div>
+      </div>
+      <div>
+        ${missionRows}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFacilityDistrict(state, district) {
+  const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
+  const progress = calcDistrictProgress(state, district.id);
+
+  const buildings = districtAccounts
+    .map(([id]) => renderBuilding(id, getBuildingState(state, id)))
+    .join('');
+
+  const facilityOrder = district.facilityOrder || districtAccounts.map(([id]) => id);
+  const facilities = facilityOrder
+    .map((id) => renderFacilitySection(state, id, district))
+    .join('');
+
+  return `
+  <div class="scanlines">
+    ${renderHud(state)}
+    <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
+      <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">${esc(district.name)}</div>
+          <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
+        </div>
+        <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+      </div>
+      <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
+        <span class="stat-value" style="color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.3);">${progress.percent}%</span>
+        <span class="stat-label" style="color: rgba(0,229,255,0.5);">SECURED</span>
+      </div>
+    </div>
+    <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
+      <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT FACILITIES</div>
+      <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap; padding-bottom: 4px;">
+        ${buildings}
+      </div>
+    </div>
+    ${district.facilityIntro ? `
+    <div style="padding: 16px 24px 8px;">
+      <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; max-width: 640px;">${esc(district.facilityIntro)}</div>
+    </div>` : ''}
+    <div style="padding: 8px 0 24px;">
+      ${facilities}
+    </div>
+  </div>`;
+}
+
 export function renderDistrict(state, districtId, activeTab) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
+
+  if (district.type === 'facility') {
+    return renderFacilityDistrict(state, district);
+  }
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
   const knownAccounts = districtAccounts.filter(([id]) => state.accounts[id]);

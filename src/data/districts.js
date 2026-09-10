@@ -47,6 +47,9 @@ export const DISTRICTS = [
     chapter: 7,
     description: 'Borders & scam defense',
     flavor: 'Cross-cutting defenses that protect the whole city.',
+    type: 'facility',
+    facilityOrder: ['sim_protection', 'device_security', 'scam_defense', 'border_prep'],
+    facilityIntro: 'These are the outer walls. Every district you secured made the buildings inside safer. The Perimeter makes the city itself harder to breach.',
   },
   {
     id: 'reclamation',
@@ -54,5 +57,14 @@ export const DISTRICTS = [
     chapter: 8,
     description: 'Data broker opt-outs',
     flavor: 'The endgame: getting your data back from the brokers who sell it.',
+    type: 'facility',
+    facilityOrder: ['credit_freeze', 'people_search', 'enterprise_data', 'ad_trackers', 'location_brokers', 'govt_id_defense'],
+    facilityIntro: 'Your accounts are locked. Now take your data back from the brokers who sell it. This is the supply chain of the surveillance economy — retail, wholesale, and the raw data underneath.',
+    facilityConnections: {
+      people_search: 'retail layer — what anyone can search',
+      enterprise_data: 'wholesale layer — what corporations buy',
+      ad_trackers: 'behavioral layer — what you do online',
+      location_brokers: 'movement layer — where you physically go',
+    },
   },
 ];

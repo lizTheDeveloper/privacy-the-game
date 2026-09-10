@@ -1,19 +1,12 @@
 import { captureError } from './utils/errors.js';
+import { ACCOUNTS } from './data/accounts.js';
 
 export const STATE_VERSION = 1;
 const STORAGE_KEY = 'reclaim-city-state';
 
-const DEFAULT_ACCOUNTS = {
-  gmail: { enabled: true, name: 'Gmail', district: 'master-keys' },
-  outlook: { enabled: true, name: 'Outlook', district: 'master-keys' },
-  icloud: { enabled: true, name: 'iCloud Mail', district: 'master-keys' },
-  yahoo: { enabled: true, name: 'Yahoo Mail', district: 'master-keys' },
-  protonmail: { enabled: true, name: 'ProtonMail', district: 'master-keys' },
-  apple_id: { enabled: true, name: 'Apple ID', district: 'master-keys' },
-  google: { enabled: true, name: 'Google Account', district: 'master-keys' },
-  microsoft: { enabled: true, name: 'Microsoft', district: 'master-keys' },
-  facebook: { enabled: true, name: 'Facebook Login', district: 'master-keys' },
-};
+const DEFAULT_ACCOUNTS = Object.fromEntries(
+  Object.entries(ACCOUNTS).map(([id, a]) => [id, { enabled: true, name: a.name, district: a.district }]),
+);
 
 export function createInitialState() {
   return {
@@ -31,6 +24,11 @@ export function loadState(storage = localStorage) {
     if (!raw) return createInitialState();
     const parsed = JSON.parse(raw);
     if (parsed.version !== STATE_VERSION) return createInitialState();
+    for (const [id, a] of Object.entries(DEFAULT_ACCOUNTS)) {
+      if (!parsed.accounts[id]) {
+        parsed.accounts[id] = { enabled: true, name: a.name, district: a.district };
+      }
+    }
     return parsed;
   } catch (error) {
     captureError(error, { operation: 'loadState' });
