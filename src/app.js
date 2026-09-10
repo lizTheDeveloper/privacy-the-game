@@ -12,6 +12,7 @@ import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
+import { renderPhishingQuiz } from './screens/phishing-quiz.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
 import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
 
@@ -30,6 +31,7 @@ const screens = {
   debrief: ({ id }) => renderDebrief(state, id),
   milestone: ({ districtId }) => renderMilestone(state, districtId),
   quickquest: () => renderQuickQuest(state),
+  phishing: () => renderPhishingQuiz(state),
   stats: () => renderStats(state),
 };
 
@@ -150,7 +152,7 @@ async function handleShareCard(districtId) {
   await shareMilestoneCard(district.name, cardStats);
 }
 
-app.addEventListener('click', (e) => {
+app.addEventListener('click', async (e) => {
   const el = e.target.closest('[data-action]');
   if (!el || !app.contains(el)) return;
   const action = el.dataset.action;
@@ -172,6 +174,46 @@ app.addEventListener('click', (e) => {
     }
   } else if (action === 'share-card') {
     handleShareCard(el.dataset.district);
+  } else if (action === 'quiz-verdict') {
+    const msgId = Number(el.dataset.msgId);
+    const verdict = el.dataset.verdict;
+    const tell = app.querySelector(`[data-quiz-tell="${msgId}"]`)?.value || '';
+    if (!state.phishingQuiz) state.phishingQuiz = { curated: {}, streak: 0, bestStreak: 0, quizRound: 0, quizAnswers: {} };
+    const { CURATED_MESSAGES } = await import('./data/phishing.js');
+    const msg = CURATED_MESSAGES.find(m => m.id === msgId);
+    if (!msg) return;
+    const correct = verdict === msg.answer;
+    state.phishingQuiz.curated[msgId] = { verdict, tell, correct };
+    if (correct) {
+      state.phishingQuiz.streak = (state.phishingQuiz.streak || 0) + 1;
+      state.phishingQuiz.bestStreak = Math.max(state.phishingQuiz.bestStreak || 0, state.phishingQuiz.streak);
+    } else {
+      state.phishingQuiz.streak = 0;
+    }
+    setState(state);
+    renderCurrentRoute();
+  } else if (action === 'quiz-next') {
+    renderCurrentRoute();
+  } else if (action === 'quiz-bank-verdict') {
+    const msgId = Number(el.dataset.msgId);
+    const verdict = el.dataset.verdict;
+    const tell = app.querySelector(`[data-quiz-bank-tell="${msgId}"]`)?.value || '';
+    if (!state.phishingQuiz) state.phishingQuiz = { curated: {}, streak: 0, bestStreak: 0, quizRound: 0, quizAnswers: {} };
+    const { MESSAGE_BANK } = await import('./data/phishing.js');
+    const msg = MESSAGE_BANK.find(m => m.id === msgId);
+    if (!msg) return;
+    const correct = verdict === msg.answer;
+    state.phishingQuiz.quizAnswers[msgId] = { verdict, tell, correct };
+    if (correct) {
+      state.phishingQuiz.streak = (state.phishingQuiz.streak || 0) + 1;
+      state.phishingQuiz.bestStreak = Math.max(state.phishingQuiz.bestStreak || 0, state.phishingQuiz.streak);
+    } else {
+      state.phishingQuiz.streak = 0;
+    }
+    setState(state);
+    renderCurrentRoute();
+  } else if (action === 'quiz-bank-next') {
+    renderCurrentRoute();
   } else if (action === 'begin-game') {
     started = true;
     try {

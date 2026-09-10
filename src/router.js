@@ -11,6 +11,7 @@ const ROUTES = [
   { pattern: /^#\/mission\/([^/]+)\/briefing$/, screen: 'briefing', params: (m) => ({ id: m[1] }) },
   { pattern: /^#\/mission\/([^/]+)\/debrief$/, screen: 'debrief', params: (m) => ({ id: m[1] }) },
   { pattern: /^#\/milestone\/([^/]+)$/, screen: 'milestone', params: (m) => ({ districtId: m[1] }) },
+  { pattern: /^#\/quiz\/phishing$/, screen: 'phishing', params: () => ({}) },
   { pattern: /^#\/quickquest$/, screen: 'quickquest', params: () => ({}) },
   { pattern: /^#\/stats$/, screen: 'stats', params: () => ({}) },
 ];

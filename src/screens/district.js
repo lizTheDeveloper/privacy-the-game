@@ -169,7 +169,49 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   </div>`;
 }
 
+function renderQuizFacility(state, facilityId, district) {
+  const account = ACCOUNTS[facilityId];
+  if (!account) return '';
+  const buildingState = getBuildingState(state, facilityId);
+  const connection = district.facilityConnections?.[facilityId];
+  const quiz = state.phishingQuiz || { curated: {} };
+  const answered = Object.keys(quiz.curated).length;
+  const correct = Object.values(quiz.curated).filter(a => a.correct).length;
+  const total = 12;
+  const allDone = answered >= total;
+  const pctWidth = Math.round((answered / total) * 100);
+  const statusColor = allDone ? 'var(--lime)' : answered > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
+  const statusText = allDone ? 'SECURED' : answered > 0 ? `${answered}/${total}` : 'READY';
+  const btnLabel = allDone ? 'QUIZ MODE — KEEP PRACTICING' : answered > 0 ? 'CONTINUE TRAINING' : 'START TRAINING';
+
+  return `
+  <div style="margin-bottom: 16px;">
+    ${connection ? `<div style="padding: 0 24px 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">↳ ${esc(connection)}</div>` : ''}
+    <div class="panel" style="margin: 0 16px; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
+        ${renderBuilding(facilityId, buildingState, 40)}
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}</div>
+          <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
+            <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
+          </div>
+        </div>
+        <div class="badge" style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${statusText}</div>
+      </div>
+      <div style="padding: 16px; text-align: center;">
+        <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
+          Real or fake? Identify phishing emails, texts, calls, and push notifications.
+          ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--cyan);">${correct}/${answered} correct so far.</span>` : ''}
+        </div>
+        <a class="btn-primary" style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderFacilitySection(state, facilityId, district) {
+  if (facilityId === 'scam_defense') return renderQuizFacility(state, facilityId, district);
+
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId);
