@@ -140,6 +140,9 @@ function renderMissionList(state, districtId, activeTab) {
 }
 
 function renderSurvey(state, districtId, districtAccounts, allDisabled) {
+  const district = DISTRICTS.find((d) => d.id === districtId);
+  const questionFn = district?.surveyQuestion || ((name) => `Do you have a ${name} account?`);
+
   const rows = districtAccounts
     .map(([id, account]) => {
       if (!state.accounts[id]) {
@@ -152,17 +155,29 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       const enabled = state.accounts[id].enabled;
       return `
       <div class="panel" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
-        <div style="flex: 1; font-size: 14px; color: ${enabled ? 'var(--offwhite)' : 'rgba(237,239,243,0.45)'};">Do you use ${esc(account.name)}?</div>
+        <div style="flex: 1; font-size: 14px; color: ${enabled ? 'var(--offwhite)' : 'rgba(237,239,243,0.45)'};">${esc(questionFn(account.name))}</div>
         <span data-action="toggle-account" data-account="${id}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid ${enabled ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${enabled ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${enabled ? 'var(--lime)' : 'rgba(237,239,243,0.35)'};">${enabled ? 'ON' : 'OFF'}</span>
       </div>`;
     })
     .join('');
+
+  const customAccounts = (state.customAccounts?.[districtId] || []);
+  const customRows = customAccounts.map((name, i) => `
+    <div class="panel" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
+      <div style="flex: 1; font-size: 14px; color: var(--offwhite);">${esc(name)}</div>
+      <span data-action="remove-custom-account" data-district="${districtId}" data-index="${i}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid rgba(255,45,155,0.3); background: rgba(255,45,155,0.05); color: var(--magenta);">REMOVE</span>
+    </div>`).join('');
 
   return `
   <div style="padding: 12px 24px 24px;">
     <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">INVENTORY SURVEY</div>
     ${allDisabled ? `<div class="panel" style="padding: 14px 16px; margin-bottom: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: rgba(237,239,243,0.5);">All accounts for this district are disabled. Turn any of them back on to start recon.</div>` : ''}
     ${rows}
+    ${customRows}
+    <div class="panel" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; margin-top: 16px;">
+      <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
+      <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
+    </div>
     <div style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
     </div>

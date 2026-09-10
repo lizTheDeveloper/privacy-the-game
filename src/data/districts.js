@@ -5,6 +5,7 @@ export const DISTRICTS = [
     chapter: 1,
     description: 'Email & Identity Providers — the foundation everything else sits on',
     flavor: 'Secure this first or nothing else matters.',
+    surveyQuestion: (name) => `Do you have a ${name} account?`,
   },
   {
     id: 'vault',
@@ -12,6 +13,7 @@ export const DISTRICTS = [
     chapter: 2,
     description: 'Financial — banks, payment apps, investments',
     flavor: 'Your money lives here.',
+    surveyQuestion: (name) => `Do you have a ${name} account?`,
   },
   {
     id: 'square',
@@ -19,6 +21,7 @@ export const DISTRICTS = [
     chapter: 3,
     description: 'Social media & messaging',
     flavor: 'A hijacked social account impersonates you to people who trust you.',
+    surveyQuestion: (name) => `Do you use ${name}?`,
   },
   {
     id: 'archives',
@@ -26,6 +29,7 @@ export const DISTRICTS = [
     chapter: 4,
     description: 'Cloud storage & work accounts',
     flavor: 'Your files, tax returns, ID scans, professional reputation.',
+    surveyQuestion: (name) => `Do you use ${name}?`,
   },
   {
     id: 'marketplace',
@@ -33,6 +37,7 @@ export const DISTRICTS = [
     chapter: 5,
     description: 'Shopping & streaming',
     flavor: 'Lower stakes but real attack surface — stored payment methods, your address.',
+    surveyQuestion: (name) => `Do you have a ${name} account?`,
   },
   {
     id: 'capitol',
@@ -40,6 +45,7 @@ export const DISTRICTS = [
     chapter: 6,
     description: 'Government accounts',
     flavor: 'Legal identity. Compromise here is identity theft in the fullest sense.',
+    surveyQuestion: (name) => `Have you registered for ${name}?`,
   },
   {
     id: 'perimeter',

@@ -214,6 +214,24 @@ app.addEventListener('click', async (e) => {
     renderCurrentRoute();
   } else if (action === 'quiz-bank-next') {
     renderCurrentRoute();
+  } else if (action === 'add-custom-account') {
+    const districtId = el.dataset.district;
+    const input = app.querySelector('#custom-account-input');
+    const name = input?.value?.trim();
+    if (!name) return;
+    if (!state.customAccounts) state.customAccounts = {};
+    if (!state.customAccounts[districtId]) state.customAccounts[districtId] = [];
+    state.customAccounts[districtId].push(name);
+    setState(state);
+    renderCurrentRoute();
+  } else if (action === 'remove-custom-account') {
+    const districtId = el.dataset.district;
+    const index = Number(el.dataset.index);
+    if (state.customAccounts?.[districtId]) {
+      state.customAccounts[districtId].splice(index, 1);
+      setState(state);
+      renderCurrentRoute();
+    }
   } else if (action === 'begin-game') {
     started = true;
     try {
