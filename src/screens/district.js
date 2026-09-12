@@ -4,6 +4,47 @@ import { getMissionsForDistrict } from '../data/missions.js';
 import { calcDistrictProgress, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
+import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+
+function renderDistrictIntro(state, districtId) {
+  const dialogue = DISTRICT_DIALOGUE[districtId];
+  if (!dialogue?.intro) return '';
+  const seen = state.seenIntros?.[districtId];
+  if (seen) return '';
+  return `
+  <div style="padding: 12px 24px 4px;">
+    <div style="display: flex; gap: 14px; align-items: flex-start;">
+      <div style="flex-shrink: 0; text-align: center;">
+        <img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+        <div style="font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--cyan); margin-top: 3px; letter-spacing: 2px;">SCOUT</div>
+      </div>
+      <div style="flex: 1; background: rgba(26,31,43,0.8); border: 1px solid rgba(0,229,255,0.2); padding: 14px 16px;">
+        <div style="font-size: 13px; color: rgba(237,239,243,0.7); line-height: 1.7; font-style: italic;">${dialogue.intro}</div>
+        ${dialogue.introLore ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,229,255,0.1);">${dialogue.introLore}</div>` : ''}
+      </div>
+    </div>
+    <div style="text-align: right; margin-top: 8px;">
+      <span data-action="dismiss-intro" data-district="${districtId}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); letter-spacing: 1px;">DISMISS</span>
+    </div>
+  </div>`;
+}
+
+function renderAlliesSection(districtId) {
+  const dialogue = DISTRICT_DIALOGUE[districtId];
+  if (!dialogue?.allies?.length) return '';
+  const links = dialogue.allies.map(a =>
+    `<a href="${a.url}" target="_blank" rel="noopener" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(0,229,255,0.1); text-decoration: none; margin-bottom: 4px;">
+      <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; white-space: nowrap;">${a.name}</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.4;">${a.description}</div>
+    </a>`
+  ).join('');
+  return `
+  <div style="padding: 12px 24px;">
+    <div class="section-label" style="color: rgba(198,255,0,0.5); margin-bottom: 10px;">ALLIED ORGANIZATIONS</div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.45); margin-bottom: 10px; line-height: 1.5;">These organizations fight for your digital rights. Your opt-outs create the paper trail. Their lawsuits turn it into enforcement.</div>
+    ${links}
+  </div>`;
+}
 
 const PHASES = [
   { id: 'survey', label: 'SURVEY' },
@@ -324,13 +365,15 @@ function renderFacilityDistrict(state, district) {
         ${buildings}
       </div>
     </div>
-    ${district.facilityIntro ? `
+    ${renderDistrictIntro(state, district.id)}
+    ${district.facilityIntro && (state.seenIntros?.[district.id]) ? `
     <div style="padding: 16px 24px 8px;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; max-width: 640px;">${esc(district.facilityIntro)}</div>
     </div>` : ''}
     <div style="padding: 8px 0 24px;">
       ${facilities}
     </div>
+    ${progress.percent >= 100 ? renderAlliesSection(district.id) : ''}
   </div>`;
 }
 
@@ -357,7 +400,20 @@ export function renderDistrict(state, districtId, activeTab) {
     .join('');
 
   let content;
-  if (allDisabled && activeTab !== 'survey') {
+  if (district.hasGarage && activeTab === 'survey') {
+    const vehicleCount = (state.vehicles || []).length;
+    content = `
+    <div style="padding: 12px 24px 24px;">
+      <div class="panel" style="padding: 32px; text-align: center;">
+        <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 12px;">VEHICLE GARAGE</div>
+        <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 20px;">${vehicleCount > 0 ? `You have ${vehicleCount} vehicle${vehicleCount === 1 ? '' : 's'} in your garage. Add more or start missions.` : 'Add your vehicles to see what data they collect and how to opt out.'}</div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a class="btn-primary" style="text-decoration: none;" href="#/garage">OPEN GARAGE</a>
+          ${vehicleCount > 0 ? `<a class="btn-secondary" style="text-decoration: none;" href="#/district/freeway?tab=recon">START RECON</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  } else if (allDisabled && activeTab !== 'survey') {
     content = renderDisabledPanel(districtId);
   } else if (activeTab === 'survey') {
     content = renderSurvey(state, districtId, districtAccounts, allDisabled);
@@ -388,7 +444,9 @@ export function renderDistrict(state, districtId, activeTab) {
         ${buildings}
       </div>
     </div>
+    ${renderDistrictIntro(state, districtId)}
     ${renderTabs(districtId, activeTab)}
     ${content}
+    ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}
   </div>`;
 }

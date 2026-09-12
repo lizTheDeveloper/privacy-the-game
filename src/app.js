@@ -13,6 +13,8 @@ import { renderStats } from './screens/stats.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz } from './screens/phishing-quiz.js';
+import { renderGarage, renderAddForm } from './screens/garage.js';
+import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
 import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
 
@@ -32,6 +34,7 @@ const screens = {
   milestone: ({ districtId }) => renderMilestone(state, districtId),
   quickquest: () => renderQuickQuest(state),
   phishing: () => renderPhishingQuiz(state),
+  garage: () => renderGarage(state),
   stats: () => renderStats(state),
 };
 
@@ -53,6 +56,10 @@ function render(route) {
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
+    if (route.screen === 'city') {
+      state.lastCityVisit = new Date().toISOString();
+      setState(state);
+    }
     if (typeof umami !== 'undefined' && umami.track) umami.track(() => ({ url: location.hash, title: route.screen }));
   } catch (error) {
     captureError(error, { screen: route.screen, params: route.params });
@@ -97,6 +104,26 @@ function submitDebrief(missionId) {
   setState(updateStreak(updated));
 
   const districtId = ACCOUNTS[mission.accountId]?.district;
+
+  // Track progress milestones for Scout check-ins
+  if (districtId && status === 'completed') {
+    const progress = calcDistrictProgress(state, districtId);
+    if (!state.seenProgress) state.seenProgress = {};
+    if (!state.seenProgress[districtId]) state.seenProgress[districtId] = [];
+    for (const m of [25, 50, 75, 100]) {
+      if (progress.percent >= m && !state.seenProgress[districtId].includes(m)) {
+        state.seenProgress[districtId].push(m);
+      }
+    }
+    setState(state);
+  }
+
+  // Track which lore entries have been seen
+  if (districtId) {
+    if (!state.seenLore) state.seenLore = {};
+    if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
+  }
+
   if (typeof umami !== 'undefined' && umami.track) {
     umami.track('mission-completed', {
       mission: missionId,
@@ -224,11 +251,50 @@ app.addEventListener('click', async (e) => {
     state.customAccounts[districtId].push(name);
     setState(state);
     renderCurrentRoute();
+  } else if (action === 'dismiss-intro') {
+    const districtId = el.dataset.district;
+    if (!state.seenIntros) state.seenIntros = {};
+    state.seenIntros[districtId] = true;
+    setState(state);
+    renderCurrentRoute();
   } else if (action === 'remove-custom-account') {
     const districtId = el.dataset.district;
     const index = Number(el.dataset.index);
     if (state.customAccounts?.[districtId]) {
       state.customAccounts[districtId].splice(index, 1);
+      setState(state);
+      renderCurrentRoute();
+    }
+  } else if (action === 'show-add-vehicle') {
+    const container = app.querySelector('#add-form-container');
+    if (container) {
+      container.innerHTML = renderAddForm();
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  } else if (action === 'cancel-add-vehicle') {
+    const container = app.querySelector('#add-form-container');
+    if (container) container.innerHTML = '';
+  } else if (action === 'add-vehicle') {
+    const make = app.querySelector('#vehicle-make')?.value;
+    const model = app.querySelector('#vehicle-model')?.value?.trim();
+    const year = app.querySelector('#vehicle-year')?.value?.trim();
+    const nickname = app.querySelector('#vehicle-nickname')?.value?.trim();
+    if (!make || !model || !year) return;
+    if (!state.vehicles) state.vehicles = [];
+    state.vehicles.push({ make, model, year, nickname: nickname || '', addedAt: new Date().toISOString() });
+    const mfr = CAR_MANUFACTURERS.find((m) => m.makes.some((n) => n.toLowerCase() === make.toLowerCase()));
+    if (mfr && state.accounts[mfr.id]) {
+      state.accounts[mfr.id].enabled = true;
+    }
+    state.accounts.car_broker_lexisnexis = { ...state.accounts.car_broker_lexisnexis, enabled: true };
+    state.accounts.car_broker_verisk = { ...state.accounts.car_broker_verisk, enabled: true };
+    setState(state);
+    if (typeof umami !== 'undefined' && umami.track) umami.track('vehicle-added', { make, year });
+    renderCurrentRoute();
+  } else if (action === 'remove-vehicle') {
+    const index = Number(el.dataset.index);
+    if (state.vehicles && state.vehicles[index]) {
+      state.vehicles.splice(index, 1);
       setState(state);
       renderCurrentRoute();
     }

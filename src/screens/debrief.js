@@ -1,6 +1,8 @@
 import { MISSIONS } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
+import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+import { calcDistrictProgress } from '../utils/calc.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -66,6 +68,41 @@ function completedGroup(q, stored) {
   </div>`;
 }
 
+function mapDebriefCategory(stored) {
+  const finding = stored.finding;
+  const action = stored.action;
+  if (finding === 'no-breaches') return 'clean';
+  if (finding === '1-2-breaches') return 'minor';
+  if (finding === '3plus-breaches') return 'major';
+  if (action === 'reset-password') return 'passwordReset';
+  if (action === 'already-strong') return 'passwordStrong';
+  if (action === 'enabled-2fa') return 'tfaEnabled';
+  if (action === 'already-enabled') return 'tfaAlready';
+  if (action === 'tightened' || action === 'already-tight') return 'clean';
+  if (finding === 'skip' || action === 'later') return 'skip';
+  if (action === 'claimed' || action === 'already-claimed') return 'claimed';
+  if (action === 'alerts-enabled') return 'alertsEnabled';
+  if (action === 'freeze-done') return 'freezeDone';
+  if (action === 'optout-done') return 'optoutDone';
+  if (action === 'action-done') return 'actionDone';
+  return null;
+}
+
+function getProgressCheckIn(state, districtId, percent, dialogue) {
+  if (!dialogue?.progress) return '';
+  const milestones = [25, 50, 75, 100];
+  const seen = state.seenProgress?.[districtId] || [];
+  for (const m of milestones) {
+    if (percent >= m && !seen.includes(m) && dialogue.progress[m]) {
+      return `<div style="margin-top: 16px; padding: 14px 16px; background: rgba(198,255,0,0.04); border: 1px solid rgba(198,255,0,0.15);">
+        <div class="section-label" style="color: rgba(198,255,0,0.6); margin-bottom: 6px;">PROGRESS: ${m}%</div>
+        <div style="font-size: 13px; color: rgba(237,239,243,0.7); line-height: 1.6; font-style: italic;">${pick(dialogue.progress[m])}</div>
+      </div>`;
+    }
+  }
+  return '';
+}
+
 export function renderDebrief(state, missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return notFound(state);
@@ -75,9 +112,19 @@ export function renderDebrief(state, missionId) {
   const stored = state.missions[missionId] || {};
   const completed = stored.status === 'completed';
 
-  const scoutLine = completed
-    ? mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action] || 'Report received. Good work, agent.'
-    : mission.scoutDialog?.briefing || 'Report back — what did you find?';
+  const dialogue = DISTRICT_DIALOGUE[districtId];
+  let scoutLine;
+  let progressLine = '';
+  if (completed) {
+    const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action];
+    const debriefCategory = mapDebriefCategory(stored);
+    const variants = dialogue?.debrief?.[debriefCategory];
+    scoutLine = (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
+    const progress = calcDistrictProgress(state, districtId);
+    progressLine = getProgressCheckIn(state, districtId, progress.percent, dialogue);
+  } else {
+    scoutLine = mission.scoutDialog?.briefing || 'Report back — what did you find?';
+  }
 
   const questions = completed
     ? `<div class="completed-marker">${mission.debriefQs.map((q) => completedGroup(q, stored)).join('')}</div>`
@@ -115,6 +162,7 @@ export function renderDebrief(state, missionId) {
         </div>
       </div>
       ${questions}
+      ${progressLine}
       ${footer}
     </div>
   </div>`;

@@ -3,6 +3,7 @@ import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
+import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
 
 // ---------------------------------------------------------------------------
 // Isometric grid. Classic 2:1 diamond tiles: a tile at (col, row) sits at
@@ -239,9 +240,34 @@ function renderDistrictLabels(state, startHere) {
   }).join('');
 }
 
+function getReturnLine(state) {
+  const lastVisit = state.lastCityVisit;
+  if (!lastVisit) return null;
+  const elapsed = Date.now() - new Date(lastVisit).getTime();
+  const hours = elapsed / (1000 * 60 * 60);
+  if (hours < 24) return null;
+
+  const dialogue = DISTRICT_DIALOGUE['master-keys'];
+  if (!dialogue?.return) return null;
+
+  if (hours >= 168) return dialogue.return.veryLong;
+  if (hours >= 96) return dialogue.return.long;
+  if (hours >= 24) return dialogue.return.medium;
+  return null;
+}
+
 function renderCityScout(state) {
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
   const next = nextAvailableMission(state);
+
+  const returnLine = getReturnLine(state);
+  if (returnLine && anyComplete) {
+    return renderScout(
+      returnLine,
+      next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : { actionText: 'VIEW STATS', actionHref: '#/stats' },
+    );
+  }
+
   if (!anyComplete) {
     return renderScout(
       'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a href="#/district/master-keys" style="color: var(--cyan); font-weight: 600;">Master Keys</a> district first — everything else in the city builds on it.',

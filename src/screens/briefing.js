@@ -2,6 +2,7 @@ import { MISSIONS } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { renderHud } from '../components/hud.js';
+import { DISTRICT_DIALOGUE } from '../data/dialogue.js';
 
 function notFound(state) {
   return `
@@ -101,7 +102,24 @@ export function renderBriefing(state, missionId) {
           <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.'}</div>
         </div>
         ${preview}
+        ${renderLoreSection(districtId, state)}
       </div>
     </div>
   </div>`;
+}
+
+function renderLoreSection(districtId, state) {
+  const dialogue = DISTRICT_DIALOGUE[districtId];
+  if (!dialogue?.lore || Object.keys(dialogue.lore).length === 0) return '';
+  const seenLore = state.seenLore?.[districtId] || [];
+  const unseenKeys = Object.keys(dialogue.lore).filter(k => !seenLore.includes(k));
+  const key = unseenKeys.length > 0 ? unseenKeys[0] : Object.keys(dialogue.lore)[0];
+  const lore = dialogue.lore[key];
+  if (!lore) return '';
+  return `
+    <div style="width: 100%; margin-top: 16px; border-top: 1px solid rgba(0,229,255,0.1); padding-top: 14px;">
+      <div class="section-label" style="color: rgba(255,159,0,0.5); margin-bottom: 8px;">INTEL</div>
+      <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: rgba(255,159,0,0.7); letter-spacing: 1px; margin-bottom: 6px;">${lore.title}</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6;">${lore.text}</div>
+    </div>`;
 }
