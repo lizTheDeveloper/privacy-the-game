@@ -13,6 +13,21 @@ describe('parseRoute', () => {
     });
   });
 
+  it('parses district route with tab query parameter', () => {
+    expect(parseRoute('#/district/master-keys?tab=fortify')).toEqual({
+      screen: 'district',
+      params: { id: 'master-keys', tab: 'fortify' },
+    });
+    expect(parseRoute('#/district/master-keys?tab=reclaim')).toEqual({
+      screen: 'district',
+      params: { id: 'master-keys', tab: 'reclaim' },
+    });
+    expect(parseRoute('#/district/master-keys?tab=survey')).toEqual({
+      screen: 'district',
+      params: { id: 'master-keys', tab: 'survey' },
+    });
+  });
+
   it('parses mission briefing route', () => {
     expect(parseRoute('#/mission/gmail-recon-breach/briefing')).toEqual({
       screen: 'briefing',

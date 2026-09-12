@@ -27,6 +27,7 @@ export function renderBriefing(state, missionId) {
   const district = DISTRICTS.find((d) => d.id === account?.district);
   const districtId = account?.district || '';
   const goUrl = mission.steps.find((s) => s.url)?.url || account?.securityUrl || '#';
+  const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
 
   const colon = mission.title.lastIndexOf(':');
   const titleTop = colon > -1 ? mission.title.slice(0, colon) : '';
@@ -63,7 +64,7 @@ export function renderBriefing(state, missionId) {
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; padding: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 20px;">
-          <a href="#/district/${districtId}" style="color: rgba(237,239,243,0.4); text-decoration: none;">${district?.name || districtId}</a>
+          <a href="#/district/${districtId}${targetTab}" style="color: rgba(237,239,243,0.4); text-decoration: none;">${district?.name || districtId}</a>
           <span style="color: rgba(237,239,243,0.2);">/</span>
           <span style="color: rgba(237,239,243,0.6); text-transform: uppercase;">${mission.phase}</span>
         </div>
@@ -91,7 +92,7 @@ export function renderBriefing(state, missionId) {
 
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
           <button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>
-          <a href="#/district/${districtId}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>
+          <a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>
         </div>
       </div>
 
