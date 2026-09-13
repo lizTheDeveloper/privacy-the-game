@@ -121,7 +121,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Breach Recon: Primary Bank',
     briefing: 'A compromised bank login is not a nuisance -- it is a loss. Actual money, actually gone. Banks will reimburse fraud in most cases, but the process involves weeks of frozen accounts, provisional credits, and phone calls with hold music composed by someone who hates you.',
     steps: [
-      { text: `Open haveibeenpwned.com', url: 'https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email address you used to register your bank account' },
       { text: 'Note the results -- if breached, that password is already in automated attack scripts' },
     ],
@@ -215,7 +215,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: Credit Card",
     briefing: "Your credit card portal stores your card number, billing address, and transaction history. The email you registered with has probably appeared in breaches from other services -- and if you reused the password, your credit card account is one automated login attempt from compromise.",
     steps: [
-      { text: `Open haveibeenpwned.com', url: 'https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email associated with your credit card account" },
       { text: "Note any breaches -- especially from retail or financial services" },
     ],
@@ -285,7 +285,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: PayPal",
     briefing: "PayPal is the most credential-stuffed service on the internet. In 2022, attackers accessed 35,000 accounts by trying passwords leaked from other sites. If you used the same password on PayPal and on that recipe site that got breached in 2019, your PayPal password is compromised too.",
     steps: [
-      { text: `Open haveibeenpwned.com", url: "https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter your PayPal email address" },
       { text: "Note any breaches -- PayPal's own 2022 incident was credential stuffing, not a server breach" },
     ],
@@ -307,7 +307,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Secure Login: PayPal",
     briefing: "PayPal connects to your bank and your cards. A unique password here is the difference between your money staying yours and a fraud dispute. Generate one in your password manager.",
     steps: [
-      { text: `Open PayPal Security Settings", url: "https://www.paypal.com/myaccount/settings/security` },
+      { text: 'Open PayPal Security Settings', url: 'https://www.paypal.com/myaccount/settings/security' },
       { text: `Click "Update" next to Password` },
       { text: "Generate a new unique password in your password manager" },
       { text: `While you're here, enable 2FA: click "Set up" next to "2-step verification"` },
@@ -333,7 +333,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: Venmo",
     briefing: "Venmo connects directly to your bank account or debit card. It's also the app where your transaction history defaults to public -- everyone can see who you pay and what you write in the memo. A breach here hits your money and your privacy simultaneously.",
     steps: [
-      { text: `Open haveibeenpwned.com", url: "https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email or phone number tied to your Venmo" },
       { text: "Note any breaches" },
     ],
@@ -355,7 +355,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Secure Login: Venmo',
     briefing: `Venmo makes sending money frictionless -- tap, amount, send. That's great for you and catastrophic if someone else has your password. New password plus payment PIN in one visit.`,
     steps: [
-      { text: `Open Venmo Settings', url: 'https://venmo.com/account/settings/security` },
+      { text: 'Open Venmo Settings', url: 'https://account.venmo.com/settings/security' },
       { text: 'Change your password (generate in password manager)' },
       { text: 'Enable "Security Lock" -- this requires PIN or biometrics for every payment' },
       { text: 'Set a PIN that is NOT your phone unlock PIN or your bank PIN' },
@@ -378,7 +378,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Privacy Lockdown: Venmo',
     briefing: `Venmo's default transaction privacy is public. Every payment you make -- the amount, the recipient, the memo -- is visible to anyone. A BuzzFeed reporter tracked the President's Venmo transactions in 2021. Two taps fix this.`,
     steps: [
-      { text: `Open Venmo Privacy Settings', url: 'https://venmo.com/account/settings/privacy` },
+      { text: 'Open Venmo Privacy Settings', url: 'https://account.venmo.com/settings/privacy' },
       { text: 'Set "Default Privacy Setting" to Private' },
       { text: 'Set "Friends List" visibility to Private' },
       { text: 'Scroll through your past transactions -- change any public ones to private' },
@@ -403,7 +403,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Breach Recon: Cash App',
     briefing: `Cash App had a major breach in 2022 when a former employee downloaded data on 8.2 million users -- names, brokerage account numbers, portfolio values. The insider threat is the one your password can't stop, but securing the account limits what anyone can do with the stolen data.`,
     steps: [
-      { text: `Open haveibeenpwned.com', url: 'https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email or phone number tied to Cash App' },
       { text: 'Note any breaches' },
     ],
@@ -450,7 +450,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: Crypto Exchange",
     briefing: "Crypto is the one place where stolen money is gone forever. No chargebacks, no fraud department, no reversal. The blockchain does not care about your feelings. Exchanges like Coinbase, Kraken, and Gemini have all had credential-related incidents.",
     steps: [
-      { text: `Open haveibeenpwned.com", url: "https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email tied to your crypto exchange account" },
       { text: "Note any breaches -- crypto accounts are the highest-value targets in The Vault" },
     ],
@@ -498,7 +498,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: Investment Account",
     briefing: "Your brokerage or retirement account probably holds more money than your bank account -- but probably has a weaker password. Fidelity had a breach in 2024 exposing 77,000 customers' personal data. These accounts hold your retirement savings, your SSN, and your bank routing numbers.",
     steps: [
-      { text: `Open haveibeenpwned.com", url: "https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email tied to your brokerage (Fidelity, Schwab, Vanguard, Robinhood, etc.)" },
       { text: "Note any breaches" },
     ],
@@ -553,7 +553,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Claim Your SSA Account",
     briefing: "The most important thing about your my Social Security account is whether it exists. If you haven't created one, an identity thief can create one using your SSN -- and control your Social Security record. The 2017 Equifax breach put 147 million SSNs on the market. Yours is almost certainly out there. Claim it first.",
     steps: [
-      { text: `Go to my Social Security", url: "https://www.ssa.gov/myaccount/` },
+      { text: 'Go to my Social Security', url: 'https://www.ssa.gov/myaccount/' },
       { text: `If you DON'T have an account: click "Create an Account" -- this prevents someone else from claiming your SSN` },
       { text: "If you DO have an account: log in and verify your address, phone, and direct deposit are correct" },
       { text: "Check for any benefit applications or address changes you didn't make" },
@@ -576,7 +576,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Secure & Lock: SSA Account",
     briefing: "Your SSA account routes through Login.gov or ID.me. Whichever one you have, lock it down with a unique password and 2FA -- this same login protects your SSA, your IRS, your VA benefits, and any other federal service. Also consider SSA's Self Lock feature, which blocks E-Verify queries against your SSN.",
     steps: [
-      { text: `Log into my Social Security", url: "https://www.ssa.gov/myaccount/` },
+      { text: 'Log into my Social Security', url: 'https://www.ssa.gov/myaccount/' },
       { text: "Note whether your account uses Login.gov or ID.me" },
       { text: "Go to that provider's security settings and change the password (use password manager)" },
       { text: "Enable 2FA -- authenticator app on Login.gov, SMS verification on ID.me" },
@@ -602,7 +602,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Claim Your IRS Account",
     briefing: "Tax identity theft is a $5.7 billion annual industry. Someone files a return with your SSN before you do, claims a fat refund, and you spend 18 months proving you're you. Step one: claim your IRS online account before they do.",
     steps: [
-      { text: `Go to IRS Online Account", url: "https://www.irs.gov/payments/your-online-account` },
+      { text: 'Go to IRS Online Account', url: 'https://www.irs.gov/payments/your-online-account' },
       { text: "If you DON'T have an account: create one through ID.me -- this prevents someone else from claiming your tax identity" },
       { text: "If you DO have an account: log in and check your tax return history" },
       { text: `Look for any returns filed that you didn't file, or address/bank changes you didn't make` },
@@ -625,7 +625,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Get an IRS Identity Protection PIN',
     briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. Without it, the return gets rejected -- even if the thief has your SSN, your name, and your address. It's effectively 2FA for your tax identity. Free, takes five minutes.`,
     steps: [
-      { text: `Go to IRS Get an IP PIN', url: 'https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin` },
+      { text: 'Go to IRS Get an IP PIN', url: 'https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin' },
       { text: `Click "Get an IP PIN" and verify your identity through ID.me` },
       { text: "The IRS will issue you a 6-digit PIN -- write it down and store it with your tax documents" },
       { text: "You'll get a new PIN each year in January by mail or through your IRS account" },
@@ -648,7 +648,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Verify Tax Records: IRS',
     briefing: 'Log into your IRS account and verify that your filing address, direct deposit bank account, and tax transcript are correct. The classic tax fraud move is changing the refund bank account -- your return gets filed, your refund goes to their bank.',
     steps: [
-      { text: `Log into your IRS account', url: 'https://www.irs.gov/payments/your-online-account` },
+      { text: 'Log into your IRS account', url: 'https://www.irs.gov/payments/your-online-account' },
       { text: 'Check your address -- is it current?' },
       { text: 'Check your bank account for direct deposit -- is it YOUR bank?' },
       { text: `View your tax transcript -- any filings you didn't make?` },
@@ -722,7 +722,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Breach Recon: Healthcare",
     briefing: `Healthcare records are worth 10x more than credit card numbers on the dark web. They contain your SSN, your insurance info, your prescriptions, and your medical history -- all in one record. The 2015 Anthem breach exposed 78.8 million records. Medical identity theft puts someone else's blood type in your chart.`,
     steps: [
-      { text: `Open haveibeenpwned.com', url: 'https://haveibeenpwned.com` },
+      { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email you use for Healthcare.gov, your insurer, or patient portals like MyChart' },
       { text: 'Note breaches -- healthcare breaches often include SSN and insurance details' },
     ],
@@ -744,7 +744,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Secure Login: Healthcare',
     briefing: 'Healthcare IT security budgets are notoriously thin. Your password is probably the strongest security layer between your medical records and the outside world. If the portal offers 2FA, consider it a minor miracle and enable it.',
     steps: [
-      { text: `Log into your healthcare portal (Healthcare.gov, insurer, or MyChart)', url: 'https://www.healthcare.gov/login/` },
+      { text: 'Log into your healthcare portal (Healthcare.gov, insurer, or MyChart)', url: 'https://www.healthcare.gov/login/' },
       { text: 'Go to Account Settings → Security → Change Password' },
       { text: 'Generate a new unique password in your password manager' },
       { text: 'Check for 2FA options and enable if available' },
@@ -770,7 +770,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: 'Claim Your StudentAid Account',
     briefing: 'Your FSA ID can sign legal documents electronically -- including new federal loan applications. Nelnet, one of the largest servicers, had a breach in 2022 exposing 2.5 million borrowers" personal data. Claim your StudentAid.gov account and verify no one has filed for aid in your name.',
     steps: [
-      { text: `Go to StudentAid.gov', url: 'https://studentaid.gov/fsa-id/sign-in/landing` },
+      { text: 'Go to StudentAid.gov', url: 'https://studentaid.gov/fsa-id/sign-in/landing' },
       { text: "Create an account if you don't have one (it goes through Login.gov)" },
       { text: `If you have one: log in and go to "My Aid" to review your loan history` },
       { text: "Look for any loans you don't recognize -- they mean someone used your identity for federal aid" },
