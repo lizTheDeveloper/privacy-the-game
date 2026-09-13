@@ -1102,7 +1102,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open Facebook Privacy Settings', url: 'https://www.facebook.com/settings?tab=privacy' },
       { text: 'Set "Who can see your future posts" to Friends' },
       { text: 'Review "Apps and Websites" and remove apps you don’t use' },
-      { text: 'Open Off-Facebook Activity', url: 'https://www.facebook.com/off_facebook_activity/' },
+      { text: 'Open Off-Facebook Activity', url: 'https://www.facebook.com/allyourbases/allactivity/?activity_history=true&category_key=YOURAPPSPOSTS' },
       { text: 'Clear history and turn off future Off-Facebook Activity' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
