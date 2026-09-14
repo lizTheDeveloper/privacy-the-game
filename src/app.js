@@ -42,9 +42,10 @@ function renderWelcome() {
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px;">
     <div style="font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
-    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(0,229,255,0.6); letter-spacing: 5px; margin-top: 12px;">TAKE BACK YOUR DATA</div>
-    <p style="max-width: 440px; font-size: 14px; line-height: 1.7; color: rgba(237,239,243,0.65); margin-top: 32px;">Your city has been taken by data brokers. Take it back, building by building.</p>
-    <div data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">BEGIN</div>
+    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(0,229,255,0.6); letter-spacing: 5px; margin-top: 12px;">A DATA PRIVACY GAME</div>
+    <p style="max-width: 440px; font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.65); margin-top: 32px;">Secure your accounts, opt out of data brokers, and learn to spot scams &mdash; one mission at a time. Every action you take is real.</p>
+    <div data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</div>
+    <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 16px; letter-spacing: 1px;">NO ACCOUNT NEEDED &middot; YOUR DATA STAYS IN YOUR BROWSER</div>
   </div>`;
 }
 
