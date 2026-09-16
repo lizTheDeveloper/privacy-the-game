@@ -503,7 +503,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Bulk Opt-Out: 100+ Ad Networks",
     briefing: "The NAI Consumer Opt-Out and DAA WebChoices tools let you opt out of targeted advertising from over a hundred ad networks in one session. Also: disable your phone's advertising ID (the unique identifier that ties your app usage to your real identity) and install Global Privacy Control (built into Firefox, Brave, and DuckDuckGo), which California law requires businesses to honor as an opt-out.",
     steps: [
-      { text: "Run the NAI Consumer Opt-Out -- covers 100+ ad networks", url: "https://optout.networkadvertising.org/" },
+      { text: "Visit the NAI opt-out page -- select and opt out of member ad networks", url: "https://thenai.org/how-to-opt-out/" },
       { text: "Run the DAA WebChoices opt-out", url: "https://optout.aboutads.info/" },
       { text: "Disable your advertising ID -- iOS: Settings → Privacy → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID" },
       { text: "Install or switch to a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)" },
@@ -549,7 +549,7 @@ export const RECLAMATION_MISSIONS = [
     briefing: "These are the behind-the-scenes ad data brokers most people never hear of. LiveRamp ties your offline identity to your online activity. Acxiom has been building consumer profiles since the 1960s. Oracle Data Cloud tracks browsing across millions of sites. These companies are invisible by design -- nobody opts out of a company they've never heard of. That's the business model.",
     steps: [
       { text: "Opt out of LiveRamp -- they match your real name to your browser cookies", url: "https://liveramp.com/opt_out/" },
-      { text: "Opt out of Acxiom -- one of the oldest and largest consumer data brokers", url: "https://isapps.acxiom.com/optout/optout.aspx" },
+      { text: "Opt out of Acxiom -- one of the oldest and largest consumer data brokers", url: "https://www.acxiom.com/opt-out/" },
       { text: "Opt out of Oracle Data Cloud / BlueKai", url: "https://www.oracle.com/legal/privacy/advertising-privacy-policy.html#optout" },
       { text: "Opt out of Lotame (cross-device audience data)", url: "https://www.lotame.com/about-lotame/privacy/lotames-products-services-privacy-policy/" },
       { text: "Opt out of Epsilon (breached in 2019)", url: "https://www.epsilon.com/us/consumer-information" },

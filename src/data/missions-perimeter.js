@@ -51,7 +51,7 @@ export const PERIMETER_MISSIONS = [
     steps: [
       { text: "T-Mobile: Open t-mobile.com/account → Profile → Security → set a unique Account PIN (not your birthday or SSN). Then enable \"Account Takeover Protection\" under the same Security page.", url: "https://www.t-mobile.com/account/profile/security" },
       { text: "AT&T: Open att.com/myatt → Profile → Sign-in info → set a Wireless Passcode. Then go to Account → Security → enable \"Extra Security\" (this requires the passcode for ALL account changes).", url: "https://www.att.com/acctmgmt/profile" },
-      { text: "Verizon: Open myverizon.com → Account → Security → set an Account PIN. Then enable \"Number Lock\" on the same page.", url: "https://www.verizon.com/signin/" },
+      { text: "Verizon: Open myverizon.com → Account → Security → set an Account PIN. Then enable \"Number Lock\" on the same page.", url: "https://secure.verizon.com/signin" },
       { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
     ],
     debriefQs: ACTION_DEBRIEF,
@@ -201,7 +201,7 @@ export const PERIMETER_MISSIONS = [
     briefing: "Three tools that protect you passively, plus one you use when something looks suspicious. Global Privacy Control tells every website \"do not sell my data\" -- legally enforceable under California law. Your advertising ID is the barcode that lets ad networks track you across apps -- delete it. And bookmark VirusTotal for when a link looks suspicious: paste the URL, don't click it.",
     steps: [
       { text: "Global Privacy Control -- Firefox: Settings → Privacy & Security → check \"Tell websites not to sell or share my data.\" Brave: already on by default. Chrome: install the Privacy Badger extension from the Chrome Web Store." },
-      { text: "Verify GPC is working", url: "https://global-privacy-control.glitch.me/" },
+      { text: "Verify GPC is working", url: "https://global-privacy-control.vercel.app/" },
       { text: "Disable advertising ID -- iPhone: Settings → Privacy & Security → Tracking → turn OFF \"Allow Apps to Request to Track.\" Android: Settings → Privacy → Ads → \"Delete advertising ID.\"" },
       { text: "Bookmark VirusTotal -- paste suspicious URLs here instead of clicking them", url: "https://www.virustotal.com/gui/home/url" },
       { text: "Bookmark Google Safe Browsing checker", url: "https://transparencyreport.google.com/safe-browsing/search" },

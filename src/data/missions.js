@@ -351,7 +351,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: iCloud',
     briefing: 'Apple shows which devices are signed into your Apple ID. An unfamiliar device means someone else has access to your iCloud data — photos, backups, Find My, and potentially your physical location.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
       { text: 'Scroll to "Devices" to see everything signed into your Apple ID' },
       { text: 'Look for devices you don’t recognize' },
     ],
@@ -373,7 +373,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: iCloud',
     briefing: 'Your Apple ID password is the key to your entire Apple ecosystem. A unique, strong password here protects your iPhone backups, photos, payment methods, and every app using Sign in with Apple.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
       { text: 'Go to "Sign-In and Security" and change your password' },
       { text: 'Choose a unique password not used anywhere else' },
     ],
@@ -395,7 +395,7 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: iCloud',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices. Without it, anyone with your password can access your entire iCloud account from any device.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
       { text: 'Go to "Sign-In and Security"' },
       { text: 'Enable Two-Factor Authentication if not already on' },
     ],
@@ -694,7 +694,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: Apple ID',
     briefing: 'Apple shows all devices currently signed into your Apple ID. Every device on this list has access to your iCloud data, photos, and Find My location. An unknown device is a serious red flag.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
       { text: 'Review the "Devices" section' },
       { text: 'Remove any devices you don’t recognize or no longer own' },
     ],
@@ -716,7 +716,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Apple ID',
     briefing: 'Your Apple ID password guards the App Store, Apple Pay, iCloud Keychain, Find My, and Sign in with Apple. If this password is compromised, an attacker can lock you out of your own devices.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
       { text: 'Go to Sign-In and Security > Password' },
       { text: 'Set a new, unique password not used anywhere else' },
     ],
@@ -738,7 +738,7 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Apple ID',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices when you sign in on a new device. It’s one of the most seamless 2FA implementations available.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
       { text: 'Go to Sign-In and Security' },
       { text: 'Enable Two-Factor Authentication (or confirm it’s already on)' },
     ],
@@ -760,7 +760,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Privacy Review: Apple ID',
     briefing: 'Review which apps use Sign in with Apple and what data they have access to. Also review app permissions on your devices — camera, microphone, contacts, and location access.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://appleid.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
       { text: 'Review "Sign in with Apple" — revoke access for apps you no longer use' },
       { text: 'On your device: Settings > Privacy & Security > review each category' },
     ],

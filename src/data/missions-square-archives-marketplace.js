@@ -263,7 +263,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: 'Connected Apps Audit: Twitter / X',
     briefing: `Over the years you've probably authorized dozens of Twitter apps -- scheduling tools, analytics, games, "What Hogwarts house are you" quizzes. Each one still has access to your account unless you revoke it.`,
     steps: [
-      { text: 'Open Twitter Connected Apps', url: 'https://twitter.com/settings/connected_apps' },
+      { text: 'Open Twitter Connected Apps', url: 'https://x.com/settings/connected_apps' },
       { text: 'Review every app in the list -- check what permissions each has (read, write, DMs)' },
       { text: `Click "Revoke access" on anything you don't actively use or recognize` },
       { text: `While you're there, check "Sessions" for any you don't recognize` },
@@ -286,7 +286,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: Twitter / X",
     briefing: "A hijacked Twitter account posts to a public audience under your name. Twitter removed free SMS 2FA in 2023 -- an authenticator app is free, more secure, and the only reasonable option now.",
     steps: [
-      { text: 'Open Twitter Settings', url: 'https://twitter.com/settings/your_twitter_data/account' },
+      { text: 'Open Twitter Settings', url: 'https://x.com/settings/your_twitter_data/account' },
       { text: `Go to "Your Account" → "Change your password" -- open your password manager, generate a 20+ character random password, save it, paste into both fields` },
       { text: `Go to Settings → "Security and account access" → "Security" → "Two-factor authentication"` },
       { text: `Choose "Authentication app." Scan the QR code with your authenticator app. Enter the 6-digit code to confirm` },
@@ -310,7 +310,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Privacy Review: Twitter / X",
     briefing: `Twitter lets people find you by email and phone number by default. That's how the 2023 scrape worked -- and it's still on unless you turned it off. The discoverability toggles are the most important settings here.`,
     steps: [
-      { text: 'Open Twitter Privacy', url: 'https://twitter.com/settings/audience_and_tagging' },
+      { text: 'Open Twitter Privacy', url: 'https://x.com/settings/audience_and_tagging' },
       { text: `Under "Discoverability and contacts" → turn OFF "Let people who have your email address find you" and same for phone` },
       { text: `Go to Settings → "Privacy and safety" → "Ads preferences" → turn off "Personalized ads"` },
       { text: `Go to "Data sharing with business partners" and turn it off` },
@@ -335,7 +335,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Device Check: TikTok",
     briefing: "TikTok collects more data than most platforms -- keystroke patterns, clipboard contents, device identifiers, face and voice data from your videos. An unauthorized device gets access to all of it, plus your DMs and drafts.",
     steps: [
-      { text: 'Open TikTok Security Settings', url: 'https://www.tiktok.com/setting/security' },
+      { text: 'In TikTok app: Profile → ☰ → Settings and privacy → Security → Devices' },
       { text: `Tap "Manage devices" -- review every device listed` },
       { text: "Remove any device you don't recognize or no longer use" },
       { text: `While you're here, check haveibeenpwned.com for the email/phone linked to TikTok`, url: `https://haveibeenpwned.com` },
@@ -666,7 +666,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: Discord",
     briefing: "Changing your Discord password invalidates all active tokens -- it's both a password reset and a session wipe. 2FA adds a second layer, and backup codes are critical because losing your authenticator without codes means losing the account.",
     steps: [
-      { text: `Open Discord Settings → "My Account"", url: "https://discord.com/channels/@me` },
+      { text: 'Open Discord Settings → "My Account"', url: 'https://discord.com/channels/@me' },
       { text: `Click "Change Password" -- open your password manager, generate a 20+ character random password, save it, paste it in` },
       { text: `Scroll to "Two-Factor Authentication" → click "Enable" → scan the QR code with your authenticator app` },
       { text: `IMPORTANT: Click "Download Backup Codes" and save them in your password manager. Losing these + your authenticator = permanent lockout` },
@@ -1032,7 +1032,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: GitHub",
     briefing: "Your GitHub password protects your code, your professional reputation, and any secrets accidentally committed. GitHub now requires 2FA for public repo contributors. Old personal access tokens with broad permissions are a common backdoor -- rotate them.",
     steps: [
-      { text: `Open GitHub Settings → "Password and authentication"", url: "https://github.com/settings/security` },
+      { text: 'Open GitHub Settings → "Password and authentication"', url: 'https://github.com/settings/security' },
       { text: "Change your password -- open your password manager, generate 20+ characters, save, paste" },
       { text: `Under "Two-factor authentication" → enable with authenticator app if not already on` },
       { text: `Go to Settings → "Developer settings" → "Personal access tokens" → revoke any old tokens with broad scopes` },
