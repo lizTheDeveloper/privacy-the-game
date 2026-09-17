@@ -351,6 +351,79 @@ export const RECLAMATION_MISSIONS = [
   },
 
   // ══════════════════════════════════════════════════════
+  // EXTENDED BROKER SWEEP (DeleteMe-identified brokers)
+  // ══════════════════════════════════════════════════════
+  {
+    id: "people_search-fortify-extended-sweep-1",
+    accountId: "people_search",
+    phase: "fortify",
+    title: "Extended Sweep: Background Check Sites",
+    briefing: "These background-check and people-search sites showed up in a DeleteMe scan with your data. They're smaller than Spokeo or WhitePages but still serve up your name, address, and phone number to anyone who searches. Each has its own opt-out page.",
+    steps: [
+      { text: "SmartBackgroundChecks: Submit opt-out", url: "https://www.smartbackgroundchecks.com/optout" },
+      { text: "AdvancedBackgroundChecks: Submit removal", url: "https://www.advancedbackgroundchecks.com/removal" },
+      { text: "AdvancedPeopleSearch: Submit opt-out", url: "https://www.advancedpeoplesearch.com/opt-out" },
+      { text: "Privateeye: Submit opt-out", url: "https://www.privateeye.com/static/view/optout" },
+      { text: "SearchPeopleFree: Submit opt-out", url: "https://www.searchpeoplefree.com/opt-out" },
+    ],
+    debriefQs: OPTOUT_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"These are the second-tier brokers. Fewer visitors than Spokeo, but they showed up in a real scan with your actual data. Every one you remove shrinks the footprint.\"",
+      debrief: {
+        "all-submitted": "\"Five more brokers cleared. You're cutting deeper than most people ever get.\"",
+        "some-submitted": "\"Every form counts. Come back for the rest.\"",
+        "skip": "\"These are quick — most take under two minutes each.\"",
+      },
+    },
+    estimatedMinutes: 10,
+  },
+  {
+    id: "people_search-fortify-extended-sweep-2",
+    accountId: "people_search",
+    phase: "fortify",
+    title: "Extended Sweep: Phone & People Lookup",
+    briefing: "Phone-lookup and people-finder sites that aggregate public records. PeopleWhiz runs a whole network of mirror sites (Peoplewhizr, Peoplewiz, Peoplewizard, etc.) — one opt-out covers them all. SpyDialer, Anywho, and QuickPeopleTrace each need their own removal.",
+    steps: [
+      { text: "PeopleWhiz (covers all Peoplewiz* mirrors): Submit removal", url: "https://www.peoplewhiz.com/remove-my-info" },
+      { text: "SpyDialer: Submit opt-out", url: "https://www.spydialer.com/optout.aspx" },
+      { text: "Anywho: Submit opt-out", url: "https://www.anywho.com/opt-out" },
+      { text: "QuickPeopleTrace: Submit opt-out", url: "https://www.quickpeopletrace.com/opt-out" },
+      { text: "Usatrace: Submit opt-out", url: "https://www.usatrace.com/optout" },
+    ],
+    debriefQs: OPTOUT_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"PeopleWhiz runs a dozen mirror sites under different names — one opt-out nukes them all. The rest are phone-lookup sites that serve up your number to robocallers and scammers.\"",
+      debrief: {
+        "all-submitted": "\"Mirror network taken down plus the phone-lookup pipeline. That's a big chunk of your exposure gone.\"",
+        "some-submitted": "\"The PeopleWhiz one is the highest value — it covers a dozen sites at once.\"",
+        "skip": "\"PeopleWhiz alone is worth coming back for. One form, twelve sites.\"",
+      },
+    },
+    estimatedMinutes: 10,
+  },
+  {
+    id: "people_search-fortify-extended-sweep-3",
+    accountId: "people_search",
+    phase: "fortify",
+    title: "Extended Sweep: Professional & B2B",
+    briefing: "RocketReach scrapes LinkedIn and public records to build professional profiles — your email, phone, employer, and job title packaged for sales teams and recruiters. FindPeopleSearch and Findpeoplesearch aggregate public records into searchable profiles.",
+    steps: [
+      { text: "RocketReach: Submit opt-out (may need to create account first)", url: "https://rocketreach.co/person/optout" },
+      { text: "FindPeopleSearch: Submit opt-out", url: "https://www.findpeoplesearch.com/opt-out" },
+    ],
+    debriefQs: OPTOUT_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"RocketReach is the one recruiters and salespeople use. Your work email and phone number are the product. Filing the opt-out cuts the B2B pipeline.\"",
+      debrief: {
+        "all-submitted": "\"Professional data pipeline severed. Salespeople and cold-callers just lost a source.\"",
+        "some-submitted": "\"RocketReach is the priority if you only do one.\"",
+        "skip": "\"These are lower urgency than the people-search sites but still worth doing.\"",
+      },
+    },
+    estimatedMinutes: 8,
+  },
+
+  // ══════════════════════════════════════════════════════
   // ENTERPRISE DATA AGGREGATORS
   // ══════════════════════════════════════════════════════
   {

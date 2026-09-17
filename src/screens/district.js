@@ -413,6 +413,19 @@ export function renderDistrict(state, districtId, activeTab) {
         </div>
       </div>
     </div>`;
+  } else if (districtId === 'square' && activeTab === 'reclaim') {
+    const timelineConfigured = Object.keys(state.socialHistory || {}).length;
+    const timelineBanner = `
+    <div style="padding: 12px 24px 0;">
+      <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+          <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. Review missions are sized to your history.` : 'Map your social media history first — we\\'ll break the review into right-sized segments based on how active you were.'}</div>
+        </div>
+        <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
+      </div>
+    </div>`;
+    content = timelineBanner + renderMissionList(state, districtId, activeTab);
   } else if (allDisabled && activeTab !== 'survey') {
     content = renderDisabledPanel(districtId);
   } else if (activeTab === 'survey') {

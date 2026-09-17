@@ -14,6 +14,7 @@ import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz } from './screens/phishing-quiz.js';
 import { renderGarage, renderAddForm } from './screens/garage.js';
+import { renderTimeline, renderSocialForm, renderEraQuestions, getEras } from './screens/timeline.js';
 import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
 import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
@@ -35,6 +36,7 @@ const screens = {
   quickquest: () => renderQuickQuest(state),
   phishing: () => renderPhishingQuiz(state),
   garage: () => renderGarage(state),
+  timeline: () => renderTimeline(state),
   stats: () => renderStats(state),
 };
 
@@ -300,6 +302,45 @@ app.addEventListener('click', async (e) => {
       setState(state);
       renderCurrentRoute();
     }
+  } else if (action === 'edit-social-profile') {
+    const container = app.querySelector('#social-form-container');
+    const platformId = el.dataset.platform;
+    if (container) {
+      container.innerHTML = renderSocialForm(platformId);
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const yearSelect = app.querySelector('#social-join-year');
+      if (yearSelect) {
+        const profile = state.socialHistory?.[platformId];
+        if (profile?.joinYear) yearSelect.value = String(profile.joinYear);
+        yearSelect.addEventListener('change', () => {
+          const year = parseInt(yearSelect.value, 10);
+          const eraDiv = app.querySelector('#era-questions');
+          const eraContainer = app.querySelector('#era-container');
+          if (year && eraDiv && eraContainer) {
+            eraContainer.innerHTML = renderEraQuestions(year);
+            eraDiv.hidden = false;
+          }
+        });
+        if (profile?.joinYear) yearSelect.dispatchEvent(new Event('change'));
+      }
+    }
+  } else if (action === 'cancel-social-profile') {
+    const container = app.querySelector('#social-form-container');
+    if (container) container.innerHTML = '';
+  } else if (action === 'save-social-profile') {
+    const platformId = el.dataset.platform;
+    const yearSelect = app.querySelector('#social-join-year');
+    const joinYear = parseInt(yearSelect?.value, 10);
+    if (!joinYear) return;
+    const eras = getEras(joinYear);
+    const eraActivities = eras.map((_, i) => {
+      const checked = app.querySelector(`input[name="era-${i}"]:checked`);
+      return checked?.value || 'light';
+    });
+    if (!state.socialHistory) state.socialHistory = {};
+    state.socialHistory[platformId] = { joinYear, eras: eraActivities };
+    setState(state);
+    renderCurrentRoute();
   } else if (action === 'begin-game') {
     started = true;
     try {

@@ -1272,4 +1272,412 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     },
     estimatedMinutes: 8,
   },
+
+  // ══════════════════════════════════════════════════════
+  // SOCIAL MEDIA HISTORY REVIEW
+  // Year-by-year — designed to be done one sitting per year.
+  // Emotionally aware. No rushing. Come back tomorrow.
+  // ══════════════════════════════════════════════════════
+
+  // --- INSTAGRAM ---
+  {
+    id: 'instagram-reclaim-prep',
+    accountId: 'instagram',
+    phase: 'reclaim',
+    title: 'Memory Lane Prep: Instagram',
+    briefing: "Before we start going through your history, let's get the lay of the land. How old is your account? How many posts? This mission sets the stage — you'll download your data so you have a backup, and figure out how many years you're looking at. The actual review happens one year at a time in the missions that follow.",
+    steps: [
+      { text: "Open your profile. Scroll to your very earliest post. Note the year — that's your starting line." },
+      { text: "Count your posts (it's in your profile header). This tells you how big the job is." },
+      { text: "Download your data now — it takes time to generate: Settings > Your activity > Download your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
+      { text: "While that processes, look at your story archive: Profile > Menu > Archive. These were 'temporary' but Instagram kept them all." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How old is your account?', options: [
+      { value: 'cleaned-up', text: '1-3 years', severity: 'safe' },
+      { value: 'some-removed', text: '4-7 years', severity: 'warn' },
+      { value: 'mostly-fine', text: '8+ years', severity: 'crit' },
+      { value: 'skip', text: "Started download, will check back", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"First step: figure out what we're dealing with. How many years of your life are in there? Download everything first — that's your safety net before we start reviewing.\"",
+      debrief: {
+        'cleaned-up': "\"A few years — that's manageable. One sitting per year, you'll be through it in a week.\"",
+        'some-removed': "\"Several years of history. We'll take it one year at a time. No rush.\"",
+        'mostly-fine': "\"That's a decade of your life on one platform. We'll go slow. One year per sitting, take breaks between.\"",
+        'skip': "\"The download is the important first step. Come back when it's ready.\"",
+      },
+    },
+    estimatedMinutes: 10,
+  },
+  {
+    id: 'instagram-reclaim-early-years',
+    accountId: 'instagram',
+    phase: 'reclaim',
+    title: 'Memory Lane: Instagram Early Years',
+    briefing: "Pick your earliest year on Instagram and just review that one year. Don't try to do more than one. Scroll through those posts and for each one, ask yourself: would I post this today? Check the location tags — did you tag your home, your workplace, your gym? Check who's in the photos. Some of those people might not be in your life anymore. That's okay. This is about what's public now, not what happened then.",
+    steps: [
+      { text: "Pick ONE year — your earliest. Scroll to those posts." },
+      { text: "For each post: would you share this today? If not, archive it (it's not deleted, just hidden)." },
+      { text: "Check location tags on posts from this year. Home, work, school — these paint a map of your life." },
+      { text: "Look for photos showing the outside of your home — especially address numbers on the house or mailbox. These make your home findable on Google Street View." },
+      { text: "Look at the comments. Any personal information shared in conversations?" },
+      { text: "When you finish that year, stop. Come back tomorrow for the next one." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How was that year?', options: [
+      { value: 'cleaned-up', text: 'Archived some posts — feels right', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed it, keeping most of it', severity: 'safe' },
+      { value: 'mostly-fine', text: 'That year was fine — moving on', severity: 'safe' },
+      { value: 'skip', text: "Got partway through — picking it up later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"One year. That's it. Don't scroll past it, don't try to power through. Just that one year. You were a different person then, and that's fine. We're just making sure that person isn't oversharing on your behalf.\"",
+      debrief: {
+        'cleaned-up': "\"One year reviewed, some things archived. That's a real accomplishment. Come back tomorrow for the next year.\"",
+        'some-removed': "\"Reviewed and kept it — that's a choice, not an accident. That counts.\"",
+        'mostly-fine': "\"Clean year. On to the next one when you're ready.\"",
+        'skip': "\"No worries. Even half a year is progress. Pick it up when you can.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'instagram-reclaim-middle-years',
+    accountId: 'instagram',
+    phase: 'reclaim',
+    title: 'Memory Lane: Instagram Middle Years',
+    briefing: "Same drill — pick the next year you haven't reviewed yet. By now you've probably hit your stride on the platform: more posts, more stories, more reels. This is often where the location tags get heavy because you were comfortable and not thinking about it. Check tagged photos too — other people's posts with your face show up under your profile.",
+    steps: [
+      { text: "Pick the next year you haven't reviewed. Set a timer for 15 minutes if it helps." },
+      { text: "Scroll through that year's posts. Archive anything that doesn't represent you anymore." },
+      { text: "Check 'Photos of you' from this period — Profile > tagged photos. Untag anything you're not comfortable with." },
+      { text: "Check story highlights from this era — these stay on your profile permanently." },
+      { text: "Stop when you finish that year. You're building a habit, not running a marathon." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How was this year?', options: [
+      { value: 'cleaned-up', text: 'Cleaned up some posts and tags', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed it, mostly good', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Nothing to change', severity: 'safe' },
+      { value: 'skip', text: "Paused — will finish this year later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Next year. Same pace. If you hit a post that makes you feel something — good or bad — sit with it for a second before deciding. This isn't a race.\"",
+      debrief: {
+        'cleaned-up': "\"Another year reclaimed. You're building a cleaner, more intentional profile one year at a time.\"",
+        'some-removed': "\"Good year. Keep the rhythm — one year per sitting is the pace.\"",
+        'mostly-fine': "\"Nothing to change is a great outcome. On to the next.\"",
+        'skip': "\"Half a year is still half a year. Come back for the rest.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'instagram-reclaim-recent',
+    accountId: 'instagram',
+    phase: 'reclaim',
+    title: 'Memory Lane: Instagram Recent + Reels',
+    briefing: "The last couple years — and this is where reels come in. Reels get algorithmic reach way beyond your followers. A reel you posted for fun might have been seen by thousands of strangers. Check what's in the background: your home, your street, your license plate, your kids' school. Also review your saved collections and close friends list — these shape what Instagram shows you and who gets to see your private stories.",
+    steps: [
+      { text: "Review your last 1-2 years of posts, same as before." },
+      { text: "Now check Reels specifically: Profile > Reels tab. Sort by views — the high-view ones reached strangers." },
+      { text: "For each reel: what's in the background? House numbers, street signs, car license plates, school names, workplace logos — these are OSINT goldmines." },
+      { text: "Review saved posts and collections — any sensitive content?" },
+      { text: "Check your Close Friends list: Settings > Close Friends. Is everyone on it still someone you trust with private stories?" },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How did the recent review go?', options: [
+      { value: 'cleaned-up', text: 'Removed or restricted some reels and posts', severity: 'safe' },
+      { value: 'some-removed', text: 'Mostly fine, tightened a few things', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Recent history looks good', severity: 'safe' },
+      { value: 'skip', text: "Will finish later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Reels are the big one here. They go places your regular posts don't. A cooking video that shows your kitchen also shows your neighborhood through the window. Check what the algorithm shared with strangers.\"",
+      debrief: {
+        'cleaned-up': "\"Instagram history: reviewed, year by year. That's something most people never do. Your profile is yours now — intentional, not accidental.\"",
+        'some-removed': "\"Recent stuff tightened up. The full history review is the real achievement here.\"",
+        'mostly-fine': "\"All years reviewed, recent stuff clean. That's the whole Instagram timeline, reclaimed.\"",
+        'skip': "\"Almost there. The recent stuff is usually the quickest review.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+
+  // --- FACEBOOK ---
+  {
+    id: 'facebook-reclaim-prep',
+    accountId: 'facebook',
+    phase: 'reclaim',
+    title: 'Memory Lane Prep: Facebook',
+    briefing: "Facebook is probably the oldest social media account you have. Some people have 15+ years of posts on here — that's high school, college, first jobs, relationships that ended, opinions you've outgrown. Before we start the year-by-year review, let's figure out what we're dealing with and get your data downloaded.",
+    steps: [
+      { text: "Check your account age: open About on your profile, look for 'Joined Facebook' date" },
+      { text: "Open Activity Log — this is your master record", url: "https://www.facebook.com/allactivity" },
+      { text: "Download your data: Settings > Your information > Download your information", url: "https://www.facebook.com/your_information/" },
+      { text: "Check which apps still have access: Settings > Apps and websites. Revoke old ones now while you're here." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How long have you been on Facebook?', options: [
+      { value: 'cleaned-up', text: '1-5 years', severity: 'safe' },
+      { value: 'some-removed', text: '6-10 years', severity: 'warn' },
+      { value: 'mostly-fine', text: '11+ years', severity: 'crit' },
+      { value: 'skip', text: "Started download, coming back", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Facebook remembers everything. Let's find out how much 'everything' is before we start going through it. Download first, review later.\"",
+      debrief: {
+        'cleaned-up': "\"A manageable history. A few sittings and you'll have reviewed it all.\"",
+        'some-removed': "\"About a decade. That's a lot of life. One year at a time — we'll get through it.\"",
+        'mostly-fine': "\"Over a decade of your life on one platform. This is going to take a few sessions, and that's completely normal. One year per sitting.\"",
+        'skip': "\"Download processing. Come back when it's ready — it's the safety net for everything that follows.\"",
+      },
+    },
+    estimatedMinutes: 10,
+  },
+  {
+    id: 'facebook-reclaim-early',
+    accountId: 'facebook',
+    phase: 'reclaim',
+    title: 'Memory Lane: Facebook Early Years',
+    briefing: "Go to your Activity Log and filter to your earliest year on Facebook. This is usually the roughest — you were younger, the internet felt smaller, and nobody thought their posts would still be public in 2026. Wall posts from friends, status updates about your day, photos from parties. Take it slow. What would present-you think of past-you's Facebook?",
+    steps: [
+      { text: "Activity Log: filter to your earliest year. Read through your posts from that year only." },
+      { text: "Check status updates — these often have way more personal detail than you'd share today." },
+      { text: "Look at wall posts FROM other people — you can hide these from your timeline." },
+      { text: "Check photos you were tagged in from this year. Untag if needed." },
+      { text: "Use 'Manage activity' to bulk-archive posts from this year if you want them hidden but not deleted." },
+      { text: "Stop after this year. Come back tomorrow." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How was that first year?', options: [
+      { value: 'cleaned-up', text: 'Archived a bunch — glad I checked', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed it, not as bad as I expected', severity: 'safe' },
+      { value: 'mostly-fine', text: 'That year was fine', severity: 'safe' },
+      { value: 'skip', text: "That was a lot — taking a break", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Your earliest Facebook year is usually the wildest one. You were younger, the world was different, and you probably didn't think anyone would read these posts a decade later. No judgment. Just review.\"",
+      debrief: {
+        'cleaned-up': "\"First year handled. That's often the hardest one. The rest get easier from here.\"",
+        'some-removed': "\"Not as bad as expected — that's a good sign for the rest.\"",
+        'mostly-fine': "\"Clean first year. Nice.\"",
+        'skip': "\"The early years hit different. Take whatever time you need.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'facebook-reclaim-middle',
+    accountId: 'facebook',
+    phase: 'reclaim',
+    title: 'Memory Lane: Facebook Next Year',
+    briefing: "Pick up where you left off — the next year you haven't reviewed. Activity Log, filter by year. This is the mission you'll repeat until you're caught up: one year per sitting. Check-ins are the big privacy exposure on Facebook — they map everywhere you went. Old group memberships too. Groups you joined in 2015 still show on your profile.",
+    steps: [
+      { text: "Activity Log: filter to your next unreviewed year." },
+      { text: "Review posts. Archive what doesn't serve you anymore." },
+      { text: "Check check-ins from this year — they map your life: home, work, favorite spots." },
+      { text: "Look for photos of your house or apartment — visible address numbers make your home findable. Porch photos, moving day posts, 'just bought a house!' celebrations." },
+      { text: "Review groups you joined this year. Leave any you no longer want associated with." },
+      { text: "Check 'Likes and reactions' — pages you liked years ago are still on your profile." },
+      { text: "Done with this year? Stop. Tomorrow is another year." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'Another year reviewed?', options: [
+      { value: 'cleaned-up', text: 'Cleaned up posts, check-ins, or groups', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed — keeping most of it', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Clean year, moving on', severity: 'safe' },
+      { value: 'skip', text: "Partway through — picking up later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Next year up. Same rhythm. Check-ins and group memberships are the ones people forget about — they're not in your feed but they're on your profile.\"",
+      debrief: {
+        'cleaned-up': "\"Another year reclaimed. You're chipping away at it. Come back tomorrow for the next one.\"",
+        'some-removed': "\"Steady progress. One year at a time is the right pace.\"",
+        'mostly-fine': "\"Clean year. Onward.\"",
+        'skip': "\"No rush. Every year you review is one more year you've made intentional.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'facebook-reclaim-recent',
+    accountId: 'facebook',
+    phase: 'reclaim',
+    title: 'Memory Lane: Facebook Recent + Tags',
+    briefing: "The last stretch — your recent years plus everything tagged by other people. Tagged photos and posts from other people are often the biggest surprise: you don't always see them, but they're on your profile. This is also a good time to review your 'Memories' settings and make sure Facebook isn't resurfacing things you've already chosen to archive.",
+    steps: [
+      { text: "Review your most recent 1-2 years of posts." },
+      { text: "Check all tagged photos: Activity Log > Photos and videos > Photos and videos of you." },
+      { text: "Review posts others shared on your timeline that you may not have noticed." },
+      { text: "Settings > Memories: control what Facebook resurfaces to you (and potentially shows friends)." },
+      { text: "Final check: view your profile as a stranger (Profile > three dots > 'View As'). What do they see?" },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How does the finished review feel?', options: [
+      { value: 'cleaned-up', text: 'Cleaned up tags and recent posts — profile is tighter', severity: 'safe' },
+      { value: 'some-removed', text: 'Mostly done, a few things left', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Whole history reviewed — I feel good about it', severity: 'safe' },
+      { value: 'skip', text: "Almost there — finishing later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Last stretch. The 'View As' at the end is the real test — see your profile through a stranger's eyes. Everything you've cleaned up over these sessions shows in that view.\"",
+      debrief: {
+        'cleaned-up': "\"Facebook history: reviewed, year by year. That's something almost nobody does. Your profile is intentional now — curated by the person you are, not the person you were.\"",
+        'some-removed': "\"Nearly there. The bulk of the work is done.\"",
+        'mostly-fine': "\"Full review complete. That's years of your life, made intentional. Well done.\"",
+        'skip': "\"So close. Come back for the final pass.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+
+  // --- X/TWITTER ---
+  {
+    id: 'twitter-reclaim-prep',
+    accountId: 'twitter',
+    phase: 'reclaim',
+    title: 'Memory Lane Prep: X / Twitter',
+    briefing: "Twitter is the platform where old posts come back to haunt people the most. Everything is public by default, old tweets get quote-tweeted with zero context, and screenshots live forever. Before you start reviewing, download your archive — it takes a while to generate, and it's your safety net.",
+    steps: [
+      { text: "Check your Joined date and tweet count on your profile." },
+      { text: "Request your archive: Settings > Your Account > Download an archive of your data", url: "https://x.com/settings/download_your_data" },
+      { text: "While it processes: try searching 'from:yourhandle' to browse your old tweets." },
+      { text: "Note how many years you're looking at. Plan one year per sitting." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'Archive requested?', options: [
+      { value: 'cleaned-up', text: 'Yes, archive is processing', severity: 'safe' },
+      { value: 'skip', text: "Will request it later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"Download first, review later. The archive means nothing is lost even if you decide to clean house. It takes a few hours to generate.\"",
+      debrief: {
+        'cleaned-up': "\"Archive on the way. When it arrives, you'll have a complete backup. Now you can review freely.\"",
+        'skip': "\"The archive is important — it's your insurance policy. Start there.\"",
+      },
+    },
+    estimatedMinutes: 5,
+  },
+  {
+    id: 'twitter-reclaim-review',
+    accountId: 'twitter',
+    phase: 'reclaim',
+    title: 'Memory Lane: X / Twitter Year Review',
+    briefing: "Pick a year and go through your tweets from that period. Search 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31' to filter. Hot takes age badly. Reply-guy energy from 2016 reads different in 2026. And your likes are public too — check those. Do one year at a time.",
+    steps: [
+      { text: "Search your tweets from one year: 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31'" },
+      { text: "Read through them. Ask: would this tweet get me in trouble if it went viral today?" },
+      { text: "Check quote tweets and replies — these have more context collapse risk than regular tweets." },
+      { text: "Review likes from this period: Profile > Likes. These are public on most accounts." },
+      { text: "Delete individual tweets you're not comfortable with, or note them for bulk deletion later." },
+      { text: "One year done? Stop. Come back for the next one." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How was that year?', options: [
+      { value: 'cleaned-up', text: 'Deleted some old tweets', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed it — mostly fine', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Nothing to change', severity: 'safe' },
+      { value: 'skip', text: "Got partway through", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"One year of tweets. Read them like a stranger would, with zero context about what was happening in your life. That's how the internet reads them.\"",
+      debrief: {
+        'cleaned-up': "\"Good judgment calls. The archive has the originals if you ever want them back.\"",
+        'some-removed': "\"Reviewed and comfortable — that's the right outcome.\"",
+        'mostly-fine': "\"Clean year. Next one when you're ready.\"",
+        'skip': "\"Even a few months reviewed is progress. Come back for the rest.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+  {
+    id: 'twitter-reclaim-bulk',
+    accountId: 'twitter',
+    phase: 'reclaim',
+    title: 'Memory Lane: X / Twitter Bulk Cleanup',
+    briefing: "After reviewing year by year, you might want a clean slate for old tweets while keeping your archive. Tools like Semiphemeral, TweetDelete, or Redact can auto-delete tweets older than a certain date. Your downloaded archive preserves everything. This is the 'keep the receipts, remove the live copies' approach.",
+    steps: [
+      { text: "Make sure you have your downloaded archive saved somewhere safe." },
+      { text: "Decide your cutoff: do you want to keep tweets from the last year? Two years? All time?" },
+      { text: "Consider a tool like Semiphemeral or Redact to bulk-delete tweets before your cutoff date." },
+      { text: "Review your media tab (Profile > Media) for photos and videos you've shared." },
+      { text: "Final check: scroll your profile as a stranger would. How does it look?" },
+    ],
+    debriefQs: [{ id: 'finding', label: 'Clean slate?', options: [
+      { value: 'cleaned-up', text: 'Bulk-deleted old tweets, archive saved', severity: 'safe' },
+      { value: 'some-removed', text: 'Deleted selectively, keeping most', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Decided to keep everything after reviewing', severity: 'safe' },
+      { value: 'skip', text: "Still deciding", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"The nuclear option — but a smart one. Your archive has everything. The live copies don't need to exist for strangers to find.\"",
+      debrief: {
+        'cleaned-up': "\"Clean public profile, complete private archive. Best of both worlds.\"",
+        'some-removed': "\"Selective cleanup is valid too. You chose what stays.\"",
+        'mostly-fine': "\"Reviewed everything and kept it — that's an informed choice. It counts.\"",
+        'skip': "\"Take your time deciding. The archive isn't going anywhere.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+
+  // --- TIKTOK ---
+  {
+    id: 'tiktok-reclaim-review',
+    accountId: 'tiktok',
+    phase: 'reclaim',
+    title: 'Memory Lane: TikTok Deep Review',
+    briefing: "TikTok is different from text-based platforms — your face, your voice, your home, your daily routine are all in the videos. The algorithm decides who sees them, and a video posted for 200 followers can surface on 50,000 For You pages. Review your videos one batch at a time, paying attention to what's in the BACKGROUND, not just the content.",
+    steps: [
+      { text: "Open your profile. Start from your oldest videos. Pick a batch of 10-20 to review." },
+      { text: "For each video: what's visible in the background? House numbers, street signs, car plates, school logos, mail with your name on it?" },
+      { text: "Check view counts — high-view videos were seen by many strangers. Anything too personal?" },
+      { text: "Review duets and stitches: others may have used your content in ways you haven't seen." },
+      { text: "Check your liked videos (heart icon) — these may be public depending on your settings." },
+      { text: "Download your data for a full record", url: "https://www.tiktok.com/setting/download-your-data" },
+      { text: "Done with this batch? Come back for the next 10-20 videos." },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How was this batch?', options: [
+      { value: 'cleaned-up', text: 'Removed or privated some videos', severity: 'safe' },
+      { value: 'some-removed', text: 'Reviewed, keeping most', severity: 'safe' },
+      { value: 'mostly-fine', text: 'All good', severity: 'safe' },
+      { value: 'skip', text: "Will review more later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"10-20 videos at a time. Watch them like a stranger would. What does the background tell someone about where you live, what you drive, where your kids go to school? That's the stuff the algorithm shared with thousands of people you don't know.\"",
+      debrief: {
+        'cleaned-up': "\"Good eye. The background details are what most people miss. Come back for the next batch when you're ready.\"",
+        'some-removed': "\"Reviewed and comfortable. Next batch whenever.\"",
+        'mostly-fine': "\"Clean batch. Keep going when you have time.\"",
+        'skip': "\"Batches of 10-20 is the right pace. No rush.\"",
+      },
+    },
+    estimatedMinutes: 15,
+  },
+
+  // --- LINKEDIN ---
+  {
+    id: 'linkedin-reclaim-review',
+    accountId: 'linkedin',
+    phase: 'reclaim',
+    title: 'Memory Lane: LinkedIn Audit',
+    briefing: "LinkedIn feels professional so people forget to audit it. But it's a complete dossier: every job, every connection, every endorsement, every recommendation, every post. Data brokers scrape it. Recruiters screenshot it. Old connections you don't remember get full access to your work history, email, and phone number.",
+    steps: [
+      { text: "View your profile as others see it: Profile > eye icon > 'View as' (or open in incognito)." },
+      { text: "Review your connections list. Do you actually know all these people? Remove unknowns." },
+      { text: "Check activity: Profile > Activity. Old posts, comments, and reactions are visible." },
+      { text: "Review recommendations — any for people or companies you'd rather not highlight?" },
+      { text: "Check skills and endorsements. Outdated skills reveal more history than you might want." },
+      { text: "Settings > Visibility: who can see your email, phone, connections list?" },
+      { text: "Download your data: Settings > Data privacy > Get a copy of your data", url: "https://www.linkedin.com/mypreferences/d/download-my-data" },
+    ],
+    debriefQs: [{ id: 'finding', label: 'How does the profile look?', options: [
+      { value: 'cleaned-up', text: 'Tightened visibility, removed old connections', severity: 'safe' },
+      { value: 'some-removed', text: 'Made some updates, more to do', severity: 'safe' },
+      { value: 'mostly-fine', text: 'Profile looks good as-is', severity: 'safe' },
+      { value: 'skip', text: "Started, will finish later", severity: 'skip' },
+    ]}],
+    scoutDialog: {
+      briefing: "\"LinkedIn is the one that sneaks up on you. It feels safe because it's 'professional.' But it's a full dossier that anyone can view — including data brokers who scrape it for people-search sites.\"",
+      debrief: {
+        'cleaned-up': "\"Profile tightened. Fewer unknown connections means less exposure. Data brokers get less to scrape.\"",
+        'some-removed': "\"Good start. The connections cull is usually where the biggest wins are.\"",
+        'mostly-fine': "\"Clean professional profile. That's actually rare.\"",
+        'skip': "\"Come back when you have time. The connections list is the priority.\"",
+      },
+    },
+    estimatedMinutes: 20,
+  },
 ];

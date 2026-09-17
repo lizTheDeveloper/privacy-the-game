@@ -5,7 +5,10 @@ export const STATE_VERSION = 1;
 const STORAGE_KEY = 'reclaim-city-state';
 
 const DEFAULT_ACCOUNTS = Object.fromEntries(
-  Object.entries(ACCOUNTS).map(([id, a]) => [id, { enabled: true, name: a.name, district: a.district }]),
+  Object.entries(ACCOUNTS).map(([id, a]) => [
+    id,
+    { enabled: a.district !== 'freeway', name: a.name, district: a.district },
+  ]),
 );
 
 export function createInitialState() {
@@ -13,6 +16,7 @@ export function createInitialState() {
     version: STATE_VERSION,
     createdAt: new Date().toISOString(),
     accounts: structuredClone(DEFAULT_ACCOUNTS),
+    vehicles: [],
     missions: {},
     streak: { current: 0, best: 0, lastDate: null },
   };

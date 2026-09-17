@@ -8,6 +8,7 @@ import { FOUNDRY_MISSIONS } from './missions-foundry.js';
 import { GRID_MISSIONS } from './missions-grid.js';
 import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
+import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -1136,6 +1137,7 @@ export const MISSIONS = [
   ...GRID_MISSIONS,
   ...CLINIC_MISSIONS,
   ...TRAIL_MISSIONS,
+  ...OSINT_SIEVE_MISSIONS,
 ];
 
 export function getMissionsForDistrict(districtId) {
