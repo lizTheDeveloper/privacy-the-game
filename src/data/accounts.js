@@ -102,6 +102,7 @@ const BASE_ACCOUNTS = {
     district: 'vault',
     building: 'assets/buildings/paypal.png',
     buildingDark: 'assets/buildings/paypal_dark.png',
+    securityUrl: 'https://www.paypal.com/myaccount/settings/security',
     riskLevel: 'high',
   },
   venmo: {
@@ -109,6 +110,7 @@ const BASE_ACCOUNTS = {
     district: 'vault',
     building: 'assets/buildings/venmo.png',
     buildingDark: 'assets/buildings/venmo_dark.png',
+    securityUrl: 'https://account.venmo.com/settings/security',
     riskLevel: 'medium',
   },
   cashapp: {

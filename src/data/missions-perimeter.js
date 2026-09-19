@@ -252,7 +252,7 @@ export const PERIMETER_MISSIONS = [
     title: "Wire the Recovery Path",
     briefing: "Now connect the clean email to your real accounts as a backup recovery method. This is the bridge: your real accounts gain a recovery path through the clean email, so when you're safely through the border, you can reset your way back in. Important: test the recovery flow before you travel. Reset one account's password through the clean email to confirm it works. Don't discover a problem at the airport.",
     steps: [
-      { text: "Google: myaccount.google.com/security → scroll to \"Ways we can verify it's you\" → add the clean email as a recovery email', url: 'https://myaccount.google.com/security" },
+      { text: "Google: myaccount.google.com/security → scroll to \"Ways we can verify it's you\" → add the clean email as a recovery email", url: "https://myaccount.google.com/security" },
       { text: "Apple: account.apple.com → Sign-In and Security → add the clean email as a notification/recovery contact", url: "https://account.apple.com/account/manage" },
       { text: "Microsoft: account.live.com/proofs/manage → add the clean email as an alternate email", url: "https://account.live.com/proofs/manage" },
       { text: "Test it: sign out of ONE account, then recover it using \"Forgot password\" with the clean email. Confirm the reset email arrives and works. Then change the password back." },

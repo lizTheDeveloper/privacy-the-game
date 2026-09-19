@@ -97,4 +97,36 @@ describe('MISSIONS', () => {
     const ids = MISSIONS.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it('mission step text does not contain raw url property strings', () => {
+    for (const m of MISSIONS) {
+      for (let i = 0; i < (m.steps || []).length; i++) {
+        const s = m.steps[i];
+        expect(s.text, `mission ${m.id} step ${i} contains raw 'url:'`).not.toContain('url:');
+      }
+    }
+  });
+
+  it('haveibeenpwned steps have valid URL set on step object', () => {
+    for (const m of MISSIONS) {
+      for (let i = 0; i < (m.steps || []).length; i++) {
+        const s = m.steps[i];
+        if (s.text?.toLowerCase().includes('haveibeenpwned.com')) {
+          expect(s.url, `mission ${m.id} step ${i} missing haveibeenpwned URL`).toBe('https://haveibeenpwned.com');
+        }
+      }
+    }
+  });
+
+  it('all step URLs are valid HTTPS links', () => {
+    for (const m of MISSIONS) {
+      for (let i = 0; i < (m.steps || []).length; i++) {
+        const s = m.steps[i];
+        if (s.url) {
+          expect(s.url.startsWith('https://'), `mission ${m.id} step ${i} url ${s.url} must start with https://`).toBe(true);
+        }
+      }
+    }
+  });
 });
+
