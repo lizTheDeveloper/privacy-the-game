@@ -9,7 +9,7 @@ export const CURATED_MESSAGES = [
   { id: 2, type: 'email', from: 'account-security-noreply@accountprotection.microsoft.com', subject: 'Unusual sign-in activity',
     body: 'We detected something unusual about a recent sign-in to your Microsoft account. Sign-in details: Country/region: United States, IP address: 104.47.58.xxx, Date: Today at 3:42 PM, Platform: Windows. If this was you, you can ignore this message.',
     answer: 'genuine', tells: ['accountprotection.microsoft.com IS a real Microsoft domain', 'Does NOT demand action or threaten suspension', 'Provides specific verifiable sign-in details', "Offers a calm 'if this was you, ignore this' option"], difficulty: 'hard', category: 'unusual-login-alert',
-    verify: { url: 'https://support.microsoft.com/en-us/account-billing/how-to-recognize-phishing-email-messages-telephone-calls-and-text-messages-71e68b4d-8ef4-4a11-9621-6a707a9a3282', label: 'Microsoft: real vs fake emails' } },
+    verify: { url: 'https://support.microsoft.com/en-us/windows/protect-yourself-from-phishing-0c7ea947-ba98-3bd9-7184-430e1f860a44', label: 'Microsoft: real vs fake emails' } },
   { id: 3, type: 'sms', from: '72255', subject: null,
     body: 'Your Apple ID has been locked for security reasons. Verify your identity to restore access: https://appleid-verify.support-apple.com/restore',
     answer: 'pretext', tells: ['Domain is support-apple.com, not apple.com (real is iforgot.apple.com)', 'Apple sends push notifications, not SMS with links', '72255 is not an Apple short code (Apple uses 27753)'], difficulty: 'easy', category: 'fake-account-lockout',
@@ -28,11 +28,11 @@ export const CURATED_MESSAGES = [
   { id: 7, type: 'sms', from: 'T-Mobile', subject: null,
     body: 'T-Mobile: A SIM change was requested for your account. If you did not request this, call 611 from your T-Mobile phone or 1-800-937-8997 immediately.',
     answer: 'genuine', tells: ['Directs you to call from YOUR phone or the official published number', '611 is the real T-Mobile customer service short code', "1-800-937-8997 is T-Mobile's real, publicly verifiable support line", 'Does not include any URL or ask you to click anything'], difficulty: 'hard', category: 'sim-change-alert',
-    verify: { url: 'https://www.t-mobile.com/support/account/t-mobile-scam-and-fraud', label: 'T-Mobile: real alerts vs scams' } },
+    verify: { url: 'https://www.t-mobile.com/isp/scam-shield', label: 'T-Mobile: real alerts vs scams' } },
   { id: 8, type: 'email', from: 'security@paypa1.com', subject: 'Action Required: Confirm your identity',
     body: "We've noticed unusual activity on your PayPal account. Verify your identity within 48 hours by clicking the link below. Failure to verify will result in permanent account limitation.",
     answer: 'pretext', tells: ['Domain is paypa1.com (digit 1) not paypal.com (letter L)', "Threatens 'permanent account limitation' with a deadline", "'Action Required' subject line is a common phishing pattern"], difficulty: 'medium', category: 'fake-verification-request',
-    verify: { url: 'https://www.paypal.com/us/security/learn/identify-phishing', label: 'PayPal: spot fake emails' } },
+    verify: { url: 'https://www.paypal.com/us/cshelp/article/how-to-identify-a-fake-fraudulent-or-phishing-paypal-email-or-website-help246', label: 'PayPal: spot fake emails' } },
   { id: 9, type: 'push', from: 'Instagram', subject: null,
     body: "We noticed a login from a device we don't recognize. Was this you? If not, we recommend changing your password. Tap to review your login activity.",
     answer: 'genuine', tells: ['Push notification from the app itself, not an SMS or email', 'Tapping opens the app directly, not a browser URL', 'Calm language, no threats, no deadline', 'Recommends changing password rather than demanding it'], difficulty: 'medium', category: 'login-activity-alert',
@@ -48,7 +48,7 @@ export const CURATED_MESSAGES = [
   { id: 12, type: 'call', from: '+1 (555) 012-3456', subject: null,
     body: '"Hello, I\'m calling from Verizon\'s fraud department. Someone has requested a port of your phone number to another carrier. Before I can block the transfer I need to verify your identity. Can you tell me the last four digits of your Social Security number and your account PIN?"',
     answer: 'pretext', tells: ['Asks for SSN digits and account PIN — real fraud departments verify YOU, not the other way', 'Creates urgency with an active port-out to rush you', 'Real carriers tell you to call back at the number on your bill', 'If a real port-out were happening, they would freeze it and ask you to visit a store'], difficulty: 'easy', category: 'sim-swap-social-engineering',
-    verify: { url: 'https://www.verizon.com/about/account-security/fraud-awareness', label: 'Verizon: fraud awareness' } },
+    verify: { url: 'https://www.verizon.com/support/security-alerts/', label: 'Verizon: fraud awareness' } },
 ];
 
 export const MESSAGE_BANK = [

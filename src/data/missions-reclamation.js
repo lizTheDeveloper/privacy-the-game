@@ -386,7 +386,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "PeopleWhiz (covers all Peoplewiz* mirrors): Submit removal", url: "https://www.peoplewhiz.com/remove-my-info" },
       { text: "SpyDialer: Submit opt-out", url: "https://www.spydialer.com/optout.aspx" },
-      { text: "Anywho: Submit opt-out", url: "https://www.anywho.com/opt-out" },
+      { text: "Anywho: Submit opt-out", url: "https://www.anywho.com/optout" },
       { text: "QuickPeopleTrace: Submit opt-out", url: "https://www.quickpeopletrace.com/opt-out" },
       { text: "Usatrace: Submit opt-out", url: "https://www.usatrace.com/optout" },
     ],
@@ -408,7 +408,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Extended Sweep: Professional & B2B",
     briefing: "RocketReach scrapes LinkedIn and public records to build professional profiles — your email, phone, employer, and job title packaged for sales teams and recruiters. FindPeopleSearch and Findpeoplesearch aggregate public records into searchable profiles.",
     steps: [
-      { text: "RocketReach: Submit opt-out (may need to create account first)", url: "https://rocketreach.co/person/optout" },
+      { text: "RocketReach: Submit profile removal request", url: "https://rocketreach.co/remove-profile" },
       { text: "FindPeopleSearch: Submit opt-out", url: "https://www.findpeoplesearch.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -435,7 +435,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Read what LexisNexis collects about you on their opt-out page", url: "https://optout.lexisnexis.com/" },
       { text: "Read about Thomson Reuters CLEAR -- this is the tool investigators use", url: "https://legalsolutions.thomsonreuters.com/law-products/clear/consumer-privacy-form" },
-      { text: "Look up Equifax Workforce Solutions (The Work Number) -- your employer reports your salary here every pay period", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
+      { text: "Look up Equifax Workforce Solutions (The Work Number) -- your employer reports your salary here every pay period", url: "https://employees.theworknumber.com/" },
       { text: "Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement" },
     ],
     debriefQs: BROKER_RECON_DEBRIEF,
@@ -499,10 +499,10 @@ export const RECLAMATION_MISSIONS = [
     id: "enterprise_data-fortify-property",
     accountId: "enterprise_data",
     phase: "fortify",
-    title: "Opt Out: CoreLogic & TransUnion TLO",
-    briefing: "CoreLogic owns the property records database behind every landlord background check -- your rental history, ownership records, and tenant screening data. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
+    title: "Opt Out: Cotality (CoreLogic) & TransUnion TLO",
+    briefing: "Cotality (formerly CoreLogic) owns the property records database behind every landlord background check -- your rental history, ownership records, and tenant screening data. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
     steps: [
-      { text: "Submit a CoreLogic consumer privacy request", url: "https://www.corelogic.com/privacy/consumer-data-privacy-request/" },
+      { text: "Submit a Cotality (formerly CoreLogic) consumer privacy request -- visit cotality.com/privacy", url: "https://www.cotality.com/privacy" },
       { text: "Submit a TransUnion consumer privacy request (TLO is included)", url: "https://www.transunion.com/consumer-privacy" },
       { text: "Note: TransUnion TLO is separate from your credit freeze -- opting out here does not affect your credit file or freeze" },
     ],
@@ -524,8 +524,8 @@ export const RECLAMATION_MISSIONS = [
     title: "The Deep Layer: Remaining Aggregators",
     briefing: "The rest of the wholesale layer. Verisk has every auto and home insurance claim you've filed. Equifax Workforce Solutions (The Work Number) has your salary from every paycheck -- your employer reports it there. Data Axle has 300 million consumer records. Sift Science assigns you a secret \"trust score\" based on your behavior across websites. These are the companies nobody's heard of that have the most data.",
     steps: [
-      { text: "Opt out of Verisk / ISO ClaimSearch (insurance claims)", url: "https://www.verisk.com/privacy-notice/" },
-      { text: "Contact Equifax Workforce Solutions about your data (The Work Number)", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
+      { text: "Opt out of Verisk / ISO ClaimSearch (insurance claims)", url: "https://fcra.verisk.com/#/" },
+      { text: "Contact Equifax Workforce Solutions about your data (The Work Number)", url: "https://employees.theworknumber.com/" },
       { text: "Opt out of Data Axle (300M consumer records)", url: "https://www.data.com/consumer-access/" },
       { text: "Request your Sift Science trust score, then opt out", url: "https://sift.com/service-privacy" },
       { text: "Opt out of Merlin Information Services (utility connection records)", url: "https://merlindata.com/consumer-opt-out/" },
@@ -553,7 +553,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Intel Brief: Ad & Tracking Brokers",
     briefing: "People-search brokers sell your identity. Ad data brokers sell your behavior -- what you browse, buy, search for, and where you go. These profiles include your real name, email, phone, home address, and detailed behavioral data. The distinction matters: people-search opt-outs remove your public records. Ad network opt-outs remove your behavioral profile.",
     steps: [
-      { text: "Check what Google knows about your ad profile", url: "https://myadcenter.google.com/personalization" },
+      { text: "Check what Google knows about your ad profile", url: "https://myadcenter.google.com/home" },
       { text: "Check what Meta/Facebook knows about your ad profile", url: "https://www.facebook.com/adpreferences/ad_settings" },
       { text: "On your phone, check how many apps have tracking permission (iOS: Settings → Privacy → Tracking)" },
     ],
@@ -599,7 +599,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Platform Settings: Google, Meta, Apple",
     briefing: "Google, Meta, and Apple are the three biggest advertising platforms. Each has ad personalization settings that control how much of your data feeds their ad targeting. Google and Meta default to maximum tracking. Apple defaults to asking per-app since iOS 14.5. These settings are buried but powerful.",
     steps: [
-      { text: "Google: Turn off Ad Personalization", url: "https://myadcenter.google.com/personalization" },
+      { text: "Google: Turn off Ad Personalization", url: "https://myadcenter.google.com/home" },
       { text: "Meta: Go to Ad Preferences → Ad Settings, limit data use for ads", url: "https://www.facebook.com/adpreferences/ad_settings" },
       { text: "Apple: Review App Tracking Transparency settings", url: "https://support.apple.com/en-us/HT212025" },
     ],
@@ -705,12 +705,12 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "fortify",
     title: "Opt Out: Location Data Companies",
-    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
+    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025 and has since been acquired by Unacast.",
     steps: [
       { text: "Opt out of SafeGraph -- email privacy@safegraph.com citing your right to data deletion", url: "https://www.safegraph.com/privacy-policy" },
       { text: "Opt out of X-Mode Social (Outlogic) via their web form", url: "https://xmode.io/opt-out/" },
-      { text: "Opt out of Placer.ai -- email privacy@placer.ai", url: "https://www.placer.ai/privacy" },
-      { text: "Opt out of Gravy Analytics -- email privacy@gravyanalytics.com", url: "https://gravyanalytics.com/privacy/" },
+      { text: "Opt out of Placer.ai -- email privacy@placer.ai", url: "https://www.placer.ai/privacy-policy" },
+      { text: "Opt out of Unacast (acquired Gravy Analytics) -- email privacy@unacast.com", url: "https://www.unacast.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
@@ -733,7 +733,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Submit through California DROP (covers Gravy Analytics and hundreds more)", url: "https://privacy.ca.gov/drop/" },
       { text: "Generate a GDPR erasure request if applicable (EU/UK)", url: "https://www.datarequests.org/generator/" },
       { text: "If any broker ignores your request: file an FTC complaint", url: "https://reportfraud.ftc.gov/" },
-      { text: "Also file with the California Privacy Protection Agency (CPPA)", url: "https://cppa.ca.gov/complaints/" },
+      { text: "Also file with the California Privacy Protection Agency (CPPA)", url: "https://cppa.ca.gov/webapplications/complaint" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {

@@ -1110,7 +1110,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: Amazon",
     briefing: "Amazon stores payment methods and your home address. 2FA here prevents unauthorized purchases even if your password leaks from another service. One reused password + one breach = someone else's packages on your card.",
     steps: [
-      { text: 'Open Amazon Login & Security', url: 'https://www.amazon.com/gp/css/account/info/ref=ya_manage_login_and_security' },
+      { text: 'Open Amazon Login & Security', url: 'https://www.amazon.com/ax/account/manage' },
       { text: `Click "Edit" next to Password → open your password manager, generate a random 20+ character password, save it, paste in` },
       { text: `Click "Edit" next to "Two-Step Verification (2SV)" → click "Get Started"` },
       { text: `Choose "Authenticator app" → scan the QR code → enter the 6-digit code to confirm` },
@@ -1255,9 +1255,9 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Privacy & Location Review: Uber",
     briefing: "Uber has a GPS trace of everywhere you've ever ridden -- your home, your workplace, your doctor, your ex's apartment. That's some of the most sensitive location data any company holds on you. Review what they share and set a strong password while you're in there.",
     steps: [
-      { text: 'Open Uber Account Settings', url: 'https://account.uber.com/safety-security' },
+      { text: 'Open Uber Privacy Center', url: 'https://www.uber.com/us/en/privacy/' },
       { text: "Change your password to a unique one -- open your password manager, generate 20+ characters, save, paste" },
-      { text: 'Go to Uber Privacy Settings', url: 'https://account.uber.com/privacy' },
+      { text: 'Manage Uber privacy settings in the app: Account → Settings → Privacy', },
       { text: `Review "Data sharing" and "Advertising preferences" -- limit what you can` },
       { text: `Consider downloading your data (Uber → Account → Privacy → "Download your data") to see what they have` },
     ],
