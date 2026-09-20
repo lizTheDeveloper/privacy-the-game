@@ -152,8 +152,8 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "The trail you leave without thinking about it. Your Amazon wishlist is public by default — it shows your name and city. Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
     steps: [
       { text: "Check your Amazon wishlist privacy: go to Your Lists, click the three dots, check sharing settings. Public? Semi-public? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
-      { text: "Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.", url: "https://venmo.com/account/settings/privacy" },
-      { text: "If you use Strava or a fitness tracker: check your heatmap. Does your running/cycling route reveal your home address?", url: "https://www.strava.com/athlete/heatmap" },
+      { text: "Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.", url: "https://account.venmo.com/settings/privacy" },
+      { text: "If you use Strava or a fitness tracker: review your activity privacy settings. Does your running/cycling route reveal your home address? In the app: Settings > Privacy Controls > enable a Privacy Zone around your home address.", url: "https://www.strava.com/settings/privacy" },
       { text: "Search your recent screenshots — any showing WiFi network names? An SSID can be looked up on WiGLE to find your physical location.", url: "https://wigle.net/" },
       { text: "Check unboxing or haul videos you've posted. Any delivery labels, packaging with your address, or mail visible in the background?" },
       { text: "Google your full name in quotes. Then try your name + city. Then your name + employer. What does a stranger find?" },
