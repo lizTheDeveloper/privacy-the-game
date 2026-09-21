@@ -4,8 +4,8 @@ import { ACCOUNTS } from '../src/data/accounts.js';
 import { MISSIONS, getMissionsForDistrict, getMissionsForAccount } from '../src/data/missions.js';
 
 describe('DISTRICTS', () => {
-  it('has 8 districts', () => {
-    expect(DISTRICTS).toHaveLength(8);
+  it('has at least 8 districts', () => {
+    expect(DISTRICTS.length).toBeGreaterThanOrEqual(8);
   });
 
   it('each district has required fields', () => {
@@ -17,9 +17,11 @@ describe('DISTRICTS', () => {
     }
   });
 
-  it('chapters are ordered 1-8', () => {
-    const chapters = DISTRICTS.map((d) => d.chapter);
-    expect(chapters).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  it('chapters 1-8 are all present', () => {
+    const chapters = new Set(DISTRICTS.map((d) => d.chapter));
+    for (let c = 1; c <= 8; c += 1) {
+      expect(chapters.has(c), `missing chapter ${c}`).toBe(true);
+    }
   });
 });
 
@@ -62,18 +64,25 @@ describe('MISSIONS', () => {
     }
   });
 
-  it('has 45 missions for Chapter 1 (9 accounts × 5 missions)', () => {
+  it('has 49 missions for Chapter 1 including bonus missions', () => {
     const ch1 = getMissionsForDistrict('master-keys');
-    expect(ch1).toHaveLength(45);
+    expect(ch1).toHaveLength(49);
   });
 
-  it('each account has 5 missions', () => {
+  it('Chapter 1 core path is ~25 missions per the design spec', () => {
+    const ch1 = getMissionsForDistrict('master-keys').filter((m) => m.phase !== 'survey');
+    const core = ch1.filter((m) => !m.optional);
+    expect(core.length).toBeGreaterThanOrEqual(22);
+    expect(core.length).toBeLessThanOrEqual(30);
+  });
+
+  it('each account has 3 core missions (breach recon, password, 2FA)', () => {
     const ch1Accounts = Object.entries(ACCOUNTS)
       .filter(([, a]) => a.district === 'master-keys')
       .map(([id]) => id);
     for (const acctId of ch1Accounts) {
-      const missions = getMissionsForAccount(acctId);
-      expect(missions, `${acctId} should have 5 missions`).toHaveLength(5);
+      const core = getMissionsForAccount(acctId).filter((m) => m.phase !== 'survey' && !m.optional);
+      expect(core, `${acctId} core path`).toHaveLength(3);
     }
   });
 

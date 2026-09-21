@@ -1,6 +1,6 @@
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
-import { calcDistrictProgress } from '../utils/calc.js';
+import { calcDistrictProgress, isCoreMission } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
@@ -75,7 +75,14 @@ function nextAvailableMission(state) {
   for (const phase of PHASE_ORDER) {
     const mission = MISSIONS.find((m) => {
       const account = state.accounts[m.accountId];
-      return m.phase === phase && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
+      return m.phase === phase && isCoreMission(m) && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
+    });
+    if (mission) return mission;
+  }
+  for (const phase of PHASE_ORDER) {
+    const mission = MISSIONS.find((m) => {
+      const account = state.accounts[m.accountId];
+      return m.phase === phase && m.optional && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
     });
     if (mission) return mission;
   }
@@ -204,7 +211,7 @@ const GROUND_H = TH * 19;
 function renderDistrictLabels(state, startHere) {
   return BLOCK_DEFS.map((def) => {
     const district = DISTRICTS.find((d) => d.id === def.district);
-    const { percent, completed, total } = calcDistrictProgress(state, district.id);
+    const { percent, completed, total, bonusTotal, bonusCompleted } = calcDistrictProgress(state, district.id);
     const status = districtStatus(percent);
     const isMaster = district.id === 'master-keys';
     const { side, top } = def.label;
@@ -222,6 +229,7 @@ function renderDistrictLabels(state, startHere) {
       const lit = percent >= (c + 1) * 10 - 5;
       return `<i class="${lit ? 'lit' : ''}"></i>`;
     }).join('');
+    const bonus = bonusTotal > 0 ? ` <span style="color: ${percent >= 100 ? 'var(--lime)' : 'rgba(0,229,255,0.45)'};">+ ${percent >= 100 ? `${bonusCompleted}/${bonusTotal}` : `${bonusTotal}`} BONUS</span>` : '';
     return `
     <a href="#/district/${district.id}" class="${classes.join(' ')}" style="${posStyle}">
       <span class="city-label__tick"></span>
@@ -234,7 +242,7 @@ function renderDistrictLabels(state, startHere) {
         <div class="city-label__bar">${cells}</div>
         <span class="city-label__pct">${percent}%</span>
       </div>
-      <div class="city-label__sub">${total ? `${completed}/${total} MISSIONS` : 'SURVEY TO UNLOCK'}</div>
+      <div class="city-label__sub">${total ? `${completed}/${total} MISSIONS${bonus}` : 'SURVEY TO UNLOCK'}</div>
       ${startTag}
     </a>`;
   }).join('');

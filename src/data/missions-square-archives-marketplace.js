@@ -1404,6 +1404,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
   // --- FACEBOOK ---
   {
     id: 'facebook-reclaim-prep',
+    optional: true,
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Memory Lane Prep: Facebook',
@@ -1433,6 +1434,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
   },
   {
     id: 'facebook-reclaim-early',
+    optional: true,
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Memory Lane: Facebook Early Years',
@@ -1464,6 +1466,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
   },
   {
     id: 'facebook-reclaim-middle',
+    optional: true,
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Memory Lane: Facebook Next Year',
@@ -1496,6 +1499,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
   },
   {
     id: 'facebook-reclaim-recent',
+    optional: true,
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Memory Lane: Facebook Recent + Tags',

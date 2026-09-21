@@ -135,8 +135,11 @@ function renderMissionRow(state, mission) {
     <div style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
+      ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
     </div>
-    <div class="badge" style="letter-spacing: 1px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15);">${esc(mission.phase).toUpperCase()}</div>
+    ${mission.optional
+      ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
+      : `<div class="badge" style="letter-spacing: 1px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15);">${esc(mission.phase).toUpperCase()}</div>`}
     <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); white-space: nowrap;">~${mission.estimatedMinutes} min</div>
     ${statusCell}
   </div>`;
@@ -148,6 +151,7 @@ function renderMissionList(state, districtId, activeTab) {
   const missions = getMissionsForDistrict(districtId).filter(
     (m) => m.phase === activeTab && state.accounts[m.accountId]?.enabled,
   );
+  missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0));
   if (missions.length === 0) {
     return `
     <div style="padding: 12px 24px 24px;">

@@ -15,12 +15,19 @@ function yahooReconIds(state) {
 }
 
 describe('getAccountPhaseGate (per-account progression)', () => {
-  it('locks an account whose prereq-phase missions are incomplete', () => {
+  it('locks an account whose core prereq-phase missions are incomplete', () => {
     const state = createInitialState();
     const gate = getAccountPhaseGate(state, 'master-keys', 'yahoo', 'recon');
-    expect(gate.total).toBe(2);
-    expect(gate.remaining).toBe(2);
+    expect(gate.total).toBe(1);
+    expect(gate.remaining).toBe(1);
     expect(gate.unlocked).toBe(false);
+  });
+
+  it('ignores optional bonus missions when computing the prereq gate', () => {
+    let state = createInitialState();
+    state = completeMission(state, 'yahoo-recon-breach');
+    expect(getAccountPhaseGate(state, 'master-keys', 'yahoo', 'recon').unlocked).toBe(true);
+    expect(getAccountPhaseGate(state, 'master-keys', 'yahoo', 'recon').total).toBe(1);
   });
 
   it('unlocks only the account whose own prereq missions are all completed', () => {

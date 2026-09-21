@@ -75,6 +75,7 @@ export function renderBriefing(state, missionId) {
 
         <div style="display: flex; gap: 8px; margin-bottom: 24px;">
           <div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); padding: 4px 12px; letter-spacing: 1px;">${mission.phase.toUpperCase()} MISSION</div>
+          ${mission.optional ? `<div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px;">BONUS &mdash; NEVER BLOCKS PROGRESS</div>` : ''}
           <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~${mission.estimatedMinutes} MIN</div>
         </div>
 
