@@ -1,3 +1,5 @@
+import { eventHasOnlyThirdPartyFrames } from './errorNoise.js';
+
 const GLITCHTIP_DSN = 'https://23700b2a5cf74033b50abee4f4a43851@errors.multiversegames.ai/2';
 
 export function initErrorTracking() {
@@ -8,6 +10,7 @@ export function initErrorTracking() {
     environment: location.hostname === 'localhost' ? 'development' : 'production',
     sendDefaultPii: false,
     beforeSend(event) {
+      if (eventHasOnlyThirdPartyFrames(event, location.origin)) return null;
       if (event.breadcrumbs) {
         event.breadcrumbs = event.breadcrumbs.filter(
           (b) => b.category !== 'console' || !b.message?.includes('localStorage'),
