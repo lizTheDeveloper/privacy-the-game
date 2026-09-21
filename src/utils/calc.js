@@ -1,4 +1,4 @@
-import { MISSIONS, getMissionsForAccount } from '../data/missions.js';
+import { MISSIONS, getMissionsForAccount, getMissionsForDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 
 export function calcIntegrity(state) {
@@ -33,6 +33,14 @@ export function calcFindings(state) {
     twoFactorEnabled: missions.filter((m) => m.action === 'enabled-2fa').length,
     optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
   };
+}
+
+export function getAccountPhaseGate(state, districtId, accountId, prereqPhase) {
+  const prereqMissions = getMissionsForDistrict(districtId).filter(
+    (m) => m.phase === prereqPhase && m.accountId === accountId,
+  );
+  const remaining = prereqMissions.filter((m) => state.missions[m.id]?.status !== 'completed').length;
+  return { total: prereqMissions.length, remaining, unlocked: remaining === 0 };
 }
 
 export function getBuildingState(state, accountId) {

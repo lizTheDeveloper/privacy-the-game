@@ -1,7 +1,7 @@
 import { DISTRICTS } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict } from '../data/missions.js';
-import { calcDistrictProgress, getBuildingState } from '../utils/calc.js';
+import { calcDistrictProgress, getAccountPhaseGate, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
@@ -156,21 +156,33 @@ function renderMissionList(state, districtId, activeTab) {
   }
   const prereq = PHASE_PREREQ[activeTab];
   if (prereq) {
-    const prereqMissions = getMissionsForDistrict(districtId).filter(
-      (m) => m.phase === prereq && state.accounts[m.accountId]?.enabled,
-    );
-    const prereqDone = prereqMissions.length > 0 && prereqMissions.every((m) => state.missions[m.id]?.status === 'completed');
-    if (!prereqDone && prereqMissions.length > 0) {
-      const remaining = prereqMissions.filter((m) => state.missions[m.id]?.status !== 'completed').length;
-      return `
-      <div style="padding: 12px 24px 24px;">
-        <div class="panel" style="padding: 32px; text-align: center;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px;">COMPLETE ${prereq.toUpperCase()} FIRST</div>
-          <div style="font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6;">Finish the remaining ${remaining} ${prereq} mission${remaining === 1 ? '' : 's'} before moving to ${activeTab}.</div>
-          <div style="margin-top: 16px;"><a class="btn-secondary" style="text-decoration: none;" href="#/district/${districtId}?tab=${prereq}">GO TO ${prereq.toUpperCase()}</a></div>
-        </div>
-      </div>`;
+    const byAccount = new Map();
+    for (const m of missions) {
+      if (!byAccount.has(m.accountId)) byAccount.set(m.accountId, []);
+      byAccount.get(m.accountId).push(m);
     }
+    const blocks = [...byAccount.entries()].map(([accountId, accountMissions]) => {
+      const gate = getAccountPhaseGate(state, districtId, accountId, prereq);
+      if (gate.unlocked) {
+        return accountMissions.map((m) => renderMissionRow(state, m)).join('');
+      }
+      const accountName = ACCOUNTS[accountId]?.name || accountId;
+      return `
+      <div class="mission-row" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05);">
+        ${renderBuilding(accountId, getBuildingState(state, accountId), 32)}
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 13px; font-weight: 600; color: rgba(237,239,243,0.6);">Complete ${prereq.toUpperCase()} for ${esc(accountName)} first</div>
+          <div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Finish the remaining ${gate.remaining} ${prereq} mission${gate.remaining === 1 ? '' : 's'} for ${esc(accountName)} to unlock ${activeTab.toUpperCase()} for this building. Buildings you have fully cleared in ${prereq.toUpperCase()} stay open.</div>
+        </div>
+        <a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; white-space: nowrap;" href="#/district/${districtId}?tab=${prereq}">GO TO ${prereq.toUpperCase()}</a>
+      </div>`;
+    }).join('');
+    return `
+    <div style="padding: 12px 24px 24px;">
+      <div class="panel" style="padding: 4px;">
+        ${blocks}
+      </div>
+    </div>`;
   }
   return `
   <div style="padding: 12px 24px 24px;">
