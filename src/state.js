@@ -27,7 +27,16 @@ export function loadState(storage = localStorage) {
     const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return createInitialState();
     const parsed = JSON.parse(raw);
-    if (parsed.version !== STATE_VERSION) return createInitialState();
+    if (!parsed || parsed.version !== STATE_VERSION) return createInitialState();
+    // Older or corrupted saves (e.g. a write truncated mid-flight) can be
+    // missing whole object fields. Default them before use — reading
+    // `parsed.accounts[id]` with `accounts` undefined threw
+    // "Cannot read properties of undefined (reading 'gmail')" (the first
+    // account id in the default map) and bricked the game for that save.
+    if (!parsed.accounts || typeof parsed.accounts !== 'object') parsed.accounts = {};
+    if (!parsed.missions || typeof parsed.missions !== 'object') parsed.missions = {};
+    if (!parsed.vehicles || typeof parsed.vehicles !== 'object') parsed.vehicles = [];
+    if (!parsed.streak || typeof parsed.streak !== 'object') parsed.streak = { current: 0, best: 0, lastDate: null };
     for (const [id, a] of Object.entries(DEFAULT_ACCOUNTS)) {
       if (!parsed.accounts[id]) {
         parsed.accounts[id] = { enabled: true, name: a.name, district: a.district };
