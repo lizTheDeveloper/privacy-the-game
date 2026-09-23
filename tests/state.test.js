@@ -57,6 +57,38 @@ describe('loadState / saveState', () => {
     const loaded = loadState(mockStorage);
     expect(loaded.missions['gmail-recon-breach'].status).toBe('completed');
   });
+
+  it('does not throw when a stored state is missing the accounts object', () => {
+    // Regression: a save truncated/corrupted mid-write (or written by an older
+    // build) can lack `accounts`. loadState used to throw
+    // "Cannot read properties of undefined (reading 'gmail')" (the first
+    // account id in the default map) — GlitchTip mvee/190, GitHub #119.
+    store['reclaim-city-state'] = JSON.stringify({
+      version: STATE_VERSION,
+      missions: { 'gmail-recon-breach': { status: 'completed' } },
+    });
+    expect(() => loadState(mockStorage)).not.toThrow();
+    const state = loadState(mockStorage);
+    // Existing data survives and defaults fill the gap.
+    expect(state.missions['gmail-recon-breach'].status).toBe('completed');
+    expect(state.accounts.gmail).toEqual({ enabled: true, name: 'Gmail', district: 'master-keys' });
+  });
+
+  it('does not throw when a stored state is missing missions/vehicles/streak', () => {
+    store['reclaim-city-state'] = JSON.stringify({ version: STATE_VERSION, accounts: { gmail: { enabled: true } } });
+    expect(() => loadState(mockStorage)).not.toThrow();
+    const state = loadState(mockStorage);
+    expect(state.missions).toEqual({});
+    expect(state.vehicles).toEqual([]);
+    expect(state.streak).toEqual({ current: 0, best: 0, lastDate: null });
+    // updateStreak must work on the normalized state.
+    expect(() => updateStreak(state)).not.toThrow();
+  });
+
+  it('returns initial state for a stored value that parses to null', () => {
+    store['reclaim-city-state'] = 'null';
+    expect(loadState(mockStorage).version).toBe(STATE_VERSION);
+  });
 });
 
 describe('hasSavedState', () => {
