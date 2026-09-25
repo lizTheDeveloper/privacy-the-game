@@ -15,7 +15,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="style.css">
   <script src="https://browser.sentry-cdn.com/7.119.0/bundle.min.js" integrity="sha384-N/+t7zuoySxu9rbUlySpn5qv9w/rBT0D7HE35N2dXNy/1W68iV8i6hc13TPJnKOB" crossorigin="anonymous"></script>
-  <script>(function(){var s=document.createElement("script");s.defer=true;s.src=(location.hostname.endsWith("multiversestudios.xyz")?"https://analytics.multiversestudios.xyz":"https://analytics.multiversegames.ai")+"/script.js";s.setAttribute("data-website-id","38d680a7-28d1-42fd-9fd5-a66702675b88");document.head.appendChild(s);})();</script>
+  <!-- Reclaim City's own Umami property. Players can turn sharing off on the
+       Your City screen; then the script is never loaded (utils/analytics-pref.js). -->
+  <script>(function(){window.__rcLoadAnalytics=function(){if(window.__rcAnalyticsLoaded)return;window.__rcAnalyticsLoaded=true;var s=document.createElement("script");s.defer=true;s.src=(location.hostname.endsWith("multiversestudios.xyz")?"https://analytics.multiversestudios.xyz":"https://analytics.multiversegames.ai")+"/script.js";s.setAttribute("data-website-id","9a3e18e2-56a6-4b69-90af-d88db951b600");document.head.appendChild(s);};var off=false;try{off=localStorage.getItem("reclaim-city.analytics-off")==="1";}catch(e){}if(!off)window.__rcLoadAnalytics();})();</script>
 </head>
 <body>
   <div id="app"></div>

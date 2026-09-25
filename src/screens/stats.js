@@ -1,3 +1,4 @@
+import { isAnalyticsOff } from '../utils/analytics-pref.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICTS } from '../data/districts.js';
 import {
@@ -127,6 +128,11 @@ export function renderStats(state) {
         ${findingCard({ label: '2FA ENABLED', value: findings.twoFactorEnabled, color: '#C6FF00', tint: 'rgba(198,255,0,0.1)' })}
         ${findingCard({ label: 'OPT-OUTS FILED', value: findings.optOutsFiled, color: '#FF9F00', tint: 'rgba(255,159,0,0.1)' })}
       </div>
+    </div>
+    <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
+      <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
+      <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on.'}</div>
+      <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
     </div>
   </div>
 </div>`;

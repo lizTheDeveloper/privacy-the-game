@@ -1,3 +1,4 @@
+import { isAnalyticsOff, setAnalyticsOff } from './utils/analytics-pref.js';
 import { initRouter, navigate, parseRoute } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
@@ -203,6 +204,12 @@ app.addEventListener('click', async (e) => {
       if (typeof umami !== 'undefined' && umami.track) umami.track('account-toggled', { account: id, enabled });
       renderCurrentRoute();
     }
+  } else if (action === 'toggle-analytics') {
+    const off = !isAnalyticsOff();
+    setAnalyticsOff(off);
+    // Turning it back on in a session that never loaded the script: load it now.
+    if (!off && typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+    renderCurrentRoute();
   } else if (action === 'share-card') {
     handleShareCard(el.dataset.district);
   } else if (action === 'quiz-verdict') {
