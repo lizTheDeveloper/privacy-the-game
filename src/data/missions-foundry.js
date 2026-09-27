@@ -148,7 +148,7 @@ export const FOUNDRY_MISSIONS = [
     title: 'AI Training Audit: ChatGPT',
     briefing: "OpenAI uses your ChatGPT conversations to improve their models unless you opt out. Every prompt, every uploaded file, every code snippet you paste — it all potentially feeds the next training run. Business and API users are excluded by default, but consumer users are opted in.",
     steps: [
-      { text: 'Open ChatGPT Settings', url: 'https://chat.openai.com/settings' },
+      { text: 'Open ChatGPT Settings', url: 'https://chatgpt.com/settings' },
       { text: 'Go to Data controls' },
       { text: 'Check if "Improve the model for everyone" is toggled on' },
       { text: 'Review what data ChatGPT stores about you' },
@@ -172,7 +172,7 @@ export const FOUNDRY_MISSIONS = [
     title: 'Disable ChatGPT Training',
     briefing: "One toggle stops OpenAI from using your conversations to train future models. Your chats still work normally — you just stop contributing to the training dataset.",
     steps: [
-      { text: 'Open ChatGPT Settings', url: 'https://chat.openai.com/settings' },
+      { text: 'Open ChatGPT Settings', url: 'https://chatgpt.com/settings' },
       { text: 'Click "Data controls"' },
       { text: 'Toggle off "Improve the model for everyone"' },
       { text: 'Confirm the change is saved' },
