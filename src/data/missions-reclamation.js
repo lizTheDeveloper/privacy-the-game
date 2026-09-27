@@ -312,7 +312,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Radaris: Go to privacy control, search your name, request removal", url: "https://radaris.com/control/privacy" },
       { text: "USPhonebook: Submit opt-out", url: "https://www.usphonebook.com/opt-out" },
       { text: "ThatsThem: Submit opt-out", url: "https://thatsthem.com/optout" },
-      { text: "PeopleFinder: Submit opt-out", url: "https://www.peoplefinder.com/optout" },
+      { text: "PeopleFinder: Go to their opt-out page (search 'peoplefinder optout' if the direct link fails)", url: "https://www.peoplefinders.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
@@ -386,7 +386,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "PeopleWhiz (covers all Peoplewiz* mirrors): Submit removal", url: "https://www.peoplewhiz.com/remove-my-info" },
       { text: "SpyDialer: Submit opt-out", url: "https://www.spydialer.com/optout.aspx" },
-      { text: "Anywho: Submit opt-out", url: "https://www.anywho.com/opt-out" },
+      { text: "Anywho: Submit opt-out (if the direct opt-out page is unavailable, email privacy@anywho.com with a CCPA deletion request)", url: "https://www.anywho.com/" },
       { text: "QuickPeopleTrace: Submit opt-out", url: "https://www.quickpeopletrace.com/opt-out" },
       { text: "Usatrace: Submit opt-out", url: "https://www.usatrace.com/optout" },
     ],
@@ -408,7 +408,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Extended Sweep: Professional & B2B",
     briefing: "RocketReach scrapes LinkedIn and public records to build professional profiles — your email, phone, employer, and job title packaged for sales teams and recruiters. FindPeopleSearch and Findpeoplesearch aggregate public records into searchable profiles.",
     steps: [
-      { text: "RocketReach: Submit opt-out (may need to create account first)", url: "https://rocketreach.co/person/optout" },
+      { text: "RocketReach: Submit opt-out via their privacy page (may need to create account first)", url: "https://rocketreach.co/privacy" },
       { text: "FindPeopleSearch: Submit opt-out", url: "https://www.findpeoplesearch.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -431,16 +431,16 @@ export const RECLAMATION_MISSIONS = [
     accountId: "enterprise_data",
     phase: "recon",
     title: "Intel Brief: The Data Supply Chain",
-    briefing: "People-search sites are the retail end of the data broker economy. Enterprise aggregators are the wholesale end. Companies like LexisNexis, Thomson Reuters, and CoreLogic buy records from courts, utilities, employers, and DMVs -- then repackage everything into profiles they sell to banks, insurers, employers, landlords, and law enforcement. Even if you removed yourself from Spokeo and Whitepages, LexisNexis still has your data because they buy from different sources. You have to opt out of both layers.",
+    briefing: "People-search sites are the retail end of the data broker economy. Enterprise aggregators are the wholesale end. Companies like LexisNexis, Thomson Reuters, and Cotality (formerly CoreLogic) buy records from courts, utilities, employers, and DMVs -- then repackage everything into profiles they sell to banks, insurers, employers, landlords, and law enforcement. Even if you removed yourself from Spokeo and Whitepages, LexisNexis still has your data because they buy from different sources. You have to opt out of both layers.",
     steps: [
       { text: "Read what LexisNexis collects about you on their opt-out page", url: "https://optout.lexisnexis.com/" },
       { text: "Read about Thomson Reuters CLEAR -- this is the tool investigators use", url: "https://legalsolutions.thomsonreuters.com/law-products/clear/consumer-privacy-form" },
-      { text: "Look up Equifax Workforce Solutions (The Work Number) -- your employer reports your salary here every pay period", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
+      { text: "Look up Equifax Workforce Solutions (The Work Number) -- your employer reports your salary here every pay period", url: "https://employees.theworknumber.com/" },
       { text: "Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement" },
     ],
     debriefQs: BROKER_RECON_DEBRIEF,
     scoutDialog: {
-      briefing: "\"People-search sites are the corner stores. Enterprise aggregators are the warehouses. LexisNexis sells to law enforcement, insurance, and landlords. Thomson Reuters CLEAR is what investigators actually use to find people. CoreLogic knows every property you've ever rented or owned. And Equifax Workforce Solutions -- separate from your credit file -- has your employment and salary history because your employer reports every paycheck there. The supply chain goes: public records flow into brokers, brokers sell to aggregators, aggregators sell to banks, insurers, landlords, and law enforcement. You have to cut the chain at every level.\"",
+      briefing: "\"People-search sites are the corner stores. Enterprise aggregators are the warehouses. LexisNexis sells to law enforcement, insurance, and landlords. Thomson Reuters CLEAR is what investigators actually use to find people. Cotality (formerly CoreLogic) knows every property you've ever rented or owned. And Equifax Workforce Solutions -- separate from your credit file -- has your employment and salary history because your employer reports every paycheck there. The supply chain goes: public records flow into brokers, brokers sell to aggregators, aggregators sell to banks, insurers, landlords, and law enforcement. You have to cut the chain at every level.\"",
       debrief: {
         "not-found": "\"Unusual. Either you're very new to the system or very good at staying out of it.\"",
         "found-some": "\"Some enterprise exposure. Normal -- these companies have been building profiles for decades.\"",
@@ -499,16 +499,16 @@ export const RECLAMATION_MISSIONS = [
     id: "enterprise_data-fortify-property",
     accountId: "enterprise_data",
     phase: "fortify",
-    title: "Opt Out: CoreLogic & TransUnion TLO",
-    briefing: "CoreLogic owns the property records database behind every landlord background check -- your rental history, ownership records, and tenant screening data. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
+    title: "Opt Out: Cotality (CoreLogic) & TransUnion TLO",
+    briefing: "Cotality (formerly CoreLogic) owns the property records database behind every landlord background check -- your rental history, ownership records, and tenant screening data. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
     steps: [
-      { text: "Submit a CoreLogic consumer privacy request", url: "https://www.corelogic.com/privacy/consumer-data-privacy-request/" },
+      { text: "Submit a Cotality (formerly CoreLogic) consumer privacy request via their privacy policy page", url: "https://www.cotality.com/legal/privacy-policy" },
       { text: "Submit a TransUnion consumer privacy request (TLO is included)", url: "https://www.transunion.com/consumer-privacy" },
       { text: "Note: TransUnion TLO is separate from your credit freeze -- opting out here does not affect your credit file or freeze" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"CoreLogic knows every property you've ever rented or owned. Every landlord background check flows through them. TransUnion TLO is their skip-tracing product -- it's a separate database from your credit file. Freezing your credit at TransUnion does NOT freeze TLO. You have to opt out separately. Most people don't know this.\"",
+      briefing: "\"Cotality (formerly CoreLogic) knows every property you've ever rented or owned. Every landlord background check flows through them. TransUnion TLO is their skip-tracing product -- it's a separate database from your credit file. Freezing your credit at TransUnion does NOT freeze TLO. You have to opt out separately. Most people don't know this.\"",
       debrief: {
         "all-submitted": "\"Property and skip-tracing databases -- both processing your removal. Two more layers of the supply chain severed.\"",
         "some-submitted": "\"One down. Come back for the other -- both matter if you've ever rented.\"",
@@ -524,8 +524,8 @@ export const RECLAMATION_MISSIONS = [
     title: "The Deep Layer: Remaining Aggregators",
     briefing: "The rest of the wholesale layer. Verisk has every auto and home insurance claim you've filed. Equifax Workforce Solutions (The Work Number) has your salary from every paycheck -- your employer reports it there. Data Axle has 300 million consumer records. Sift Science assigns you a secret \"trust score\" based on your behavior across websites. These are the companies nobody's heard of that have the most data.",
     steps: [
-      { text: "Opt out of Verisk / ISO ClaimSearch (insurance claims)", url: "https://www.verisk.com/privacy-notice/" },
-      { text: "Contact Equifax Workforce Solutions about your data (The Work Number)", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
+      { text: "Opt out of Verisk / ISO ClaimSearch (insurance claims) -- email privacy@verisk.com with a CCPA deletion request or visit their main privacy page", url: "https://www.verisk.com/" },
+      { text: "Contact Equifax Workforce Solutions about your data (The Work Number)", url: "https://employees.theworknumber.com/" },
       { text: "Opt out of Data Axle (300M consumer records)", url: "https://www.data.com/consumer-access/" },
       { text: "Request your Sift Science trust score, then opt out", url: "https://sift.com/service-privacy" },
       { text: "Opt out of Merlin Information Services (utility connection records)", url: "https://merlindata.com/consumer-opt-out/" },
@@ -553,7 +553,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Intel Brief: Ad & Tracking Brokers",
     briefing: "People-search brokers sell your identity. Ad data brokers sell your behavior -- what you browse, buy, search for, and where you go. These profiles include your real name, email, phone, home address, and detailed behavioral data. The distinction matters: people-search opt-outs remove your public records. Ad network opt-outs remove your behavioral profile.",
     steps: [
-      { text: "Check what Google knows about your ad profile", url: "https://myadcenter.google.com/personalization" },
+      { text: "Check what Google knows about your ad profile", url: "https://myadcenter.google.com/" },
       { text: "Check what Meta/Facebook knows about your ad profile", url: "https://www.facebook.com/adpreferences/ad_settings" },
       { text: "On your phone, check how many apps have tracking permission (iOS: Settings → Privacy → Tracking)" },
     ],
@@ -599,7 +599,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Platform Settings: Google, Meta, Apple",
     briefing: "Google, Meta, and Apple are the three biggest advertising platforms. Each has ad personalization settings that control how much of your data feeds their ad targeting. Google and Meta default to maximum tracking. Apple defaults to asking per-app since iOS 14.5. These settings are buried but powerful.",
     steps: [
-      { text: "Google: Turn off Ad Personalization", url: "https://myadcenter.google.com/personalization" },
+      { text: "Google: Turn off Ad Personalization", url: "https://myadcenter.google.com/" },
       { text: "Meta: Go to Ad Preferences → Ad Settings, limit data use for ads", url: "https://www.facebook.com/adpreferences/ad_settings" },
       { text: "Apple: Review App Tracking Transparency settings", url: "https://support.apple.com/en-us/HT212025" },
     ],
@@ -705,19 +705,19 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "fortify",
     title: "Opt Out: Location Data Companies",
-    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
+    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. Outlogic (formerly X-Mode Social) sold prayer app data to the military. Gravy Analytics was breached in 2025 and subsequently acquired by Unacast.",
     steps: [
       { text: "Opt out of SafeGraph -- email privacy@safegraph.com citing your right to data deletion", url: "https://www.safegraph.com/privacy-policy" },
-      { text: "Opt out of X-Mode Social (Outlogic) via their web form", url: "https://xmode.io/opt-out/" },
-      { text: "Opt out of Placer.ai -- email privacy@placer.ai", url: "https://www.placer.ai/privacy" },
-      { text: "Opt out of Gravy Analytics -- email privacy@gravyanalytics.com", url: "https://gravyanalytics.com/privacy/" },
+      { text: "Opt out of Outlogic (formerly X-Mode Social) via their web form", url: "https://outlogic.io/opt-out-form/" },
+      { text: "Opt out of Placer.ai -- email privacy@placer.ai", url: "https://www.placer.ai/privacy-policy" },
+      { text: "Opt out of Unacast (acquired Gravy Analytics in 2025) -- email privacy@unacast.com", url: "https://www.unacast.com/privacy" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"These companies buy your GPS data from apps, package it into movement profiles, and sell it. SafeGraph to hedge funds. X-Mode to the US military. Near Intelligence to anti-abortion groups. Most hide their opt-outs behind email addresses instead of web forms. They're betting you won't bother. Prove them wrong.\"",
+      briefing: "\"These companies buy your GPS data from apps, package it into movement profiles, and sell it. SafeGraph to hedge funds. Outlogic (formerly X-Mode) to the US military. Near Intelligence to anti-abortion groups. Most hide their opt-outs behind email addresses instead of web forms. They're betting you won't bother. Prove them wrong.\"",
       debrief: {
         "all-submitted": "\"Location broker opt-outs submitted. Email ones take longer -- follow up if you don't get confirmation within 30 days.\"",
-        "some-submitted": "\"Partial progress. X-Mode and SafeGraph are the highest priority if you can only do two.\"",
+        "some-submitted": "\"Partial progress. Outlogic and SafeGraph are the highest priority if you can only do two.\"",
         "skip": "\"Location data is the most sensitive category. Come back when you can send a few emails.\"",
       },
     },
@@ -728,12 +728,12 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "reclaim",
     title: "Legal Tools: DROP + GDPR + Complaints",
-    briefing: "For location brokers without opt-out pages -- or to catch ones you missed -- use the legal tools. California DROP covers Gravy Analytics (they're registered). GDPR erasure requests work for EU/UK data. And filing complaints creates the paper trail regulators use to build enforcement cases -- the FTC has banned three location brokers since 2024.",
+    briefing: "For location brokers without opt-out pages -- or to catch ones you missed -- use the legal tools. California DROP covers Unacast/Gravy Analytics and hundreds more registered brokers. GDPR erasure requests work for EU/UK data. And filing complaints creates the paper trail regulators use to build enforcement cases -- the FTC has banned three location brokers since 2024.",
     steps: [
-      { text: "Submit through California DROP (covers Gravy Analytics and hundreds more)", url: "https://privacy.ca.gov/drop/" },
+      { text: "Submit through California DROP (covers Unacast/Gravy Analytics and hundreds more registered brokers)", url: "https://privacy.ca.gov/drop/" },
       { text: "Generate a GDPR erasure request if applicable (EU/UK)", url: "https://www.datarequests.org/generator/" },
       { text: "If any broker ignores your request: file an FTC complaint", url: "https://reportfraud.ftc.gov/" },
-      { text: "Also file with the California Privacy Protection Agency (CPPA)", url: "https://cppa.ca.gov/complaints/" },
+      { text: "Also file with the California Privacy Protection Agency (CPPA)", url: "https://cppa.ca.gov/" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
