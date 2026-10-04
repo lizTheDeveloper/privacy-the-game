@@ -26,7 +26,7 @@ export const FOUNDRY_ACCOUNTS = {
     district: 'foundry',
     building: 'assets/buildings/ai_openai.png',
     buildingDark: 'assets/buildings/ai_openai_dark.png',
-    securityUrl: 'https://chat.openai.com/settings',
+    securityUrl: 'https://chatgpt.com/settings',
     riskLevel: 'high',
     dataCollected: ['prompts', 'uploaded files', 'conversation history'],
     settingsPath: 'Settings > Data controls > "Improve the model for everyone"',

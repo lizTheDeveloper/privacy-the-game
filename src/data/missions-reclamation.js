@@ -526,9 +526,9 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Opt out of Verisk / ISO ClaimSearch (insurance claims)", url: "https://www.verisk.com/privacy-notice/" },
       { text: "Contact Equifax Workforce Solutions about your data (The Work Number)", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
-      { text: "Opt out of Data Axle (300M consumer records)", url: "https://www.data.com/consumer-access/" },
+      { text: "Opt out of Data Axle (300M consumer records)", url: "https://www.data-axle.com/do-not-sell-my-data/" },
       { text: "Request your Sift Science trust score, then opt out", url: "https://sift.com/service-privacy" },
-      { text: "Opt out of Merlin Information Services (utility connection records)", url: "https://merlindata.com/consumer-opt-out/" },
+      { text: "Opt out of Merlin Information Services (utility connection records) -- submit request to privacy@merlindata.com (website is down)" },
       { text: "Opt out of Tracers (debt collectors and PIs)", url: "https://www.tracersinfo.com/consumer-privacy/" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -625,7 +625,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Opt out of Acxiom -- one of the oldest and largest consumer data brokers", url: "https://www.acxiom.com/opt-out/" },
       { text: "Opt out of Oracle Data Cloud / BlueKai", url: "https://www.oracle.com/legal/privacy/advertising-privacy-policy.html#optout" },
       { text: "Opt out of Lotame (cross-device audience data)", url: "https://www.lotame.com/about-lotame/privacy/lotames-products-services-privacy-policy/" },
-      { text: "Opt out of Epsilon (breached in 2019)", url: "https://www.epsilon.com/us/consumer-information" },
+      { text: "Opt out of Epsilon (breached in 2019)", url: "https://legal.epsilon.com/us/consumer-information" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
@@ -705,12 +705,12 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "fortify",
     title: "Opt Out: Location Data Companies",
-    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
+    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (rebranded as Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025 and has since merged with Unacast.",
     steps: [
       { text: "Opt out of SafeGraph -- email privacy@safegraph.com citing your right to data deletion", url: "https://www.safegraph.com/privacy-policy" },
-      { text: "Opt out of X-Mode Social (Outlogic) via their web form", url: "https://xmode.io/opt-out/" },
+      { text: "Opt out of Outlogic (formerly X-Mode Social) via their web form", url: "https://outlogic.io/opt-out/" },
       { text: "Opt out of Placer.ai -- email privacy@placer.ai", url: "https://www.placer.ai/privacy" },
-      { text: "Opt out of Gravy Analytics -- email privacy@gravyanalytics.com", url: "https://gravyanalytics.com/privacy/" },
+      { text: "Opt out of Gravy Analytics (now Unacast) -- use their opt-out form", url: "https://www.unacast.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
