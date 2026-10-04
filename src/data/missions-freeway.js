@@ -256,7 +256,7 @@ const GENERAL_MISSIONS = [
       { text: 'Open Vehicle Privacy Report', url: 'https://vehicleprivacyreport.com/' },
       { text: 'Enter your VIN (found on registration or driver-side door jamb)' },
       { text: 'Review the report — note data categories and risk level' },
-      { text: 'Check Mozilla\'s Privacy Not Included for your make', url: 'https://foundation.mozilla.org/en/privacynotincluded/categories/cars/' },
+      { text: 'Check Mozilla\'s Privacy Not Included for your make', url: 'https://www.mozillafoundation.org/en/privacynotincluded/categories/cars/' },
     ],
     debriefQs: CAR_AUDIT_DEBRIEF,
     scoutDialog: {
