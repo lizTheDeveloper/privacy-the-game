@@ -83,7 +83,7 @@ export const ACCOUNTS_SAM_ADDITIONS = {
     building: 'assets/buildings/iso_occupied.png',
     buildingDark: 'assets/buildings/iso_occupied.png',
     buildingLib: 'assets/buildings/iso_liberated.png',
-    securityUrl: 'https://account.uber.com/safety-security',
+    securityUrl: 'https://www.uber.com/us/en/privacy/',
     riskLevel: 'medium',
   },
 };

@@ -58,7 +58,7 @@ export const FREEWAY_ACCOUNTS = {
     district: 'freeway',
     building: 'assets/buildings/car_kia.png',
     buildingDark: 'assets/buildings/car_kia_dark.png',
-    securityUrl: 'https://ksupport.kiausa.com/ConsumerAffairs',
+    securityUrl: 'https://www.kia.com/us/en/privacy.html',
     riskLevel: 'high',
     dataCollected: ['driving score', 'insurance data', 'location', 'diagnostics'],
     insuranceProgram: 'Driving Score',

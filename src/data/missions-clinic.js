@@ -162,7 +162,7 @@ export const CLINIC_MISSIONS = [
     title: "Review Mental Health App Data Practices",
     briefing: "BetterHelp, the largest online therapy platform, paid a $7.8 million FTC settlement in 2023 for sharing therapy data with Facebook for ad targeting. They embedded the Facebook pixel on their intake questionnaire -- the form where you describe your mental health struggles. Facebook used this to target ads at you. Cerebral shared patient mental health diagnoses with advertisers including Google, TikTok, and Snapchat. Talkspace's privacy policy allows sharing 'de-identified' data, which researchers have repeatedly shown can be re-identified. If you have ever used an online therapy or mental health app, your diagnosis may be in an advertising database.",
     steps: [
-      { text: "BetterHelp: Check if you are eligible for the FTC settlement refund", url: "https://www.ftc.gov/legal-library/browse/cases-proceedings/2023169-betterhelp-inc" },
+      { text: "BetterHelp: Check if you are eligible for the FTC settlement refund", url: "https://www.ftc.gov/betterhelp" },
       { text: "Cerebral: Log in and check Settings > Privacy for data sharing options. Consider requesting your data and deleting your account if no longer needed." },
       { text: "Any therapy app: Search '[app name] FTC' or '[app name] data sharing' to check if they have been caught" },
       { text: "For ongoing therapy: ask your provider directly what data is shared and with whom" },
@@ -186,7 +186,7 @@ export const CLINIC_MISSIONS = [
     title: "Delete Breached Health Accounts",
     briefing: "MyFitnessPal was breached in 2018 -- 150 million accounts with email addresses, usernames, and hashed passwords. Under Armour owned it at the time and sold it to Francisco Partners in 2020. If you created a MyFitnessPal account before 2018, your data was in that breach. Any health app you no longer actively use is an unmonitored attack surface storing your body data. Delete the accounts, not just the apps.",
     steps: [
-      { text: "MyFitnessPal: Log in > Settings > Account > scroll to Delete Account. Do not just uninstall the app.", url: "https://www.myfitnesspal.com/account/delete_account" },
+      { text: "MyFitnessPal: Log in > Account (account.myfitnesspal.com) > scroll to Delete Account. Do not just uninstall the app.", url: "https://account.myfitnesspal.com" },
       { text: "Check haveibeenpwned.com to see if your email was in the MyFitnessPal breach or other health app breaches", url: "https://haveibeenpwned.com" },
       { text: "List any health apps you installed, tried once, and forgot about. Search your email for signup confirmations." },
       { text: "Delete the accounts on each one -- Settings > Account > Delete. Request data deletion where available." },
@@ -289,7 +289,7 @@ export const CLINIC_MISSIONS = [
     title: "Check If Your Therapy App Sold Your Data",
     briefing: "The FTC found that BetterHelp shared mental health data -- including intake questionnaire responses about depression, anxiety, and substance abuse -- with Facebook, Snapchat, Criteo, and Pinterest for advertising. The Facebook pixel on BetterHelp's site transmitted data about pages users visited, including pages describing specific mental health conditions. Cerebral, an ADHD and mental health platform, shared patient diagnoses with Google, TikTok, and Snapchat via advertising pixels embedded in their platform. If you used either service, your mental health data may be in advertising databases.",
     steps: [
-      { text: "BetterHelp: Check if you qualify for the FTC refund (users between 2017-2023)", url: "https://www.ftc.gov/legal-library/browse/cases-proceedings/2023169-betterhelp-inc" },
+      { text: "BetterHelp: Check if you qualify for the FTC refund (users between 2017-2023)", url: "https://www.ftc.gov/betterhelp" },
       { text: "Cerebral: Log in > Settings > review privacy and data sharing options. Request a copy of your data to see what was shared." },
       { text: "Talkspace: Review their privacy policy for 'de-identified' data sharing -- researchers have shown de-identified health data can be re-identified" },
       { text: "For any telehealth app: search '[app name] FTC' or '[app name] data breach' to check their record" },

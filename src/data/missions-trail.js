@@ -98,7 +98,7 @@ export const TRAIL_MISSIONS = [
     title: "Audit Your Cloud Photo Location History",
     briefing: "Google Photos and Apple Photos both build a complete location map from your photo library. Every geotagged photo becomes a pin on a map that shows everywhere you've been, on what date, for years. This is a more detailed location history than most people realize they've created -- and it's accessible to anyone who gets into your cloud account.",
     steps: [
-      { text: "Google Photos: Open photos.google.com/map in a browser. This is your photo location history -- every place you've taken a photo, clustered by area. Zoom in on your home area and notice how many pins there are.", url: "https://photos.google.com/map" },
+      { text: "Google Photos: Open Google Photos > Explore > Map (in the mobile app) or search.google.com/photos to find location-tagged photos. Google removed the standalone map page -- use the app's Explore tab instead." },
       { text: "Apple Photos: Open the Photos app on Mac or iPhone > Albums > Places. This is the same thing -- a map of everywhere your photos were taken." },
       { text: "Consider: would you want someone who got into your Google or Apple account to see this map? This is why the Master Keys district comes first -- your email account protects this data." },
       { text: "Google Photos: Settings > Sharing > check that partner sharing and shared libraries aren't exposing location data to people you didn't intend.", url: "https://photos.google.com/settings" },
@@ -151,7 +151,7 @@ export const TRAIL_MISSIONS = [
     steps: [
       { text: "CVS ExtraCare: Log into CVS.com > Account Settings > Privacy Preferences > opt out of 'sharing for marketing purposes' and 'sharing for analytics'", url: "https://www.cvs.com/account/compliance/do-not-sell" },
       { text: "Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): Log into kroger.com > My Account > Communication Preferences. Also submit a data deletion request through their privacy portal.", url: "https://www.kroger.com/account/privacy-choices" },
-      { text: "Target Circle: Log into target.com > Account > Settings > Privacy. Opt out of targeted advertising and data sharing.", url: "https://www.target.com/circle/account" },
+      { text: "Target Circle: Log into target.com > Account > Privacy. Opt out of targeted advertising and data sharing.", url: "https://www.target.com/account/privacy" },
       { text: "Starbucks: Open the Starbucks app > Account > Privacy Settings. Or visit starbucks.com privacy page.", url: "https://www.starbucks.com/terms/privacy-policy/" },
       { text: "For any loyalty program not listed: search '[company name] do not sell my personal information' -- CCPA requires a page with this exact language." },
     ],
@@ -200,7 +200,7 @@ export const TRAIL_MISSIONS = [
     title: "Review Your Plaid Connections",
     briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, Mint, YNAB, or any budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. But Plaid was sued (and settled for $58 million) for collecting more transaction data than users authorized and sharing it with third parties. You can request your Plaid data and delete it.",
     steps: [
-      { text: "Go to Plaid's data protection request page", url: "https://plaid.com/legal/data-protection-request/" },
+      { text: "Go to the Plaid portal to view and manage your data", url: "https://my.plaid.com/privacy" },
       { text: "Submit a request to see what data Plaid has on you. Select 'Access my data' first to see what they have before deciding whether to delete." },
       { text: "After reviewing: submit a deletion request if you no longer use the apps that connected through Plaid." },
       { text: "For apps you still use: check if the app offers a direct bank connection (ACH) that bypasses Plaid. Some do, most don't advertise it." },
@@ -248,7 +248,7 @@ export const TRAIL_MISSIONS = [
     title: "Review Credit Card Data Sharing",
     briefing: "Visa and Mastercard sell aggregated transaction data to marketers and analytics firms. Your card issuer (Chase, Citi, Amex, etc.) also has its own data-sharing agreements. The aggregated data is supposedly anonymized, but researchers have repeatedly shown that credit card transaction records can be de-anonymized with just a few data points -- the store, the date, and the amount are often enough to identify a specific person.",
     steps: [
-      { text: "Chase: Log into chase.com > Profile & Settings > Privacy Preferences > opt out of sharing for marketing", url: "https://www.chase.com/digital/data-privacy/manage-settings" },
+      { text: "Chase: Log into chase.com > Profile & Settings > Privacy & Security > review and opt out of data sharing for marketing", url: "https://www.chase.com/digital/resources/privacy-security/privacy/consumer-privacy-notice" },
       { text: "Capital One: Log in > Settings > Privacy > 'Limit sharing of personal information'", url: "https://www.capitalone.com/privacy/" },
       { text: "American Express: Log in > Account Services > Privacy > opt out of 'sharing information with Amex business partners'", url: "https://global.americanexpress.com/privacy/opt-out" },
       { text: "Bank of America: Log in > Profile & Settings > Privacy > 'Manage your ad choices'", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
