@@ -27,7 +27,7 @@ There are two kinds of ghost, and both switch analytics off in the game:
 Both deletions can be called off until the nightly run, but only from the browser that asked for them:
 
 - When a player turns sharing off (`opted-out`) or goes ghost early (`went-ghost-early`), the game makes a random nonce (16 bytes, `crypto.getRandomValues`), keeps it in that browser, and sends it as event data `nonce`. Its cancel (`opt-out-cancelled` / `ghost-cancelled`) carries the same nonce.
-- A session is purged if it has any deletion event whose nonce has no matching cancel of the same kind. Order and timestamps don't matter. A deletion sent without a nonce (older clients) can never be cancelled.
+- A session is purged if it has any deletion event whose nonce has no matching cancel of the same kind in the same session. Cancels must come from the same browser and connection (Umami's session): a nonce seen in the analytics dashboard and replayed from anywhere else does nothing. Order and timestamps don't matter. A deletion sent without a nonce (older clients) can never be cancelled.
 - Umami's session is IP + browser + monthly salt, so people sharing a connection with identical browsers share a session. One person's cancel carries their own nonce and cannot undo another's deletion: shared sessions fail safe (purged).
 - Turning sharing back on while an opt-out is pending sends `opt-out-cancelled`; the game waits for `collective.json` first, because its `asOf` decides whether the deletion is still pending (it counts as done only if `asOf` is more than 10 minutes after the deletion, to allow for clock skew).
 

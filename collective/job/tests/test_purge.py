@@ -164,6 +164,20 @@ class CancelAndRestoreTest(unittest.TestCase):
         self.assertEqual(PG.count("session", sid), 0)
         self.assertEqual(self.counter(), 1)
 
+    def test_cancel_from_another_session_does_not_count(self):
+        # A nonce visible in the analytics dashboard, replayed from elsewhere, can't cancel.
+        a = PG.insert_session()
+        b = PG.insert_session(city="Seattle", region="US-WA")
+        PG.insert_event(a, "opted-out", {"nonce": "n"}, at=T1)
+        PG.insert_event(b, "opt-out-cancelled", {"nonce": "n"}, at=T2)
+        PG.insert_event(PG.insert_session(), "went-ghost-early", {"nonce": "g"}, at=T1)
+        PG.insert_event(b, "ghost-cancelled", {"nonce": "g"}, at=T2)
+        self.purge()
+        self.assertEqual(PG.count("session", a), 0)
+        self.assertEqual(PG.count("session", b), 1)
+        self.assertEqual(self.counter(), 1)
+        self.assertEqual(self.early(), 1)
+
     def test_cancel_with_the_same_nonce_keeps_the_session(self):
         sid = PG.insert_session()
         PG.insert_event(sid, "opted-out", {"nonce": "aaaa"}, at=T1)

@@ -4,8 +4,10 @@
 --
 -- A session goes if it has ANY deletion event (opted-out, went-ghost-early)
 -- that no cancel matches. The game sends a random `nonce` with each deletion
--- and the same nonce with its cancel (opt-out-cancelled, ghost-cancelled), so
--- only the browser that asked for the deletion can call it off: on a shared
+-- and the same nonce with its cancel (opt-out-cancelled, ghost-cancelled); a
+-- cancel counts only in the same session (same browser and connection), so a
+-- nonce read off the analytics dashboard can't cancel from elsewhere, and only
+-- the browser that asked for the deletion can call it off: on a shared
 -- connection with identical browsers (one Umami session) another person's
 -- cancel carries another nonce and the session is still purged. Order and
 -- timestamps don't matter. A deletion with no nonce (older clients) can never
@@ -53,7 +55,8 @@ CREATE TEMP TABLE rc_purge ON COMMIT DROP AS
    WHERE d.event_name IN ('opted-out', 'went-ghost-early')
      AND (d.nonce IS NULL OR NOT EXISTS (
            SELECT 1 FROM rc_del c
-            WHERE c.nonce = d.nonce
+            WHERE c.session_id = d.session_id
+              AND c.nonce = d.nonce
               AND c.event_name = CASE d.event_name WHEN 'opted-out' THEN 'opt-out-cancelled'
                                                    ELSE 'ghost-cancelled' END))
    GROUP BY session_id;
