@@ -8,6 +8,8 @@ import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmNumbers } from '../utils/bursts.js';
 import { twoFactorMethod, CODE_METHODS } from '../utils/two-factor.js';
+import { scoutSprite } from '../components/scout.js';
+import { feelingForDebrief, twoFactorHugDue } from '../utils/scout-feelings.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -161,6 +163,14 @@ function mapDebriefCategory(stored) {
   return null;
 }
 
+const DEBRIEF_SCOUT = 'filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));';
+
+function debriefScout(state, mission, stored) {
+  const feeling = twoFactorHugDue(state, mission.id) ? 'hug' : feelingForDebrief(mission, stored);
+  if (!feeling) return `<img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; ${DEBRIEF_SCOUT}">`;
+  return scoutSprite(feeling, { size: 52, style: DEBRIEF_SCOUT });
+}
+
 function getProgressCheckIn(state, districtId, percent, dialogue) {
   if (!dialogue?.progress) return '';
   const milestones = [25, 50, 75, 100];
@@ -229,7 +239,7 @@ export function renderDebrief(state, missionId) {
     <div style="flex: 1; padding: 24px;">
       <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px;">
         <div style="flex-shrink: 0;">
-          <img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+          ${debriefScout(state, mission, stored)}
         </div>
         <div style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; flex: 1;">
           <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? 'Report filed. Good work, agent.' : 'Welcome back, agent. What did you find?'}</div>

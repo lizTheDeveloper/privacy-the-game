@@ -4,6 +4,7 @@ import { getMissionsForDistrict } from '../data/missions.js';
 import { calcIntegrity, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
+import { scoutSprite } from '../components/scout.js';
 
 export function renderMilestone(state, districtId) {
   const district = DISTRICTS.find((d) => d.id === districtId);
@@ -43,6 +44,7 @@ export function renderMilestone(state, districtId) {
     ${renderHud(state)}
     <div style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, rgba(198,255,0,0.03) 40%, transparent 70%); pointer-events: none;"></div>
     <div style="position: relative; text-align: center; padding-top: 44px;">
+      <div style="margin-bottom: 12px;">${scoutSprite('hug', { size: 64, style: 'filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));' })}</div>
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">

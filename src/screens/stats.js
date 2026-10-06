@@ -5,6 +5,7 @@ import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from '../data/dialogue.js';
 import { getChosenPod } from '../utils/pod-pref.js';
 import { findPod } from '../utils/collective.js';
 import { renderHud } from '../components/hud.js';
+import { smallScout } from '../components/scout.js';
 import { DISTRICTS } from '../data/districts.js';
 import {
   calcIntegrity,
@@ -89,7 +90,10 @@ export function renderDataDeleted() {
   return `
     <div data-data-deleted style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,159,0,0.25);">
       <div class="section-label" style="color: rgba(255,159,0,0.6); margin-bottom: 8px;">${esc(RESTORE_DIALOGUE.heading)}</div>
-      <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.text)}</div>
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        ${smallScout('sad')}
+        <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.text)}</div>
+      </div>
       <button class="btn-secondary" data-action="restore-data" style="margin-top: 12px;">BRING MY DATA BACK</button>
     </div>`;
 }
@@ -97,7 +101,10 @@ export function renderDataDeleted() {
 // One line of feedback from the last cancel/restore action.
 export function renderNotice(notice) {
   if (typeof notice !== 'string' || !notice) return '';
-  return `<div role="status" style="${BLOCK_TEXT} color: #FF9F00; margin-top: 14px;">${esc(notice)}</div>`;
+  const line = `<div role="status" style="${BLOCK_TEXT} color: #FF9F00; margin-top: 14px;">${esc(notice)}</div>`;
+  // Back in the city after a restore: Scout hugs.
+  if (notice !== RESTORE_DIALOGUE.done) return line;
+  return `<div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 14px;">${smallScout('hug')}${line.replace(' margin-top: 14px;', '')}</div>`;
 }
 
 // The cancel or restore block for this browser, or nothing. With
@@ -193,6 +200,13 @@ export function renderWhoamiPanel(view = {}) {
       ${view.podPickerOpen ? podPicker(view.collective) : ''}`);
 }
 
+// The play-stats explanation; once sharing is off, Scout thinks it over beside it.
+function playStatsText() {
+  const text = `<div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this browser sent us this month from the connection you\'re on now, and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>`;
+  if (!isAnalyticsOff()) return text;
+  return `<div style="display: flex; gap: 10px; align-items: flex-start;">${smallScout('thinkingB')}${text}</div>`;
+}
+
 export function renderStats(state, view = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
@@ -264,7 +278,7 @@ export function renderStats(state, view = {}) {
     ${renderWhoamiPanel(view)}
     <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
-      <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this browser sent us this month from the connection you\'re on now, and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>
+      ${playStatsText()}
       <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
       ${renderDeletionBlock(view.collective, { requireLoaded: true })}
       ${renderNotice(view.notice)}

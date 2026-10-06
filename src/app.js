@@ -31,6 +31,9 @@ import { renderGarage, renderAddForm } from './screens/garage.js';
 import { renderTimeline, renderSocialForm, renderEraQuestions, getEras } from './screens/timeline.js';
 import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
+import { newScreenVisit, feelingDuration } from './components/scout.js';
+import { noteFirstTwoFactor, twoFactorHugDue, markTwoFactorHugSeen } from './utils/scout-feelings.js';
+import { briefingScout } from './screens/briefing.js';
 import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
 
 initErrorTracking();
@@ -49,6 +52,12 @@ let notice = { hash: null, text: '' };
 let restoring = false;
 // "Reset it anyway" on a password recon showed is fine (until the page reloads).
 let resetAnywayMission = null;
+// When the player last saw the city map before this visit (Scout waves after a while away).
+let cityArrival;
+// The first-2FA hug was on screen this visit; it counts as seen once they leave.
+let twoFactorHugShown = false;
+// Scout is cheering the player out of the briefing; ignore further clicks.
+let leavingBriefing = false;
 
 function setNotice(text, hash = location.hash) {
   notice = { hash, text };
@@ -82,7 +91,7 @@ function loadWhoami() {
 }
 
 const screens = {
-  city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView }),
+  city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival }),
   district: ({ id, tab }) => renderDistrict(state, id, tab),
   briefing: ({ id }) => renderBriefing(state, id, { resetAnyway: resetAnywayMission === id }),
   debrief: ({ id }) => renderDebrief(state, id),
@@ -119,6 +128,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   // Your City needs the published file's date to tell a pending deletion from one that went through.
   if ((getGhostInfo()?.early || getOptedOutAt()) && shouldAutoLoad(route.screen, collectiveView.status, ['stats'])) loadCollective();
   if (route.screen === 'ghost' && whoamiView.status === 'idle') loadWhoami();
+  // A screen visit is what a pageview counts: arriving, not a re-draw.
+  if (tracksPageview(cause)) startScreenVisit(route);
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
@@ -138,6 +149,31 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
 
 // Re-draw the current screen (data arrived, an action changed state). Not a
 // pageview unless the caller says this is the player arriving on the screen.
+// A new screen visit: Scout's feelings may play again, and the map remembers
+// when the player last saw it.
+function startScreenVisit(route) {
+  newScreenVisit();
+  leavingBriefing = false;
+  if (twoFactorHugShown) {
+    twoFactorHugShown = false;
+    setState(markTwoFactorHugSeen(state));
+  }
+  if (route.screen === 'city') cityArrival = { before: state.lastCityVisit || null };
+  if (route.screen === 'debrief' && twoFactorHugDue(state, route.params.id)) twoFactorHugShown = true;
+}
+
+// Scout cheers the player off (goDoIt on the briefing), then the game moves on.
+function cheerThenGo(hash) {
+  const slot = app.querySelector('[data-scout="briefing"]');
+  const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (!slot || still) return navigate(hash);
+  leavingBriefing = true;
+  slot.outerHTML = briefingScout('goDoIt');
+  setTimeout(() => {
+    if (leavingBriefing) navigate(hash);
+  }, feelingDuration('goDoIt') + 150);
+}
+
 function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
   render(parseRoute(location.hash), cause);
 }
@@ -158,7 +194,7 @@ function submitDebrief(missionId) {
   // Nothing happens until every question on screen is answered.
   const filed = fileDebrief(state, mission, readAnswers(app, mission));
   if (!filed) return;
-  setState(ensureBurst(updateStreak(filed.state)));
+  setState(ensureBurst(updateStreak(noteFirstTwoFactor(filed.state, mission, filed.state.missions[missionId]))));
   afterMissionRecorded(mission, filed.event);
 }
 
@@ -338,13 +374,21 @@ app.addEventListener('click', async (e) => {
   if (!el || !app.contains(el)) return;
   const action = el.dataset.action;
 
+  if (leavingBriefing && (action === 'go-do-it' || action === 'i-did-it')) {
+    e.preventDefault();
+    return;
+  }
   if (action === 'go-do-it') {
     const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
     // Save first: on phones the new tab can get this one reloaded.
     setState(markMissionStarted(state, el.dataset.mission));
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
     track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
-    navigate(`#/mission/${el.dataset.mission}/debrief`);
+    cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
+  } else if (action === 'i-did-it') {
+    // A plain link without JS; here Scout cheers first.
+    e.preventDefault();
+    cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'mission-step') {
     // A step link opens the real site itself (default action is left alone);
     // just remember the start so the briefing offers "I did it" on return.

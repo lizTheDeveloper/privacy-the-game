@@ -8,6 +8,7 @@ import { missionSteps } from '../utils/debrief.js';
 import { isPasswordMission, passwordResetNeed, notNeededReasons, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
+import { scoutSprite } from '../components/scout.js';
 
 function notFound(state) {
   return `
@@ -113,7 +114,7 @@ export function renderBriefing(state, missionId, opts = {}) {
 
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
           ${noReset ? renderNoResetActions(mission, districtId, targetTab, noResetFiled) : state.startedMissions?.[mission.id]
-            ? `<a class="btn-primary" href="#/mission/${mission.id}/debrief" style="text-decoration: none;">I DID IT &#10003;</a>
+            ? `<a class="btn-primary" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}" style="text-decoration: none;">I DID IT &#10003;</a>
           <button class="btn-secondary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT AGAIN</button>`
             : `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`}
           ${noResetFiled ? '' : `<a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>`}
@@ -121,7 +122,7 @@ export function renderBriefing(state, missionId, opts = {}) {
       </div>
 
       <div style="flex: 1 1 240px; background: rgba(26,31,43,0.4); border-left: 1px solid rgba(0,229,255,0.1); padding: 24px; display: flex; flex-direction: column; align-items: center;">
-        <img src="assets/characters/scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
+        ${briefingScout(noReset ? 'happy' : undefined)}
         <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
           <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : mission.id === PM_BURST_ID ? pmBurstBriefingLine(state) : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
@@ -131,6 +132,14 @@ export function renderBriefing(state, missionId, opts = {}) {
       </div>
     </div>
   </div>`;
+}
+
+const BRIEFING_SCOUT = 'margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));';
+
+// The briefing's big Scout. app.js swaps it for goDoIt when the player heads out.
+export function briefingScout(feeling) {
+  if (!feeling) return `<img src="assets/characters/scout_0.png" data-scout="briefing" style="width: 96px; height: 96px; ${BRIEFING_SCOUT}">`;
+  return scoutSprite(feeling, { size: 96, style: BRIEFING_SCOUT, attrs: 'data-scout="briefing"' });
 }
 
 // "Clean record" only when the breach check found nothing.

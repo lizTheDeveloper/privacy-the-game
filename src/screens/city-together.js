@@ -11,7 +11,7 @@ const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 const plural = (n, one, many) => (n === 1 ? one : many);
 
 function explainer() {
-  return `<div style="margin-bottom: 16px;">${renderScout(COLLECTIVE_DIALOGUE.explainer, { actionText: 'WHAT WE KNOW ABOUT YOU', actionHref: '#/stats' })}</div>`;
+  return `<div style="margin-bottom: 16px;">${renderScout(COLLECTIVE_DIALOGUE.explainer, { feeling: 'thinkingA', actionText: 'WHAT WE KNOW ABOUT YOU', actionHref: '#/stats' })}</div>`;
 }
 
 // GO GHOST for everyone: the final mission once the city is taken back, the

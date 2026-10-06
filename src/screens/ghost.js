@@ -1,5 +1,6 @@
 import { renderHud } from '../components/hud.js';
-import { renderScout } from '../components/scout.js';
+import { renderScout, smallScout } from '../components/scout.js';
+import { feelingForGhostDone } from '../utils/scout-feelings.js';
 import { GHOST_DIALOGUE } from '../data/dialogue.js';
 import { renderWhoamiPanel, renderDeletionBlock, renderNotice, esc } from './stats.js';
 import { displayPodId, findPod, fmt } from '../utils/collective.js';
@@ -36,7 +37,7 @@ export function renderGhost(state, view = {}) {
     <div style="font-family: var(--font-display); font-size: 48px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
-    ${renderScout(GHOST_DIALOGUE.briefing)}
+    ${renderScout(GHOST_DIALOGUE.briefing, { feeling: 'thinkingB' })}
     <div style="${STEP} margin-top: 28px;">1 &middot; Look at what our analytics can see</div>
     ${renderWhoamiPanel(view)}
     <div class="panel" style="padding: 20px 24px; margin-top: 24px;">
@@ -66,7 +67,10 @@ export function renderGhostEarly(state, view = {}) {
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
     <div class="panel" style="padding: 20px 24px; margin-top: 24px;">
-      <p style="${MUTED} margin: 0 0 18px;">${off ? GHOST_DIALOGUE.alreadyOff : GHOST_DIALOGUE.early}</p>
+      <div style="display: flex; gap: 10px; align-items: flex-start; margin: 0 0 18px;">
+        ${smallScout('worried')}
+        <p style="${MUTED} margin: 0;">${off ? GHOST_DIALOGUE.alreadyOff : GHOST_DIALOGUE.early}</p>
+      </div>
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
         ${action}
         <a class="btn-secondary" href="#/city-together" style="display: inline-block; text-decoration: none;">NOT YET</a>
@@ -119,7 +123,7 @@ export function renderGhostDone(state, view = {}) {
     <div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>
   </div>
   <div style="max-width: 640px; margin: 32px auto 0; padding: 0 24px;">
-    ${renderScout(GHOST_DIALOGUE.done)}
+    ${renderScout(GHOST_DIALOGUE.done, { feeling: feelingForGhostDone(info) })}
     ${renderDeletionBlock(view.collective)}
     ${renderNotice(view.notice)}
     <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 28px;">

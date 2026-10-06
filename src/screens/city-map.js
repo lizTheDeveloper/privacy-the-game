@@ -9,6 +9,7 @@ import { GHOST_DIALOGUE } from '../data/dialogue.js';
 import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
 import { backdropPods, displayPodId } from '../utils/collective.js';
+import { feelingForCity } from '../utils/scout-feelings.js';
 
 // ---------------------------------------------------------------------------
 // Isometric grid. Classic 2:1 diamond tiles: a tile at (col, row) sits at
@@ -370,37 +371,39 @@ function getReturnLine(state) {
   return null;
 }
 
-function renderCityScout(state) {
+// feeling: Scout's feeling for this visit (utils/scout-feelings.js), on every line.
+function renderCityScout(state, feeling) {
+  const say = (message, options = {}) => renderScout(message, { ...options, feeling });
   if (isCityComplete(state) && !hasGoneGhost()) {
-    return renderScout(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
+    return say(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
   }
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
   const next = nextAvailableMission(state);
 
   const pacing = returnPacingLine(state);
-  if (pacing) return renderScout(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
+  if (pacing) return say(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
 
   const returnLine = getReturnLine(state);
   if (returnLine && anyComplete) {
-    return renderScout(
+    return say(
       returnLine,
       next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : { actionText: 'VIEW STATS', actionHref: '#/stats' },
     );
   }
 
   if (!anyComplete) {
-    return renderScout(
+    return say(
       'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a href="#/district/master-keys" style="color: var(--cyan); font-weight: 600;">Master Keys</a> district first — everything else in the city builds on it.',
       next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : {},
     );
   }
   if (next) {
-    return renderScout(
+    return say(
       `Ready for the next one? <span style="color: var(--cyan); font-weight: 600;">${next.title}</span> — about ${next.estimatedMinutes} minutes.`,
       { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` },
     );
   }
-  return renderScout(
+  return say(
     'Every mission complete. The city is yours again. Go see what you built.',
     { actionText: 'VIEW STATS', actionHref: '#/stats' },
   );
@@ -761,7 +764,7 @@ const STYLE = `
     }
   </style>`;
 
-export function renderCityMap(state, { collective, whoami } = {}) {
+export function renderCityMap(state, { collective, whoami, arrival } = {}) {
   if (Object.values(state.accounts).every((a) => !a.enabled)) {
     return renderAllOffline();
   }
@@ -815,6 +818,6 @@ export function renderCityMap(state, { collective, whoami } = {}) {
   <div class="city-labels">
     ${renderDistrictLabels(state, startHere)}
   </div>
-  <div class="city-scout">${renderCityScout(state)}</div>
+  <div class="city-scout">${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }))}</div>
 </div>`;
 }
