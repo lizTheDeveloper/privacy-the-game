@@ -33,6 +33,8 @@ describe('The Whole City', () => {
     expect(html.indexOf('Seattle')).toBeLessThan(html.indexOf('Chicago'));
     expect(html).toMatch(/anonymous browser sessions/);
     expect(html).toMatch(/12 opted out/);
+    expect(html).toContain("Loading this page doesn't track you.");
+    expect(html).toMatch(/in places with enough players to count, this share has been fixed/);
   });
 
   it('highlights your pod and shows its numbers', () => {
