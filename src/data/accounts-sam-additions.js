@@ -38,7 +38,7 @@ export const ACCOUNTS_SAM_ADDITIONS = {
     building: 'assets/buildings/iso_occupied.png',
     buildingDark: 'assets/buildings/iso_occupied.png',
     buildingLib: 'assets/buildings/iso_liberated.png',
-    securityUrl: 'https://account.apple.com/account/manage',
+    securityUrl: 'https://www.icloud.com/settings/',
     riskLevel: 'high',
   },
   onedrive: {

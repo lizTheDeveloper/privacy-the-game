@@ -164,10 +164,41 @@ img { image-rendering: pixelated; }
   div[style*="font-size: 20px"] { font-size: 17px !important; }
   div[style*="font-size: 42px"] { font-size: 30px !important; }
   .mission-row { flex-wrap: wrap; row-gap: 8px; }
+  /* Keep the title wide enough for its words; badges wrap below instead of under it. */
+  .mission-row .mission-text { flex: 1 1 140px; min-width: 140px !important; }
   img[src*="iso_"],
   img[src*="buildings/"] { transform: scale(0.8); transform-origin: bottom center; }
 }
 
+/* Scout's feelings: a sprite sheet that plays once and holds its last frame.
+   The stage is scout_0.png's 48px box (scaled like the <img>); the 64px frames
+   sit at (-12, -12) in it so Scout stands exactly where scout_0.png does. */
+.scout-sprite { display: inline-block; position: relative; vertical-align: baseline; }
+.scout-sprite__stage { position: absolute; left: 0; top: 0; width: 48px; height: 48px; transform-origin: 0 0; }
+.scout-sprite__sheet {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  width: 64px;
+  height: 64px;
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  image-rendering: pixelated;
+}
+@keyframes scout-play {
+  from { background-position: 0 0; }
+  to { background-position: 100% 0; }
+}
+@keyframes scout-show {
+  from, to { visibility: hidden; }
+}
+@keyframes scout-hide {
+  from, to { visibility: hidden; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #app > * { animation: none; }
+  /* No animation: the last frame of the last feeling, held. */
+  .scout-sprite__sheet { animation: none !important; }
+  .scout-sprite__sheet:not(:last-child) { display: none; }
 }

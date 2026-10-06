@@ -1,5 +1,11 @@
-import { isAnalyticsOff } from '../utils/analytics-pref.js';
+import { isAnalyticsOff, getOptedOutAt } from '../utils/analytics-pref.js';
+import { getGhostInfo, isGhostPending } from '../utils/ghost.js';
+import { deletionStatus } from '../utils/restore.js';
+import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from '../data/dialogue.js';
+import { getChosenPod } from '../utils/pod-pref.js';
+import { findPod } from '../utils/collective.js';
 import { renderHud } from '../components/hud.js';
+import { smallScout } from '../components/scout.js';
 import { DISTRICTS } from '../data/districts.js';
 import {
   calcIntegrity,
@@ -12,7 +18,7 @@ const RING_SIZE = 120;
 const RING_RADIUS = 45;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-function ringChart({ fraction, color, glow, track, value, unit }) {
+export function ringChart({ fraction, color, glow, track, value, unit }) {
   const clamped = Math.min(1, Math.max(0, fraction));
   const offset = RING_CIRCUMFERENCE * (1 - clamped);
   return `
@@ -62,7 +68,146 @@ function findingCard({ label, value, color, tint }) {
   </div>`;
 }
 
-export function renderStats(state) {
+export function esc(v) {
+  return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const NOTE = 'font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); line-height: 1.6;';
+const BLOCK_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
+
+// An early ghost before tonight's run: it can still be called off.
+export function renderGhostPending() {
+  return `
+    <div data-ghost-pending style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,45,155,0.25);">
+      <div style="${BLOCK_TEXT}">${esc(GHOST_DIALOGUE.pending)}</div>
+      <button class="btn-secondary" data-action="ghost-cancel" style="margin-top: 12px;">CANCEL</button>
+      <div style="${NOTE} margin-top: 10px;">${esc(GHOST_DIALOGUE.cancelNote)}</div>
+    </div>`;
+}
+
+// Tonight's run deleted this browser's data; the save can send it again.
+export function renderDataDeleted() {
+  return `
+    <div data-data-deleted style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,159,0,0.25);">
+      <div class="section-label" style="color: rgba(255,159,0,0.6); margin-bottom: 8px;">${esc(RESTORE_DIALOGUE.heading)}</div>
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        ${smallScout('sad')}
+        <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.text)}</div>
+      </div>
+      <button class="btn-secondary" data-action="restore-data" style="margin-top: 12px;">BRING MY DATA BACK</button>
+    </div>`;
+}
+
+// One line of feedback from the last cancel/restore action.
+export function renderNotice(notice) {
+  if (typeof notice !== 'string' || !notice) return '';
+  const line = `<div role="status" style="${BLOCK_TEXT} color: #FF9F00; margin-top: 14px;">${esc(notice)}</div>`;
+  // Back in the city after a restore: Scout hugs.
+  if (notice !== RESTORE_DIALOGUE.done) return line;
+  return `<div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 14px;">${smallScout('hug')}${line.replace(' margin-top: 14px;', '')}</div>`;
+}
+
+// The cancel or restore block for this browser, or nothing. With
+// `requireLoaded`, a browser with a deletion record waits for collective.json
+// before offering either (the published date decides which applies).
+export function renderDeletionBlock(collectiveView, { requireLoaded = false } = {}) {
+  const data = collectiveView?.status === 'ready' ? collectiveView.data : null;
+  const ghostInfo = getGhostInfo();
+  if (requireLoaded && !data && (ghostInfo?.early || getOptedOutAt())) {
+    if (collectiveView?.status === 'error') {
+      return `
+    <div data-deletion-checking style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(0,229,255,0.15);">
+      <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.checkFailed)}</div>
+      <button class="btn-secondary" data-action="collective-retry" style="margin-top: 12px;">TRY AGAIN</button>
+    </div>`;
+    }
+    return `<div data-deletion-checking style="${BLOCK_TEXT} margin-top: 16px;">${esc(RESTORE_DIALOGUE.checking)}</div>`;
+  }
+  if (isGhostPending(ghostInfo, data)) return renderGhostPending();
+  if (deletionStatus({ ghostInfo, optedOutAt: getOptedOutAt(), collective: data }) === 'deleted') return renderDataDeleted();
+  return '';
+}
+
+const WHOAMI_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 10px;';
+
+function whoamiShell(inner) {
+  return `
+    <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
+      <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 16px;">WHAT WE KNOW ABOUT YOU</div>
+      ${inner}
+    </div>`;
+}
+
+function joinParts(parts, sep) {
+  return parts.filter((v) => v !== null && v !== undefined && v !== '').map(esc).join(sep);
+}
+
+function podPicker(collective) {
+  const pods = collective?.status === 'ready' && Array.isArray(collective.data?.pods) ? collective.data.pods : null;
+  if (!pods) return `<div style="${WHOAMI_TEXT}">We can't load the list of places right now.</div>`;
+  return `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">${pods
+    .map((p) => `<button class="btn-secondary" data-action="pod-pick" data-pod="${esc(p.id)}">${esc(p.label)}</button>`)
+    .join('')}</div>`;
+}
+
+export function renderWhoamiPanel(view = {}) {
+  const who = view.whoami || { status: 'idle' };
+  if (who.status === 'loading') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">Asking our analytics&hellip;</div>`);
+  }
+  if (who.status === 'error') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">We couldn't reach our analytics just now. Nothing was sent.</div>
+      <button class="btn-secondary" data-action="whoami-open">TRY AGAIN</button>`);
+  }
+  if (who.status !== 'ready') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">Our analytics can see a few things about every visit. Want to see exactly what they see about you?</div>
+      <button class="btn-secondary" data-action="whoami-open">SHOW ME</button>`);
+  }
+
+  const d = who.data || {};
+  const place = joinParts([d.city, d.region, d.country], ', ');
+  const locationLine = place
+    ? `<b>${place}</b> &mdash; from your connection's address, looked up the way most websites do. We don't store the address itself.`
+    : `We couldn't place you from your connection.`;
+  const device = joinParts([d.device, d.os, d.browser, d.language], ' \u00b7 ');
+  const deviceLine = device ? `<div style="${WHOAMI_TEXT}">${device} &mdash; from what your browser tells every site.</div>` : '';
+
+  const collectiveData = view.collective?.status === 'ready' ? view.collective.data : null;
+  const chosenId = getChosenPod();
+  const chosen = findPod(collectiveData, chosenId);
+  const whoPodLabel = d.pod && d.pod.label ? esc(d.pod.label) : null;
+  let podLine = '';
+  if (chosen && whoPodLabel && d.pod.id !== chosen.id) {
+    podLine = `<div style="${WHOAMI_TEXT}">We'll count you in <b>${esc(chosen.label)}</b>. Our analytics still recorded ${whoPodLabel} from your connection.</div>
+      <button class="btn-secondary" data-action="pod-pick-clear">USE WHERE YOU ARE</button>`;
+  } else if (chosen && !whoPodLabel) {
+    podLine = `<div style="${WHOAMI_TEXT}">We'll count you in <b>${esc(chosen.label)}</b>.</div>
+      <button class="btn-secondary" data-action="pod-pick-clear">USE WHERE YOU ARE</button>`;
+  } else if (whoPodLabel) {
+    podLine = `<div style="${WHOAMI_TEXT}">You count toward <b>${whoPodLabel}</b>.</div>`;
+  }
+  const buttons = `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+      <button class="btn-secondary" data-action="whoami-confirm">THAT'S RIGHT</button>
+      <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
+    </div>`;
+
+  return whoamiShell(`
+      <div style="${WHOAMI_TEXT}">${locationLine}</div>
+      ${deviceLine}
+      <div style="${WHOAMI_TEXT}">We don't have your name, email, or any of your accounts.</div>
+      ${podLine}
+      ${buttons}
+      ${view.podPickerOpen ? podPicker(view.collective) : ''}`);
+}
+
+// The play-stats explanation; once sharing is off, Scout thinks it over beside it.
+function playStatsText() {
+  const text = `<div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this browser sent us this month from the connection you\'re on now, and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>`;
+  if (!isAnalyticsOff()) return text;
+  return `<div style="display: flex; gap: 10px; align-items: flex-start;">${smallScout('thinkingB')}${text}</div>`;
+}
+
+export function renderStats(state, view = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
   const findings = calcFindings(state);
@@ -74,6 +219,7 @@ export function renderStats(state) {
     <a href="#/city" class="btn-secondary" style="display: inline-block; text-decoration: none;">← CITY</a>
     <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">YOUR CITY</div>
     <div style="flex: 1;"></div>
+    <a href="#/city-together" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: #00E5FF; text-decoration: none;">THE WHOLE CITY →</a>
   </div>
   <div style="padding: 20px 24px 32px;">
     <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
@@ -129,10 +275,13 @@ export function renderStats(state) {
         ${findingCard({ label: 'OPT-OUTS FILED', value: findings.optOutsFiled, color: '#FF9F00', tint: 'rgba(255,159,0,0.1)' })}
       </div>
     </div>
+    ${renderWhoamiPanel(view)}
     <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
-      <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on.'}</div>
+      ${playStatsText()}
       <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
+      ${renderDeletionBlock(view.collective, { requireLoaded: true })}
+      ${renderNotice(view.notice)}
     </div>
   </div>
 </div>`;

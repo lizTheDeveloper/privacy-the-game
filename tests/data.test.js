@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DISTRICTS } from '../src/data/districts.js';
 import { ACCOUNTS } from '../src/data/accounts.js';
-import { MISSIONS, getMissionsForDistrict, getMissionsForAccount } from '../src/data/missions.js';
+import { MISSIONS, getMissionsForDistrict, getMissionsForAccount, missionDistrict } from '../src/data/missions.js';
 
 describe('DISTRICTS', () => {
   it('has at least 8 districts', () => {
@@ -44,7 +44,13 @@ describe('ACCOUNTS', () => {
 
 describe('MISSIONS', () => {
   it('every mission references a valid account', () => {
+    // The password-manager report belongs to no account; it names its district instead.
+    const accountless = new Set(['password_manager-recon-report', 'password_manager-fortify-burst']);
     for (const m of MISSIONS) {
+      if (accountless.has(m.id)) {
+        expect(DISTRICTS.some((d) => d.id === m.district), `${m.id} needs a valid district`).toBe(true);
+        continue;
+      }
       expect(ACCOUNTS[m.accountId], `mission ${m.id} has invalid account ${m.accountId}`).toBeTruthy();
     }
   });
@@ -64,9 +70,12 @@ describe('MISSIONS', () => {
     }
   });
 
-  it('has 49 missions for Chapter 1 including bonus missions', () => {
+  it('has 68 missions for Chapter 1 including bonus missions', () => {
+    // 49, plus Task 14's: the password-manager report and "Change the next 3"
+    // (core, only for players with a manager), 9 upgrades from text/email
+    // codes and 8 backup ways in (bonus).
     const ch1 = getMissionsForDistrict('master-keys');
-    expect(ch1).toHaveLength(49);
+    expect(ch1).toHaveLength(68);
   });
 
   it('Chapter 1 core path is ~25 missions per the design spec', () => {
@@ -98,7 +107,7 @@ describe('MISSIONS', () => {
     const missions = getMissionsForDistrict('master-keys');
     expect(missions.length).toBeGreaterThan(0);
     for (const m of missions) {
-      expect(ACCOUNTS[m.accountId].district).toBe('master-keys');
+      expect(missionDistrict(m)).toBe('master-keys');
     }
   });
 

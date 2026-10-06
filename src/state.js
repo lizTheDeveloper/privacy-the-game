@@ -72,6 +72,16 @@ export function updateMission(state, missionId, update) {
   };
 }
 
+// The player has left for the real site (on phones that's another tab, and the
+// game's tab may be reloaded meanwhile). Remember it so the briefing offers
+// "I did it" when they come back. Status is untouched: started is not done.
+export function markMissionStarted(state, missionId) {
+  return {
+    ...state,
+    startedMissions: { ...state.startedMissions, [missionId]: new Date().toISOString() },
+  };
+}
+
 export function toggleAccount(state, accountId, enabled) {
   return {
     ...state,

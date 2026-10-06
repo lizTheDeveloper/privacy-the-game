@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Reclaim City collective-score job nightly
+
+[Timer]
+OnCalendar=*-*-* 04:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+Unit=rc-collective-job.service
+
+[Install]
+WantedBy=timers.target

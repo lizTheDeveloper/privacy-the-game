@@ -1,9 +1,15 @@
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress, isCoreMission } from '../utils/calc.js';
+import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
+import { currentBurst, isHeldBack, returnPacingLine, PM_BURST_ID } from '../utils/bursts.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
+import { GHOST_DIALOGUE } from '../data/dialogue.js';
+import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+import { backdropPods, displayPodId } from '../utils/collective.js';
+import { feelingForCity } from '../utils/scout-feelings.js';
 
 // ---------------------------------------------------------------------------
 // Isometric grid. Classic 2:1 diamond tiles: a tile at (col, row) sits at
@@ -57,6 +63,53 @@ const BACKDROP_DEFS = [
   { at: [-1, 2], tier: 'mid', tiles: [[0, 0, 0], [1, 0, 1], [1, 1, 0]] },
 ];
 
+// Where the broader city goes when the collective data is in: first the
+// backdrop positions above, nearest the districts first, then rings further
+// out to the left and right, past the 960px map, which only wide screens see.
+// d = bc - br (left/right), s = bc + br (back/front); x = 120d, y = 60s + 20.
+const PLAZA = blockCentre(1, 1);
+const nearness = ([bc, br]) => {
+  const { x, y } = blockCentre(bc, br);
+  return Math.hypot(x - PLAZA.x, y - PLAZA.y);
+};
+const MAP_SLOTS = BACKDROP_DEFS
+  .map((def, i) => ({ key: `map-${def.at.join('_')}`, at: def.at, tier: def.tier, tiles: def.tiles, layer: 'map', i }))
+  .sort((a, b) => nearness(a.at) - nearness(b.at) || a.i - b.i);
+// The wide layer's lots. First the side band: every block-lattice spot beside
+// the map (|d| >= 4, past the map's districts and backdrop, d = bc - br) in the
+// skyline's rows (s = bc + br <= 6), which every wide screen shows. Then the
+// rows below it, which only taller screens reach; those also run under the map
+// once they're clear of the Scout (s >= 10). Each part goes nearest the plaza
+// first; on a tie, back row first, then left. So n pods always fill the n
+// nearest lots with no holes: whole columns hugging the map, then the next
+// column out, both sides growing together, and every block shares its streets
+// with its neighbours.
+const WIDE_WINDOW = { minD: 4, maxD: 11, minS: -2, bandS: 6, underMapS: 10, maxS: 19 };
+const byNearness = (a, b) => nearness(a) - nearness(b) || (a[0] + a[1]) - (b[0] + b[1]) || (a[0] - a[1]) - (b[0] - b[1]);
+const WIDE_BAND = [];
+const WIDE_BELOW = [];
+for (let d = -WIDE_WINDOW.maxD; d <= WIDE_WINDOW.maxD; d += 1) {
+  for (let s = WIDE_WINDOW.minS; s <= WIDE_WINDOW.maxS; s += 1) {
+    if ((s + d) % 2) continue; // bc and br are whole: s and d share parity
+    const beside = Math.abs(d) >= WIDE_WINDOW.minD;
+    const at = [(s + d) / 2, (s - d) / 2];
+    if (s <= WIDE_WINDOW.bandS) { if (beside) WIDE_BAND.push(at); } else if (beside || s >= WIDE_WINDOW.underMapS) WIDE_BELOW.push(at);
+  }
+}
+const WIDE_LATTICE = [...WIDE_BAND.sort(byNearness), ...WIDE_BELOW.sort(byNearness)];
+
+export function wideBlockPositions(count) {
+  const n = Math.max(0, Math.min(WIDE_LATTICE.length, Math.floor(Number(count) || 0)));
+  return WIDE_LATTICE.slice(0, n).map((at) => [...at]);
+}
+
+const WIDE_SLOTS = wideBlockPositions(Infinity).map((at, i) => (
+  { key: `wide-${at.join('_')}`, at, tier: 'far', tiles: BACKDROP_DEFS[i % BACKDROP_DEFS.length].tiles, layer: 'wide' }
+));
+export const BACKDROP_SLOTS = [...MAP_SLOTS, ...WIDE_SLOTS];
+// The map is capped at 960px; the wide layer shows only once the window has room beside it.
+const WIDE_MIN = 1000;
+
 // Vertical data packets that fall through the skyline. [left%, duration s, delay s, color, z]
 const STREAMS = [
   [9, 7.5, 0, 'cyan', 1],
@@ -72,18 +125,17 @@ const STREAMS = [
 const PHASE_ORDER = ['recon', 'fortify', 'reclaim'];
 
 function nextAvailableMission(state) {
+  // Password resets come in bursts: the current burst first, the rest wait.
+  for (const id of currentBurst(state)) {
+    const m = MISSIONS.find((x) => x.id === id);
+    if (m && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id])) return m;
+  }
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => {
-      const account = state.accounts[m.accountId];
-      return m.phase === phase && isCoreMission(m) && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
-    });
+    const mission = MISSIONS.find((m) => m.phase === phase && isCoreMission(m) && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]) && !isHeldBack(state, m));
     if (mission) return mission;
   }
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => {
-      const account = state.accounts[m.accountId];
-      return m.phase === phase && m.optional && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
-    });
+    const mission = MISSIONS.find((m) => m.phase === phase && m.optional && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]));
     if (mission) return mission;
   }
   return null;
@@ -175,19 +227,74 @@ function renderDistrictBlocks(state) {
   }).join('');
 }
 
-function renderBackdropBlocks() {
+// Without collective data (`placed` null) this is exactly the old silhouette
+// backdrop; with it, backdrop positions holding a pod show that pod instead.
+function renderBackdropBlocks(placed) {
+  const bySlot = new Map((placed || []).filter((p) => p.slot.layer === 'map').map((p) => [p.slot.key, p]));
   return BACKDROP_DEFS.map((def) => {
-    const [bc, br] = def.at;
-    const lot = lotStyle(bc, br);
-    const imgs = def.tiles.map((tile) => placeInLot(tile, tile[2] === 1)).map((p) => (
-      `<img src="assets/${p.tower ? 'iso_tower_occ.png' : 'iso_occupied.png'}" alt="" style="left: ${p.left.toFixed(1)}px; bottom: ${p.bottom}px; width: ${p.w.toFixed(1)}px; z-index: ${p.z};">`
-    ));
-    return `
+    const pod = bySlot.get(`map-${def.at.join('_')}`);
+    return pod ? renderPodBlock(pod) : renderGenericBlock(def);
+  }).join('');
+}
+
+function escAttr(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// One pod of the broader city: the slot's own buildings, taller for more
+// players (log scale), with a share of them lit for the pod's fortified %.
+function renderPodBlock(p) {
+  const slot = p.slot;
+  const [bc, br] = slot.at;
+  const lot = lotStyle(bc, br);
+  // In the map, never bigger than the old silhouettes (they must stay clear of
+  // the HUD band on phones); out on the wide layer the big places may tower.
+  const size = Math.min(slot.layer === 'map' ? 1 : 1.25, Math.max(0.6, 1.25 * p.height));
+  const litCount = p.lit === null ? 0 : Math.round(p.lit * slot.tiles.length);
+  const placed = slot.tiles.map((tile) => placeInLot([tile[0], tile[1], tile[2], (tile[3] || 1) * size], tile[2] === 1));
+  const imgs = placed.map((pl, i) => {
+    const lit = i < litCount;
+    const src = pl.tower ? (lit ? 'iso_tower_lib.png' : 'iso_tower_occ.png') : (lit ? 'iso_liberated.png' : 'iso_occupied.png');
+    return `<img src="assets/${src}" alt="" class="${lit ? 'is-lit' : ''}" style="left: ${pl.left.toFixed(1)}px; bottom: ${pl.bottom}px; width: ${pl.w.toFixed(1)}px; z-index: ${pl.z};">`;
+  });
+  const peak = Math.min(...placed.map((pl) => pl.top));
+  const label = escAttr(p.text);
+  const cls = ['city-block', 'city-pod', `city-pod--${slot.tier}`];
+  if (p.yours) cls.push('is-yours');
+  return `
+    <a class="${cls.join(' ')}" href="#/city-together" data-pod="${escAttr(p.id)}" data-slot="${slot.key}" data-label="${label}" aria-label="${label}"
+       style="${lot.style} --peak: ${(2 * TH - peak + 8).toFixed(0)}px;">
+      <span class="city-pod__lot"></span>
+      ${imgs.join('\n      ')}
+    </a>`;
+}
+
+function renderGenericBlock(def) {
+  const [bc, br] = def.at;
+  const lot = lotStyle(bc, br);
+  const imgs = def.tiles.map((tile) => placeInLot(tile, tile[2] === 1)).map((p) => (
+    `<img src="assets/${p.tower ? 'iso_tower_occ.png' : 'iso_occupied.png'}" alt="" style="left: ${p.left.toFixed(1)}px; bottom: ${p.bottom}px; width: ${p.w.toFixed(1)}px; z-index: ${p.z};">`
+  ));
+  return `
     <div class="city-block city-block--${def.tier}" style="${lot.style}">
       ${imgs.join('\n      ')}
     </div>`;
-  }).join('');
 }
+
+// Pods placed beyond the map's frame, on a full-width layer behind it.
+function renderWideCity(placed) {
+  const wide = placed.filter((p) => p.slot.layer === 'wide');
+  if (!wide.length) return '';
+  return `
+<div class="city-wide">
+  <div class="city-wide__ground"></div>
+  <div class="city-wide__iso">
+    ${wide.map(renderPodBlock).join('')}
+  </div>
+</div>`;
+}
+
+
 
 // The empty centre block: a lit plaza the whole city is arranged around.
 function renderPlaza() {
@@ -248,8 +355,9 @@ function renderDistrictLabels(state, startHere) {
   }).join('');
 }
 
-function getReturnLine(state) {
-  const lastVisit = state.lastCityVisit;
+// lastVisit: when the player last saw the map before this visit (re-draws
+// within the visit overwrite state.lastCityVisit).
+function getReturnLine(lastVisit) {
   if (!lastVisit) return null;
   const elapsed = Date.now() - new Date(lastVisit).getTime();
   const hours = elapsed / (1000 * 60 * 60);
@@ -264,31 +372,39 @@ function getReturnLine(state) {
   return null;
 }
 
-function renderCityScout(state) {
+// feeling: Scout's feeling for this visit (utils/scout-feelings.js), on every line.
+function renderCityScout(state, feeling, lastVisit) {
+  const say = (message, options = {}) => renderScout(message, { ...options, feeling });
+  if (isCityComplete(state) && !hasGoneGhost()) {
+    return say(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
+  }
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
   const next = nextAvailableMission(state);
 
-  const returnLine = getReturnLine(state);
+  const pacing = returnPacingLine(state);
+  if (pacing) return say(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
+
+  const returnLine = getReturnLine(lastVisit);
   if (returnLine && anyComplete) {
-    return renderScout(
+    return say(
       returnLine,
       next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : { actionText: 'VIEW STATS', actionHref: '#/stats' },
     );
   }
 
   if (!anyComplete) {
-    return renderScout(
+    return say(
       'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a href="#/district/master-keys" style="color: var(--cyan); font-weight: 600;">Master Keys</a> district first — everything else in the city builds on it.',
       next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : {},
     );
   }
   if (next) {
-    return renderScout(
+    return say(
       `Ready for the next one? <span style="color: var(--cyan); font-weight: 600;">${next.title}</span> — about ${next.estimatedMinutes} minutes.`,
       { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` },
     );
   }
-  return renderScout(
+  return say(
     'Every mission complete. The city is yours again. Go see what you built.',
     { actionText: 'VIEW STATS', actionHref: '#/stats' },
   );
@@ -325,6 +441,91 @@ const TILE_SVG = encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}" fill="none" stroke="#00E5FF" stroke-width="1">`
   + `<path d="M${TW / 2} 0.5L${TW - 0.5} ${TH / 2}L${TW / 2} ${TH - 0.5}L0.5 ${TH / 2}Z"/></svg>`,
 );
+
+// The street lattice: one cell is a block pitch square (3x3 tiles) centred on a
+// block's lot; its inscribed diamond is the centreline of the 1-tile streets
+// around that lot, so the cells tile into every street of the city, with a
+// streetlight where four blocks meet.
+const STREET_CELL = (() => {
+  const w = BLOCK_PITCH * TW;
+  const h = BLOCK_PITCH * TH;
+  const c = blockCentre(0, 0);
+  return { w, h, x: c.x, y: ORIGIN_TOP + c.y - h / 2 };
+})();
+const STREET_SVG = (() => {
+  const { w, h } = STREET_CELL;
+  const d = `M${w / 2} 0L${w} ${h / 2}L${w / 2} ${h}L0 ${h / 2}Z`;
+  const lights = [[w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2"/>`).join('');
+  return encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">`
+    + `<path d="${d}" stroke="#00E5FF" stroke-opacity="0.18" stroke-width="5"/>`
+    + `<path d="${d}" stroke="#00E5FF" stroke-opacity="0.8" stroke-width="1.2"/>`
+    + `<g fill="#FF2D9B">${lights}</g></svg>`,
+  );
+})();
+// Inverse of .city-ground's mask (same ellipse, in screen px), then soft edges.
+const WIDE_GROUND_MASK = (() => {
+  const rx = 0.46 * GROUND_W;
+  const ry = 0.42 * GROUND_H;
+  const cy = ORIGIN_TOP + GROUND_TOP + 0.54 * GROUND_H;
+  return [
+    `radial-gradient(ellipse ${rx.toFixed(1)}px ${ry.toFixed(1)}px at 50% ${cy.toFixed(1)}px, transparent 30%, rgba(0,0,0,0.65) 62%, #000 82%)`,
+    'linear-gradient(90deg, transparent 0, #000 160px, #000 calc(100% - 160px), transparent 100%)',
+    'linear-gradient(180deg, transparent 60px, #000 200px, #000 calc(100% - 180px), transparent calc(100% - 20px))',
+  ].join(', ');
+})();
+
+const POD_STYLE = `
+  <style>
+    .city-pod { pointer-events: auto; display: block; text-decoration: none; cursor: pointer; transition: filter 200ms ease, opacity 200ms ease; }
+    .city-pod--far { opacity: 0.5; }
+    .city-pod--mid { opacity: 0.62; }
+    .city-pod img { filter: brightness(0.34) saturate(0.2); }
+    .city-pod img.is-lit { filter: brightness(0.8) saturate(0.8) drop-shadow(0 0 6px rgba(0,229,255,0.35)); }
+    .city-pod__lot { position: absolute; inset: -4px -8px; pointer-events: none; z-index: 0; opacity: 0;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background: radial-gradient(ellipse at 50% 55%, rgba(255,45,155,0.28) 0%, rgba(255,45,155,0.08) 60%, transparent 100%); }
+    .city-pod.is-yours { opacity: 0.8; }
+    .city-pod.is-yours .city-pod__lot { opacity: 1; }
+    .city-pod::after { content: attr(data-label); position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
+      padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.94); box-shadow: 0 0 12px rgba(0,229,255,0.25);
+      opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; transform-origin: 50% 100%; }
+    .city-pod.is-yours::after { color: var(--magenta); border-color: rgba(255,45,155,0.55); }
+    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); outline: none; }
+    .city-pod:hover::after, .city-pod:focus-visible::after { opacity: 1; transform: translate(-50%, -6px); }
+    .city-wide { display: none; }
+    @media (min-width: ${WIDE_MIN}px) {
+      body:has(.city-wide) { overflow-x: clip; }
+      /* Emitted before the map at z-index 0: it paints above the page (so its pods take the
+         pointer) and beneath the map. On tall screens it runs to the window's bottom; the sky
+         gradient stays the map's 720px. */
+      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: max(720px, 100vh); overflow: hidden;
+        z-index: 0; pointer-events: none;
+        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%) top / 100% 720px no-repeat, #101626; }
+      .city-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 60;
+        background: linear-gradient(180deg, rgba(9,11,16,0) calc(100% - 216px), rgba(9,11,16,0.95) 100%),
+          linear-gradient(90deg, rgba(9,11,16,0.8) 0%, rgba(9,11,16,0) 22%, rgba(9,11,16,0) 78%, rgba(9,11,16,0.8) 100%); }
+      /* On the ground, wide pods are dimmed rather than see-through, so streets don't show through them. */
+      .city-wide .city-pod--far, .city-wide .city-pod.is-yours { opacity: 1; }
+      .city-wide .city-pod { filter: brightness(0.42); }
+      .city-wide .city-pod.is-yours { filter: brightness(0.82); }
+      .city-wide .city-pod:hover, .city-wide .city-pod:focus-visible { filter: brightness(1.35); }
+      .city-wide__iso { position: absolute; left: 50%; top: ${ORIGIN_TOP}px; width: 0; height: 0; }
+      /* The map's ground carried out under the wide city: the same tile grid plus the street
+         lattice between blocks, both on the map's own lattice. It fades in where the map's
+         ground fades out, and away toward the screen's edges, top and bottom. */
+      .city-wide__ground { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.28;
+        background-image: url("data:image/svg+xml,${STREET_SVG}"), url("data:image/svg+xml,${TILE_SVG}");
+        background-size: ${STREET_CELL.w}px ${STREET_CELL.h}px, ${TW}px ${TH}px;
+        background-position: calc(50% + ${STREET_CELL.x}px) ${STREET_CELL.y}px, 50% ${ORIGIN_TOP - TH / 2}px;
+        -webkit-mask-image: ${WIDE_GROUND_MASK}; mask-image: ${WIDE_GROUND_MASK};
+        -webkit-mask-composite: source-in; mask-composite: intersect; }
+      /* The map lets the wide city show through, so the ground runs on across its edge. */
+      .city-wide + .city-map { background: transparent; }
+    }
+    @media (max-width: 768px) { .city-pod::after { display: none; } }
+  </style>`;
 
 const STYLE = `
   <style>
@@ -564,10 +765,13 @@ const STYLE = `
     }
   </style>`;
 
-export function renderCityMap(state) {
+export function renderCityMap(state, { collective, whoami, arrival } = {}) {
   if (Object.values(state.accounts).every((a) => !a.enabled)) {
     return renderAllOffline();
   }
+  const data = collective?.status === 'ready' ? collective.data : null;
+  const placed = data ? backdropPods(data, displayPodId(data, whoami?.status === 'ready' ? whoami.data : null), BACKDROP_SLOTS) : null;
+  const hasPods = Boolean(placed && placed.length);
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
   const progress = DISTRICTS.map((d) => calcDistrictProgress(state, d.id).percent);
   const securedCount = progress.filter((p) => p >= 100).length;
@@ -575,9 +779,9 @@ export function renderCityMap(state) {
   const hazeMagenta = (0.22 * (1 - avg)).toFixed(3);
   const hazeCyan = (0.05 + 0.2 * avg).toFixed(3);
   const plaza = blockCentre(1, 1);
-  return `
+  return `${hasPods ? renderWideCity(placed) : ''}
 <div class="city-map scanlines">
-  ${STYLE}
+  ${STYLE}${hasPods ? POD_STYLE : ''}
   <div class="city-stars"></div>
   <div class="city-circuit"></div>
   <div class="city-haze" style="background:
@@ -597,12 +801,13 @@ export function renderCityMap(state) {
   <div class="city-actions">
     <a href="#/quickquest" class="city-btn city-btn--magenta">⚡ QUICK QUEST</a>
     <a href="#/stats" class="city-btn city-btn--cyan">STATS</a>
+    <a href="#/city-together" class="city-btn city-btn--cyan">WHOLE CITY</a>
   </div>
   <div class="city-skyline">
     <div class="city-horizon"></div>
     <div class="city-iso">
       <div class="city-ground"></div>
-      ${renderBackdropBlocks()}
+      ${renderBackdropBlocks(placed)}
       ${renderPlaza()}
       ${renderDistrictBlocks(state)}
     </div>
@@ -614,6 +819,6 @@ export function renderCityMap(state) {
   <div class="city-labels">
     ${renderDistrictLabels(state, startHere)}
   </div>
-  <div class="city-scout">${renderCityScout(state)}</div>
+  <div class="city-scout">${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
 </div>`;
 }

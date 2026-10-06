@@ -9,6 +9,7 @@ import { GRID_MISSIONS } from './missions-grid.js';
 import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
+import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF, PASSWORD_MISSIONS } from './missions-passwords.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -21,6 +22,7 @@ const BREACH_DEBRIEF = [
       { value: 'skip', text: 'Couldn’t check right now', severity: 'skip' },
     ],
   },
+  PASSWORD_EXPOSED_QUESTION,
 ];
 
 const LOGIN_DEBRIEF = [
@@ -43,18 +45,6 @@ const PASSWORD_DEBRIEF = [
     options: [
       { value: 'reset-password', text: 'Yes, changed to a new unique password', severity: 'safe' },
       { value: 'already-strong', text: 'It was already unique and strong', severity: 'safe' },
-      { value: 'later', text: 'I’ll come back to this', severity: 'skip' },
-    ],
-  },
-];
-
-const TWO_FA_DEBRIEF = [
-  {
-    id: 'action',
-    label: 'Did you set up two-factor authentication?',
-    options: [
-      { value: 'enabled-2fa', text: 'Yes, 2FA is now enabled', severity: 'safe' },
-      { value: 'already-enabled', text: 'It was already enabled', severity: 'safe' },
       { value: 'later', text: 'I’ll come back to this', severity: 'skip' },
     ],
   },
@@ -172,7 +162,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable 2-Step Verification if not already on' },
       { text: 'Prefer an authenticator app or security key over SMS' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"A password is a lock. 2FA is a deadbolt. Both together is how you keep people out."',
       debrief: {
@@ -289,7 +279,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Set up "Two-step verification"' },
       { text: 'Add the Microsoft Authenticator app or another authenticator' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Two factors beat one factor, every time. Authenticator app over SMS if you can."',
       debrief: {
@@ -357,7 +347,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: iCloud',
     briefing: 'Apple shows which devices are signed into your Apple ID. An unfamiliar device means someone else has access to your iCloud data — photos, backups, Find My, and potentially your physical location.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
       { text: 'Scroll to "Devices" to see everything signed into your Apple ID' },
       { text: 'Look for devices you don’t recognize' },
     ],
@@ -379,7 +369,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: iCloud',
     briefing: 'Your Apple ID password is the key to your entire Apple ecosystem. A unique, strong password here protects your iPhone backups, photos, payment methods, and every app using Sign in with Apple.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
       { text: 'Go to "Sign-In and Security" and change your password' },
       { text: 'Choose a unique password not used anywhere else' },
     ],
@@ -401,11 +391,11 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: iCloud',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices. Without it, anyone with your password can access your entire iCloud account from any device.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
       { text: 'Go to "Sign-In and Security"' },
       { text: 'Enable Two-Factor Authentication if not already on' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Apple’s 2FA sends codes to your trusted devices. Without it, a password is all someone needs."',
       debrief: {
@@ -522,7 +512,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-step verification"' },
       { text: 'Set up with an authenticator app for best security' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"After those breaches, 2FA on Yahoo isn’t optional — it’s damage control."',
       debrief: {
@@ -638,7 +628,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-factor authentication"' },
       { text: 'Set up with an authenticator app — save your recovery codes securely' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"If you chose Proton for privacy, 2FA completes the picture. Don’t leave the front door unlocked on the most secure house."',
       debrief: {
@@ -706,7 +696,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: Apple ID',
     briefing: 'Apple shows all devices currently signed into your Apple ID. Every device on this list has access to your iCloud data, photos, and Find My location. An unknown device is a serious red flag.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
       { text: 'Review the "Devices" section' },
       { text: 'Remove any devices you don’t recognize or no longer own' },
     ],
@@ -728,7 +718,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Apple ID',
     briefing: 'Your Apple ID password guards the App Store, Apple Pay, iCloud Keychain, Find My, and Sign in with Apple. If this password is compromised, an attacker can lock you out of your own devices.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
       { text: 'Go to Sign-In and Security > Password' },
       { text: 'Set a new, unique password not used anywhere else' },
     ],
@@ -750,11 +740,11 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Apple ID',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices when you sign in on a new device. It’s one of the most seamless 2FA implementations available.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
       { text: 'Go to Sign-In and Security' },
       { text: 'Enable Two-Factor Authentication (or confirm it’s already on)' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Apple’s 2FA is seamless — it sends a code to your existing devices. Easy to set up, hard for attackers to bypass."',
       debrief: {
@@ -773,7 +763,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Privacy Review: Apple ID',
     briefing: 'Review which apps use Sign in with Apple and what data they have access to. Also review app permissions on your devices — camera, microphone, contacts, and location access.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://account.apple.com/account/manage' },
+      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
       { text: 'Review "Sign in with Apple" — revoke access for apps you no longer use' },
       { text: 'On your device: Settings > Privacy & Security > review each category' },
     ],
@@ -871,7 +861,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Add a security key or authenticator app as your primary method' },
       { text: 'Save your backup codes in a secure location' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Google offers the most 2FA options of anyone. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
       debrief: {
@@ -988,7 +978,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-step verification"' },
       { text: 'Add Microsoft Authenticator or another authenticator app' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Microsoft’s Authenticator has a nice one-tap approval. Set it up and you won’t even need to type codes."',
       debrief: {
@@ -1104,7 +1094,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Click "Use two-factor authentication"' },
       { text: 'Set up with an authenticator app (not SMS)' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Social media accounts are SIM-swap targets. Use an authenticator app, not SMS."',
       debrief: {
@@ -1156,10 +1146,17 @@ export const MISSIONS = [
   ...CLINIC_MISSIONS,
   ...TRAIL_MISSIONS,
   ...OSINT_SIEVE_MISSIONS,
+  ...PASSWORD_MISSIONS,
 ];
 
+// A mission's district: its account's, or its own for a mission that belongs
+// to no account (the password-manager report).
+export function missionDistrict(mission) {
+  return mission?.district || ACCOUNTS[mission?.accountId]?.district;
+}
+
 export function getMissionsForDistrict(districtId) {
-  return MISSIONS.filter((m) => ACCOUNTS[m.accountId]?.district === districtId);
+  return MISSIONS.filter((m) => missionDistrict(m) === districtId);
 }
 
 export function getMissionsForAccount(accountId) {

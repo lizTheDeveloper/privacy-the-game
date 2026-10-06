@@ -358,3 +358,47 @@ export const DISTRICT_DIALOGUE = {
     ],
   },
 };
+
+export const GHOST_DIALOGUE = {
+  unlock: `Every district is lit. The brokers' towers are dark, their antennas are scrap, and the city answers to you now. There's one job left, and it's a strange one. Come find me when you're ready.`,
+  briefing: `I'd be lying if I said the city had no watchers left. There's one. It's us. This game counts what people do here — which missions they start and finish, a few of the answers they pick, which accounts they said they have, and the place their connection points to — anonymously, on our own server, no ads, no third parties — because that's how we know what's working. You don't owe us that. So, last job: look at exactly what we can see about you. Then switch us off. Your city stays exactly as it is. We just stop watching.`,
+  whatHappens: `From the moment you go ghost, this device sends us nothing. Everything you already did stays in the city's totals — you earned that — and tonight you'll be counted as one more person who has gone ghost. We keep nothing new about you after that.`,
+  alreadyOff: `You'd already switched us off, so there was nothing left for us to stop.`,
+  done: `No more watchers. Not the brokers, not the data farms, not us. The city's yours and nobody's taking notes. If you ever want to help us count again, the switch is on Your City. Until then — enjoy the quiet. You earned it.`,
+  early: `Going ghost now switches us off for good. Tonight we delete what this browser sent us this month from the connection you're on now — your missions leave the city's totals tomorrow — and you're added to the ghost count. (Ghosts who take back the whole city first keep their place in the totals.)`,
+  pending: `Your ghost is pending until tonight's run. Changed your mind?`,
+  cancelNote: `Cancel from this browser and connection — that's how our analytics recognise you.`,
+  cancelFailed: `We couldn't reach our analytics to cancel. Tonight's run may still delete your data.`,
+  wentThrough: `Your ghost went through. Tonight's run deleted what this browser had sent us.`,
+};
+
+// Task 14: passwords get reset only when they're compromised.
+export const PASSWORD_DIALOGUE = {
+  notNeeded: `Clean record. No leaked password, nothing flagged — changing it now would just be busywork. Moving on.`,
+  notNeededAfterLeak: `There were leaks, but your password wasn't in them, and nothing's flagged it. Changing it now would just be busywork.`,
+  breachNoPassword: `Your address leaked; your password didn't. Expect a bit more spam and a few more phishing attempts aimed at that inbox — but these leaks didn't hand anyone your key.`,
+  noManager: `No password manager yet? Worth getting one — it makes a different strong password for every account and remembers them all, so you don't have to. Your phone or browser probably has one built in.`,
+  hasManager: `Good. Most managers can tell you which of your passwords leaked or got reused — there's a recon mission for reading that report.`,
+};
+
+// Task 14: what Scout says about the second step the player has.
+export const TWO_FA_DIALOGUE = {
+  passkey: `A passkey. Nothing to type, nothing to phish, nothing riding along in a text message. That's the best lock they make, and it's on your door.`,
+  authenticator: `An authenticator app. The codes are made on your own device and never cross the phone network, so a SIM swap gets nobody anywhere. Lovely work.`,
+  sms: `Text codes count — this account is much safer than with no second step, and I'm marking it done. Fair warning, though: a scammer who talks your carrier into moving your number to their SIM card — a SIM swap — gets your codes too. An authenticator app or a passkey closes that gap. There's a bonus mission for it whenever you're up for it.`,
+  email: `Email codes count — I'm marking this one done. The catch: anyone who gets into that inbox gets the codes as well, so this account is only as safe as your email. An authenticator app or a passkey breaks that chain. Bonus mission's there when you want it.`,
+};
+
+export const COLLECTIVE_DIALOGUE = {
+  explainer: `Here's how we know any of this. While you play, the game tells our own server — not an ad company, ours — what you do here. That's things like which missions you start and finish, some of what you pick in debriefs — like what a breach check found or how an account is protected — which accounts you said you have, the make and year of a car you add, and the place your internet connection points to. Never your passwords, never what's inside your accounts. Every night we add everyone up, and a place only shows up once it has at least 50 players, so nobody can be picked out. Turn sharing off and that night we delete what this browser sent us this month from your connection. Want to see exactly what we can see about you? It's on Your City.`,
+};
+
+export const RESTORE_DIALOGUE = {
+  heading: `YOUR DATA WAS DELETED`,
+  text: `We deleted what this browser had sent us. Your game is still saved here, so you can send it again and rejoin the city's totals.`,
+  failed: `We couldn't reach our analytics. Try again in a moment.`,
+  progress: (n, total) => `Sending your city back… (${n} of ${total})`,
+  done: `You're back in the city. Tomorrow's totals will include you again.`,
+  checking: `Checking whether tonight's run has happened…`,
+  checkFailed: `We couldn't check whether tonight's run has happened.`,
+};
