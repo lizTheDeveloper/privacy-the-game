@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nightly Reclaim City collective-score job.
 
-Purge opted-out sessions (committed on its own), then build totals. Then label the
+Purge opted-out and early-ghost sessions (committed on its own), then build totals. Then label the
 result and atomically replace collective.json. Any failure leaves yesterday's
 file in place, records the failed run, reports to GlitchTip, and exits 1 so it
 shows in `systemctl --failed`.

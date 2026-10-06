@@ -220,6 +220,22 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(doc["city"]["ghosts"], 1)
         self.assertEqual(doc["city"]["optedOut"], 7)
 
+    def test_city_ghosts_are_kept_ghosts_plus_early_ghosts(self):
+        sids = players(60)
+        events(sids[:4], "went-ghost")
+        PG.sql("UPDATE rc_collective.counters SET value = 9 WHERE name = 'ghosts_early_total';")
+        doc = build()
+        self.assertEqual(doc["city"]["ghosts"], 13)
+        self.assertEqual(pods_by_id(doc)["us-il-chicago"]["ghosts"], 4)  # pods: kept ghosts only
+
+    def test_restored_mission_events_count_in_actions(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed", "restored": "1"})
+        events(sids[:2], "district-completed", {"district": "master-keys", "restored": "1"})
+        doc = build()
+        self.assertEqual(doc["city"]["actions"], 60)
+        self.assertEqual(doc["city"]["districts"], 2)
+
 
 
 class PurgeThenBuildTest(unittest.TestCase):
@@ -234,6 +250,19 @@ class PurgeThenBuildTest(unittest.TestCase):
         doc = json.loads([l for l in out.splitlines() if l.startswith("{")][0])
         self.assertEqual(doc["city"]["players"], 59)
         self.assertEqual(doc["city"]["optedOut"], 1)
+
+    def test_early_ghost_leaves_the_totals_and_joins_the_ghost_count(self):
+        sids = players(61)
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed"})
+        PG.insert_event(sids[0], "went-ghost-early")
+        PG.insert_event(sids[1], "went-ghost")
+        out = PG.run_files(SQL_DIR / "purge.sql", SQL_DIR / "purge_mig.sql", SQL_DIR / "build.sql",
+                           variables={"website": WEBSITE, "k": K})
+        doc = json.loads([l for l in out.splitlines() if l.startswith("{")][0])
+        self.assertEqual(doc["city"]["players"], 60)
+        self.assertEqual(doc["city"]["actions"], 60)
+        self.assertEqual(doc["city"]["ghosts"], 2)
+        self.assertEqual(doc["city"]["optedOut"], 0)
 
 
 class NoResidualTest(unittest.TestCase):

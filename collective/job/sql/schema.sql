@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS rc_collective.counters (
 );
 INSERT INTO rc_collective.counters (name, value) VALUES ('opted_out_total', 0)
   ON CONFLICT (name) DO NOTHING;
+-- Early ghosts: went ghost before taking back the whole city, so their rows
+-- were purged like an opt-out; only this count of them remains.
+INSERT INTO rc_collective.counters (name, value) VALUES ('ghosts_early_total', 0)
+  ON CONFLICT (name) DO NOTHING;
 CREATE TABLE IF NOT EXISTS rc_collective.runs (
   ran_at timestamptz NOT NULL DEFAULT now(),
   ok     boolean NOT NULL,

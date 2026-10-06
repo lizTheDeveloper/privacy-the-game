@@ -175,10 +175,16 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_totals(pod_filter text, k int) RETURNS jso
   FROM n
 $$;
 
+-- city.ghosts = kept ghosts (went-ghost, counted over published pods only, as
+-- above) + ghosts_early_total. Early ghosts' rows were purged, so that part is
+-- a city-only counter like optedOut: it has no pod residual to subtract, and
+-- city.ghosts minus the sum of pod ghosts is exactly that published counter.
 SELECT jsonb_build_object(
   'k', :k,
-  'city', pg_temp.rc_city(:k)
-          || jsonb_build_object('optedOut', (SELECT value FROM rc_collective.counters WHERE name = 'opted_out_total'),
+  'city', c.city
+          || jsonb_build_object('ghosts', coalesce((c.city->>'ghosts')::bigint, 0)
+                                          + (SELECT value FROM rc_collective.counters WHERE name = 'ghosts_early_total'),
+                                'optedOut', (SELECT value FROM rc_collective.counters WHERE name = 'opted_out_total'),
                                 'pods', (SELECT count(*) FROM rc_pods),
                                 'byAddress', coalesce((
                                   SELECT jsonb_agg(jsonb_build_object('id', acct, 'breachRatePct', pct)
@@ -195,4 +201,5 @@ SELECT jsonb_build_object(
                               'region', nullif(p.region, ''), 'city', nullif(p.city, ''),
                               'rest', p.rest, 'includesWorld', p.includes_world))
             || pg_temp.rc_totals(p.id, :k) ORDER BY p.id) FROM rc_pods p), '[]'::jsonb)
-)::text;
+)::text
+FROM (SELECT pg_temp.rc_city(:k) AS city) c;
