@@ -24,16 +24,19 @@ There are two kinds of ghost, and both switch analytics off in the game:
 
 ## Cancelling before the run
 
-Both deletions can be called off from the same browser and connection (that is what Umami's session is) until the nightly run:
+Both deletions can be called off until the nightly run, but only from the browser that asked for them:
 
-- An early ghost cancels with `ghost-cancelled`. A session is purged as an early ghost only if its latest of (`went-ghost-early`, `ghost-cancelled`), ordered by `created_at` then `event_id`, is `went-ghost-early`. Going ghost again after cancelling purges it again.
-- Turning sharing back on while an opt-out is pending sends `opt-out-cancelled`. A session is purged as an opt-out only if its latest of (`opted-out`, `opt-out-cancelled`) is `opted-out`.
+- When a player turns sharing off (`opted-out`) or goes ghost early (`went-ghost-early`), the game makes a random nonce (16 bytes, `crypto.getRandomValues`), keeps it in that browser, and sends it as event data `nonce`. Its cancel (`opt-out-cancelled` / `ghost-cancelled`) carries the same nonce.
+- A session is purged if it has any deletion event whose nonce has no matching cancel of the same kind. Order and timestamps don't matter. A deletion sent without a nonce (older clients) can never be cancelled.
+- Umami's session is IP + browser + monthly salt, so people sharing a connection with identical browsers share a session. One person's cancel carries their own nonce and cannot undo another's deletion: shared sessions fail safe (purged).
+- Turning sharing back on while an opt-out is pending sends `opt-out-cancelled`; the game waits for `collective.json` first, because its `asOf` decides whether the deletion is still pending (it counts as done only if `asOf` is more than 10 minutes after the deletion, to allow for clock skew).
 
 ## Bringing data back
 
 After a deletion went through, the player's browser still holds their whole saved game, and they can send it again:
 
-- The game sends `data-restored` with `kind` = `opted-out` or `ghost-early`, then one `mission-completed` per completed or skipped mission and one `district-completed` per finished district, each with `restored: '1'`. Those restored events are ordinary rows (in a new session) and count in the totals as usual; their timestamps are the restore time, not when the mission was played.
+- The game sends `data-restored` with `kind` = `opted-out` or `ghost-early`, then one `mission-completed` per completed or skipped mission and one `district-completed` per finished district, each with `restored: '1'`. Those restored events are ordinary rows and count in the totals as usual. They arrive in whatever Umami session the browser has now (the same session as before on the same connection in the same month, otherwise a new one); their timestamps are the restore time, not when the mission was played.
+- If both an opt-out and an early ghost were deleted, the game sends only `kind: opted-out`, matching how the job counted that person (once, as an opt-out).
 - The next run takes one off the matching counter (`opted_out_total` or `ghosts_early_total`) per distinct session that sent `data-restored` with that kind, never below zero, then deletes the `data-restored` events so they are counted once.
 - Anyone can send `data-restored`, like `opted-out`: a scripted sender could lower the published opt-out or ghost counts (never below zero), but cannot touch anyone else's data.
 
