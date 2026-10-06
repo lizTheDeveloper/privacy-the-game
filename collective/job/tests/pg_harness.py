@@ -29,17 +29,21 @@ class PgHarness:
 
     def start(self):
         self._sh(["docker", "rm", "-f", self.name], check=False)
-        self._sh(["docker", "run", "-d", "--name", self.name,
-                  "-e", "POSTGRES_PASSWORD=test", "-e", "POSTGRES_USER=umami",
-                  "-e", "POSTGRES_DB=umami", "postgres:18-alpine"])
-        for _ in range(60):
-            if self._sh(["docker", "exec", self.name, "pg_isready", "-U", "umami"], check=False).returncode == 0:
-                break
+        try:
+            self._sh(["docker", "run", "-d", "--name", self.name,
+                      "-e", "POSTGRES_PASSWORD=test", "-e", "POSTGRES_USER=umami",
+                      "-e", "POSTGRES_DB=umami", "postgres:18-alpine"])
+            for _ in range(60):
+                if self._sh(["docker", "exec", self.name, "pg_isready", "-U", "umami"], check=False).returncode == 0:
+                    break
+                time.sleep(1)
+            else:
+                raise RuntimeError("postgres did not become ready")
             time.sleep(1)
-        else:
-            raise RuntimeError("postgres did not become ready")
-        time.sleep(1)
-        self.reset()
+            self.reset()
+        except Exception:
+            self.stop()
+            raise
 
     def stop(self):
         self._sh(["docker", "rm", "-f", self.name], check=False)
