@@ -1,4 +1,5 @@
 import { isAnalyticsOff, setAnalyticsOff } from './utils/analytics-pref.js';
+import { track, trackPageview, trackThenStop } from './utils/analytics.js';
 import { initRouter, navigate, parseRoute } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
@@ -64,7 +65,7 @@ function render(route) {
       state.lastCityVisit = new Date().toISOString();
       setState(state);
     }
-    if (typeof umami !== 'undefined' && umami.track) umami.track(() => ({ url: location.hash, title: route.screen }));
+    trackPageview(location.hash, route.screen);
   } catch (error) {
     captureError(error, { screen: route.screen, params: route.params });
     app.innerHTML = `<div style="padding: 40px; text-align: center;">
@@ -128,22 +129,20 @@ function submitDebrief(missionId) {
     if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
   }
 
-  if (typeof umami !== 'undefined' && umami.track) {
-    umami.track('mission-completed', {
-      mission: missionId,
-      district: districtId,
-      finding: answers.finding,
-      phase: mission.phase,
-      status,
-    });
-  }
+  track('mission-completed', {
+    mission: missionId,
+    district: districtId,
+    finding: answers.finding,
+    phase: mission.phase,
+    status,
+  });
   if (status === 'completed' && shouldAskPermission(state)) {
     requestPermission();
   }
 
   const progress = calcDistrictProgress(state, districtId);
   if (progress.total > 0 && progress.percent === 100) {
-    if (typeof umami !== 'undefined' && umami.track) umami.track('district-completed', { district: districtId });
+    track('district-completed', { district: districtId });
     navigate(`#/milestone/${districtId}`);
   } else {
     const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
@@ -192,7 +191,7 @@ app.addEventListener('click', async (e) => {
   if (action === 'go-do-it') {
     const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
-    if (typeof umami !== 'undefined' && umami.track) umami.track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     navigate(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
@@ -201,14 +200,18 @@ app.addEventListener('click', async (e) => {
     if (state.accounts[id]) {
       const enabled = !state.accounts[id].enabled;
       setState(toggleAccount(state, id, enabled));
-      if (typeof umami !== 'undefined' && umami.track) umami.track('account-toggled', { account: id, enabled });
+      track('account-toggled', { account: id, enabled });
       renderCurrentRoute();
     }
   } else if (action === 'toggle-analytics') {
-    const off = !isAnalyticsOff();
-    setAnalyticsOff(off);
-    // Turning it back on in a session that never loaded the script: load it now.
-    if (!off && typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+    if (isAnalyticsOff()) {
+      setAnalyticsOff(false);
+      // Turning it back on in a session that never loaded the script: load it now.
+      if (typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+    } else {
+      // Say goodbye first so tonight's job can find and delete this device's data.
+      await trackThenStop('opted-out');
+    }
     renderCurrentRoute();
   } else if (action === 'share-card') {
     handleShareCard(el.dataset.district);
@@ -300,7 +303,7 @@ app.addEventListener('click', async (e) => {
     state.accounts.car_broker_lexisnexis = { ...state.accounts.car_broker_lexisnexis, enabled: true };
     state.accounts.car_broker_verisk = { ...state.accounts.car_broker_verisk, enabled: true };
     setState(state);
-    if (typeof umami !== 'undefined' && umami.track) umami.track('vehicle-added', { make, year });
+    track('vehicle-added', { make, year });
     renderCurrentRoute();
   } else if (action === 'remove-vehicle') {
     const index = Number(el.dataset.index);

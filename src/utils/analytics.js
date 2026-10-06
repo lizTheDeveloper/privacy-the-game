@@ -1,0 +1,42 @@
+// The only module that talks to Umami. Everything else calls these, so a
+// missed call site can't send an event after a player turns sharing off.
+import { isAnalyticsOff, setAnalyticsOff } from './analytics-pref.js';
+import { getChosenPod } from './pod-pref.js';
+
+function tracker() {
+  if (isAnalyticsOff()) return null;
+  const u = globalThis.umami;
+  return u && typeof u.track === 'function' ? u : null;
+}
+
+function withPod(data) {
+  const pod = getChosenPod();
+  return pod ? { ...(data || {}), pod } : data;
+}
+
+export function track(name, data) {
+  const u = tracker();
+  if (u) u.track(name, withPod(data));
+}
+
+export function trackPageview(url, title) {
+  const u = tracker();
+  if (u) u.track(() => ({ url, title }));
+}
+
+// Send one last event, wait for it (bounded), then stop tracking for good.
+// Sharing turns off even if the send fails, hangs, or the script never loaded.
+export async function trackThenStop(name, data, { timeoutMs = 1500 } = {}) {
+  const u = tracker();
+  if (u) {
+    try {
+      await Promise.race([
+        Promise.resolve(u.track(name, withPod(data))),
+        new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+      ]);
+    } catch {
+      // Best effort; turning sharing off below is what matters.
+    }
+  }
+  setAnalyticsOff(true);
+}
