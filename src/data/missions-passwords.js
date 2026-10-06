@@ -1,9 +1,10 @@
 // Honest passwords and two-factor (approved by Liz 2026-10-06): breach checks
 // ask whether the password itself leaked, 2FA asks what the account already
-// has, and three kinds of BONUS missions appear only when they apply —
-// a password manager's security report, an upgrade from text/email codes,
-// and a backup way in for the most critical accounts. None of these are core:
-// adding them never moves a finished district below 100%.
+// has. Missions that appear only when they apply: the password manager's
+// security report (CORE recon, but only for players who say they use a
+// manager), and two BONUS missions — an upgrade from text/email codes and a
+// backup way in for the most critical accounts. Saves that never answered
+// the manager question keep exactly their old totals.
 import { ACCOUNTS } from './accounts.js';
 
 const BREACHED = ['1-2-breaches', '3plus-breaches'];
@@ -131,10 +132,11 @@ export const PASSWORD_MANAGER_MISSION = {
   accountId: 'password_manager',
   district: 'master-keys',
   phase: 'recon',
-  optional: true,
+  // Core for players who use a password manager (Liz, 2026-10-06: take its
+  // report seriously); players without one never see it.
   unlock: { type: 'password-manager' },
   title: 'Check your password manager’s security report',
-  briefing: 'Your password manager can already tell you which passwords are in trouble. Most of them check your saved passwords against known leaks and point out any you’ve used in more than one place. That report shows exactly which passwords need changing — and which ones don’t.',
+  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. Whatever it clears, we leave alone.',
   steps: PM_STEPS.other,
   stepsByManager: PM_STEPS,
   debriefQs: [
@@ -142,6 +144,7 @@ export const PASSWORD_MANAGER_MISSION = {
       id: 'flagged',
       multi: true,
       label: 'Which of your accounts did it flag as compromised or reused?',
+      hint: 'Whatever it flags gets a new password; whatever it clears stays as it is.',
       optionsFrom: 'password-accounts',
       options: [
         { value: 'none', text: 'None were flagged', severity: 'safe' },

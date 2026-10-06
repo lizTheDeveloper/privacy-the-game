@@ -15,6 +15,8 @@ export function isMissionAvailable(state, mission) {
   const u = mission.unlock;
   if (!u) return true;
   if (u.type === 'password-manager') {
+    // A finished report keeps counting if the answer later changes to "none".
+    if (isMissionDone(state.missions?.[mission.id])) return true;
     return Boolean(state.passwordManager) && state.passwordManager !== 'none';
   }
   const rec = state.missions?.[u.mission];

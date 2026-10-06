@@ -115,7 +115,7 @@ function renderTabs(districtId, activeTab) {
     <a href="#/district/${districtId}?tab=${phase.id}" class="panel${active ? ' panel--active' : ''}" style="padding: 10px 18px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'rgba(237,239,243,0.25)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
   });
   return `
-  <div style="display: flex; gap: 8px; padding: 16px 24px 0;">
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 24px 0;">
     ${tabs.join('')}
   </div>`;
 }
@@ -161,6 +161,7 @@ function renderMissionRow(state, mission) {
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
+      ${!completed && isPasswordMission(mission) && (state.pmFlagged || []).includes(mission.accountId) ? `<div style="font-size: 11px; color: var(--magenta); margin-top: 2px;">Flagged by your password manager</div>` : ''}
     </div>
     ${mission.optional
       ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
@@ -262,7 +263,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
     </div>
     <div style="margin-top: 20px; text-align: right;">
-      <a class="btn-primary" style="text-decoration: none;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
+      <a class="btn-primary" style="text-decoration: none; display: inline-block; max-width: 100%;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
     </div>
   </div>`;
 }

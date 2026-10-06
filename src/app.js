@@ -10,6 +10,7 @@ import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS, missionDistrict } from './data/missions.js';
 import { applyDebrief, recordNotNeeded, missionEventData } from './utils/debrief.js';
 import { isMissionDone } from './utils/mission-status.js';
+import { keyActivationTarget } from './utils/keyboard.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { DISTRICTS } from './data/districts.js';
 import { generateMilestoneCard, shareMilestoneCard, shareStatCard } from './utils/milestone-card.js';
@@ -582,6 +583,14 @@ app.addEventListener('click', async (e) => {
     podPickerOpen = false;
     renderCurrentRoute();
   }
+});
+
+// role="button" actions answer Enter and Space like real buttons.
+app.addEventListener('keydown', (e) => {
+  const el = keyActivationTarget(e);
+  if (!el || !app.contains(el)) return;
+  e.preventDefault();
+  el.click();
 });
 
 // Debrief follow-ups appear once the answer they depend on is picked; in a

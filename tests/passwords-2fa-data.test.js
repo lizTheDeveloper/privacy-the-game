@@ -172,18 +172,20 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
     expect(isMissionInPlay(s, m)).toBe(false);
   });
 
-  it('none of the new missions are core: existing totals stay the same', () => {
+  it('upgrades and backups are never core; a save without a manager answer keeps its totals', () => {
     const core = getMissionsForDistrict('master-keys').filter(isCoreMission);
-    expect(core).toHaveLength(27);
+    expect(core.map((m) => m.id).filter((id) => id.startsWith('password_manager-'))).toEqual(['password_manager-recon-report']);
     const vaultCore = getMissionsForDistrict('vault').filter(isCoreMission);
     for (const m of [...core, ...vaultCore]) {
-      expect(m.id).not.toMatch(/-fortify-2fa-(upgrade|backup)$|^password_manager-/);
+      expect(m.id).not.toMatch(/-fortify-2fa-(upgrade|backup)$/);
     }
+    expect(calcDistrictProgress(createInitialState(), 'master-keys').total).toBe(27);
   });
 
   it('an old save with the core path done stays at 100%', () => {
     let s = createInitialState();
     for (const m of getMissionsForDistrict('master-keys').filter(isCoreMission)) {
+      if (m.unlock) continue; // the password-manager report: not in an old save
       s = updateMission(s, m.id, { status: 'completed', action: m.id.endsWith('2fa') ? 'enabled-2fa' : undefined });
     }
     expect(calcDistrictProgress(s, 'master-keys').percent).toBe(100);
@@ -193,9 +195,10 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
 describe('password manager recon', () => {
   const pm = byId('password_manager-recon-report');
 
-  it('is an optional Master Keys recon mission', () => {
+  it('is a core Master Keys recon mission (in play only with a manager)', () => {
     expect(pm.title).toBe('Check your password manager’s security report');
-    expect(pm.optional).toBe(true);
+    expect(pm.optional).toBeFalsy();
+    expect(isCoreMission(pm)).toBe(true);
     expect(pm.phase).toBe('recon');
     expect(missionDistrict(pm)).toBe('master-keys');
     expect(getMissionsForDistrict('master-keys')).toContain(pm);

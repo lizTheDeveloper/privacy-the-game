@@ -22,6 +22,8 @@ function notFound(state) {
   </div>`;
 }
 
+const FLAGGED_NOTE = '<div style="font-size: 13px; font-weight: 600; color: var(--magenta); margin: -12px 0 20px;">Flagged by your password manager</div>';
+
 const NO_RESET_BADGE = '<div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--lime); background: rgba(198,255,0,0.08); border: 1px solid rgba(198,255,0,0.3); padding: 4px 12px; letter-spacing: 1px;">NO RESET NEEDED</div>';
 
 // opts.resetAnyway: the player chose to reset a password recon showed is fine.
@@ -91,6 +93,7 @@ export function renderBriefing(state, missionId, opts = {}) {
           <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~${mission.estimatedMinutes} MIN</div>
           ${noReset ? NO_RESET_BADGE : ''}
         </div>
+        ${isPasswordMission(mission) && (state.pmFlagged || []).includes(mission.accountId) ? FLAGGED_NOTE : ''}
 
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
@@ -118,13 +121,19 @@ export function renderBriefing(state, missionId, opts = {}) {
         <img src="assets/characters/scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
         <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
-          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? PASSWORD_DIALOGUE.notNeeded : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
+          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
         </div>
         ${preview}
         ${renderLoreSection(districtId, state)}
       </div>
     </div>
   </div>`;
+}
+
+// "Clean record" only when the breach check found nothing.
+function noResetScoutLine(state, mission) {
+  const finding = state.missions[`${mission.accountId}-recon-breach`]?.finding;
+  return finding === 'no-breaches' ? PASSWORD_DIALOGUE.notNeeded : PASSWORD_DIALOGUE.notNeededAfterLeak;
 }
 
 function renderNoResetPanel(state, mission) {
@@ -135,6 +144,7 @@ function renderNoResetPanel(state, mission) {
           <div class="section-label" style="color: var(--lime); margin-bottom: 12px;">WHY NO RESET</div>
           <ul style="margin: 0; padding-left: 18px; font-size: 14px; color: var(--offwhite); line-height: 1.5;">${reasons}</ul>
           <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-top: 10px;">A password only needs changing when it has leaked, been flagged, or someone else has been in the account.</div>
+          <div style="font-size: 13px; color: rgba(237,239,243,0.75); line-height: 1.6; margin-top: 8px;">Unless you use this same password somewhere else — then change it here, because a leak there opens this door too.</div>
         </div>`;
 }
 

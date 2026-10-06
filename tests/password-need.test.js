@@ -127,6 +127,7 @@ describe('not-needed counts as done for progress, never as a real action', () =>
   function allCoreDone(passwordStatus) {
     let s = createInitialState();
     for (const m of getMissionsForDistrict('master-keys').filter(isCoreMission)) {
+      if (m.unlock) continue; // the password-manager report: not in an old save
       if (m.id.endsWith('-fortify-password')) {
         s = set(s, m.id, passwordStatus === 'completed'
           ? { status: 'completed', action: 'reset-password' }

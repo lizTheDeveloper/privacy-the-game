@@ -9,8 +9,10 @@ import { renderDistrict } from '../src/screens/district.js';
 import { getMissionsForDistrict } from '../src/data/missions.js';
 import { createInitialState, updateMission } from '../src/state.js';
 
+// Core missions every player has. The password-manager report is core too,
+// but only for players who say they use a manager (mission.unlock).
 function coreCh1() {
-  return getMissionsForDistrict('master-keys').filter(isCoreMission);
+  return getMissionsForDistrict('master-keys').filter((m) => isCoreMission(m) && !m.unlock);
 }
 
 function completeAll(state, ids) {

@@ -20,8 +20,17 @@ function weightedScore(missions, isDone) {
   return { total, done };
 }
 
+// Bonus missions that unlock later (optional + mission.unlock) count toward
+// integrity and exposure only once done, so unlocking one never lowers a
+// score. A core mission that unlocks (the password-manager report) counts
+// like any core mission once it is in play.
+function scoredMissions(state) {
+  return MISSIONS.filter((m) => m.phase !== 'survey' && isMissionInPlay(state, m)
+    && (!(m.unlock && m.optional) || isMissionDone(state.missions[m.id])));
+}
+
 export function calcIntegrity(state) {
-  const relevant = MISSIONS.filter((m) => m.phase !== 'survey' && isMissionInPlay(state, m));
+  const relevant = scoredMissions(state);
   if (relevant.length === 0) return 0;
   const { total, done } = weightedScore(relevant, (m) => isMissionDone(state.missions[m.id]));
   if (done === 0) return 0;
@@ -29,7 +38,7 @@ export function calcIntegrity(state) {
 }
 
 export function calcExposure(state) {
-  const relevant = MISSIONS.filter((m) => m.phase !== 'survey' && isMissionInPlay(state, m));
+  const relevant = scoredMissions(state);
   const { total, done } = weightedScore(relevant, (m) => isMissionDone(state.missions[m.id]));
   const perPoint = total > 0 ? 1000 / total : 0;
   return Math.max(0, Math.round(1000 - done * perPoint));

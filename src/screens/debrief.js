@@ -1,4 +1,4 @@
-import { MISSIONS } from '../data/missions.js';
+import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
@@ -153,8 +153,7 @@ export function renderDebrief(state, missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return notFound(state);
 
-  const account = ACCOUNTS[mission.accountId];
-  const districtId = account?.district || '';
+  const districtId = missionDistrict(mission) || '';
   const stored = state.missions[missionId] || {};
   const completed = stored.status === 'completed';
 
