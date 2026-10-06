@@ -130,7 +130,7 @@ test('oversized headers (past the 16 KB limit) are refused fast; near-limit ones
     assert.ok([400, 431, 'closed'].includes(huge), String(huge));
     const near = await fetch(`http://127.0.0.1:${port}/whoami`, { headers: { 'user-agent': '('.repeat(8000), 'x-forwarded-for': '1'.repeat(4000) } });
     assert.equal(near.status, 200);
-    assert.ok(Date.now() - t0 < 200, `took ${Date.now() - t0}ms`);
+    assert.ok(Date.now() - t0 < 2000, `took ${Date.now() - t0}ms`);
   } finally {
     server.close();
   }

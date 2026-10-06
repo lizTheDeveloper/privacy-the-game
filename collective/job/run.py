@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nightly Reclaim City collective-score job.
 
-In one transaction: purge opted-out sessions, then build totals. Then label the
+Purge opted-out sessions (committed on its own), then build totals. Then label the
 result and atomically replace collective.json. Any failure leaves yesterday's
 file in place, records the failed run, reports to GlitchTip, and exits 1 so it
 shows in `systemctl --failed`.
@@ -84,13 +84,17 @@ def write_atomic(path, text):
 
 
 def sql_script():
-    """schema + purge + build in one transaction. The _rc_mig_* backups may be
-    dropped one day; their purge runs only while the tables exist."""
+    """Two transactions in one psql run: schema + purge commit first, then build.
+    The privacy promise (deleting opted-out sessions) must not depend on the
+    build succeeding; ON_ERROR_STOP still makes a build failure exit non-zero.
+    The _rc_mig_* backups may be dropped one day; their purge runs only while
+    the tables exist."""
     sql = lambda name: (HERE / "sql" / name).read_text(encoding="utf-8")
     return ("SELECT to_regclass('public._rc_mig_events') IS NOT NULL AS has_mig \\gset\n"
             "BEGIN;\n" + sql("schema.sql") + "\n" + sql("purge.sql") + "\n"
             "\\if :has_mig\n" + sql("purge_mig.sql") + "\n\\endif\n"
-            + sql("build.sql") + "\nCOMMIT;\n")
+            "COMMIT;\n"
+            "BEGIN;\n" + sql("build.sql") + "\nCOMMIT;\n")
 
 
 def run_sql():

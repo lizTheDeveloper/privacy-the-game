@@ -4,7 +4,7 @@ A nightly job that turns Reclaim City's analytics events into one public file, `
 
 ## What the job does
 
-`job/run.py` does two things inside one database transaction, so a failure rolls back both:
+`job/run.py` does two things, each in its own database transaction (one psql run). The purge commits first, so deleting opted-out sessions never depends on the build succeeding:
 
 1. **Purge.** Deletes the rows of every session that sent an `opted-out` event this month (`purge.sql`), and the same sessions' rows in the `_rc_mig_*` migration backup tables while those tables exist (`purge_mig.sql`).
 2. **Build.** Computes the totals (`build.sql`) and prints one JSON line.
@@ -17,8 +17,10 @@ K is 50. A pod is a place: a city, a region, a country, or "rest of" a larger pl
 
 ## Opting out
 
-- Opting out deletes this device's rows for the current month from the analytics database, including the `_rc_mig_*` migration backups. Hetzner's automatic server backups of the games box (daily, about a week kept) still hold those rows until they roll over.
+- Opting out deletes the rows this browser sent this month from the connection it's on now (Umami's session is the sender's IP, browser and a monthly salt, so that is what the job can find) from the analytics database, including the `_rc_mig_*` migration backups. Hetzner's automatic server backups of the games box (daily, about a week kept) still hold those rows until they roll over.
 - Anyone can send an `opted-out` event. Umami derives the session from the sender's own IP and browser, so a forged event only purges the sender's own session (or others sharing the same IP and browser, whom Umami already treats as one). It can inflate the opt-out count.
+
+- `/whoami` (like Umami) trusts client-supplied IP and geo headers: `cf-connecting-ip`, `true-client-ip`, the first hop of `x-forwarded-for`, and provider geo headers. Spoofing them only changes the caller's own echo.
 
 ## Files on the box
 
@@ -51,6 +53,7 @@ Install or update with `collective/job/install.sh`, then `systemctl enable --now
 ## What a failure looks like
 
 - The unit shows as failed in `systemctl --failed` (the script exits 1).
+- If the build fails, the purge has already committed (it runs in its own transaction before the build), so opted-out sessions are deleted even on a failed night; only the build rolls back.
 - Yesterday's `collective.json` is still being served; it is never partially overwritten. The GeoLite copy is refreshed before the new file is published, so a failure there also leaves yesterday's file in place.
 - A GlitchTip event with logger `rc-collective-job`.
 - A row with `ok = false` and the error in `rc_collective.runs` (best effort: if the database itself is unreachable, the row cannot be written, but the GlitchTip event and the failed unit still appear).
