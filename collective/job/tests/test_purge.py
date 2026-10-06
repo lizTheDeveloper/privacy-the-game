@@ -97,8 +97,8 @@ class EarlyGhostTest(unittest.TestCase):
 
     def test_cancelled_early_ghost_is_kept_and_not_counted(self):
         sid = PG.insert_session()
-        PG.insert_event(sid, "went-ghost-early", at=T1)
-        PG.insert_event(sid, "ghost-cancelled", at=T2)
+        PG.insert_event(sid, "went-ghost-early", {"nonce": "n1"}, at=T1)
+        PG.insert_event(sid, "ghost-cancelled", {"nonce": "n1"}, at=T2)
         self.purge()
         self.assertEqual(PG.count("website_event", sid), 2)
         self.assertEqual(self.early(), 0)
@@ -106,9 +106,9 @@ class EarlyGhostTest(unittest.TestCase):
 
     def test_cancel_then_early_ghost_again_is_purged(self):
         sid = PG.insert_session()
-        PG.insert_event(sid, "went-ghost-early", at=T1)
-        PG.insert_event(sid, "ghost-cancelled", at=T2)
-        PG.insert_event(sid, "went-ghost-early", at=T3)
+        PG.insert_event(sid, "went-ghost-early", {"nonce": "n1"}, at=T1)
+        PG.insert_event(sid, "ghost-cancelled", {"nonce": "n1"}, at=T2)
+        PG.insert_event(sid, "went-ghost-early", {"nonce": "n2"}, at=T3)
         self.purge()
         self.assertEqual(PG.count("session", sid), 0)
         self.assertEqual(self.early(), 1)
@@ -140,20 +140,82 @@ class CancelAndRestoreTest(unittest.TestCase):
 
     def test_cancelled_opt_out_is_kept_and_not_counted(self):
         sid = PG.insert_session()
-        PG.insert_event(sid, "opted-out", at=T1)
-        PG.insert_event(sid, "opt-out-cancelled", at=T2)
+        PG.insert_event(sid, "opted-out", {"nonce": "n1"}, at=T1)
+        PG.insert_event(sid, "opt-out-cancelled", {"nonce": "n1"}, at=T2)
         self.purge()
         self.assertEqual(PG.count("website_event", sid), 2)
         self.assertEqual(self.counter(), 0)
 
     def test_opt_out_again_after_cancelling_is_purged(self):
         sid = PG.insert_session()
-        PG.insert_event(sid, "opted-out", at=T1)
-        PG.insert_event(sid, "opt-out-cancelled", at=T2)
-        PG.insert_event(sid, "opted-out", at=T3)
+        PG.insert_event(sid, "opted-out", {"nonce": "n1"}, at=T1)
+        PG.insert_event(sid, "opt-out-cancelled", {"nonce": "n1"}, at=T2)
+        PG.insert_event(sid, "opted-out", {"nonce": "n2"}, at=T3)
         self.purge()
         self.assertEqual(PG.count("session", sid), 0)
         self.assertEqual(self.counter(), 1)
+
+    def test_shared_session_cancel_with_another_nonce_still_purges(self):
+        # A and B share a connection and browser (one Umami session). A opts out; B's cancel can't undo it.
+        sid = PG.insert_session()
+        PG.insert_event(sid, "opted-out", {"nonce": "aaaa"}, at=T1)
+        PG.insert_event(sid, "opt-out-cancelled", {"nonce": "bbbb"}, at=T2)
+        self.purge()
+        self.assertEqual(PG.count("session", sid), 0)
+        self.assertEqual(self.counter(), 1)
+
+    def test_cancel_with_the_same_nonce_keeps_the_session(self):
+        sid = PG.insert_session()
+        PG.insert_event(sid, "opted-out", {"nonce": "aaaa"}, at=T1)
+        PG.insert_event(sid, "opt-out-cancelled", {"nonce": "aaaa"}, at=T2)
+        self.purge()
+        self.assertEqual(PG.count("session", sid), 1)
+        self.assertEqual(self.counter(), 0)
+
+    def test_same_timestamp_deletion_and_cancel_match_by_nonce_not_order(self):
+        kept = PG.insert_session()
+        gone = PG.insert_session()
+        at = "'2026-10-06 10:00:00+00'"
+        PG.insert_event(kept, "went-ghost-early", {"nonce": "same"}, at=at)
+        PG.insert_event(kept, "ghost-cancelled", {"nonce": "same"}, at=at)
+        PG.insert_event(gone, "went-ghost-early", {"nonce": "mine"}, at=at)
+        PG.insert_event(gone, "ghost-cancelled", {"nonce": "other"}, at=at)
+        self.purge()
+        self.assertEqual(PG.count("session", kept), 1)
+        self.assertEqual(PG.count("session", gone), 0)
+        self.assertEqual(self.early(), 1)
+
+    def test_nonceless_deletion_is_never_cancellable(self):
+        a = PG.insert_session()
+        b = PG.insert_session()
+        PG.insert_event(a, "opted-out", at=T1)                      # older client: no nonce
+        PG.insert_event(a, "opt-out-cancelled", at=T2)
+        PG.insert_event(b, "opted-out", at=T1)
+        PG.insert_event(b, "opt-out-cancelled", {"nonce": "x"}, at=T2)
+        self.purge()
+        self.assertEqual(PG.count("session", a), 0)
+        self.assertEqual(PG.count("session", b), 0)
+        self.assertEqual(self.counter(), 2)
+
+    def test_cancelled_ghost_with_uncancelled_opt_out_counts_as_opt_out(self):
+        sid = PG.insert_session()
+        PG.insert_event(sid, "went-ghost-early", {"nonce": "g"}, at=T1)
+        PG.insert_event(sid, "ghost-cancelled", {"nonce": "g"}, at=T2)
+        PG.insert_event(sid, "opted-out", {"nonce": "o"}, at=T3)
+        self.purge()
+        self.assertEqual(PG.count("session", sid), 0)
+        self.assertEqual(self.counter(), 1)
+        self.assertEqual(self.early(), 0)
+
+    def test_cancelled_opt_out_with_uncancelled_early_ghost_counts_as_ghost(self):
+        sid = PG.insert_session()
+        PG.insert_event(sid, "opted-out", {"nonce": "o"}, at=T1)
+        PG.insert_event(sid, "opt-out-cancelled", {"nonce": "o"}, at=T2)
+        PG.insert_event(sid, "went-ghost-early", {"nonce": "g"}, at=T3)
+        self.purge()
+        self.assertEqual(PG.count("session", sid), 0)
+        self.assertEqual(self.counter(), 0)
+        self.assertEqual(self.early(), 1)
 
     def test_data_restored_decrements_the_matching_counter_once(self):
         PG.sql("UPDATE rc_collective.counters SET value = 5 WHERE name IN ('opted_out_total', 'ghosts_early_total');")

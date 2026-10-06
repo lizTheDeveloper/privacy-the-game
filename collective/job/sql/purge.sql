@@ -2,10 +2,14 @@
 -- were. Runs inside the caller's transaction. Variable: :website (Umami website id).
 -- Session ids carry a monthly salt, so this reaches the current month only.
 --
--- A session goes when, by (created_at, event_id):
---   * its latest of (opted-out, opt-out-cancelled) is opted-out, or
---   * its latest of (went-ghost-early, ghost-cancelled) is went-ghost-early.
--- A final-mission `went-ghost` deletes nothing.
+-- A session goes if it has ANY deletion event (opted-out, went-ghost-early)
+-- that no cancel matches. The game sends a random `nonce` with each deletion
+-- and the same nonce with its cancel (opt-out-cancelled, ghost-cancelled), so
+-- only the browser that asked for the deletion can call it off: on a shared
+-- connection with identical browsers (one Umami session) another person's
+-- cancel carries another nonce and the session is still purged. Order and
+-- timestamps don't matter. A deletion with no nonce (older clients) can never
+-- be cancelled. A final-mission `went-ghost` deletes nothing.
 
 -- 1. Restores. A player whose data was deleted sent their saved game again,
 -- with `data-restored` {kind}: they are no longer an opt-out / early ghost, so
@@ -33,22 +37,29 @@ DELETE FROM event_data
 DELETE FROM website_event WHERE website_id = :'website' AND event_name = 'data-restored';
 
 -- 2. Who goes tonight.
+CREATE TEMP TABLE rc_del ON COMMIT DROP AS
+  SELECT e.session_id, e.event_name,
+         (SELECT nullif(d.string_value, '') FROM event_data d
+           WHERE d.website_event_id = e.event_id AND d.data_key = 'nonce' LIMIT 1) AS nonce
+    FROM website_event e
+   WHERE e.website_id = :'website'
+     AND e.event_name IN ('opted-out', 'opt-out-cancelled', 'went-ghost-early', 'ghost-cancelled');
+
 CREATE TEMP TABLE rc_purge ON COMMIT DROP AS
   SELECT session_id,
-         coalesce(optout = 'opted-out', false)       AS opted_out,
-         coalesce(ghost = 'went-ghost-early', false) AS ghost_early
-    FROM (SELECT session_id,
-                 (array_agg(event_name ORDER BY created_at DESC, event_id DESC)
-                    FILTER (WHERE event_name IN ('opted-out', 'opt-out-cancelled')))[1] AS optout,
-                 (array_agg(event_name ORDER BY created_at DESC, event_id DESC)
-                    FILTER (WHERE event_name IN ('went-ghost-early', 'ghost-cancelled')))[1] AS ghost
-            FROM website_event
-           WHERE website_id = :'website'
-             AND event_name IN ('opted-out', 'opt-out-cancelled', 'went-ghost-early', 'ghost-cancelled')
-           GROUP BY session_id) latest
-   WHERE optout = 'opted-out' OR ghost = 'went-ghost-early';
+         bool_or(event_name = 'opted-out')        AS opted_out,
+         bool_or(event_name = 'went-ghost-early') AS ghost_early
+    FROM rc_del d
+   WHERE d.event_name IN ('opted-out', 'went-ghost-early')
+     AND (d.nonce IS NULL OR NOT EXISTS (
+           SELECT 1 FROM rc_del c
+            WHERE c.nonce = d.nonce
+              AND c.event_name = CASE d.event_name WHEN 'opted-out' THEN 'opt-out-cancelled'
+                                                   ELSE 'ghost-cancelled' END))
+   GROUP BY session_id;
 
--- An early ghost who also opted out counts once, as an opt-out.
+-- Counted by uncancelled deletions only. An early ghost who also has an
+-- uncancelled opt-out counts once, as an opt-out.
 UPDATE rc_collective.counters
   SET value = value + (SELECT count(*) FROM rc_purge WHERE opted_out)
   WHERE name = 'opted_out_total';
