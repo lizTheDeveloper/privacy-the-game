@@ -259,3 +259,23 @@ describe('city map: the wide city is one continuous city', () => {
     expect(html).not.toContain('class="city-wide__ground"');
   });
 });
+
+describe('welcome back survives the re-draw when data arrives', () => {
+  const threeDaysAgo = new Date(Date.now() - 72 * 3600 * 1000).toISOString();
+  const played = () => {
+    const s = createInitialState();
+    s.missions['gmail-recon-breach'] = { status: 'completed', finding: 'no-breaches' };
+    s.lastCityVisit = new Date().toISOString(); // the first draw of this visit already stamped it
+    return s;
+  };
+
+  it('uses when the player last saw the map before this visit', () => {
+    const html = renderCityMap(played(), { arrival: { before: threeDaysAgo } });
+    expect(html).toContain('good to see you');
+  });
+
+  it('no welcome back when the last visit before this one was recent', () => {
+    const html = renderCityMap(played(), { arrival: { before: new Date().toISOString() } });
+    expect(html).not.toContain('good to see you');
+  });
+});

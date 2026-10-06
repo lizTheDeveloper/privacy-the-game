@@ -233,6 +233,9 @@ function afterMissionRecorded(mission, event) {
   const record = state.missions[missionId];
   const status = event?.status;
   const districtId = missionDistrict(mission);
+  // Already taken back before this filing (a bonus mission in a finished
+  // district): no second district-completed, no second milestone.
+  const wasComplete = Boolean(state.seenProgress?.[districtId]?.includes(100));
 
   // Track progress milestones for Scout check-ins
   if (districtId && isMissionDone(record)) {
@@ -261,7 +264,7 @@ function afterMissionRecorded(mission, event) {
   }
 
   const progress = calcDistrictProgress(state, districtId);
-  if (progress.total > 0 && progress.percent === 100) {
+  if (progress.total > 0 && progress.percent === 100 && !wasComplete) {
     track('district-completed', { district: districtId });
     navigate(`#/milestone/${districtId}`);
   } else {

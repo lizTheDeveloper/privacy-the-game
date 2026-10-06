@@ -355,8 +355,9 @@ function renderDistrictLabels(state, startHere) {
   }).join('');
 }
 
-function getReturnLine(state) {
-  const lastVisit = state.lastCityVisit;
+// lastVisit: when the player last saw the map before this visit (re-draws
+// within the visit overwrite state.lastCityVisit).
+function getReturnLine(lastVisit) {
   if (!lastVisit) return null;
   const elapsed = Date.now() - new Date(lastVisit).getTime();
   const hours = elapsed / (1000 * 60 * 60);
@@ -372,7 +373,7 @@ function getReturnLine(state) {
 }
 
 // feeling: Scout's feeling for this visit (utils/scout-feelings.js), on every line.
-function renderCityScout(state, feeling) {
+function renderCityScout(state, feeling, lastVisit) {
   const say = (message, options = {}) => renderScout(message, { ...options, feeling });
   if (isCityComplete(state) && !hasGoneGhost()) {
     return say(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
@@ -383,7 +384,7 @@ function renderCityScout(state, feeling) {
   const pacing = returnPacingLine(state);
   if (pacing) return say(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
 
-  const returnLine = getReturnLine(state);
+  const returnLine = getReturnLine(lastVisit);
   if (returnLine && anyComplete) {
     return say(
       returnLine,
@@ -818,6 +819,6 @@ export function renderCityMap(state, { collective, whoami, arrival } = {}) {
   <div class="city-labels">
     ${renderDistrictLabels(state, startHere)}
   </div>
-  <div class="city-scout">${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }))}</div>
+  <div class="city-scout">${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
 </div>`;
 }
