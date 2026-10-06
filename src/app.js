@@ -1,4 +1,4 @@
-import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt } from './utils/analytics-pref.js';
+import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce } from './utils/analytics-pref.js';
 import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
@@ -226,7 +226,9 @@ async function reconnectAnalytics() {
 
 // Call off an early ghost before tonight's run. The ghost flag clears either way.
 async function cancelGhost() {
-  const sent = (await reconnectAnalytics()) && (await trackNow('ghost-cancelled'));
+  // The cancel carries the nonce sent with went-ghost-early: only that matches.
+  const nonce = getGhostInfo()?.nonce;
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('ghost-cancelled', { nonce }));
   clearGhost();
   // From the finale, go where the ghost state (and any failure) is shown.
   const hash = parseRoute(location.hash).screen === 'ghost-done' ? '#/city-together' : location.hash;
@@ -237,7 +239,8 @@ async function cancelGhost() {
 
 // Sharing back on while an opt-out is still pending: tell tonight's run not to delete.
 async function cancelOptOut() {
-  const sent = (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled'));
+  const nonce = getOptedOutNonce();
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled', { nonce }));
   if (sent) setOptedOutAt(null);
   else setNotice(GHOST_DIALOGUE.cancelFailed);
 }
@@ -335,6 +338,13 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'toggle-analytics') {
     if (isAnalyticsOff()) {
       const optedOutAt = getOptedOutAt();
+      if ((optedOutAt || getGhostInfo()?.early) && collectiveView.status !== 'ready') {
+        // Pending or already deleted depends on the published file: never
+        // cancel (or forget the opt-out) before it has loaded.
+        loadCollective();
+        renderCurrentRoute();
+        return;
+      }
       if (isGhostPending(getGhostInfo(), collectiveData())) {
         // Sharing back on is calling off the early ghost too.
         await cancelGhost();
@@ -349,8 +359,9 @@ app.addEventListener('click', async (e) => {
       }
     } else {
       // Say goodbye first so tonight's job can find and delete this browser's data.
-      await trackThenStop('opted-out');
-      setOptedOutAt(new Date().toISOString());
+      const nonce = newNonce();
+      await trackThenStop('opted-out', nonce ? { nonce } : undefined);
+      setOptedOutAt(new Date().toISOString(), nonce);
     }
     renderCurrentRoute();
   } else if (action === 'share-card') {
@@ -514,8 +525,9 @@ app.addEventListener('click', async (e) => {
     navigate('#/ghost/done');
   } else if (action === 'go-ghost-early') {
     if (isCityComplete(state) || hasGoneGhost() || isAnalyticsOff()) return;
-    markGoneGhost({ early: true });
-    await trackThenStop('went-ghost-early');
+    const nonce = newNonce();
+    markGoneGhost({ early: true, nonce });
+    await trackThenStop('went-ghost-early', nonce ? { nonce } : undefined);
     navigate('#/ghost/done');
   } else if (action === 'ghost-cancel') {
     if (!isGhostPending(getGhostInfo(), collectiveData())) return;

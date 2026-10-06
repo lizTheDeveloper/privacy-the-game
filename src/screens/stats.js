@@ -100,10 +100,22 @@ export function renderNotice(notice) {
   return `<div role="status" style="${BLOCK_TEXT} color: #FF9F00; margin-top: 14px;">${esc(notice)}</div>`;
 }
 
-// The cancel or restore block for this browser, or nothing.
-export function renderDeletionBlock(collectiveView) {
+// The cancel or restore block for this browser, or nothing. With
+// `requireLoaded`, a browser with a deletion record waits for collective.json
+// before offering either (the published date decides which applies).
+export function renderDeletionBlock(collectiveView, { requireLoaded = false } = {}) {
   const data = collectiveView?.status === 'ready' ? collectiveView.data : null;
   const ghostInfo = getGhostInfo();
+  if (requireLoaded && !data && (ghostInfo?.early || getOptedOutAt())) {
+    if (collectiveView?.status === 'error') {
+      return `
+    <div data-deletion-checking style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(0,229,255,0.15);">
+      <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.checkFailed)}</div>
+      <button class="btn-secondary" data-action="collective-retry" style="margin-top: 12px;">TRY AGAIN</button>
+    </div>`;
+    }
+    return `<div data-deletion-checking style="${BLOCK_TEXT} margin-top: 16px;">${esc(RESTORE_DIALOGUE.checking)}</div>`;
+  }
   if (isGhostPending(ghostInfo, data)) return renderGhostPending();
   if (deletionStatus({ ghostInfo, optedOutAt: getOptedOutAt(), collective: data }) === 'deleted') return renderDataDeleted();
   return '';
@@ -254,7 +266,7 @@ export function renderStats(state, view = {}) {
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this browser sent us this month from the connection you\'re on now, and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>
       <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
-      ${renderDeletionBlock(view.collective)}
+      ${renderDeletionBlock(view.collective, { requireLoaded: true })}
       ${renderNotice(view.notice)}
     </div>
   </div>

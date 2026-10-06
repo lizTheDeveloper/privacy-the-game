@@ -41,8 +41,11 @@ function deletions({ ghostInfo, optedOutAt }) {
 }
 
 // Deletions tonight's run has already carried out ('opted-out' | 'ghost-early').
+// When both went through, the job counted one opt-out and no early ghost, so
+// only 'opted-out' is given back.
 export function deletedKinds({ ghostInfo = null, optedOutAt = null, collective = null } = {}) {
-  return deletions({ ghostInfo, optedOutAt }).filter((d) => !notYetRun(d.at, collective)).map((d) => d.kind);
+  const kinds = deletions({ ghostInfo, optedOutAt }).filter((d) => !notYetRun(d.at, collective)).map((d) => d.kind);
+  return kinds.includes('opted-out') ? ['opted-out'] : kinds;
 }
 
 // 'pending' wins: something can still be cancelled before tonight's run.

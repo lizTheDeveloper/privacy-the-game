@@ -373,7 +373,7 @@ export const GHOST_DIALOGUE = {
 };
 
 export const COLLECTIVE_DIALOGUE = {
-  explainer: `Here's how we know any of this. When you finish a mission, the game tells our own server — not an ad company, ours — which mission it was and the one answer you picked in the debrief. Never your passwords, never your accounts. Every night we add everyone up and sort people into places by what their internet connection says. A place only shows up once it has at least 50 players, so nobody can be picked out. Anyone who turned sharing off isn't in here at all. Want to see exactly what we can see about you? It's on Your City.`,
+  explainer: `Here's how we know any of this. While you play, the game tells our own server — not an ad company, ours — what you do here: which missions you start and finish, the one answer you pick in each debrief, which accounts you said you have, and the place your internet connection points to. Never your passwords, never what's inside your accounts. Every night we add everyone up, and a place only shows up once it has at least 50 players, so nobody can be picked out. Turn sharing off and that night we delete what this browser sent us this month from your connection. Want to see exactly what we can see about you? It's on Your City.`,
 };
 
 export const RESTORE_DIALOGUE = {
@@ -382,4 +382,6 @@ export const RESTORE_DIALOGUE = {
   failed: `We couldn't reach our analytics. Try again in a moment.`,
   progress: (n, total) => `Sending your city back… (${n} of ${total})`,
   done: `You're back in the city. Tomorrow's totals will include you again.`,
+  checking: `Checking whether tonight's run has happened…`,
+  checkFailed: `We couldn't check whether tonight's run has happened.`,
 };

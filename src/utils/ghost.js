@@ -24,7 +24,8 @@ export function hasGoneGhost() {
   }
 }
 
-// {at, silent, early}: `silent` means sharing was already off, so no event was
+// {at, silent, early, nonce}: `nonce` is the random value sent with
+// went-ghost-early; a cancel must carry it. `silent` means sharing was already off, so no event was
 // sent and the player is not part of any count. `early` means they went ghost
 // before taking back the whole city, so tonight's run deletes what this
 // browser sent. Older values were a bare ISO string, or JSON without `early`.
@@ -39,17 +40,18 @@ export function getGhostInfo() {
   try {
     const v = JSON.parse(raw);
     if (v && typeof v === 'object') {
-      return { at: typeof v.at === 'string' ? v.at : null, silent: v.silent === true, early: v.early === true };
+      return { at: typeof v.at === 'string' ? v.at : null, silent: v.silent === true, early: v.early === true,
+        nonce: typeof v.nonce === 'string' && v.nonce ? v.nonce : null };
     }
   } catch {
     // Not JSON: the older bare-timestamp form.
   }
-  return { at: raw, silent: false, early: false };
+  return { at: raw, silent: false, early: false, nonce: null };
 }
 
-export function markGoneGhost({ silent = false, early = false } = {}) {
+export function markGoneGhost({ silent = false, early = false, nonce = null } = {}) {
   try {
-    localStorage.setItem(GHOST_KEY, JSON.stringify({ at: new Date().toISOString(), silent, early }));
+    localStorage.setItem(GHOST_KEY, JSON.stringify({ at: new Date().toISOString(), silent, early, nonce }));
   } catch {
     // Storage blocked: the analytics switch still turns off.
   }
@@ -63,14 +65,18 @@ export function clearGhost() {
   }
 }
 
+// The browser clock and the server's asOf can disagree; only a file published
+// more than this long after the moment counts as having run.
+export const SKEW_MS = 10 * 60 * 1000;
+
 // Tonight's run hasn't reached this moment yet: no published file, or the file
-// is older than `at`. Unparseable dates count as not yet run.
+// is not more than SKEW_MS newer than `at`. Unparseable dates count as not yet run.
 export function notYetRun(at, collectiveData) {
   if (!collectiveData) return true;
   const asOf = Date.parse(collectiveData.asOf);
   const t = Date.parse(at);
   if (Number.isNaN(asOf) || Number.isNaN(t)) return true;
-  return t > asOf;
+  return asOf - t <= SKEW_MS;
 }
 
 // Only an early ghost can be cancelled: a final-mission ghost deletes nothing.

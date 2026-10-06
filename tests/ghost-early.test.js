@@ -38,7 +38,7 @@ beforeEach(() => { globalThis.localStorage = memoryStorage(); setAnalyticsOff(fa
 
 describe('The Whole City: Scout explainer', () => {
   it('copy is verbatim', () => {
-    expect(COLLECTIVE_DIALOGUE.explainer).toBe("Here's how we know any of this. When you finish a mission, the game tells our own server — not an ad company, ours — which mission it was and the one answer you picked in the debrief. Never your passwords, never your accounts. Every night we add everyone up and sort people into places by what their internet connection says. A place only shows up once it has at least 50 players, so nobody can be picked out. Anyone who turned sharing off isn't in here at all. Want to see exactly what we can see about you? It's on Your City.");
+    expect(COLLECTIVE_DIALOGUE.explainer).toBe("Here's how we know any of this. While you play, the game tells our own server — not an ad company, ours — what you do here: which missions you start and finish, the one answer you pick in each debrief, which accounts you said you have, and the place your internet connection points to. Never your passwords, never what's inside your accounts. Every night we add everyone up, and a place only shows up once it has at least 50 players, so nobody can be picked out. Turn sharing off and that night we delete what this browser sent us this month from your connection. Want to see exactly what we can see about you? It's on Your City.");
   });
   for (const [name, collective] of [['ready', AFTER], ['loading', { status: 'loading' }], ['error', { status: 'error' }]]) {
     it(`shows in the ${name} state with a link to Your City`, () => {
@@ -197,6 +197,22 @@ describe('Your City: PLAY STATS', () => {
     expect(pending).not.toContain('data-action="restore-data"');
     expect(pending).not.toContain('data-action="ghost-cancel"');
     expect(pending).toContain('data-action="toggle-analytics"');
+  });
+
+  it('before collective.json loads: a checking line, never cancel or restore', () => {
+    earlyGhost();
+    setAnalyticsOff(true);
+    for (const collective of [undefined, { status: 'idle' }, { status: 'loading' }]) {
+      const html = txt(renderStats(createInitialState(), { collective }));
+      expect(html).toContain("Checking whether tonight's run has happened…");
+      expect(html).not.toContain('data-action="ghost-cancel"');
+      expect(html).not.toContain('data-action="restore-data"');
+    }
+    setOptedOutAt(AT);
+    const err = txt(renderStats(createInitialState(), { collective: { status: 'error' } }));
+    expect(err).toContain("We couldn't check whether tonight's run has happened.");
+    expect(err).toContain('data-action="collective-retry"');
+    expect(err).not.toContain('data-action="ghost-cancel"');
   });
 
   it('nobody deleted: no new blocks, and no view still renders', () => {

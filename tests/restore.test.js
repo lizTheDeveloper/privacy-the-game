@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { restoreEvents, deletionStatus, deletedKinds } from '../src/utils/restore.js';
 import { getGhostInfo, markGoneGhost, clearGhost, isGhostPending, GHOST_KEY } from '../src/utils/ghost.js';
-import { getOptedOutAt, setOptedOutAt, OPTED_OUT_AT_KEY } from '../src/utils/analytics-pref.js';
+import { getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce, OPTED_OUT_AT_KEY } from '../src/utils/analytics-pref.js';
 import { setAnalyticsOff } from '../src/utils/analytics-pref.js';
 import { waitForTracker } from '../src/utils/analytics.js';
 import { createInitialState } from '../src/state.js';
@@ -27,9 +27,14 @@ describe('ghost record', () => {
 
   it('older stored values read back as not early', () => {
     localStorage.setItem(GHOST_KEY, '2026-10-01T00:00:00Z');
-    expect(getGhostInfo()).toEqual({ at: '2026-10-01T00:00:00Z', silent: false, early: false });
+    expect(getGhostInfo()).toEqual({ at: '2026-10-01T00:00:00Z', silent: false, early: false, nonce: null });
     localStorage.setItem(GHOST_KEY, JSON.stringify({ at: '2026-10-01T00:00:00Z', silent: true }));
-    expect(getGhostInfo()).toEqual({ at: '2026-10-01T00:00:00Z', silent: true, early: false });
+    expect(getGhostInfo()).toEqual({ at: '2026-10-01T00:00:00Z', silent: true, early: false, nonce: null });
+  });
+
+  it('keeps the nonce sent with went-ghost-early', () => {
+    markGoneGhost({ early: true, nonce: 'abc123' });
+    expect(getGhostInfo().nonce).toBe('abc123');
   });
 
   it('clearGhost removes it and never throws', () => {
@@ -52,6 +57,13 @@ describe('isGhostPending', () => {
     expect(isGhostPending({ at: '2026-10-06T10:00:00Z', silent: false, early: false }, null)).toBe(false);
     expect(isGhostPending(null, null)).toBe(false);
   });
+  it('a published file less than 10 minutes after the ghost is still pending (clock skew)', () => {
+    expect(isGhostPending(early('2026-10-06T10:00:00Z'), data('2026-10-06T10:05:00Z'))).toBe(true);
+    expect(isGhostPending(early('2026-10-06T10:00:00Z'), data('2026-10-06T10:09:59Z'))).toBe(true);
+    expect(isGhostPending(early('2026-10-06T10:00:00Z'), data('2026-10-06T10:11:00Z'))).toBe(false);
+    // Browser clock ahead of the server: the file says 09:55, the ghost says 10:00.
+    expect(isGhostPending(early('2026-10-06T10:00:00Z'), data('2026-10-06T09:55:00Z'))).toBe(true);
+  });
   it('unparseable dates count as pending', () =>
     expect(isGhostPending(early('2026-10-06T10:00:00Z'), data('nonsense'))).toBe(true));
 });
@@ -66,11 +78,26 @@ describe('opted-out timestamp', () => {
     setOptedOutAt(null);
     expect(getOptedOutAt()).toBeNull();
   });
+  it('keeps the nonce sent with opted-out, and clears it with the timestamp', () => {
+    setOptedOutAt('2026-10-06T10:00:00Z', 'n1');
+    expect(getOptedOutNonce()).toBe('n1');
+    setOptedOutAt(null);
+    expect(getOptedOutNonce()).toBeNull();
+  });
   it('never throws on blocked storage', () => {
     globalThis.localStorage = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
     expect(getOptedOutAt()).toBeNull();
+    expect(getOptedOutNonce()).toBeNull();
     expect(() => setOptedOutAt('x')).not.toThrow();
     expect(() => setOptedOutAt(null)).not.toThrow();
+  });
+});
+
+describe('newNonce', () => {
+  it('is 16 random bytes as hex', () => {
+    const a = newNonce();
+    expect(a).toMatch(/^[0-9a-f]{32}$/);
+    expect(newNonce()).not.toBe(a);
   });
 });
 
@@ -93,8 +120,14 @@ describe('deletionStatus', () => {
     expect(deletionStatus({ optedOutAt: at, collective: null })).toBe('pending');
     expect(deletionStatus({ optedOutAt: at, collective: after })).toBe('deleted');
   });
+  it('within 10 minutes of the published file: still pending', () => {
+    expect(deletionStatus({ optedOutAt: at, collective: data('2026-10-06T10:05:00Z') })).toBe('pending');
+    expect(deletionStatus({ optedOutAt: at, collective: data('2026-10-06T10:10:01Z') })).toBe('deleted');
+  });
   it('kinds that went through', () => {
-    expect(deletedKinds({ ghostInfo: early, optedOutAt: '2026-10-01T00:00:00Z', collective: after })).toEqual(['opted-out', 'ghost-early']);
+    // Both went through: the job counted this person once, as an opt-out.
+    expect(deletedKinds({ ghostInfo: early, optedOutAt: '2026-10-01T00:00:00Z', collective: after })).toEqual(['opted-out']);
+    expect(deletedKinds({ ghostInfo: early, optedOutAt: null, collective: after })).toEqual(['ghost-early']);
     expect(deletedKinds({ ghostInfo: early, optedOutAt: null, collective: before })).toEqual([]);
     expect(deletedKinds({ ghostInfo: null, optedOutAt: at, collective: after })).toEqual(['opted-out']);
   });
