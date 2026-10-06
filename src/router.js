@@ -16,6 +16,8 @@ const ROUTES = [
   { pattern: /^#\/quiz\/phishing$/, screen: 'phishing', params: () => ({}) },
   { pattern: /^#\/quickquest$/, screen: 'quickquest', params: () => ({}) },
   { pattern: /^#\/city-together$/, screen: 'together', params: () => ({}) },
+  { pattern: /^#\/ghost$/, screen: 'ghost', params: () => ({}) },
+  { pattern: /^#\/ghost\/done$/, screen: 'ghost-done', params: () => ({}) },
   { pattern: /^#\/stats$/, screen: 'stats', params: () => ({}) },
 ];
 

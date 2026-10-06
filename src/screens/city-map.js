@@ -3,6 +3,8 @@ import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress, isCoreMission } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
+import { GHOST_DIALOGUE } from '../data/dialogue.js';
+import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
 
 // ---------------------------------------------------------------------------
@@ -265,6 +267,9 @@ function getReturnLine(state) {
 }
 
 function renderCityScout(state) {
+  if (isCityComplete(state) && !hasGoneGhost()) {
+    return renderScout(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
+  }
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
   const next = nextAvailableMission(state);
 

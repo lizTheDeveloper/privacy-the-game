@@ -15,6 +15,8 @@ import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether } from './screens/city-together.js';
+import { renderGhost, renderGhostDone } from './screens/ghost.js';
+import { isCityComplete, hasGoneGhost, markGoneGhost } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz } from './screens/phishing-quiz.js';
@@ -66,6 +68,8 @@ const screens = {
   garage: () => renderGarage(state),
   timeline: () => renderTimeline(state),
   together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView }),
+  ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView }),
+  'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView }),
   stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen }),
 };
 
@@ -86,6 +90,8 @@ function render(route) {
     return;
   }
   if (shouldAutoLoad(route.screen, collectiveView.status)) loadCollective();
+  if (shouldAutoLoad(route.screen, collectiveView.status, ['ghost', 'ghost-done'])) loadCollective();
+  if (route.screen === 'ghost' && whoamiView.status === 'idle') loadWhoami();
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
@@ -390,6 +396,11 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'whoami-open') {
     loadCollective();
     loadWhoami();
+  } else if (action === 'go-ghost') {
+    if (!isCityComplete(state) || hasGoneGhost()) return;
+    markGoneGhost();
+    await trackThenStop('went-ghost');
+    navigate('#/ghost/done');
   } else if (action === 'collective-retry') {
     loadCollective();
     renderCurrentRoute();
