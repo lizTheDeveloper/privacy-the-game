@@ -12,7 +12,7 @@ import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { DISTRICTS } from '../data/districts.js';
 import { isMissionDone } from './mission-status.js';
 import { isPasswordMission, passwordResetNeed, resetNeedSources } from './password-need.js';
-import { pmNumbers, BURST_SIZE } from './pm-numbers.js';
+import { pmNumbers, BURST_SIZE, hasManager } from './pm-numbers.js';
 import { openCategoryCount, usedCategories } from './pm-categories.js';
 
 export { pmNumbers, applyBurst, BURST_SIZE } from './pm-numbers.js';
@@ -38,7 +38,8 @@ export function neededResets(state) {
 export function resetCounts(state) {
   const list = neededResets(state);
   const done = list.filter((m) => isMissionDone(state.missions?.[m.id])).length;
-  const pmOnly = list.length > 0 && list.every((m) => {
+  // Only credit the manager while the player still says they use one.
+  const pmOnly = hasManager(state) && list.length > 0 && list.every((m) => {
     const src = resetNeedSources(state, m.accountId);
     return src.length === 1 && src[0] === 'pm';
   });

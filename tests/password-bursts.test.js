@@ -289,3 +289,19 @@ describe('11e: return pacing', () => {
     expect(html).toContain(`#/mission/${PM_BURST_ID}/briefing`);
   });
 });
+
+describe('after switching the manager answer to No', () => {
+  it('stops crediting the password manager in the reset counts', async () => {
+    const { resetCounts } = await import('../src/utils/bursts.js');
+    const { ACCOUNTS } = await import('../src/data/accounts.js');
+    const state = {
+      accounts: { gmail: { enabled: true } },
+      missions: {},
+      pmFlagged: ['gmail'],
+      passwordManager: 'bitwarden',
+    };
+    expect(ACCOUNTS.gmail).toBeTruthy();
+    expect(resetCounts(state).source).toBe('pm');
+    expect(resetCounts({ ...state, passwordManager: 'none' }).source).toBe('mixed');
+  });
+});
