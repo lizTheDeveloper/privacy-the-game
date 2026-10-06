@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { DISTRICTS } from '../src/data/districts.js';
 import { ACCOUNTS } from '../src/data/accounts.js';
 import { MISSIONS, getMissionsForDistrict, getMissionsForAccount } from '../src/data/missions.js';
+import { PWNED_PASSWORD_STEP, PWNED_PASSWORDS_URL } from '../src/data/pwned-passwords-step.js';
 
 describe('DISTRICTS', () => {
   it('has at least 8 districts', () => {
@@ -105,5 +106,24 @@ describe('MISSIONS', () => {
   it('mission IDs are unique', () => {
     const ids = MISSIONS.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('Breach Recon password check', () => {
+  const breachRecon = MISSIONS.filter((m) => m.id.endsWith('-recon-breach'));
+
+  it('every Breach Recon mission ends with the Pwned Passwords step', () => {
+    expect(breachRecon.length).toBeGreaterThan(0);
+    for (const m of breachRecon) {
+      const step = m.steps.at(-1);
+      expect(step.url, `${m.id} missing the Pwned Passwords step`).toBe(PWNED_PASSWORDS_URL);
+      expect(step.note?.length, `${m.id} password step has no explanation`).toBe(3);
+    }
+  });
+
+  it('the step explains why separately, who runs it, and why it is safe', () => {
+    const labels = PWNED_PASSWORD_STEP.note.map((n) => n.label);
+    expect(labels).toEqual(['Why separately', 'Who runs it', 'Why it’s safe']);
+    expect(PWNED_PASSWORD_STEP.note[2].text).toMatch(/never ask for your password/);
   });
 });
