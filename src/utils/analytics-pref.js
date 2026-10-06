@@ -5,7 +5,12 @@
 export const ANALYTICS_OFF_KEY = 'reclaim-city.analytics-off';
 export const UMAMI_DISABLED_KEY = 'umami.disabled';
 
+// Remembered for this page load too, so blocked storage can't leave sharing on
+// after the player turned it off.
+let offInMemory = false;
+
 export function isAnalyticsOff() {
+  if (offInMemory) return true;
   try {
     return localStorage.getItem(ANALYTICS_OFF_KEY) === '1';
   } catch {
@@ -14,6 +19,7 @@ export function isAnalyticsOff() {
 }
 
 export function setAnalyticsOff(off) {
+  offInMemory = Boolean(off);
   try {
     if (off) {
       localStorage.setItem(ANALYTICS_OFF_KEY, '1');

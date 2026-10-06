@@ -13,7 +13,7 @@ function memoryStorage() {
 }
 
 describe('analytics opt-out', () => {
-  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); setAnalyticsOff(false); });
 
   it('is on by default', () => {
     expect(isAnalyticsOff()).toBe(false);
@@ -38,6 +38,14 @@ describe('analytics opt-out', () => {
     globalThis.localStorage = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); }, removeItem() { throw new Error('denied'); } };
     expect(isAnalyticsOff()).toBe(false);
     expect(() => setAnalyticsOff(true)).not.toThrow();
+  });
+
+  it('blocked storage still turns sharing off for this page load', () => {
+    globalThis.localStorage = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); }, removeItem() { throw new Error('denied'); } };
+    setAnalyticsOff(true);
+    expect(isAnalyticsOff()).toBe(true);
+    setAnalyticsOff(false);
+    expect(isAnalyticsOff()).toBe(false);
   });
 
   it('the stats screen shows the toggle and its current state', () => {
