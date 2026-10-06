@@ -9,6 +9,7 @@ import { GRID_MISSIONS } from './missions-grid.js';
 import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
+import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF, PASSWORD_MISSIONS } from './missions-passwords.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -21,6 +22,7 @@ const BREACH_DEBRIEF = [
       { value: 'skip', text: 'Couldn’t check right now', severity: 'skip' },
     ],
   },
+  PASSWORD_EXPOSED_QUESTION,
 ];
 
 const LOGIN_DEBRIEF = [
@@ -43,18 +45,6 @@ const PASSWORD_DEBRIEF = [
     options: [
       { value: 'reset-password', text: 'Yes, changed to a new unique password', severity: 'safe' },
       { value: 'already-strong', text: 'It was already unique and strong', severity: 'safe' },
-      { value: 'later', text: 'I’ll come back to this', severity: 'skip' },
-    ],
-  },
-];
-
-const TWO_FA_DEBRIEF = [
-  {
-    id: 'action',
-    label: 'Did you set up two-factor authentication?',
-    options: [
-      { value: 'enabled-2fa', text: 'Yes, 2FA is now enabled', severity: 'safe' },
-      { value: 'already-enabled', text: 'It was already enabled', severity: 'safe' },
       { value: 'later', text: 'I’ll come back to this', severity: 'skip' },
     ],
   },
@@ -172,7 +162,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable 2-Step Verification if not already on' },
       { text: 'Prefer an authenticator app or security key over SMS' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"A password is a lock. 2FA is a deadbolt. Both together is how you keep people out."',
       debrief: {
@@ -289,7 +279,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Set up "Two-step verification"' },
       { text: 'Add the Microsoft Authenticator app or another authenticator' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Two factors beat one factor, every time. Authenticator app over SMS if you can."',
       debrief: {
@@ -405,7 +395,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Go to "Sign-In and Security"' },
       { text: 'Enable Two-Factor Authentication if not already on' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Apple’s 2FA sends codes to your trusted devices. Without it, a password is all someone needs."',
       debrief: {
@@ -522,7 +512,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-step verification"' },
       { text: 'Set up with an authenticator app for best security' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"After those breaches, 2FA on Yahoo isn’t optional — it’s damage control."',
       debrief: {
@@ -638,7 +628,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-factor authentication"' },
       { text: 'Set up with an authenticator app — save your recovery codes securely' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"If you chose Proton for privacy, 2FA completes the picture. Don’t leave the front door unlocked on the most secure house."',
       debrief: {
@@ -754,7 +744,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Go to Sign-In and Security' },
       { text: 'Enable Two-Factor Authentication (or confirm it’s already on)' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Apple’s 2FA is seamless — it sends a code to your existing devices. Easy to set up, hard for attackers to bypass."',
       debrief: {
@@ -871,7 +861,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Add a security key or authenticator app as your primary method' },
       { text: 'Save your backup codes in a secure location' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Google offers the most 2FA options of anyone. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
       debrief: {
@@ -988,7 +978,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Enable "Two-step verification"' },
       { text: 'Add Microsoft Authenticator or another authenticator app' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Microsoft’s Authenticator has a nice one-tap approval. Set it up and you won’t even need to type codes."',
       debrief: {
@@ -1104,7 +1094,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Click "Use two-factor authentication"' },
       { text: 'Set up with an authenticator app (not SMS)' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: '"Social media accounts are SIM-swap targets. Use an authenticator app, not SMS."',
       debrief: {
@@ -1156,6 +1146,7 @@ export const MISSIONS = [
   ...CLINIC_MISSIONS,
   ...TRAIL_MISSIONS,
   ...OSINT_SIEVE_MISSIONS,
+  ...PASSWORD_MISSIONS,
 ];
 
 // A mission's district: its account's, or its own for a mission that belongs

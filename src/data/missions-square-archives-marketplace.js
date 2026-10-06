@@ -1,3 +1,4 @@
+import { PASSWORD_EXPOSED_QUESTION } from './missions-passwords.js';
 // Missions for The Square (Ch. 3), The Archives (Ch. 4), The Marketplace (Ch. 5)
 // Breaks from rigid 5-per-account format -- missions are purposeful and distinct.
 // Low-stakes accounts grouped by action. Messaging apps get unique missions.
@@ -13,6 +14,7 @@ const BREACH_DEBRIEF = [
       { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
     ],
   },
+  PASSWORD_EXPOSED_QUESTION,
 ];
 
 const LOGIN_DEBRIEF = [

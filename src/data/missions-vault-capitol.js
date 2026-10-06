@@ -1,3 +1,4 @@
+import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF } from './missions-passwords.js';
 // Missions for The Vault (Chapter 2) and The Capitol (Chapter 6)
 // Uses the same debrief schemas as missions.js -- redefined here for standalone use,
 // merged by the integration code.
@@ -13,6 +14,7 @@ const BREACH_DEBRIEF = [
       { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
     ],
   },
+  PASSWORD_EXPOSED_QUESTION,
 ];
 
 const LOGIN_DEBRIEF = [
@@ -171,7 +173,7 @@ export const VAULT_CAPITOL_MISSIONS = [
       { text: 'Go to Settings → Security → Two-Factor Authentication (may be called "Extra Security" or "Login Verification")' },
       { text: 'Enable it -- choose authenticator app if available, SMS if not' },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
       briefing: `A bank without 2FA is a vault with just a combination lock. Turn on whatever they offer -- we'll take SMS over nothing.`,
       debrief: {

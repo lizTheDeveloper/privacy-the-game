@@ -174,3 +174,20 @@ describe('not-needed counts as done for progress, never as a real action', () =>
     expect(ev.data.restored).toBe('1');
   });
 });
+
+describe('restore sends the new answers too', () => {
+  it('password_exposed and the 2FA method go back with the same keys', () => {
+    let s = breach(createInitialState(), 'gmail', '1-2-breaches', { password_exposed: 'unsure' });
+    s = set(s, 'gmail-fortify-2fa', { status: 'completed', action: 'enabled-2fa', method: 'none', method_setup: 'passkey' });
+    const evs = restoreEvents(s);
+    expect(evs.find((e) => e.data.mission === 'gmail-recon-breach').data).toMatchObject({ password_exposed: 'unsure', finding: '1-2-breaches' });
+    expect(evs.find((e) => e.data.mission === 'gmail-fortify-2fa').data).toMatchObject({ method: 'passkey', status: 'completed' });
+  });
+
+  it('an old save sends exactly what it used to', () => {
+    const s = set(createInitialState(), 'gmail-fortify-2fa', { status: 'completed', action: 'enabled-2fa' });
+    expect(restoreEvents(s).find((e) => e.data.mission === 'gmail-fortify-2fa').data).toEqual({
+      mission: 'gmail-fortify-2fa', district: 'master-keys', phase: 'fortify', status: 'completed', restored: '1',
+    });
+  });
+});
