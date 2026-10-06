@@ -6,6 +6,7 @@ export const DISTRICTS = [
     description: 'Email & Identity Providers — the foundation everything else sits on',
     flavor: 'Secure this first or nothing else matters.',
     surveyQuestion: (name) => `Do you have a ${name} account?`,
+    askPasswordManager: true,
   },
   {
     id: 'vault',

@@ -372,8 +372,24 @@ export const GHOST_DIALOGUE = {
   wentThrough: `Your ghost went through. Tonight's run deleted what this browser had sent us.`,
 };
 
+// Task 14: passwords get reset only when they're compromised.
+export const PASSWORD_DIALOGUE = {
+  notNeeded: `Clean record. No leaked password, nothing flagged — changing it now would just be busywork. Moving on.`,
+  breachNoPassword: `Your address leaked; your password didn't. Expect a bit more spam and a few more phishing attempts aimed at that inbox — but these leaks didn't hand anyone your key.`,
+  noManager: `No password manager yet? Worth getting one — it makes a different strong password for every account and remembers them all, so you don't have to. Your phone or browser probably has one built in.`,
+  hasManager: `Good. Most managers can tell you which of your passwords leaked or got reused — there's a recon mission for reading that report.`,
+};
+
+// Task 14: what Scout says about the second step the player has.
+export const TWO_FA_DIALOGUE = {
+  passkey: `A passkey. Nothing to type, nothing to phish, nothing riding along in a text message. That's the best lock they make, and it's on your door.`,
+  authenticator: `An authenticator app. The codes are made on your own device and never cross the phone network, so a SIM swap gets nobody anywhere. Lovely work.`,
+  sms: `Text codes count — this account is much safer than with no second step, and I'm marking it done. Fair warning, though: a scammer who talks your carrier into moving your number to their SIM card — a SIM swap — gets your codes too. An authenticator app or a passkey closes that gap. There's a bonus mission for it whenever you're up for it.`,
+  email: `Email codes count — I'm marking this one done. The catch: anyone who gets into that inbox gets the codes as well, so this account is only as safe as your email. An authenticator app or a passkey breaks that chain. Bonus mission's there when you want it.`,
+};
+
 export const COLLECTIVE_DIALOGUE = {
-  explainer: `Here's how we know any of this. While you play, the game tells our own server — not an ad company, ours — what you do here: which missions you start and finish, the one answer you pick in each debrief, which accounts you said you have, and the place your internet connection points to. Never your passwords, never what's inside your accounts. Every night we add everyone up, and a place only shows up once it has at least 50 players, so nobody can be picked out. Turn sharing off and that night we delete what this browser sent us this month from your connection. Want to see exactly what we can see about you? It's on Your City.`,
+  explainer: `Here's how we know any of this. While you play, the game tells our own server — not an ad company, ours — what you do here: which missions you start and finish, the answers you pick in each debrief (like what a breach check found, whether it included a password, or how an account is protected), which accounts you said you have, and the place your internet connection points to. Never your passwords, never what's inside your accounts. Every night we add everyone up, and a place only shows up once it has at least 50 players, so nobody can be picked out. Turn sharing off and that night we delete what this browser sent us this month from your connection. Want to see exactly what we can see about you? It's on Your City.`,
 };
 
 export const RESTORE_DIALOGUE = {

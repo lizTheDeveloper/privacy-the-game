@@ -7,7 +7,9 @@ import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
-import { MISSIONS } from './data/missions.js';
+import { MISSIONS, missionDistrict } from './data/missions.js';
+import { applyDebrief, recordNotNeeded, missionEventData } from './utils/debrief.js';
+import { isMissionDone } from './utils/mission-status.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { DISTRICTS } from './data/districts.js';
 import { generateMilestoneCard, shareMilestoneCard, shareStatCard } from './utils/milestone-card.js';
@@ -42,6 +44,8 @@ let podPickerOpen = false;
 // One line of feedback from a cancel/restore, shown only on the screen it belongs to.
 let notice = { hash: null, text: '' };
 let restoring = false;
+// "Reset it anyway" on a password recon showed is fine (until the page reloads).
+let resetAnywayMission = null;
 
 function setNotice(text, hash = location.hash) {
   notice = { hash, text };
@@ -77,7 +81,7 @@ function loadWhoami() {
 const screens = {
   city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView }),
   district: ({ id, tab }) => renderDistrict(state, id, tab),
-  briefing: ({ id }) => renderBriefing(state, id),
+  briefing: ({ id }) => renderBriefing(state, id, { resetAnyway: resetAnywayMission === id }),
   debrief: ({ id }) => renderDebrief(state, id),
   milestone: ({ districtId }) => renderMilestone(state, districtId),
   quickquest: () => renderQuickQuest(state),
@@ -150,24 +154,41 @@ function submitDebrief(missionId) {
 
   const answers = {};
   for (const q of mission.debriefQs) {
-    const el = app.querySelector(`input[name="q_${q.id}"]:checked`);
-    if (el) answers[q.id] = el.value;
+    if (q.multi) {
+      const values = [...app.querySelectorAll(`input[name="q_${q.id}"]:checked`)].map((el) => el.value);
+      if (values.length) answers[q.id] = values;
+    } else {
+      const el = app.querySelector(`input[name="q_${q.id}"]:checked`);
+      if (el) answers[q.id] = el.value;
+    }
   }
-  if (Object.keys(answers).length === 0) return;
+  // Nothing happens until every question on screen is answered.
+  const next = applyDebrief(state, mission, answers);
+  if (!next) return;
+  setState(updateStreak(next));
+  afterMissionRecorded(mission);
+}
 
-  const deferred = Object.values(answers).some((v) => v === 'skip' || v === 'later');
-  const status = deferred ? 'skipped' : 'completed';
-  const updated = updateMission(state, missionId, {
-    status,
-    finding: answers.finding,
-    action: answers.action,
-  });
-  setState(updateStreak(updated));
+// "GOT IT" on a password reset the player's own recon showed isn't needed.
+function markNotNeeded(missionId) {
+  const mission = MISSIONS.find((m) => m.id === missionId);
+  if (!mission) return;
+  const next = recordNotNeeded(state, missionId);
+  if (next === state) return;
+  setState(updateStreak(next));
+  afterMissionRecorded(mission);
+}
 
-  const districtId = ACCOUNTS[mission.accountId]?.district;
+// Shared tail of filing a mission: progress check-ins, the event, the
+// district milestone or back to the district.
+function afterMissionRecorded(mission) {
+  const missionId = mission.id;
+  const record = state.missions[missionId];
+  const status = record.status;
+  const districtId = missionDistrict(mission);
 
   // Track progress milestones for Scout check-ins
-  if (districtId && status === 'completed') {
+  if (districtId && isMissionDone(record)) {
     const progress = calcDistrictProgress(state, districtId);
     if (!state.seenProgress) state.seenProgress = {};
     if (!state.seenProgress[districtId]) state.seenProgress[districtId] = [];
@@ -185,13 +206,7 @@ function submitDebrief(missionId) {
     if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
   }
 
-  track('mission-completed', {
-    mission: missionId,
-    district: districtId,
-    finding: answers.finding,
-    phase: mission.phase,
-    status,
-  });
+  track('mission-completed', missionEventData(mission, record));
   if (status === 'completed' && shouldAskPermission(state)) {
     requestPermission();
   }
@@ -329,6 +344,14 @@ app.addEventListener('click', async (e) => {
     setTimeout(() => renderCurrentRoute(), 0);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
+  } else if (action === 'password-not-needed') {
+    markNotNeeded(el.dataset.mission);
+  } else if (action === 'reset-anyway') {
+    resetAnywayMission = el.dataset.mission;
+    renderCurrentRoute();
+  } else if (action === 'set-password-manager') {
+    setState({ ...state, passwordManager: el.dataset.pm });
+    renderCurrentRoute();
   } else if (action === 'toggle-account') {
     const id = el.dataset.account;
     if (state.accounts[id]) {
@@ -558,6 +581,26 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'whoami-confirm') {
     podPickerOpen = false;
     renderCurrentRoute();
+  }
+});
+
+// Debrief follow-ups appear once the answer they depend on is picked; in a
+// pick-all-that-apply list, "none" and "couldn't check" stand alone.
+app.addEventListener('change', (e) => {
+  const input = e.target;
+  if (!(input instanceof HTMLInputElement) || !input.name.startsWith('q_')) return;
+  const form = input.closest('[data-debrief]');
+  if (!form) return;
+  if (input.type === 'checkbox' && input.checked) {
+    const alone = input.value === 'none' || input.value === 'skip';
+    for (const other of form.querySelectorAll(`input[name="${input.name}"]`)) {
+      if (other === input) continue;
+      if (alone || other.value === 'none' || other.value === 'skip') other.checked = false;
+    }
+  }
+  for (const group of form.querySelectorAll('[data-show-if-q]')) {
+    const picked = form.querySelector(`input[name="q_${group.dataset.showIfQ}"]:checked`)?.value;
+    group.hidden = !group.dataset.showIfValues.split(',').includes(picked);
   }
 });
 

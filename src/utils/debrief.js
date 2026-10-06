@@ -4,6 +4,8 @@
 import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { twoFactorAction, twoFactorMethod } from './two-factor.js';
+import { updateMission } from '../state.js';
+import { isPasswordMission, passwordResetNeed, reopenStaleNotNeeded } from './password-need.js';
 
 const DEFERRED = new Set(['skip', 'later']);
 
@@ -43,6 +45,7 @@ export function debriefRecord(mission, answers) {
   if (Array.isArray(a.flagged)) {
     const ids = a.flagged.filter((v) => v !== 'none' && v !== 'skip');
     record.action = ids.length ? 'flagged' : 'none-flagged';
+    record.flagged = a.flagged;
     if (status === 'completed') out.pmFlagged = ids;
     else record.action = 'skip';
   }
@@ -69,4 +72,24 @@ export function missionEventData(mission, record) {
 export function missionSteps(mission, state) {
   if (mission.stepsByManager) return mission.stepsByManager[state?.passwordManager] || mission.steps;
   return mission.steps;
+}
+
+const ANSWER_KEYS = ['finding', 'action', 'password_exposed', 'method', 'method_setup', 'flagged'];
+
+// The state after filing a debrief, or null while the form is incomplete.
+// Answers replace the previous ones (a re-filed skip keeps nothing stale).
+export function applyDebrief(state, mission, answers) {
+  const r = debriefRecord(mission, answers);
+  if (!r) return null;
+  const update = Object.fromEntries(ANSWER_KEYS.map((k) => [k, undefined]));
+  let next = updateMission(state, mission.id, { ...update, ...r.record });
+  if (r.pmFlagged) next = { ...next, pmFlagged: r.pmFlagged };
+  return reopenStaleNotNeeded(next);
+}
+
+// "GOT IT" on a password reset the player's recon showed isn't needed.
+export function recordNotNeeded(state, missionId) {
+  const mission = MISSIONS.find((m) => m.id === missionId);
+  if (!isPasswordMission(mission) || passwordResetNeed(state, mission.accountId) !== 'not-needed') return state;
+  return updateMission(state, missionId, { status: 'not-needed', action: undefined });
 }

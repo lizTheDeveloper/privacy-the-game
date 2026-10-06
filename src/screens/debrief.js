@@ -1,8 +1,10 @@
 import { MISSIONS } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
-import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
 import { calcDistrictProgress } from '../utils/calc.js';
+import { questionOptions } from '../utils/debrief.js';
+import { twoFactorMethod, CODE_METHODS } from '../utils/two-factor.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -28,7 +30,7 @@ function badge(severity) {
 function optionRow(q, opt) {
   return `
   <label class="debrief-opt" style="${ROW}">
-    <input type="radio" name="q_${q.id}" value="${opt.value}" style="width: 16px; height: 16px; flex-shrink: 0;">
+    <input type="${q.multi ? 'checkbox' : 'radio'}" name="q_${q.id}" value="${opt.value}" style="width: 16px; height: 16px; flex-shrink: 0;">
     <span style="flex: 1; font-size: 14px; color: var(--offwhite); line-height: 1.5;">${opt.text}</span>
     ${opt.severity ? badge(opt.severity) : ''}
   </label>`;
@@ -43,21 +45,32 @@ function lockedRow(opt) {
   </div>`;
 }
 
-function questionGroup(q) {
+// A follow-up question (showIf) starts hidden; app.js shows it once the
+// question it depends on has one of its values.
+function showIfAttrs(q) {
+  if (!q.showIf) return '';
+  return ` hidden data-show-if-q="${q.showIf.question}" data-show-if-values="${q.showIf.values.join(',')}"`;
+}
+
+function questionGroup(q, state) {
   return `
-  <div style="margin-bottom: 28px;">
+  <div data-question="${q.id}"${showIfAttrs(q)} style="margin-bottom: 28px;">
     <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
+    ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
+    ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
     <div style="display: flex; flex-direction: column; gap: 6px;">
-      ${q.options.map((opt) => optionRow(q, opt)).join('')}
+      ${questionOptions(q, state).map((opt) => optionRow(q, opt)).join('')}
     </div>
   </div>`;
 }
 
-function completedGroup(q, stored) {
+function completedGroup(q, stored, state) {
   const value = stored[q.id];
-  const opt = q.options.find((o) => o.value === value);
-  const row = opt
-    ? lockedRow(opt)
+  const options = questionOptions(q, state);
+  const optFor = (v) => options.find((o) => o.value === v) || (ACCOUNTS[v] ? { value: v, text: ACCOUNTS[v].name } : null);
+  const opts = Array.isArray(value) ? value.map(optFor).filter(Boolean) : [optFor(value)].filter(Boolean);
+  const row = opts.length
+    ? `<div style="display: flex; flex-direction: column; gap: 6px;">${opts.map(lockedRow).join('')}</div>`
     : `<div style="${ROW}">
         <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${value || 'Not recorded'}</span>
        </div>`;
@@ -66,6 +79,39 @@ function completedGroup(q, stored) {
     <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
     ${row}
   </div>`;
+}
+
+// The questions a filed debrief shows: follow-ups only when answered, and a
+// save from before a question changed shows the question it answered then.
+function completedQuestions(mission, stored, state) {
+  return mission.debriefQs.map((q) => {
+    if (stored[q.id] !== undefined) return completedGroup(q, stored, state);
+    if (q.legacy && stored[q.legacy.id] !== undefined) return completedGroup(q.legacy, stored, state);
+    if (q.showIf) return '';
+    return completedGroup(q, stored, state);
+  }).join('');
+}
+
+const BREACHED = new Set(['1-2-breaches', '3plus-breaches']);
+
+// Scout on what the player told us about passwords and 2FA, before the
+// district's generic lines.
+function passwordScoutLine(mission, stored) {
+  if (mission.debriefQs.some((q) => q.kind === 'two-factor')) {
+    const line = TWO_FA_DIALOGUE[twoFactorMethod(stored)];
+    if (line) return line;
+  }
+  if (BREACHED.has(stored.finding) && stored.password_exposed === 'no') return PASSWORD_DIALOGUE.breachNoPassword;
+  return null;
+}
+
+function upgradeOffer(mission, stored) {
+  if (!mission.debriefQs.some((q) => q.kind === 'two-factor')) return '';
+  if (!CODE_METHODS.includes(twoFactorMethod(stored))) return '';
+  return `
+      <div style="margin-bottom: 24px;">
+        <a href="#/mission/${mission.accountId}-fortify-2fa-upgrade/briefing" class="btn-secondary" style="display: inline-block; text-decoration: none;">UPGRADE FROM CODES &mdash; BONUS</a>
+      </div>`;
 }
 
 function mapDebriefCategory(stored) {
@@ -116,10 +162,11 @@ export function renderDebrief(state, missionId) {
   let scoutLine;
   let progressLine = '';
   if (completed) {
-    const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action];
+    const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
+      || mission.scoutDialog?.debrief?.[stored.method];
     const debriefCategory = mapDebriefCategory(stored);
     const variants = dialogue?.debrief?.[debriefCategory];
-    scoutLine = (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
+    scoutLine = passwordScoutLine(mission, stored) || (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
     const progress = calcDistrictProgress(state, districtId);
     progressLine = getProgressCheckIn(state, districtId, progress.percent, dialogue);
   } else {
@@ -127,8 +174,8 @@ export function renderDebrief(state, missionId) {
   }
 
   const questions = completed
-    ? `<div class="completed-marker">${mission.debriefQs.map((q) => completedGroup(q, stored)).join('')}</div>`
-    : mission.debriefQs.map((q) => questionGroup(q)).join('');
+    ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}`
+    : `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state)).join('')}</div>`;
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const footer = completed

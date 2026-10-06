@@ -1,6 +1,7 @@
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress, isCoreMission } from '../utils/calc.js';
+import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { GHOST_DIALOGUE } from '../data/dialogue.js';
@@ -123,17 +124,11 @@ const PHASE_ORDER = ['recon', 'fortify', 'reclaim'];
 
 function nextAvailableMission(state) {
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => {
-      const account = state.accounts[m.accountId];
-      return m.phase === phase && isCoreMission(m) && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
-    });
+    const mission = MISSIONS.find((m) => m.phase === phase && isCoreMission(m) && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]));
     if (mission) return mission;
   }
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => {
-      const account = state.accounts[m.accountId];
-      return m.phase === phase && m.optional && Boolean(account && account.enabled) && state.missions[m.id]?.status !== 'completed';
-    });
+    const mission = MISSIONS.find((m) => m.phase === phase && m.optional && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]));
     if (mission) return mission;
   }
   return null;

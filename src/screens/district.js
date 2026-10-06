@@ -4,7 +4,11 @@ import { getMissionsForDistrict } from '../data/missions.js';
 import { calcDistrictProgress, getAccountPhaseGate, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
-import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, pick } from '../data/dialogue.js';
+import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
+import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
+import { isPasswordMission, passwordResetNeed } from '../utils/password-need.js';
+import { twoFactorMethod } from '../utils/two-factor.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -64,16 +68,31 @@ function esc(value) {
 function optionText(mission, value) {
   if (!value) return null;
   for (const question of mission.debriefQs) {
-    const option = question.options.find((o) => o.value === value);
-    if (option) return option.text;
+    // Old saves answered questions that have since changed (question.legacy).
+    for (const q of [question, question.legacy].filter(Boolean)) {
+      const option = q.options.find((o) => o.value === value);
+      if (option) return option.text;
+    }
   }
   return null;
 }
 
 function missionSummary(mission, record) {
-  return [optionText(mission, record.finding), optionText(mission, record.action)]
-    .filter(Boolean)
-    .join(' — ');
+  const parts = [optionText(mission, record.finding), optionText(mission, record.password_exposed)];
+  if (record.method) parts.push(optionText(mission, twoFactorMethod(record)));
+  else if (Array.isArray(record.flagged)) {
+    const names = record.flagged.filter((v) => ACCOUNTS[v]).map((v) => ACCOUNTS[v].name);
+    parts.push(names.length ? `Flagged: ${names.join(', ')}` : optionText(mission, 'none'));
+  } else parts.push(optionText(mission, record.action));
+  return parts.filter(Boolean).join(' — ');
+}
+
+const NO_RESET_STYLE = 'letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);';
+
+// A mission with no account (the password-manager report) has no building.
+function missionIcon(state, mission) {
+  if (ACCOUNTS[mission.accountId]) return renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32);
+  return '<div aria-hidden="true" style="width: 32px; text-align: center; font-size: 20px; color: var(--cyan); flex-shrink: 0;">&#128273;</div>';
 }
 
 function renderNotFound() {
@@ -113,13 +132,18 @@ function renderDisabledPanel(districtId) {
 
 function renderMissionRow(state, mission) {
   const record = state.missions[mission.id];
-  const completed = record?.status === 'completed';
+  const notNeeded = record?.status === 'not-needed';
+  const completed = isMissionDone(record);
   const skipped = record?.status === 'skipped';
   const dimmed = completed || skipped;
-  const summary = completed ? missionSummary(mission, record) : '';
+  const summary = completed && !notNeeded ? missionSummary(mission, record) : '';
+  const noResetYet = !completed && isPasswordMission(mission) && passwordResetNeed(state, mission.accountId) === 'not-needed';
 
   let statusCell;
-  if (completed) {
+  if (notNeeded) {
+    // A link, so the player can still choose "Reset it anyway" from the briefing.
+    statusCell = `<a class="badge" style="${NO_RESET_STYLE} text-decoration: none;" href="#/mission/${mission.id}/briefing">NO RESET NEEDED</a>`;
+  } else if (completed) {
     statusCell = `<div class="badge" style="letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);">SECURED</div>`;
   } else if (skipped) {
     statusCell = `
@@ -131,11 +155,12 @@ function renderMissionRow(state, mission) {
 
   return `
   <div class="mission-row" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05); ${dimmed ? 'opacity: 0.55;' : 'border: 1px solid rgba(0,229,255,0.2); background: rgba(0,229,255,0.03);'}">
-    ${renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32)}
+    ${missionIcon(state, mission)}
     <div style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
+      ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
     </div>
     ${mission.optional
       ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
@@ -149,7 +174,7 @@ const PHASE_PREREQ = { fortify: 'recon', reclaim: 'fortify' };
 
 function renderMissionList(state, districtId, activeTab) {
   const missions = getMissionsForDistrict(districtId).filter(
-    (m) => m.phase === activeTab && state.accounts[m.accountId]?.enabled,
+    (m) => m.phase === activeTab && isMissionInPlay(state, m),
   );
   missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0));
   if (missions.length === 0) {
@@ -230,6 +255,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
     <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">INVENTORY SURVEY</div>
     ${allDisabled ? `<div class="panel" style="padding: 14px 16px; margin-bottom: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: rgba(237,239,243,0.5);">All accounts for this district are disabled. Turn any of them back on to start recon.</div>` : ''}
     ${rows}
+    ${district?.askPasswordManager ? renderPasswordManagerQuestion(state) : ''}
     ${customRows}
     <div class="panel" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; margin-top: 16px;">
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
@@ -239,6 +265,24 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       <a class="btn-primary" style="text-decoration: none;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
     </div>
   </div>`;
+}
+
+function renderPasswordManagerQuestion(state) {
+  const chosen = state.passwordManager;
+  const chips = PASSWORD_MANAGERS.map((pm) => {
+    const on = pm.value === chosen;
+    return `<span data-action="set-password-manager" data-pm="${pm.value}" role="button" tabindex="0" aria-pressed="${on}" style="cursor: pointer; font-size: 12px; padding: 7px 12px; border: 1px solid ${on ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${on ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${on ? 'var(--lime)' : 'rgba(237,239,243,0.7)'};">${esc(pm.text)}</span>`;
+  }).join('');
+  const line = chosen === 'none' ? PASSWORD_DIALOGUE.noManager : chosen ? PASSWORD_DIALOGUE.hasManager : '';
+  return `
+    <div class="panel" style="padding: 14px; margin: 16px 0 8px;">
+      <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 12px;">DO YOU USE A PASSWORD MANAGER?</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">${chips}</div>
+      ${line ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin-top: 14px;">
+        <img src="assets/characters/scout_0.png" alt="" style="width: 32px; height: 32px; flex-shrink: 0;">
+        <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; font-style: italic;">${esc(line)}</div>
+      </div>` : ''}
+    </div>`;
 }
 
 function renderQuizFacility(state, facilityId, district) {
@@ -287,7 +331,7 @@ function renderFacilitySection(state, facilityId, district) {
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId);
-  const completed = missions.filter((m) => state.missions[m.id]?.status === 'completed').length;
+  const completed = missions.filter((m) => isMissionDone(state.missions[m.id])).length;
   const total = missions.length;
   const allDone = total > 0 && completed === total;
   const buildingState = getBuildingState(state, facilityId);
@@ -299,7 +343,7 @@ function renderFacilitySection(state, facilityId, district) {
 
   const missionRows = missions.map((m) => {
     const record = state.missions[m.id];
-    const done = record?.status === 'completed';
+    const done = isMissionDone(record);
     const skipped = record?.status === 'skipped';
     const summary = done ? missionSummary(m, record) : '';
 
