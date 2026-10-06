@@ -99,8 +99,9 @@ describe('app.js wiring: data arriving never logs a pageview', async () => {
   };
 
   it('render tracks only when the cause is a navigation', () => {
-    expect(body('render')).toMatch(/if \(tracksPageview\(cause\)\) trackPageview\(/);
-    expect((src.match(/trackPageview\(/g) || []).length).toBe(1);
+    // Umami's script records pageviews itself; the game must not send its own.
+    expect((src.match(/trackPageview\(/g) || []).length).toBe(0);
+    expect(body('render')).toMatch(/if \(tracksPageview\(cause\)\) startScreenVisit\(/);
     expect(body('render')).toContain('cause = RENDER_CAUSE.REFRESH');
     expect(body('renderCurrentRoute')).toContain('cause = RENDER_CAUSE.REFRESH');
   });
