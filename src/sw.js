@@ -1,4 +1,11 @@
-const CACHE_NAME = 'reclaim-city-v1';
+const CACHE_NAME = 'reclaim-city-v2';
+
+// API answers (/whoami, collective.json) describe the visitor or tonight's
+// numbers and must always come from the network. Never intercept them.
+function shouldIntercept(url) {
+  return !url.pathname.includes('/api/');
+}
+
 const SHELL = [
   './',
   './index.html',
@@ -31,6 +38,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
   if (url.origin !== location.origin) return;
+  if (!shouldIntercept(url)) return;
 
   if (e.request.mode === 'navigate') {
     e.respondWith(
