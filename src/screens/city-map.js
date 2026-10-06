@@ -72,20 +72,30 @@ const nearness = ([bc, br]) => {
 const MAP_SLOTS = BACKDROP_DEFS
   .map((def, i) => ({ key: `map-${def.at.join('_')}`, at: def.at, tier: def.tier, tiles: def.tiles, layer: 'map', i }))
   .sort((a, b) => nearness(a.at) - nearness(b.at) || a.i - b.i);
-const WIDE_SLOTS = [];
-for (let ring = 5; ring <= 10; ring += 1) {
-  const row = [];
-  for (let s = -2; s <= 6; s += 1) {
-    if ((s + ring) % 2) continue;
-    for (const d of [-ring, ring]) row.push({ d, s });
-  }
-  row.sort((a, b) => Math.abs(a.s - 2) - Math.abs(b.s - 2) || a.s - b.s || a.d - b.d);
-  for (const { d, s } of row) {
-    const at = [(s + d) / 2, (s - d) / 2];
-    const tiles = BACKDROP_DEFS[WIDE_SLOTS.length % BACKDROP_DEFS.length].tiles;
-    WIDE_SLOTS.push({ key: `wide-${at.join('_')}`, at, tier: 'far', tiles, layer: 'wide' });
+// The wide layer's lots: every block-lattice spot beside the map (|d| >= 4, past
+// the map's districts and backdrop, d = bc - br) within the skyline's band of
+// rows (s = bc + br), nearest the plaza first; on a tie, back row first, then left. So
+// n pods always fill the n nearest lots with no holes: whole columns hugging
+// the map, then the next column out, both sides growing together, and every
+// block shares its streets with its neighbours.
+const WIDE_WINDOW = { minD: 4, maxD: 11, minS: -2, maxS: 6 };
+const WIDE_LATTICE = [];
+for (let d = WIDE_WINDOW.minD; d <= WIDE_WINDOW.maxD; d += 1) {
+  for (let s = WIDE_WINDOW.minS; s <= WIDE_WINDOW.maxS; s += 1) {
+    if ((s + d) % 2) continue; // bc and br are whole: s and d share parity
+    for (const sd of [-d, d]) WIDE_LATTICE.push([(s + sd) / 2, (s - sd) / 2]);
   }
 }
+WIDE_LATTICE.sort((a, b) => nearness(a) - nearness(b) || (a[0] + a[1]) - (b[0] + b[1]) || (a[0] - a[1]) - (b[0] - b[1]));
+
+export function wideBlockPositions(count) {
+  const n = Math.max(0, Math.min(WIDE_LATTICE.length, Math.floor(Number(count) || 0)));
+  return WIDE_LATTICE.slice(0, n).map((at) => [...at]);
+}
+
+const WIDE_SLOTS = wideBlockPositions(Infinity).map((at, i) => (
+  { key: `wide-${at.join('_')}`, at, tier: 'far', tiles: BACKDROP_DEFS[i % BACKDROP_DEFS.length].tiles, layer: 'wide' }
+));
 export const BACKDROP_SLOTS = [...MAP_SLOTS, ...WIDE_SLOTS];
 // The map is capped at 960px; the wide layer shows only once the window has room beside it.
 const WIDE_MIN = 1000;
@@ -268,46 +278,14 @@ function renderWideCity(placed) {
   if (!wide.length) return '';
   return `
 <div class="city-wide">
+  <div class="city-wide__ground"></div>
   <div class="city-wide__iso">
     ${wide.map(renderPodBlock).join('')}
   </div>
 </div>`;
 }
 
-const POD_STYLE = `
-  <style>
-    .city-pod { pointer-events: auto; display: block; text-decoration: none; cursor: pointer; transition: filter 200ms ease, opacity 200ms ease; }
-    .city-pod--far { opacity: 0.5; }
-    .city-pod--mid { opacity: 0.62; }
-    .city-pod img { filter: brightness(0.34) saturate(0.2); }
-    .city-pod img.is-lit { filter: brightness(0.8) saturate(0.8) drop-shadow(0 0 6px rgba(0,229,255,0.35)); }
-    .city-pod__lot { position: absolute; inset: -4px -8px; pointer-events: none; z-index: 0; opacity: 0;
-      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-      background: radial-gradient(ellipse at 50% 55%, rgba(255,45,155,0.28) 0%, rgba(255,45,155,0.08) 60%, transparent 100%); }
-    .city-pod.is-yours { opacity: 0.8; }
-    .city-pod.is-yours .city-pod__lot { opacity: 1; }
-    .city-pod::after { content: attr(data-label); position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
-      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
-      padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.94); box-shadow: 0 0 12px rgba(0,229,255,0.25);
-      opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; transform-origin: 50% 100%; }
-    .city-pod.is-yours::after { color: var(--magenta); border-color: rgba(255,45,155,0.55); }
-    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); outline: none; }
-    .city-pod:hover::after, .city-pod:focus-visible::after { opacity: 1; transform: translate(-50%, -6px); }
-    .city-wide { display: none; }
-    @media (min-width: ${WIDE_MIN}px) {
-      body:has(.city-wide) { overflow-x: clip; }
-      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: 720px; overflow: hidden;
-        z-index: -1; pointer-events: none;
-        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%); }
-      .city-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 60;
-        background: linear-gradient(180deg, rgba(9,11,16,0) 70%, rgba(9,11,16,0.95) 100%),
-          linear-gradient(90deg, rgba(9,11,16,0.8) 0%, rgba(9,11,16,0) 22%, rgba(9,11,16,0) 78%, rgba(9,11,16,0.8) 100%); }
-      .city-wide .city-pod--far { opacity: 0.4; }
-      .city-wide .city-pod.is-yours { opacity: 0.8; }
-      .city-wide__iso { position: absolute; left: 50%; top: ${ORIGIN_TOP}px; width: 0; height: 0; }
-    }
-    @media (max-width: 768px) { .city-pod::after { display: none; } }
-  </style>`;
+
 
 // The empty centre block: a lit plaza the whole city is arranged around.
 function renderPlaza() {
@@ -448,6 +426,88 @@ const TILE_SVG = encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}" fill="none" stroke="#00E5FF" stroke-width="1">`
   + `<path d="M${TW / 2} 0.5L${TW - 0.5} ${TH / 2}L${TW / 2} ${TH - 0.5}L0.5 ${TH / 2}Z"/></svg>`,
 );
+
+// The street lattice: one cell is a block pitch square (3x3 tiles) centred on a
+// block's lot; its inscribed diamond is the centreline of the 1-tile streets
+// around that lot, so the cells tile into every street of the city, with a
+// streetlight where four blocks meet.
+const STREET_CELL = (() => {
+  const w = BLOCK_PITCH * TW;
+  const h = BLOCK_PITCH * TH;
+  const c = blockCentre(0, 0);
+  return { w, h, x: c.x, y: ORIGIN_TOP + c.y - h / 2 };
+})();
+const STREET_SVG = (() => {
+  const { w, h } = STREET_CELL;
+  const d = `M${w / 2} 0L${w} ${h / 2}L${w / 2} ${h}L0 ${h / 2}Z`;
+  const lights = [[w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2"/>`).join('');
+  return encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">`
+    + `<path d="${d}" stroke="#00E5FF" stroke-opacity="0.18" stroke-width="5"/>`
+    + `<path d="${d}" stroke="#00E5FF" stroke-opacity="0.8" stroke-width="1.2"/>`
+    + `<g fill="#FF2D9B">${lights}</g></svg>`,
+  );
+})();
+// Inverse of .city-ground's mask (same ellipse, in screen px), then soft edges.
+const WIDE_GROUND_MASK = (() => {
+  const rx = 0.46 * GROUND_W;
+  const ry = 0.42 * GROUND_H;
+  const cy = ORIGIN_TOP + GROUND_TOP + 0.54 * GROUND_H;
+  return [
+    `radial-gradient(ellipse ${rx.toFixed(1)}px ${ry.toFixed(1)}px at 50% ${cy.toFixed(1)}px, transparent 30%, rgba(0,0,0,0.65) 62%, #000 82%)`,
+    'linear-gradient(90deg, transparent 0, #000 160px, #000 calc(100% - 160px), transparent 100%)',
+    'linear-gradient(180deg, transparent 60px, #000 200px, #000 540px, transparent 700px)',
+  ].join(', ');
+})();
+
+const POD_STYLE = `
+  <style>
+    .city-pod { pointer-events: auto; display: block; text-decoration: none; cursor: pointer; transition: filter 200ms ease, opacity 200ms ease; }
+    .city-pod--far { opacity: 0.5; }
+    .city-pod--mid { opacity: 0.62; }
+    .city-pod img { filter: brightness(0.34) saturate(0.2); }
+    .city-pod img.is-lit { filter: brightness(0.8) saturate(0.8) drop-shadow(0 0 6px rgba(0,229,255,0.35)); }
+    .city-pod__lot { position: absolute; inset: -4px -8px; pointer-events: none; z-index: 0; opacity: 0;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background: radial-gradient(ellipse at 50% 55%, rgba(255,45,155,0.28) 0%, rgba(255,45,155,0.08) 60%, transparent 100%); }
+    .city-pod.is-yours { opacity: 0.8; }
+    .city-pod.is-yours .city-pod__lot { opacity: 1; }
+    .city-pod::after { content: attr(data-label); position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
+      padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.94); box-shadow: 0 0 12px rgba(0,229,255,0.25);
+      opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; transform-origin: 50% 100%; }
+    .city-pod.is-yours::after { color: var(--magenta); border-color: rgba(255,45,155,0.55); }
+    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); outline: none; }
+    .city-pod:hover::after, .city-pod:focus-visible::after { opacity: 1; transform: translate(-50%, -6px); }
+    .city-wide { display: none; }
+    @media (min-width: ${WIDE_MIN}px) {
+      body:has(.city-wide) { overflow-x: clip; }
+      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: 720px; overflow: hidden;
+        z-index: -1; pointer-events: none;
+        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%); }
+      .city-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 60;
+        background: linear-gradient(180deg, rgba(9,11,16,0) 70%, rgba(9,11,16,0.95) 100%),
+          linear-gradient(90deg, rgba(9,11,16,0.8) 0%, rgba(9,11,16,0) 22%, rgba(9,11,16,0) 78%, rgba(9,11,16,0.8) 100%); }
+      /* On the ground, wide pods are dimmed rather than see-through, so streets don't show through them. */
+      .city-wide .city-pod--far, .city-wide .city-pod.is-yours { opacity: 1; }
+      .city-wide .city-pod { filter: brightness(0.42); }
+      .city-wide .city-pod.is-yours { filter: brightness(0.82); }
+      .city-wide .city-pod:hover, .city-wide .city-pod:focus-visible { filter: brightness(1.35); }
+      .city-wide__iso { position: absolute; left: 50%; top: ${ORIGIN_TOP}px; width: 0; height: 0; }
+      /* The map's ground carried out under the wide city: the same tile grid plus the street
+         lattice between blocks, both on the map's own lattice. It fades in where the map's
+         ground fades out, and away toward the screen's edges, top and bottom. */
+      .city-wide__ground { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.28;
+        background-image: url("data:image/svg+xml,${STREET_SVG}"), url("data:image/svg+xml,${TILE_SVG}");
+        background-size: ${STREET_CELL.w}px ${STREET_CELL.h}px, ${TW}px ${TH}px;
+        background-position: calc(50% + ${STREET_CELL.x}px) ${STREET_CELL.y}px, 50% ${ORIGIN_TOP - TH / 2}px;
+        -webkit-mask-image: ${WIDE_GROUND_MASK}; mask-image: ${WIDE_GROUND_MASK};
+        -webkit-mask-composite: source-in; mask-composite: intersect; }
+      /* The map lets the wide city show through, so the ground runs on across its edge. */
+      .city-map:has(+ .city-wide) { background: transparent; }
+    }
+    @media (max-width: 768px) { .city-pod::after { display: none; } }
+  </style>`;
 
 const STYLE = `
   <style>

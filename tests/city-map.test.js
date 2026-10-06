@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { renderCityMap, BACKDROP_SLOTS } from '../src/screens/city-map.js';
+import { renderCityMap, BACKDROP_SLOTS, wideBlockPositions } from '../src/screens/city-map.js';
 import { createInitialState } from '../src/state.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
 
@@ -132,5 +132,96 @@ describe('city map: backdrop pods stay behind your city', () => {
     const rule = html.match(/\.city-pod:hover, \.city-pod:focus-visible \{[^}]*\}/);
     expect(rule).not.toBeNull();
     expect(rule[0]).not.toMatch(/z-index/);
+  });
+});
+
+describe('city map: the wide city is one continuous city', () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
+  // Independent of the module: block (bc, br) centre in px from tile (0,0), and the plaza at block (1,1).
+  const centre = ([bc, br]) => ({ x: (bc - br) * 120, y: (bc + br) * 60 + 20 });
+  const dist = (at) => { const c = centre(at); return Math.hypot(c.x - 0, c.y - 140); };
+  const cap = () => wideBlockPositions(Infinity).length;
+
+  it('every wide block sits on the iso block lattice, outside the 960px map, with no two on one lot', () => {
+    const CAP = cap();
+    expect(CAP).toBeGreaterThanOrEqual(60);
+    const all = wideBlockPositions(CAP);
+    const keys = new Set();
+    for (const at of all) {
+      expect(at).toHaveLength(2);
+      for (const v of at) expect(Number.isInteger(v)).toBe(true);
+      expect(Math.abs(centre(at).x)).toBeGreaterThanOrEqual(480); // past the map's districts and backdrop
+      keys.add(at.join('_'));
+    }
+    expect(keys.size).toBe(all.length);
+  });
+
+  it('fills nearest-first with no holes: every lattice spot closer than the farthest block is taken', () => {
+    const CAP = cap();
+    const all = wideBlockPositions(CAP);
+    for (let n = 1; n <= CAP; n += 1) {
+      const some = wideBlockPositions(n);
+      expect(some).toEqual(all.slice(0, n)); // a stable prefix: more pods only add further-out blocks
+      const far = Math.max(...some.map(dist));
+      const taken = new Set(some.map((a) => a.join('_')));
+      for (const at of all) if (dist(at) < far - 1e-9) expect(taken.has(at.join('_'))).toBe(true);
+      const left = some.filter((a) => centre(a).x < 0).length;
+      expect(Math.abs(left - (n - left))).toBeLessThanOrEqual(1); // both sides grow together
+    }
+  });
+
+  it('neighbouring wide blocks share a street: the first column hugs the map, one block pitch apart', () => {
+    const first = wideBlockPositions(10).map(centre);
+    for (const side of [-1, 1]) {
+      const col = first.filter((c) => Math.sign(c.x) === side);
+      expect(new Set(col.map((c) => c.x))).toEqual(new Set([480 * side]));
+      const ys = col.map((c) => c.y).sort((a, b) => a - b);
+      for (let i = 1; i < ys.length; i += 1) expect(ys[i] - ys[i - 1]).toBe(120);
+    }
+  });
+
+  it('wide pods take the wide blocks in order: largest nearest', () => {
+    const many = { ...DATA, pods: Array.from({ length: 40 }, (_, i) => POD(`p${i}`, `Place ${i}`, 5000 - i * 10, i)) };
+    const html = renderCityMap(createInitialState(), ready(many));
+    const wide = html.slice(html.indexOf('<div class="city-wide"'));
+    const slots = [...wide.matchAll(/data-pod="p(\d+)" data-slot="([^"]+)"/g)].map((m) => [Number(m[1]), m[2]]);
+    expect(slots).toEqual(wideBlockPositions(31).map((at, i) => [9 + i, `wide-${at.join('_')}`]));
+    for (const [, key] of slots) expect(BACKDROP_SLOTS.some((s) => s.key === key && s.layer === 'wide')).toBe(true);
+  });
+
+  it('the wide layer has one ground element carrying the tile grid and the street lattice', () => {
+    const many = { ...DATA, pods: Array.from({ length: 30 }, (_, i) => POD(`p${i}`, `Place ${i}`, 60 + i * 10, i)) };
+    const html = renderCityMap(createInitialState(), ready(many));
+    const wide = html.slice(html.indexOf('<div class="city-wide"'));
+    expect(wide.match(/class="city-wide__ground"/g)).toHaveLength(1);
+    const rule = html.match(/\.city-wide__ground \{[^}]*\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[0]).toContain('background-size: 240px 120px, 80px 40px'); // street lattice at BLOCK_PITCH, tiles at TW x TH
+    expect(rule[0]).toMatch(/mask-image:/); // fades toward the screen edges
+  });
+
+  it('new wide-city CSS lives only inside the wide media query (phones and narrow windows untouched)', () => {
+    const many = { ...DATA, pods: Array.from({ length: 30 }, (_, i) => POD(`p${i}`, `Place ${i}`, 60 + i * 10, i)) };
+    const html = renderCityMap(createInitialState(), ready(many));
+    const start = html.indexOf('@media (min-width: 1000px) {');
+    expect(start).toBeGreaterThan(-1);
+    let depth = 0;
+    let end = start;
+    for (let i = html.indexOf('{', start); i < html.length; i += 1) {
+      if (html[i] === '{') depth += 1;
+      if (html[i] === '}') depth -= 1;
+      if (depth === 0) { end = i; break; }
+    }
+    const inside = html.slice(start, end);
+    const outside = html.slice(0, start) + html.slice(end);
+    for (const sel of ['.city-wide__ground {', '.city-map:has(+ .city-wide)']) {
+      expect(inside).toContain(sel);
+      expect(outside).not.toContain(sel);
+    }
+  });
+
+  it('few pods (no wide layer): no ground, no see-through map', () => {
+    const html = renderCityMap(createInitialState(), ready(DATA));
+    expect(html).not.toContain('class="city-wide__ground"');
   });
 });
