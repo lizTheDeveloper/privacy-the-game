@@ -53,6 +53,10 @@ describe('parseRoute', () => {
     });
   });
 
+  it('routes the whole city', () => {
+    expect(parseRoute('#/city-together')).toEqual({ screen: 'together', params: {} });
+  });
+
   it('defaults to city for unknown routes', () => {
     expect(parseRoute('#/unknown')).toEqual({ screen: 'city', params: {} });
     expect(parseRoute('')).toEqual({ screen: 'city', params: {} });

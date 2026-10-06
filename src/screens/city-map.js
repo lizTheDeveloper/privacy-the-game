@@ -597,6 +597,7 @@ export function renderCityMap(state) {
   <div class="city-actions">
     <a href="#/quickquest" class="city-btn city-btn--magenta">⚡ QUICK QUEST</a>
     <a href="#/stats" class="city-btn city-btn--cyan">STATS</a>
+    <a href="#/city-together" class="city-btn city-btn--cyan">WHOLE CITY</a>
   </div>
   <div class="city-skyline">
     <div class="city-horizon"></div>

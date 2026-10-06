@@ -14,6 +14,7 @@ import { renderDistrict } from './screens/district.js';
 import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
+import { renderCityTogether } from './screens/city-together.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz } from './screens/phishing-quiz.js';
@@ -64,6 +65,7 @@ const screens = {
   phishing: () => renderPhishingQuiz(state),
   garage: () => renderGarage(state),
   timeline: () => renderTimeline(state),
+  together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView }),
   stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen }),
 };
 
@@ -83,6 +85,7 @@ function render(route) {
     app.innerHTML = renderWelcome();
     return;
   }
+  if (route.screen === 'together') loadCollective();
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);

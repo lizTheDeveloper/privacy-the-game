@@ -14,7 +14,7 @@ const RING_SIZE = 120;
 const RING_RADIUS = 45;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-function ringChart({ fraction, color, glow, track, value, unit }) {
+export function ringChart({ fraction, color, glow, track, value, unit }) {
   const clamped = Math.min(1, Math.max(0, fraction));
   const offset = RING_CIRCUMFERENCE * (1 - clamped);
   return `
@@ -64,7 +64,7 @@ function findingCard({ label, value, color, tint }) {
   </div>`;
 }
 
-function esc(v) {
+export function esc(v) {
   return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
@@ -152,6 +152,7 @@ export function renderStats(state, view = {}) {
     <a href="#/city" class="btn-secondary" style="display: inline-block; text-decoration: none;">← CITY</a>
     <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">YOUR CITY</div>
     <div style="flex: 1;"></div>
+    <a href="#/city-together" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: #00E5FF; text-decoration: none;">THE WHOLE CITY →</a>
   </div>
   <div style="padding: 20px 24px 32px;">
     <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
