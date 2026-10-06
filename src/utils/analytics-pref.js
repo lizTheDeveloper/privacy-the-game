@@ -32,3 +32,24 @@ export function setAnalyticsOff(off) {
     // Storage blocked (private mode): nothing persists, and nothing to undo.
   }
 }
+
+// When this browser last turned sharing off (sent `opted-out`), so the game can
+// tell whether tonight's run has deleted its data yet.
+export const OPTED_OUT_AT_KEY = 'reclaim-city.opted-out-at';
+
+export function getOptedOutAt() {
+  try {
+    return localStorage.getItem(OPTED_OUT_AT_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function setOptedOutAt(iso) {
+  try {
+    if (iso) localStorage.setItem(OPTED_OUT_AT_KEY, iso);
+    else localStorage.removeItem(OPTED_OUT_AT_KEY);
+  } catch {
+    // Storage blocked: nothing to remember.
+  }
+}

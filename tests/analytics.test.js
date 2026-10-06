@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { track, trackPageview, trackThenStop } from '../src/utils/analytics.js';
+import { track, trackPageview, trackThenStop, trackNow } from '../src/utils/analytics.js';
 import { setChosenPod, getChosenPod } from '../src/utils/pod-pref.js';
 import { isAnalyticsOff, setAnalyticsOff } from '../src/utils/analytics-pref.js';
 import { renderStats } from '../src/screens/stats.js';
@@ -95,6 +95,22 @@ describe('trackThenStop()', () => {
     delete globalThis.umami;
     await trackThenStop('opted-out');
     expect(isAnalyticsOff()).toBe(true);
+  });
+});
+
+describe('trackNow()', () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); setAnalyticsOff(false); });
+
+  it('sends and waits for the send, bounded, without turning sharing off', async () => {
+    globalThis.umami = { track: vi.fn(() => new Promise(() => {})) };
+    expect(await trackNow('ghost-cancelled', undefined, { timeoutMs: 20 })).toBe(true);
+    expect(umami.track).toHaveBeenCalledWith('ghost-cancelled', undefined);
+    expect(isAnalyticsOff()).toBe(false);
+  });
+
+  it('reports false when nothing could be sent', async () => {
+    delete globalThis.umami;
+    expect(await trackNow('ghost-cancelled')).toBe(false);
   });
 });
 
