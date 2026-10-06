@@ -36,7 +36,7 @@ export function renderBriefing(state, missionId) {
   const steps = mission.steps.map((step, i) => {
     const num = String(i + 1).padStart(2, '0');
     const body = step.url
-      ? `<a href="${step.url}" target="_blank" rel="noopener" style="color: var(--cyan); font-weight: 600;">${step.text}</a>`
+      ? `<a href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" style="color: var(--cyan); font-weight: 600;">${step.text}</a>`
       : step.text;
     return `
     <div style="display: flex; gap: 14px; align-items: flex-start;">
@@ -92,7 +92,10 @@ export function renderBriefing(state, missionId) {
         </div>
 
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-          <button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>
+          ${state.startedMissions?.[mission.id]
+            ? `<a class="btn-primary" href="#/mission/${mission.id}/debrief" style="text-decoration: none;">I DID IT &#10003;</a>
+          <button class="btn-secondary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT AGAIN</button>`
+            : `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`}
           <a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>
         </div>
       </div>

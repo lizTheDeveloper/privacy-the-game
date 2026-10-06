@@ -5,7 +5,7 @@ import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute } from './router.js';
-import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
+import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS } from './data/missions.js';
 import { ACCOUNTS } from './data/accounts.js';
@@ -307,9 +307,21 @@ app.addEventListener('click', async (e) => {
 
   if (action === 'go-do-it') {
     const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+    // Save first: on phones the new tab can get this one reloaded.
+    setState(markMissionStarted(state, el.dataset.mission));
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
     track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     navigate(`#/mission/${el.dataset.mission}/debrief`);
+  } else if (action === 'mission-step') {
+    // A step link opens the real site itself (default action is left alone);
+    // just remember the start so the briefing offers "I did it" on return.
+    const firstTime = !state.startedMissions?.[el.dataset.mission];
+    setState(markMissionStarted(state, el.dataset.mission));
+    if (firstTime) {
+      const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+      track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    }
+    setTimeout(renderCurrentRoute, 0);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
   } else if (action === 'toggle-account') {
