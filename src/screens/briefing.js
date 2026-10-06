@@ -38,10 +38,19 @@ export function renderBriefing(state, missionId) {
     const body = step.url
       ? `<a href="${step.url}" target="_blank" rel="noopener" style="color: var(--cyan); font-weight: 600;">${step.text}</a>`
       : step.text;
+    // A step that needs its reasons on screen (the Pwned Passwords check asks
+    // for a real password, so it says why, who, and why that's safe).
+    const note = step.note?.length ? `
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          ${step.note.map((n) => `
+          <div style="font-size: 13px; color: rgba(237,239,243,0.7); line-height: 1.55;">
+            <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: rgba(0,229,255,0.6); text-transform: uppercase;">${n.label}</span><br>${n.text}
+          </div>`).join('')}
+        </div>` : '';
     return `
     <div style="display: flex; gap: 14px; align-items: flex-start;">
       <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--cyan); width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">${num}</div>
-      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5;">${body}</div>
+      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5;">${body}${note}</div>
     </div>`;
   }).join('');
 

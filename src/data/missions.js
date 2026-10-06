@@ -9,6 +9,7 @@ import { GRID_MISSIONS } from './missions-grid.js';
 import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
+import { PWNED_PASSWORD_STEP } from './pwned-passwords-step.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -104,6 +105,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Gmail address' },
       { text: 'Read the results — note how many breaches (if any)' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -221,6 +223,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Outlook/Hotmail address' },
       { text: 'Note how many breaches your email appears in' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -337,6 +340,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your iCloud email address' },
       { text: 'Note how many breaches (if any) your email appears in' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -454,6 +458,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Yahoo email address' },
       { text: 'Note the breaches — Yahoo’s own breaches are likely listed' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -570,6 +575,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your ProtonMail address' },
       { text: 'Note any third-party breaches where this address appeared' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -686,6 +692,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Apple ID' },
       { text: 'Check for any breaches — cross-service credential reuse is the risk' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -802,6 +809,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Google email address' },
       { text: 'Also check Google’s built-in Password Checkup', url: 'https://passwords.google.com/checkup' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -920,6 +928,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Microsoft account' },
       { text: 'Note any breaches, especially from LinkedIn (owned by Microsoft)' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -1036,6 +1045,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email or phone number associated with your Facebook account' },
       { text: 'Note any breaches — the 2019 Facebook breach is a common hit' },
+      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
