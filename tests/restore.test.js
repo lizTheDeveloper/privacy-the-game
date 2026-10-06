@@ -125,8 +125,11 @@ describe('deletionStatus', () => {
     expect(deletionStatus({ optedOutAt: at, collective: data('2026-10-06T10:10:01Z') })).toBe('deleted');
   });
   it('kinds that went through', () => {
-    // Both went through: the job counted this person once, as an opt-out.
-    expect(deletedKinds({ ghostInfo: early, optedOutAt: '2026-10-01T00:00:00Z', collective: after })).toEqual(['opted-out']);
+    // Both removed by the same nightly run: the job counted this person once, as an opt-out.
+    expect(deletedKinds({ ghostInfo: early, optedOutAt: '2026-10-06T12:00:00Z', collective: after })).toEqual(['opted-out']);
+    // Removed on different nights: both counters went up, so both come back.
+    expect(deletedKinds({ ghostInfo: early, optedOutAt: '2026-10-01T00:00:00Z', collective: after })).toEqual(['opted-out', 'ghost-early']);
+    expect(deletedKinds({ ghostInfo: { ...early, at: '2026-10-01T00:00:00Z' }, optedOutAt: at, collective: after })).toEqual(['opted-out', 'ghost-early']);
     expect(deletedKinds({ ghostInfo: early, optedOutAt: null, collective: after })).toEqual(['ghost-early']);
     expect(deletedKinds({ ghostInfo: early, optedOutAt: null, collective: before })).toEqual([]);
     expect(deletedKinds({ ghostInfo: null, optedOutAt: at, collective: after })).toEqual(['opted-out']);

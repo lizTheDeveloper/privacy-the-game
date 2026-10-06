@@ -40,12 +40,24 @@ function deletions({ ghostInfo, optedOutAt }) {
   return list;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 // Deletions tonight's run has already carried out ('opted-out' | 'ghost-early').
-// When both went through, the job counted one opt-out and no early ghost, so
-// only 'opted-out' is given back.
+// When the same nightly run removed both, the job counted one opt-out and no
+// early ghost, so only 'opted-out' is given back. We can't see the previous
+// run, so "same run" means both moments fall in the 24 hours before asOf.
+// Removed on different nights, both counters went up and both come back.
 export function deletedKinds({ ghostInfo = null, optedOutAt = null, collective = null } = {}) {
-  const kinds = deletions({ ghostInfo, optedOutAt }).filter((d) => !notYetRun(d.at, collective)).map((d) => d.kind);
-  return kinds.includes('opted-out') ? ['opted-out'] : kinds;
+  const done = deletions({ ghostInfo, optedOutAt }).filter((d) => !notYetRun(d.at, collective));
+  if (done.length === 2) {
+    const asOf = Date.parse(collective.asOf);
+    const sameRun = done.every((d) => {
+      const t = Date.parse(d.at);
+      return t <= asOf && t > asOf - DAY_MS;
+    });
+    if (sameRun) return ['opted-out'];
+  }
+  return done.map((d) => d.kind);
 }
 
 // 'pending' wins: something can still be cancelled before tonight's run.
