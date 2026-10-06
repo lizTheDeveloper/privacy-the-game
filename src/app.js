@@ -1,5 +1,7 @@
-import { isAnalyticsOff, setAnalyticsOff } from './utils/analytics-pref.js';
-import { track, trackPageview, trackThenStop } from './utils/analytics.js';
+import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt } from './utils/analytics-pref.js';
+import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
+import { restoreEvents, deletedKinds } from './utils/restore.js';
+import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute } from './router.js';
@@ -15,8 +17,8 @@ import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether } from './screens/city-together.js';
-import { renderGhost, renderGhostDone } from './screens/ghost.js';
-import { isCityComplete, hasGoneGhost, markGoneGhost } from './utils/ghost.js';
+import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
+import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz } from './screens/phishing-quiz.js';
@@ -37,6 +39,21 @@ const app = document.getElementById('app');
 let collectiveView = { status: 'idle' };
 let whoamiView = { status: 'idle' };
 let podPickerOpen = false;
+// One line of feedback from a cancel/restore, shown only on the screen it belongs to.
+let notice = { hash: null, text: '' };
+let restoring = false;
+
+function setNotice(text, hash = location.hash) {
+  notice = { hash, text };
+}
+
+function currentNotice() {
+  return notice.hash === location.hash ? notice.text : '';
+}
+
+function collectiveData() {
+  return collectiveView.status === 'ready' ? collectiveView.data : null;
+}
 
 function loadCollective() {
   if (collectiveView.status === 'loading' || collectiveView.status === 'ready') return;
@@ -67,10 +84,11 @@ const screens = {
   phishing: () => renderPhishingQuiz(state),
   garage: () => renderGarage(state),
   timeline: () => renderTimeline(state),
-  together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView }),
+  together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView, notice: currentNotice() }),
   ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView }),
-  'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView }),
-  stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen }),
+  'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
+  'ghost-early': () => renderGhostEarly(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
+  stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, notice: currentNotice() }),
 };
 
 function renderWelcome() {
@@ -90,7 +108,9 @@ function render(route) {
     return;
   }
   if (shouldAutoLoad(route.screen, collectiveView.status)) loadCollective();
-  if (shouldAutoLoad(route.screen, collectiveView.status, ['ghost', 'ghost-done'])) loadCollective();
+  if (shouldAutoLoad(route.screen, collectiveView.status, ['ghost', 'ghost-done', 'ghost-early'])) loadCollective();
+  // Your City needs the published file's date to tell a pending deletion from one that went through.
+  if ((getGhostInfo()?.early || getOptedOutAt()) && shouldAutoLoad(route.screen, collectiveView.status, ['stats'])) loadCollective();
   if (route.screen === 'ghost' && whoamiView.status === 'idle') loadWhoami();
   try {
     const renderFn = screens[route.screen] || screens.city;
@@ -197,6 +217,69 @@ function districtCardStats(districtId) {
   return { accountsSecured, breachesFixed, integrityPercent: calcIntegrity(state) };
 }
 
+// Turn sharing back on and wait for the analytics script to be able to send.
+async function reconnectAnalytics() {
+  setAnalyticsOff(false);
+  if (typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+  return waitForTracker({ timeoutMs: 3000 });
+}
+
+// Call off an early ghost before tonight's run. The ghost flag clears either way.
+async function cancelGhost() {
+  const sent = (await reconnectAnalytics()) && (await trackNow('ghost-cancelled'));
+  clearGhost();
+  // From the finale, go where the ghost state (and any failure) is shown.
+  const hash = parseRoute(location.hash).screen === 'ghost-done' ? '#/city-together' : location.hash;
+  setNotice(sent ? '' : GHOST_DIALOGUE.cancelFailed, hash);
+  if (hash !== location.hash) navigate(hash);
+  else renderCurrentRoute();
+}
+
+// Sharing back on while an opt-out is still pending: tell tonight's run not to delete.
+async function cancelOptOut() {
+  const sent = (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled'));
+  if (sent) setOptedOutAt(null);
+  else setNotice(GHOST_DIALOGUE.cancelFailed);
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Re-send this browser's saved game after tonight's run deleted it.
+async function restoreData() {
+  if (restoring) return;
+  const kinds = deletedKinds({ ghostInfo: getGhostInfo(), optedOutAt: getOptedOutAt(), collective: collectiveData() });
+  if (kinds.length === 0) return;
+  restoring = true;
+  const wasOff = isAnalyticsOff();
+  try {
+    if (!(await reconnectAnalytics())) {
+      // Nothing was sent: leave sharing as the player had it.
+      setAnalyticsOff(wasOff);
+      setNotice(RESTORE_DIALOGUE.failed);
+      return;
+    }
+    for (const kind of kinds) track('data-restored', { kind });
+    const events = restoreEvents(state);
+    for (let i = 0; i < events.length; i += 10) {
+      for (const e of events.slice(i, i + 10)) track(e.name, e.data);
+      setNotice(RESTORE_DIALOGUE.progress(Math.min(i + 10, events.length), events.length));
+      renderCurrentRoute();
+      if (i + 10 < events.length) await sleep(500);
+    }
+    clearGhost();
+    setOptedOutAt(null);
+    if (parseRoute(location.hash).screen === 'ghost-done') {
+      setNotice(RESTORE_DIALOGUE.done, '#/stats');
+      navigate('#/stats');
+      return;
+    }
+    setNotice(RESTORE_DIALOGUE.done);
+  } finally {
+    restoring = false;
+    renderCurrentRoute();
+  }
+}
+
 async function handleShareCard(districtId) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return;
@@ -239,12 +322,23 @@ app.addEventListener('click', async (e) => {
     }
   } else if (action === 'toggle-analytics') {
     if (isAnalyticsOff()) {
-      setAnalyticsOff(false);
-      // Turning it back on in a session that never loaded the script: load it now.
-      if (typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+      const optedOutAt = getOptedOutAt();
+      if (isGhostPending(getGhostInfo(), collectiveData())) {
+        // Sharing back on is calling off the early ghost too.
+        await cancelGhost();
+        return;
+      } else if (optedOutAt && notYetRun(optedOutAt, collectiveData())) {
+        // The farewell is already on our server; without this, tonight's run still deletes.
+        await cancelOptOut();
+      } else {
+        setAnalyticsOff(false);
+        // Turning it back on in a session that never loaded the script: load it now.
+        if (typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
+      }
     } else {
       // Say goodbye first so tonight's job can find and delete this browser's data.
       await trackThenStop('opted-out');
+      setOptedOutAt(new Date().toISOString());
     }
     renderCurrentRoute();
   } else if (action === 'share-card') {
@@ -406,6 +500,16 @@ app.addEventListener('click', async (e) => {
       await trackThenStop('went-ghost');
     }
     navigate('#/ghost/done');
+  } else if (action === 'go-ghost-early') {
+    if (isCityComplete(state) || hasGoneGhost() || isAnalyticsOff()) return;
+    markGoneGhost({ early: true });
+    await trackThenStop('went-ghost-early');
+    navigate('#/ghost/done');
+  } else if (action === 'ghost-cancel') {
+    if (!isGhostPending(getGhostInfo(), collectiveData())) return;
+    await cancelGhost();
+  } else if (action === 'restore-data') {
+    await restoreData();
   } else if (action === 'collective-retry') {
     loadCollective();
     renderCurrentRoute();
