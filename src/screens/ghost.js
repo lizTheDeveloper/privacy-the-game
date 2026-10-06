@@ -3,7 +3,8 @@ import { renderScout } from '../components/scout.js';
 import { GHOST_DIALOGUE } from '../data/dialogue.js';
 import { renderWhoamiPanel, esc } from './stats.js';
 import { displayPodId, findPod, fmt } from '../utils/collective.js';
-import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
+import { isCityComplete, hasGoneGhost, getGhostInfo } from '../utils/ghost.js';
+import { isAnalyticsOff } from '../utils/analytics-pref.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const STEP = 'font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--cyan); margin-bottom: 12px;';
@@ -40,7 +41,7 @@ export function renderGhost(state, view = {}) {
     ${renderWhoamiPanel(view)}
     <div class="panel" style="padding: 20px 24px; margin-top: 24px;">
       <div style="${STEP}">2 &middot; Turn us off</div>
-      <p style="${MUTED} margin: 0 0 18px;">${GHOST_DIALOGUE.whatHappens}</p>
+      <p style="${MUTED} margin: 0 0 18px;">${isAnalyticsOff() ? GHOST_DIALOGUE.alreadyOff : GHOST_DIALOGUE.whatHappens}</p>
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
         <button class="btn-primary" data-action="go-ghost">GO GHOST</button>
         <a class="btn-secondary" href="#/city" style="display: inline-block; text-decoration: none;">NOT YET</a>
@@ -49,24 +50,38 @@ export function renderGhost(state, view = {}) {
   </div>`);
 }
 
-function countsLine(view) {
+// Tonight's run counts a went-ghost event. If the published file is already
+// newer than the player's ghost moment it includes them; otherwise add one.
+// Unparseable dates: add one.
+function plusOne(c, info) {
+  const asOf = Date.parse(c.asOf);
+  const at = Date.parse(info?.at);
+  if (Number.isNaN(asOf) || Number.isNaN(at)) return 1;
+  return at > asOf ? 1 : 0;
+}
+
+function countsLine(view, info) {
+  if (info?.silent) return GHOST_DIALOGUE.alreadyOff;
   const c = view.collective?.status === 'ready' ? view.collective.data : null;
   const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
   if (!c || !isNum(c.city?.ghosts)) return `You're the newest ghost in the city.`;
-  const cityPart = `${fmt(c.city.ghosts + 1)} across the city`;
+  const extra = plusOne(c, info);
+  const cityPart = `${fmt(c.city.ghosts + extra)} across the city`;
   const podId = displayPodId(c, view.whoami?.status === 'ready' ? view.whoami.data : null);
   const pod = findPod(c, podId);
   if (pod && isNum(pod.ghosts)) {
-    return `You're one of ${fmt(pod.ghosts + 1)} in ${esc(pod.label)} and ${cityPart}.`;
+    return `You're one of ${fmt(pod.ghosts + extra)} in ${esc(pod.label)} and ${cityPart}.`;
   }
   return `You're one of ${cityPart}.`;
 }
 
 export function renderGhostDone(state, view = {}) {
+  if (!hasGoneGhost()) return renderGhost(state, view);
+  const info = getGhostInfo();
   return shell(state, `
   <div style="text-align: center; padding: 56px 24px 0;">
     <div style="font-family: var(--font-display); font-size: 44px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5);">YOU HAVE GONE GHOST</div>
-    <div style="${MUTED} margin-top: 16px;">${countsLine(view)}</div>
+    <div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>
   </div>
   <div style="max-width: 640px; margin: 32px auto 0; padding: 0 24px;">
     ${renderScout(GHOST_DIALOGUE.done)}

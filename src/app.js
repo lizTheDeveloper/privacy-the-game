@@ -243,7 +243,7 @@ app.addEventListener('click', async (e) => {
       // Turning it back on in a session that never loaded the script: load it now.
       if (typeof window.__rcLoadAnalytics === 'function') window.__rcLoadAnalytics();
     } else {
-      // Say goodbye first so tonight's job can find and delete this device's data.
+      // Say goodbye first so tonight's job can find and delete this browser's data.
       await trackThenStop('opted-out');
     }
     renderCurrentRoute();
@@ -398,8 +398,13 @@ app.addEventListener('click', async (e) => {
     loadWhoami();
   } else if (action === 'go-ghost') {
     if (!isCityComplete(state) || hasGoneGhost()) return;
-    markGoneGhost();
-    await trackThenStop('went-ghost');
+    if (isAnalyticsOff()) {
+      // Sharing was already off: nothing to send, nothing to count.
+      markGoneGhost({ silent: true });
+    } else {
+      markGoneGhost();
+      await trackThenStop('went-ghost');
+    }
     navigate('#/ghost/done');
   } else if (action === 'collective-retry') {
     loadCollective();

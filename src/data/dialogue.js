@@ -362,6 +362,7 @@ export const DISTRICT_DIALOGUE = {
 export const GHOST_DIALOGUE = {
   unlock: `Every district is lit. The brokers' towers are dark, their antennas are scrap, and the city answers to you now. There's one job left, and it's a strange one. Come find me when you're ready.`,
   briefing: `I'd be lying if I said the city had no watchers left. There's one. It's us. This game counts which missions people start and finish — anonymously, on our own server, no ads, no third parties — because that's how we know what's working. You don't owe us that. So, last job: look at exactly what we can see about you. Then switch us off. Your city stays exactly as it is. We just stop watching.`,
-  whatHappens: `From the moment you go ghost, this device sends us nothing. Everything you already did stays in the city's totals — you earned that — and tonight you'll be counted as one more person who has gone ghost. Nothing else about you is kept.`,
+  whatHappens: `From the moment you go ghost, this device sends us nothing. Everything you already did stays in the city's totals — you earned that — and tonight you'll be counted as one more person who has gone ghost. We keep nothing new about you after that.`,
+  alreadyOff: `You'd already switched us off, so there was nothing left for us to stop.`,
   done: `No more watchers. Not the brokers, not the data farms, not us. The city's yours and nobody's taking notes. If you ever want to help us count again, the switch is on Your City. Until then — enjoy the quiet. You earned it.`,
 };
