@@ -51,9 +51,9 @@ Install or update with `collective/job/install.sh`, then `systemctl enable --now
 ## What a failure looks like
 
 - The unit shows as failed in `systemctl --failed` (the script exits 1).
-- Yesterday's `collective.json` is still being served; it is never partially overwritten.
+- Yesterday's `collective.json` is still being served; it is never partially overwritten. The GeoLite copy is refreshed before the new file is published, so a failure there also leaves yesterday's file in place.
 - A GlitchTip event with logger `rc-collective-job`.
-- A row with `ok = false` and the error in `rc_collective.runs`.
+- A row with `ok = false` and the error in `rc_collective.runs` (best effort: if the database itself is unreachable, the row cannot be written, but the GlitchTip event and the failed unit still appear).
 
 ## The rc-collective service
 

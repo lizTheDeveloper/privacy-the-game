@@ -24,7 +24,7 @@ PSQL = ["docker", "exec", "-i", "game-db", "psql", "-U", "umami", "-d", "umami",
 
 def load_names(path):
     names = {}
-    for line in Path(path).read_text().splitlines():
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
         if not line.strip() or line.startswith("#"):
             continue
         code, _, name = line.partition("\t")
@@ -71,7 +71,7 @@ def write_atomic(path, text):
     d = os.path.dirname(os.path.abspath(path))
     fd, tmp = tempfile.mkstemp(dir=d, prefix=".collective-", suffix=".tmp")
     try:
-        with os.fdopen(fd, "w") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(text)
             f.flush()
             os.fsync(f.fileno())
@@ -86,7 +86,7 @@ def write_atomic(path, text):
 def sql_script():
     """schema + purge + build in one transaction. The _rc_mig_* backups may be
     dropped one day; their purge runs only while the tables exist."""
-    sql = lambda name: (HERE / "sql" / name).read_text()
+    sql = lambda name: (HERE / "sql" / name).read_text(encoding="utf-8")
     return ("SELECT to_regclass('public._rc_mig_events') IS NOT NULL AS has_mig \\gset\n"
             "BEGIN;\n" + sql("schema.sql") + "\n" + sql("purge.sql") + "\n"
             "\\if :has_mig\n" + sql("purge_mig.sql") + "\n\\endif\n"
@@ -95,27 +95,38 @@ def sql_script():
 
 def run_sql():
     r = subprocess.run(PSQL + ["-v", f"website={WEBSITE}", "-v", f"k={K}"],
-                       input=sql_script(), capture_output=True, text=True, timeout=600)
+                       input=sql_script(), capture_output=True, text=True, encoding="utf-8", timeout=600)
     if r.returncode != 0:
         raise RuntimeError("psql failed: " + r.stderr.strip()[-2000:])
     return r.stdout
 
 
 def record_run(ok, detail):
-    detail = detail.replace("'", "''")[:2000]
-    subprocess.run(PSQL, input=f"INSERT INTO rc_collective.runs (ok, detail) VALUES ({'true' if ok else 'false'}, '{detail}');",
-                   capture_output=True, text=True, timeout=60)
+    """Record the run in rc_collective.runs. Runs schema.sql first (idempotent) so
+    a failure row is not lost when the main transaction rolled back before the
+    table existed."""
+    detail = detail[:2000].replace("'", "''")  # truncate first, then escape
+    sql = ((HERE / "sql" / "schema.sql").read_text(encoding="utf-8") + "\n"
+           f"INSERT INTO rc_collective.runs (ok, detail) VALUES ({'true' if ok else 'false'}, '{detail}');\n")
+    r = subprocess.run(PSQL, input=sql, capture_output=True, text=True, encoding="utf-8", timeout=60)
+    if r.returncode != 0:
+        print("could not record run: " + r.stderr.strip()[-500:], file=sys.stderr)
 
 
 def refresh_geo(dest_dir):
     """Keep our GeoLite copy identical to the one Umami uses."""
     os.makedirs(dest_dir, exist_ok=True)
     tmp = os.path.join(dest_dir, ".GeoLite2-City.mmdb.tmp")
-    r = subprocess.run(["docker", "cp", "umami:/app/geo/GeoLite2-City.mmdb", tmp], capture_output=True, text=True)
-    if r.returncode != 0:
-        raise RuntimeError("could not copy GeoLite db from umami: " + r.stderr.strip())
-    os.chmod(tmp, 0o644)
-    os.replace(tmp, os.path.join(dest_dir, "GeoLite2-City.mmdb"))
+    try:
+        r = subprocess.run(["docker", "cp", "umami:/app/geo/GeoLite2-City.mmdb", tmp],
+                           capture_output=True, text=True, encoding="utf-8", timeout=120)
+        if r.returncode != 0:
+            raise RuntimeError("could not copy GeoLite db from umami: " + r.stderr.strip())
+        os.chmod(tmp, 0o644)
+        os.replace(tmp, os.path.join(dest_dir, "GeoLite2-City.mmdb"))
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def glitchtip_endpoint(dsn):
@@ -161,18 +172,22 @@ def main(argv=None, report=report_glitchtip):
         validate(doc)
         doc["asOf"] = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         add_labels(doc, load_names(args.names))
+        if args.dry_sql_output is None:
+            refresh_geo(args.geo_dir)  # before publishing: a geo failure must leave yesterday's file untouched
         write_atomic(args.out, json.dumps(doc, separators=(",", ":"), ensure_ascii=False))
         if args.dry_sql_output is None:
-            refresh_geo(args.geo_dir)
             record_run(True, f"players={doc['city'].get('players')} pods={len(doc['pods'])}")
         print(f"ok: {len(doc['pods'])} pods, asOf {doc['asOf']}")
         return 0
     except Exception as e:
         msg = f"{type(e).__name__}: {e}"
         print(msg, file=sys.stderr)
-        if args.dry_sql_output is None:
-            record_run(False, msg)
         report(msg)
+        if args.dry_sql_output is None:
+            try:
+                record_run(False, msg)
+            except Exception as e2:
+                print(f"could not record failed run: {type(e2).__name__}: {e2}", file=sys.stderr)
         return 1
 
 
