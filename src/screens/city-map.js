@@ -72,21 +72,28 @@ const nearness = ([bc, br]) => {
 const MAP_SLOTS = BACKDROP_DEFS
   .map((def, i) => ({ key: `map-${def.at.join('_')}`, at: def.at, tier: def.tier, tiles: def.tiles, layer: 'map', i }))
   .sort((a, b) => nearness(a.at) - nearness(b.at) || a.i - b.i);
-// The wide layer's lots: every block-lattice spot beside the map (|d| >= 4, past
-// the map's districts and backdrop, d = bc - br) within the skyline's band of
-// rows (s = bc + br), nearest the plaza first; on a tie, back row first, then left. So
-// n pods always fill the n nearest lots with no holes: whole columns hugging
-// the map, then the next column out, both sides growing together, and every
-// block shares its streets with its neighbours.
-const WIDE_WINDOW = { minD: 4, maxD: 11, minS: -2, maxS: 6 };
-const WIDE_LATTICE = [];
-for (let d = WIDE_WINDOW.minD; d <= WIDE_WINDOW.maxD; d += 1) {
+// The wide layer's lots. First the side band: every block-lattice spot beside
+// the map (|d| >= 4, past the map's districts and backdrop, d = bc - br) in the
+// skyline's rows (s = bc + br <= 6), which every wide screen shows. Then the
+// rows below it, which only taller screens reach; those also run under the map
+// once they're clear of the Scout (s >= 10). Each part goes nearest the plaza
+// first; on a tie, back row first, then left. So n pods always fill the n
+// nearest lots with no holes: whole columns hugging the map, then the next
+// column out, both sides growing together, and every block shares its streets
+// with its neighbours.
+const WIDE_WINDOW = { minD: 4, maxD: 11, minS: -2, bandS: 6, underMapS: 10, maxS: 19 };
+const byNearness = (a, b) => nearness(a) - nearness(b) || (a[0] + a[1]) - (b[0] + b[1]) || (a[0] - a[1]) - (b[0] - b[1]);
+const WIDE_BAND = [];
+const WIDE_BELOW = [];
+for (let d = -WIDE_WINDOW.maxD; d <= WIDE_WINDOW.maxD; d += 1) {
   for (let s = WIDE_WINDOW.minS; s <= WIDE_WINDOW.maxS; s += 1) {
     if ((s + d) % 2) continue; // bc and br are whole: s and d share parity
-    for (const sd of [-d, d]) WIDE_LATTICE.push([(s + sd) / 2, (s - sd) / 2]);
+    const beside = Math.abs(d) >= WIDE_WINDOW.minD;
+    const at = [(s + d) / 2, (s - d) / 2];
+    if (s <= WIDE_WINDOW.bandS) { if (beside) WIDE_BAND.push(at); } else if (beside || s >= WIDE_WINDOW.underMapS) WIDE_BELOW.push(at);
   }
 }
-WIDE_LATTICE.sort((a, b) => nearness(a) - nearness(b) || (a[0] + a[1]) - (b[0] + b[1]) || (a[0] - a[1]) - (b[0] - b[1]));
+const WIDE_LATTICE = [...WIDE_BAND.sort(byNearness), ...WIDE_BELOW.sort(byNearness)];
 
 export function wideBlockPositions(count) {
   const n = Math.max(0, Math.min(WIDE_LATTICE.length, Math.floor(Number(count) || 0)));
@@ -456,7 +463,7 @@ const WIDE_GROUND_MASK = (() => {
   return [
     `radial-gradient(ellipse ${rx.toFixed(1)}px ${ry.toFixed(1)}px at 50% ${cy.toFixed(1)}px, transparent 30%, rgba(0,0,0,0.65) 62%, #000 82%)`,
     'linear-gradient(90deg, transparent 0, #000 160px, #000 calc(100% - 160px), transparent 100%)',
-    'linear-gradient(180deg, transparent 60px, #000 200px, #000 540px, transparent 700px)',
+    'linear-gradient(180deg, transparent 60px, #000 200px, #000 calc(100% - 180px), transparent calc(100% - 20px))',
   ].join(', ');
 })();
 
@@ -482,11 +489,14 @@ const POD_STYLE = `
     .city-wide { display: none; }
     @media (min-width: ${WIDE_MIN}px) {
       body:has(.city-wide) { overflow-x: clip; }
-      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: 720px; overflow: hidden;
-        z-index: -1; pointer-events: none;
-        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%); }
+      /* Emitted before the map at z-index 0: it paints above the page (so its pods take the
+         pointer) and beneath the map. On tall screens it runs to the window's bottom; the sky
+         gradient stays the map's 720px. */
+      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: max(720px, 100vh); overflow: hidden;
+        z-index: 0; pointer-events: none;
+        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%) top / 100% 720px no-repeat, #101626; }
       .city-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 60;
-        background: linear-gradient(180deg, rgba(9,11,16,0) 70%, rgba(9,11,16,0.95) 100%),
+        background: linear-gradient(180deg, rgba(9,11,16,0) calc(100% - 216px), rgba(9,11,16,0.95) 100%),
           linear-gradient(90deg, rgba(9,11,16,0.8) 0%, rgba(9,11,16,0) 22%, rgba(9,11,16,0) 78%, rgba(9,11,16,0.8) 100%); }
       /* On the ground, wide pods are dimmed rather than see-through, so streets don't show through them. */
       .city-wide .city-pod--far, .city-wide .city-pod.is-yours { opacity: 1; }
@@ -504,7 +514,7 @@ const POD_STYLE = `
         -webkit-mask-image: ${WIDE_GROUND_MASK}; mask-image: ${WIDE_GROUND_MASK};
         -webkit-mask-composite: source-in; mask-composite: intersect; }
       /* The map lets the wide city show through, so the ground runs on across its edge. */
-      .city-map:has(+ .city-wide) { background: transparent; }
+      .city-wide + .city-map { background: transparent; }
     }
     @media (max-width: 768px) { .city-pod::after { display: none; } }
   </style>`;
@@ -761,7 +771,7 @@ export function renderCityMap(state, { collective, whoami } = {}) {
   const hazeMagenta = (0.22 * (1 - avg)).toFixed(3);
   const hazeCyan = (0.05 + 0.2 * avg).toFixed(3);
   const plaza = blockCentre(1, 1);
-  return `
+  return `${hasPods ? renderWideCity(placed) : ''}
 <div class="city-map scanlines">
   ${STYLE}${hasPods ? POD_STYLE : ''}
   <div class="city-stars"></div>
@@ -802,5 +812,5 @@ export function renderCityMap(state, { collective, whoami } = {}) {
     ${renderDistrictLabels(state, startHere)}
   </div>
   <div class="city-scout">${renderCityScout(state)}</div>
-</div>${hasPods ? renderWideCity(placed) : ''}`;
+</div>`;
 }
