@@ -88,3 +88,62 @@ test('unknown routes 404, writes 405', async () => {
   assert.equal((await call(fixed(), '/etc/passwd')).status, 404);
   assert.equal((await call(fixed(), '/collective.json', {}, 'POST')).status, 405);
 });
+
+import net from 'node:net';
+
+test('malformed request target gets a 400 and the server keeps serving', async () => {
+  const server = fixed();
+  await new Promise((r) => server.listen(0, r));
+  const { port } = server.address();
+  try {
+    const raw = await new Promise((resolve, reject) => {
+      const s = net.connect(port, '127.0.0.1', () => s.write('GET // HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n'));
+      let buf = '';
+      s.on('data', (d) => { buf += d; });
+      s.on('end', () => resolve(buf));
+      s.on('error', reject);
+    });
+    assert.match(raw, /^HTTP\/1\.1 400 /);
+    const ok = await fetch(`http://127.0.0.1:${port}/collective.json`);
+    assert.equal(ok.status, 200);
+    // garbage that the HTTP parser itself rejects
+    const bad = await new Promise((resolve) => {
+      const s = net.connect(port, '127.0.0.1', () => s.write('\x00\x01 nonsense\r\n\r\n'));
+      let buf = '';
+      s.on('data', (d) => { buf += d; });
+      s.on('close', () => resolve(buf));
+    });
+    assert.match(bad, /^HTTP\/1\.1 400 /);
+    assert.equal((await fetch(`http://127.0.0.1:${port}/collective.json`)).status, 200);
+  } finally {
+    server.close();
+  }
+});
+
+test('oversized headers (past the 16 KB limit) are refused fast; near-limit ones are served', async () => {
+  const t0 = Date.now();
+  const server = createServer({ readCollective: async () => JSON.stringify(DOC) });
+  await new Promise((r) => server.listen(0, r));
+  const { port } = server.address();
+  try {
+    const huge = await fetch(`http://127.0.0.1:${port}/whoami`, { headers: { 'user-agent': 'a'.repeat(100 * 1024) } }).then((r) => r.status, () => 'closed');
+    assert.ok([400, 431, 'closed'].includes(huge), String(huge));
+    const near = await fetch(`http://127.0.0.1:${port}/whoami`, { headers: { 'user-agent': '('.repeat(8000), 'x-forwarded-for': '1'.repeat(4000) } });
+    assert.equal(near.status, 200);
+    assert.ok(Date.now() - t0 < 200, `took ${Date.now() - t0}ms`);
+  } finally {
+    server.close();
+  }
+});
+
+test('HEAD has no body, OPTIONS is 204 with Allow-Methods, Vary on 404 and 405', async () => {
+  const head = await call(fixed(), '/collective.json', {}, 'HEAD');
+  assert.equal(head.status, 200);
+  assert.equal(head.body, '');
+  const opt = await call(fixed(), '/whoami', { origin: 'https://multiversegames.ai' }, 'OPTIONS');
+  assert.equal(opt.status, 204);
+  assert.equal(opt.headers.get('access-control-allow-methods'), 'GET');
+  assert.equal(opt.headers.get('access-control-allow-origin'), 'https://multiversegames.ai');
+  assert.equal((await call(fixed(), '/nope')).headers.get('vary'), 'Origin');
+  assert.equal((await call(fixed(), '/whoami', {}, 'POST')).headers.get('vary'), 'Origin');
+});

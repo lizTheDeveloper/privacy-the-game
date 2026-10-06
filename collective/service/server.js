@@ -21,12 +21,29 @@ export function createServer({
   lookupGeo = defaultLookupGeo,
 } = {}) {
   // No logging anywhere in this handler: whoami answers are about a person.
-  return http.createServer(async (req, res) => {
+  const server = http.createServer((req, res) => {
+    handle(req, res).catch(() => {
+      if (!res.headersSent) send(res, 500, { error: 'internal' });
+      else res.end();
+    });
+  });
+  server.on('clientError', (err, socket) => {
+    if (socket.writable) socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+    else socket.destroy();
+  });
+  return server;
+
+  async function handle(req, res) {
     const origin = req.headers.origin;
     const cors = ALLOWED_ORIGINS.has(origin) ? { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' } : { Vary: 'Origin' };
     if (req.method === 'OPTIONS') return send(res, 204, '', { ...cors, 'Access-Control-Allow-Methods': 'GET' });
     if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, { error: 'method not allowed' }, cors);
-    const url = new URL(req.url, 'http://local');
+    let url;
+    try {
+      url = new URL(req.url, 'http://local');
+    } catch {
+      return send(res, 400, { error: 'bad request' }, cors);
+    }
 
     if (url.pathname === '/collective.json') {
       try {
@@ -40,8 +57,8 @@ export function createServer({
 
     if (url.pathname === '/whoami') {
       const geo = await (async () => lookupGeo(req.headers))().catch(() => NO_GEO);
-      const screen = (url.searchParams.get('screen') || '').slice(0, 16) || undefined;
-      const info = getClientInfo(req.headers['user-agent'] || '', screen);
+      const screen = (url.searchParams.get('screen') || '').slice(0, 32) || undefined;
+      const info = getClientInfo((req.headers['user-agent'] || '').slice(0, 512), screen);
       let pod = null;
       try {
         const p = podForGeo(JSON.parse(await readCollective()).pods, geo);
@@ -52,8 +69,11 @@ export function createServer({
     }
 
     return send(res, 404, { error: 'not found' }, cors);
-  });
+  }
 }
+
+// A stray rejection must not take the process down; log nothing (request data is private).
+process.on('unhandledRejection', () => {});
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   createServer().listen(Number(process.env.PORT || 8080));

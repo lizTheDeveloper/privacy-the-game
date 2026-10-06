@@ -6,9 +6,9 @@
 // Deviations: CLOUD_MODE and CLIENT_IP_HEADER knobs are not ported (not set on our Umami);
 // SKIP_LOCATION_HEADERS is honoured; nothing here logs.
 import { statSync } from 'node:fs';
+import net from 'node:net';
 import maxmind from 'maxmind';
 import ipaddr from 'ipaddr.js';
-import isLocalhost from 'is-localhost-ip';
 import { UAParser } from 'ua-parser-js';
 import { browserName, detectOS } from 'detect-browser';
 
@@ -48,12 +48,23 @@ const PROVIDER_HEADERS = [
   { countryHeader: 'eo-ipcountry', regionHeader: 'eo-region-code', cityHeader: 'eo-ipcity' },
 ];
 
+const MAX_HEADER = 256;
+
+// Loopback, private, link-local and unspecified ranges: no geography to report.
+// Pure check, no DNS (replaces is-localhost-ip, which resolves hostnames).
+const LOCAL = new net.BlockList();
+for (const [a, p] of [['0.0.0.0', 8], ['10.0.0.0', 8], ['127.0.0.0', 8], ['169.254.0.0', 16], ['172.16.0.0', 12], ['192.168.0.0', 16]]) LOCAL.addSubnet(a, p, 'ipv4');
+for (const [a, p] of [['::', 128], ['::1', 128], ['fc00::', 7], ['fe80::', 10]]) LOCAL.addSubnet(a, p, 'ipv6');
+function isLocalIp(ip) {
+  return LOCAL.check(ip, net.isIPv6(ip) ? 'ipv6' : 'ipv4');
+}
+
 // Node's req.headers is a plain object; Umami reads a Headers instance.
 export function toHeaders(raw = {}) {
   const h = new Headers();
   for (const [k, v] of Object.entries(raw)) {
     if (v === undefined) continue;
-    try { h.set(k, Array.isArray(v) ? v.join(', ') : String(v)); } catch { /* invalid header value: skip */ }
+    try { h.set(k, (Array.isArray(v) ? v.join(', ') : String(v)).slice(0, MAX_HEADER)); } catch { /* invalid header value: skip */ }
   }
   return h;
 }
@@ -127,7 +138,9 @@ function decodeHeader(s) {
 }
 
 async function getLocation(ip = '', headers, openReader) {
-  if (!ip || (await isLocalhost(ip))) return null;
+  // Client-controlled header: anything that is not a literal IP is unknown. Never resolve names.
+  const literal = stripPort(ip);
+  if (!ip || net.isIP(literal) === 0 || isLocalIp(literal)) return null;
 
   if (!process.env.SKIP_LOCATION_HEADERS) {
     for (const provider of PROVIDER_HEADERS) {
@@ -172,6 +185,8 @@ function getDevice(userAgent, screen = '') {
 }
 
 export function getClientInfo(userAgent, screen) {
+  userAgent = String(userAgent || '').slice(0, 512);
+  screen = screen === undefined ? undefined : String(screen).slice(0, 32);
   return {
     browser: browserName(userAgent) || null,
     os: detectOS(userAgent) || null,

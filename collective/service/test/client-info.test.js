@@ -46,3 +46,33 @@ test('location: database mapping and local IPs', async () => {
   const reg = () => ({ registered_country: { iso_code: 'DE' } });
   assert.deepEqual(await resolveLocation('203.0.113.9', h({}), async () => ({ get: reg })), { country: 'DE', region: null, city: null });
 });
+
+test('hostname in an IP header is unknown geo and triggers no DNS', async () => {
+  const dns = (await import('node:dns')).default;
+  const orig = dns.lookup;
+  let lookups = 0;
+  dns.lookup = (...a) => { lookups++; return orig(...a); };
+  try {
+    const boom = async () => { throw new Error('db must not be consulted'); };
+    const none = { country: null, region: null, city: null };
+    assert.deepEqual(await resolveLocation('evil.example.com', h({}), boom), none);
+    assert.deepEqual(await resolveLocation('localhost', h({}), boom), none);
+    for (const ip of ['10.1.2.3', '192.168.0.9', '::1', 'fe80::1', '172.20.0.1']) {
+      assert.deepEqual(await resolveLocation(ip, h({}), boom), none);
+    }
+  } finally {
+    dns.lookup = orig;
+  }
+  assert.equal(lookups, 0);
+  assert.equal((await import('node:fs')).readFileSync(new URL('../package.json', import.meta.url), 'utf8').includes('is-localhost-ip'), false);
+});
+
+test('100 KB user-agent and x-forwarded-for are capped before parsing and answer fast', async () => {
+  const { lookupGeo } = await import('../client-info.js');
+  const big = 'a'.repeat(100 * 1024);
+  const t = Date.now();
+  getClientInfo(big, '9'.repeat(100 * 1024));
+  getClientInfo('(' .repeat(100 * 1024), '1x1');
+  await lookupGeo({ 'x-forwarded-for': big.replace(/a/g, '1'), forwarded: 'for=' + big.replace(/a/g, 'f') });
+  assert.ok(Date.now() - t < 200, `took ${Date.now() - t}ms`);
+});
