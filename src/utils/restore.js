@@ -1,12 +1,11 @@
 // Bringing deleted data back: the browser still holds the whole save, so a
 // player whose data was deleted can send it again. Pure parts only.
-import { MISSIONS } from '../data/missions.js';
-import { ACCOUNTS } from '../data/accounts.js';
+import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { DISTRICTS } from '../data/districts.js';
 import { calcDistrictProgress } from './calc.js';
 import { notYetRun } from './ghost.js';
 
-const RESENT = new Set(['completed', 'skipped']);
+const RESENT = new Set(['completed', 'skipped', 'not-needed']);
 
 // The events the game would have sent, with the same keys, marked restored.
 export function restoreEvents(state) {
@@ -17,7 +16,7 @@ export function restoreEvents(state) {
     if (!mission) continue;
     const data = {
       mission: id,
-      district: ACCOUNTS[mission.accountId]?.district,
+      district: missionDistrict(mission),
       finding: m.finding,
       phase: mission.phase,
       status: m.status,

@@ -1158,8 +1158,14 @@ export const MISSIONS = [
   ...OSINT_SIEVE_MISSIONS,
 ];
 
+// A mission's district: its account's, or its own for a mission that belongs
+// to no account (the password-manager report).
+export function missionDistrict(mission) {
+  return mission?.district || ACCOUNTS[mission?.accountId]?.district;
+}
+
 export function getMissionsForDistrict(districtId) {
-  return MISSIONS.filter((m) => ACCOUNTS[m.accountId]?.district === districtId);
+  return MISSIONS.filter((m) => missionDistrict(m) === districtId);
 }
 
 export function getMissionsForAccount(accountId) {
