@@ -1,7 +1,7 @@
 // The only module that talks to Umami. Everything else calls these, so a
 // missed call site can't send an event after a player turns sharing off.
 import { isAnalyticsOff, setAnalyticsOff } from './analytics-pref.js';
-import { getChosenPod } from './pod-pref.js';
+import { getChosenPod, isPodAuto, POD_AUTO } from './pod-pref.js';
 
 function tracker() {
   if (isAnalyticsOff()) return null;
@@ -10,7 +10,7 @@ function tracker() {
 }
 
 function withPod(data) {
-  const pod = getChosenPod();
+  const pod = getChosenPod() || (isPodAuto() ? POD_AUTO : null);
   return pod ? { ...(data || {}), pod } : data;
 }
 

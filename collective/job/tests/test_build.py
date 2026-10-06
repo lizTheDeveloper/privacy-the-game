@@ -125,13 +125,26 @@ class PodTest(unittest.TestCase):
         self.assertEqual(ids["us-wa-seattle"]["players"], 61)
         self.assertEqual(ids["us-il-chicago"]["players"], 59)
 
+    def test_cleared_choice_marker_auto_falls_back_to_geo_pod(self):
+        chi = players(60, city="Chicago")
+        players(60, region="US-WA", city="Seattle")
+        mover = chi[0]
+        PG.insert_event(mover, "mission-started", {"pod": "us-wa-seattle"})
+        PG.insert_event(mover, "mission-started", {"pod": "auto"})  # later event: choice cleared
+        doc = build()
+        ids = pods_by_id(doc)
+        self.assertEqual(ids["us-wa-seattle"]["players"], 60)
+        self.assertEqual(ids["us-il-chicago"]["players"], 60)
+
     def test_cities_with_colliding_slugs_merge_into_one_pod(self):
+        # Both spellings alone reach K, so the old per-name grouping would have
+        # inserted the same id twice and aborted on the primary key.
         players(50, region="US-MO", city="St. Louis")
-        players(10, region="US-MO", city="St Louis")
+        players(50, region="US-MO", city="St Louis")
         doc = build()
         matching = [p for p in doc["pods"] if p["id"] == "us-mo-st-louis"]
         self.assertEqual(len(matching), 1)
-        self.assertEqual(matching[0]["players"], 60)
+        self.assertEqual(matching[0]["players"], 100)
 
     def test_pod_below_k_after_moves_publishes_no_figures(self):
         chi = players(50, city="Chicago")
@@ -280,6 +293,26 @@ class RunnerScriptTest(unittest.TestCase):
         PG.sql("DROP TABLE _rc_mig_event_data, _rc_mig_events, _rc_mig_sessions;")
         out = PG.sql(run.sql_script(), variables={"website": WEBSITE, "k": K})
         self.assertEqual(len([l for l in out.splitlines() if l.startswith("{")]), 1)
+
+    def test_failed_build_still_commits_the_purge(self):
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(SQL_DIR.parent))
+        import run
+        sid = PG.insert_session()
+        PG.insert_event(sid, "mission-started")
+        PG.insert_event(sid, "opted-out")
+        real = Path.read_text
+        Path.read_text = lambda self, *a, **kw: "SELECT 1/0;" if self.name == "build.sql" else real(self, *a, **kw)
+        try:
+            script = run.sql_script()
+        finally:
+            Path.read_text = real
+        with self.assertRaises(RuntimeError):
+            PG.sql(script, variables={"website": WEBSITE, "k": K})
+        self.assertEqual(PG.count("session", sid), 0)
+        self.assertEqual(PG.count("website_event", sid), 0)
+        self.assertEqual(int(PG.sql("SELECT value FROM rc_collective.counters WHERE name = 'opted_out_total';").strip()), 1)
 
 
 if __name__ == "__main__":

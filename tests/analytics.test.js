@@ -15,6 +15,7 @@ function memoryStorage() {
 describe('track()', () => {
   beforeEach(() => {
     globalThis.localStorage = memoryStorage();
+    setAnalyticsOff(false);
     globalThis.umami = { track: vi.fn(() => Promise.resolve()) };
   });
 
@@ -31,6 +32,19 @@ describe('track()', () => {
     expect(umami.track).toHaveBeenNthCalledWith(2, 'went-ghost', { pod: 'us-wa-seattle' });
   });
 
+  it('clearing the pod choice is sent as pod: auto, and reads back as no choice', () => {
+    setChosenPod('us-wa-seattle');
+    setChosenPod(null);
+    expect(getChosenPod()).toBeNull();
+    track('mission-started', { mission: 'x' });
+    expect(umami.track).toHaveBeenCalledWith('mission-started', { mission: 'x', pod: 'auto' });
+  });
+
+  it('never chose a pod: nothing extra is sent', () => {
+    track('mission-started', { mission: 'x' });
+    expect(umami.track).toHaveBeenCalledWith('mission-started', { mission: 'x' });
+  });
+
   it('does nothing when sharing is off or umami is absent', () => {
     setAnalyticsOff(true);
     track('mission-started');
@@ -39,6 +53,15 @@ describe('track()', () => {
     setAnalyticsOff(false);
     delete globalThis.umami;
     expect(() => track('mission-started')).not.toThrow();
+  });
+
+  it('blocked storage: turning sharing off still stops track() this page load', () => {
+    globalThis.localStorage = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); }, removeItem() { throw new Error('denied'); } };
+    setAnalyticsOff(true);
+    expect(isAnalyticsOff()).toBe(true);
+    track('mission-started');
+    expect(umami.track).not.toHaveBeenCalled();
+    setAnalyticsOff(false);
   });
 
   it('pod storage failures never throw', () => {
@@ -90,10 +113,10 @@ describe('only analytics.js talks to umami', () => {
 });
 
 describe('sharing copy', () => {
-  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
-  it('promises deletion of this month on this device, and nothing more', () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); setAnalyticsOff(false); });
+  it('promises deletion of this month from this browser and connection, and nothing more', () => {
     const html = renderStats(createInitialState());
-    expect(html).toMatch(/Tonight we delete what this device sent us this month/);
+    expect(html).toMatch(/Tonight we delete what this browser sent us this month from the connection you're on now/);
     expect(html).toMatch(/one more person opted out/);
   });
   it('is honest that server backups roll over within about a week', () => {
