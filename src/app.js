@@ -1,6 +1,6 @@
 import { isAnalyticsOff, setAnalyticsOff } from './utils/analytics-pref.js';
 import { track, trackPageview, trackThenStop } from './utils/analytics.js';
-import { fetchCollective, fetchWhoami } from './utils/collective.js';
+import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
@@ -85,7 +85,7 @@ function render(route) {
     app.innerHTML = renderWelcome();
     return;
   }
-  if (route.screen === 'together') loadCollective();
+  if (shouldAutoLoad(route.screen, collectiveView.status)) loadCollective();
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
@@ -390,6 +390,9 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'whoami-open') {
     loadCollective();
     loadWhoami();
+  } else if (action === 'collective-retry') {
+    loadCollective();
+    renderCurrentRoute();
   } else if (action === 'pod-pick-open') {
     podPickerOpen = true;
     loadCollective();

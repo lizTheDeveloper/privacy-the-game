@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderCityTogether } from '../src/screens/city-together.js';
 import { createInitialState } from '../src/state.js';
+import { shouldAutoLoad } from '../src/utils/collective.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
 
 function memoryStorage() {
@@ -70,5 +71,20 @@ describe('The Whole City', () => {
   it('escapes labels', () => {
     const evil = { status: 'ready', data: { ...DATA, pods: [{ id: 'x', label: '<img src=x>' }] } };
     expect(renderCityTogether(createInitialState(), { collective: evil })).not.toContain('<img src=x>');
+  });
+
+  it('error view offers a retry control', () => {
+    const html = renderCityTogether(createInitialState(), { collective: { status: 'error' } });
+    expect(html).toContain('data-action="collective-retry"');
+  });
+});
+
+describe('shouldAutoLoad', () => {
+  it('fires only from idle on collective screens', () => {
+    expect(shouldAutoLoad('together', 'idle')).toBe(true);
+    for (const st of ['loading', 'ready', 'error']) expect(shouldAutoLoad('together', st)).toBe(false);
+    expect(shouldAutoLoad('stats', 'idle')).toBe(false);
+    expect(shouldAutoLoad('ghost', 'idle', ['ghost', 'ghost-done'])).toBe(true);
+    expect(shouldAutoLoad('ghost', 'error', ['ghost'])).toBe(false);
   });
 });

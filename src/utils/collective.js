@@ -80,3 +80,10 @@ export function yourPart(state) {
 export function fmt(n) {
   return typeof n === 'number' && Number.isFinite(n) ? n.toLocaleString('en-US') : '';
 }
+
+// Screens that read the collective data; load it once on entry, never re-trigger from error.
+export const COLLECTIVE_SCREENS = ['together'];
+
+export function shouldAutoLoad(screen, status, screens = COLLECTIVE_SCREENS) {
+  return screens.includes(screen) && status === 'idle';
+}

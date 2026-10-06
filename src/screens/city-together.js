@@ -120,7 +120,7 @@ function footer(data) {
 export function renderCityTogether(state, { collective, whoami } = {}) {
   const view = collective || { status: 'idle' };
   if (view.status === 'error') {
-    return shell(`<div class="panel" style="padding: 24px;"><div style="${MUTED}">Couldn't reach the city tonight.</div></div>`, state);
+    return shell(`<div class="panel" style="padding: 24px;"><div style="${MUTED} margin-bottom: 12px;">Couldn't reach the city tonight.</div><button class="btn-secondary" data-action="collective-retry">TRY AGAIN</button></div>`, state);
   }
   if (view.status !== 'ready' || !view.data) {
     return shell(`<div class="panel" style="padding: 24px;"><div style="${MUTED}">Gathering the city…</div></div>`, state);
