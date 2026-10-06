@@ -18,6 +18,7 @@ const ROUTES = [
   { pattern: /^#\/city-together$/, screen: 'together', params: () => ({}) },
   { pattern: /^#\/ghost$/, screen: 'ghost', params: () => ({}) },
   { pattern: /^#\/ghost\/done$/, screen: 'ghost-done', params: () => ({}) },
+  { pattern: /^#\/ghost\/early$/, screen: 'ghost-early', params: () => ({}) },
   { pattern: /^#\/stats$/, screen: 'stats', params: () => ({}) },
 ];
 

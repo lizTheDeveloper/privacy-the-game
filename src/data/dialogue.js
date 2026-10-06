@@ -365,4 +365,21 @@ export const GHOST_DIALOGUE = {
   whatHappens: `From the moment you go ghost, this device sends us nothing. Everything you already did stays in the city's totals — you earned that — and tonight you'll be counted as one more person who has gone ghost. We keep nothing new about you after that.`,
   alreadyOff: `You'd already switched us off, so there was nothing left for us to stop.`,
   done: `No more watchers. Not the brokers, not the data farms, not us. The city's yours and nobody's taking notes. If you ever want to help us count again, the switch is on Your City. Until then — enjoy the quiet. You earned it.`,
+  early: `Going ghost now switches us off for good. Tonight we delete what this browser sent us this month from the connection you're on now — your missions leave the city's totals tomorrow — and you're added to the ghost count. (Ghosts who take back the whole city first keep their place in the totals.)`,
+  pending: `Your ghost is pending until tonight's run. Changed your mind?`,
+  cancelNote: `Cancel from this browser and connection — that's how our analytics recognise you.`,
+  cancelFailed: `We couldn't reach our analytics to cancel. Tonight's run may still delete your data.`,
+  wentThrough: `Your ghost went through. Tonight's run deleted what this browser had sent us.`,
+};
+
+export const COLLECTIVE_DIALOGUE = {
+  explainer: `Here's how we know any of this. When you finish a mission, the game tells our own server — not an ad company, ours — which mission it was and the one answer you picked in the debrief. Never your passwords, never your accounts. Every night we add everyone up and sort people into places by what their internet connection says. A place only shows up once it has at least 50 players, so nobody can be picked out. Anyone who turned sharing off isn't in here at all. Want to see exactly what we can see about you? It's on Your City.`,
+};
+
+export const RESTORE_DIALOGUE = {
+  heading: `YOUR DATA WAS DELETED`,
+  text: `We deleted what this browser had sent us. Your game is still saved here, so you can send it again and rejoin the city's totals.`,
+  failed: `We couldn't reach our analytics. Try again in a moment.`,
+  progress: (n, total) => `Sending your city back… (${n} of ${total})`,
+  done: `You're back in the city. Tomorrow's totals will include you again.`,
 };

@@ -1,4 +1,7 @@
-import { isAnalyticsOff } from '../utils/analytics-pref.js';
+import { isAnalyticsOff, getOptedOutAt } from '../utils/analytics-pref.js';
+import { getGhostInfo, isGhostPending } from '../utils/ghost.js';
+import { deletionStatus } from '../utils/restore.js';
+import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from '../data/dialogue.js';
 import { getChosenPod } from '../utils/pod-pref.js';
 import { findPod } from '../utils/collective.js';
 import { renderHud } from '../components/hud.js';
@@ -66,6 +69,44 @@ function findingCard({ label, value, color, tint }) {
 
 export function esc(v) {
   return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const NOTE = 'font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); line-height: 1.6;';
+const BLOCK_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
+
+// An early ghost before tonight's run: it can still be called off.
+export function renderGhostPending() {
+  return `
+    <div data-ghost-pending style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,45,155,0.25);">
+      <div style="${BLOCK_TEXT}">${esc(GHOST_DIALOGUE.pending)}</div>
+      <button class="btn-secondary" data-action="ghost-cancel" style="margin-top: 12px;">CANCEL</button>
+      <div style="${NOTE} margin-top: 10px;">${esc(GHOST_DIALOGUE.cancelNote)}</div>
+    </div>`;
+}
+
+// Tonight's run deleted this browser's data; the save can send it again.
+export function renderDataDeleted() {
+  return `
+    <div data-data-deleted style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,159,0,0.25);">
+      <div class="section-label" style="color: rgba(255,159,0,0.6); margin-bottom: 8px;">${esc(RESTORE_DIALOGUE.heading)}</div>
+      <div style="${BLOCK_TEXT}">${esc(RESTORE_DIALOGUE.text)}</div>
+      <button class="btn-secondary" data-action="restore-data" style="margin-top: 12px;">BRING MY DATA BACK</button>
+    </div>`;
+}
+
+// One line of feedback from the last cancel/restore action.
+export function renderNotice(notice) {
+  if (typeof notice !== 'string' || !notice) return '';
+  return `<div role="status" style="${BLOCK_TEXT} color: #FF9F00; margin-top: 14px;">${esc(notice)}</div>`;
+}
+
+// The cancel or restore block for this browser, or nothing.
+export function renderDeletionBlock(collectiveView) {
+  const data = collectiveView?.status === 'ready' ? collectiveView.data : null;
+  const ghostInfo = getGhostInfo();
+  if (isGhostPending(ghostInfo, data)) return renderGhostPending();
+  if (deletionStatus({ ghostInfo, optedOutAt: getOptedOutAt(), collective: data }) === 'deleted') return renderDataDeleted();
+  return '';
 }
 
 const WHOAMI_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 10px;';
@@ -213,6 +254,8 @@ export function renderStats(state, view = {}) {
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this browser sent us this month from the connection you\'re on now, and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>
       <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
+      ${renderDeletionBlock(view.collective)}
+      ${renderNotice(view.notice)}
     </div>
   </div>
 </div>`;

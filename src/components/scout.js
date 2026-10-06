@@ -4,7 +4,7 @@ export function renderScout(message, options = {}) {
     : '';
   return `
   <div style="background: linear-gradient(180deg, transparent 0%, rgba(9,11,16,0.92) 25%, rgba(9,11,16,0.99) 100%); padding: 18px 20px 14px; border-top: 1px solid rgba(0,229,255,0.08);">
-    <div style="display: flex; gap: 14px; align-items: flex-end;">
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
       <div style="flex-shrink: 0; text-align: center;">
         <img src="assets/characters/scout_0.png" style="width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
         <div style="font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--cyan); margin-top: 3px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,229,255,0.4);">SCOUT</div>

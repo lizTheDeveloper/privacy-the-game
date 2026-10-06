@@ -1,11 +1,39 @@
 import { renderHud } from '../components/hud.js';
-import { ringChart, esc } from './stats.js';
+import { renderScout } from '../components/scout.js';
+import { ringChart, renderGhostPending, renderNotice, esc } from './stats.js';
 import { podBoard, displayPodId, findPod, yourPart, fmt } from '../utils/collective.js';
+import { isCityComplete, getGhostInfo, isGhostPending } from '../utils/ghost.js';
+import { COLLECTIVE_DIALOGUE } from '../data/dialogue.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const LABEL = 'color: rgba(0,229,255,0.4); margin-bottom: 16px;';
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 const plural = (n, one, many) => (n === 1 ? one : many);
+
+function explainer() {
+  return `<div style="margin-bottom: 16px;">${renderScout(COLLECTIVE_DIALOGUE.explainer, { actionText: 'WHAT WE KNOW ABOUT YOU', actionHref: '#/stats' })}</div>`;
+}
+
+// GO GHOST for everyone: the final mission once the city is taken back, the
+// early ghost before that. A pending early ghost can cancel instead.
+function ghostPanel(state, view, notice) {
+  const data = view.status === 'ready' ? view.data : null;
+  const info = getGhostInfo();
+  let body;
+  if (info && isGhostPending(info, data)) {
+    body = renderGhostPending();
+  } else if (info) {
+    body = `<div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 3px; color: #00E5FF;">${esc("YOU'VE GONE GHOST")}</div>`;
+  } else {
+    const href = isCityComplete(state) ? '#/ghost' : '#/ghost/early';
+    body = `<a class="btn-secondary" href="${href}" style="display: inline-block; text-decoration: none;">GO GHOST</a>`;
+  }
+  return `
+  <div class="panel" style="padding: 20px 24px; margin-bottom: 16px;">
+    ${body}
+    ${renderNotice(notice)}
+  </div>`;
+}
 
 function shell(inner, state) {
   return `
@@ -118,23 +146,26 @@ function footer(data) {
   return `<div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); line-height: 1.8;">${lines.map((l) => `<div>${l}</div>`).join('')}</div>`;
 }
 
-export function renderCityTogether(state, { collective, whoami } = {}) {
+export function renderCityTogether(state, { collective, whoami, notice } = {}) {
   const view = collective || { status: 'idle' };
+  const ghost = ghostPanel(state, view, notice);
   if (view.status === 'error') {
-    return shell(`<div class="panel" style="padding: 24px;"><div style="${MUTED} margin-bottom: 12px;">Couldn't reach the city tonight.</div><button class="btn-secondary" data-action="collective-retry">TRY AGAIN</button></div>`, state);
+    return shell(`${explainer()}<div class="panel" style="padding: 24px; margin-bottom: 16px;"><div style="${MUTED} margin-bottom: 12px;">Couldn't reach the city tonight.</div><button class="btn-secondary" data-action="collective-retry">TRY AGAIN</button></div>${ghost}`, state);
   }
   if (view.status !== 'ready' || !view.data) {
-    return shell(`<div class="panel" style="padding: 24px;"><div style="${MUTED}">Gathering the city…</div></div>`, state);
+    return shell(`${explainer()}<div class="panel" style="padding: 24px; margin-bottom: 16px;"><div style="${MUTED}">Gathering the city…</div></div>${ghost}`, state);
   }
   const data = view.data;
   const city = data.city || {};
   const yoursId = displayPodId(data, whoami?.data);
   const yoursPod = findPod(data, yoursId);
   return shell(`
+    ${explainer()}
     ${cityScore(city)}
     ${yourPodCard(data, whoami)}
     ${board(data, yoursId)}
     ${breachMap(city)}
     ${yourPartPanel(state, yoursPod?.label)}
+    ${ghost}
     ${footer(data)}`, state);
 }
