@@ -164,6 +164,8 @@ img { image-rendering: pixelated; }
   div[style*="font-size: 20px"] { font-size: 17px !important; }
   div[style*="font-size: 42px"] { font-size: 30px !important; }
   .mission-row { flex-wrap: wrap; row-gap: 8px; }
+  /* Keep the title wide enough for its words; badges wrap below instead of under it. */
+  .mission-row .mission-text { flex: 1 1 140px; min-width: 140px !important; }
   img[src*="iso_"],
   img[src*="buildings/"] { transform: scale(0.8); transform-origin: bottom center; }
 }
