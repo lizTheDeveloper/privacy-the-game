@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { track, trackPageview, trackThenStop, trackNow } from '../src/utils/analytics.js';
+import { track, trackThenStop, trackNow } from '../src/utils/analytics.js';
 import { setChosenPod, getChosenPod } from '../src/utils/pod-pref.js';
 import { isAnalyticsOff, setAnalyticsOff } from '../src/utils/analytics-pref.js';
 import { renderStats } from '../src/screens/stats.js';
@@ -48,7 +48,6 @@ describe('track()', () => {
   it('does nothing when sharing is off or umami is absent', () => {
     setAnalyticsOff(true);
     track('mission-started');
-    trackPageview('#/city', 'city');
     expect(umami.track).not.toHaveBeenCalled();
     setAnalyticsOff(false);
     delete globalThis.umami;

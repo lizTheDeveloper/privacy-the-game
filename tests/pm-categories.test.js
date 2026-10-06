@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 vi.mock('../src/utils/analytics.js', () => ({
-  track: vi.fn(), trackNow: vi.fn(), trackPageview: vi.fn(), trackThenStop: vi.fn(), waitForTracker: vi.fn(),
+  track: vi.fn(), trackNow: vi.fn(), trackThenStop: vi.fn(), waitForTracker: vi.fn(),
 }));
 
 import { track } from '../src/utils/analytics.js';

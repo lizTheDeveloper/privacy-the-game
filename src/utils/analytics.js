@@ -19,10 +19,9 @@ export function track(name, data) {
   if (u) u.track(name, withPod(data));
 }
 
-export function trackPageview(url, title) {
-  const u = tracker();
-  if (u) u.track(() => ({ url, title }));
-}
+// Pageviews: Umami's script records one per screen change by itself (and
+// stops when sharing is off, through `umami.disabled`). The game sends none:
+// a hand-built pageview without the website id is rejected (400).
 
 // Send one event and wait for it (bounded). True if a send was attempted.
 export async function trackNow(name, data, { timeoutMs = 1500 } = {}) {
