@@ -81,6 +81,64 @@ function yourPodCard(data, whoami) {
   </div>`;
 }
 
+// The city in numbers: one panel per figure the nightly job published.
+const COLORS = {
+  cyan: ['#00E5FF', 'rgba(0,229,255,'],
+  lime: ['#C6FF00', 'rgba(198,255,0,'],
+  pink: ['#FF2D9B', 'rgba(255,45,155,'],
+  amber: ['#FF9F00', 'rgba(255,159,0,'],
+};
+const STATS = [
+  ['players', 'cyan', 'PLAYERS', () => 'anonymous browser sessions playing, together'],
+  ['actions', 'lime', 'ACTIONS TAKEN', () => 'real steps taken to take back accounts and data'],
+  ['breachChecks', 'pink', 'BREACH CHECKS', () => 'addresses checked against known breaches'],
+  ['breachRatePct', 'pink', 'FOUND IN A BREACH', () => 'of addresses checked turned up in at least one known breach', '%'],
+  ['passwords', 'lime', 'PASSWORDS CHANGED', () => 'weak or reused passwords replaced'],
+  ['twoFactor', 'lime', 'TWO-FACTOR ON', () => 'accounts that now ask for a second step to sign in'],
+  ['creditFreezes', 'cyan', 'CREDIT FROZEN', () => 'credit freezes and government ID locks put in place'],
+  ['privacy', 'cyan', 'PRIVACY SETTINGS', () => 'privacy and app-permission settings locked down'],
+  ['brokerOptOuts', 'amber', 'DATA BROKERS', () => 'opt-outs sent to people-search sites and data brokers'],
+  ['historyReviewed', 'amber', 'OLD POSTS', () => 'rounds of old posts reviewed and cleaned up'],
+  ['districts', 'lime', 'DISTRICTS', (n) => `${plural(n, 'district', 'districts')} taken back`],
+  ['countries', 'cyan', 'COUNTRIES', (n) => `${plural(n, 'country', 'countries')} with someone playing`],
+  ['phonePct', 'cyan', 'ON PHONES', () => 'of players play on a phone', '%'],
+  ['ghosts', 'amber', 'GONE GHOST', (n) => (n === 1 ? 'person has gone ghost' : 'people have gone ghost')],
+  ['optedOut', 'pink', 'OPTED OUT', (n) => `${plural(n, 'person', 'people')} turned sharing off and had their data deleted`],
+];
+
+export function cityStats(city) {
+  const c = city || {};
+  return STATS.filter(([key]) => isNum(c[key])).map(([key, color, kicker, what, unit = '']) => ({
+    key,
+    color,
+    kicker,
+    big: `${fmt(c[key])}${unit}`,
+    what: what(c[key]),
+    sub: key === 'breachRatePct' && isNum(c.breach3PlusPct) ? `${fmt(c.breach3PlusPct)}% in three or more` : '',
+  }));
+}
+
+function statPanel(st) {
+  const [hex, rgba] = COLORS[st.color];
+  const sub = st.sub ? `<div style="${MUTED} margin-top: 4px;">${esc(st.sub)}</div>` : '';
+  return `
+    <div class="panel" data-stat-panel="${st.key}" style="padding: 20px 24px; text-align: center; border-color: ${rgba}0.15);">
+      <div class="section-label" style="color: ${rgba}0.5); margin-bottom: 10px;">${esc(st.kicker)}</div>
+      <div style="font-family: var(--font-display); font-size: 34px; font-weight: 800; line-height: 1.1; color: ${hex}; text-shadow: 0 0 18px ${rgba}0.4);">${esc(st.big)}</div>
+      <div style="${MUTED} margin-top: 8px;">${esc(st.what)}</div>
+      ${sub}
+      <button class="btn-secondary" data-action="share-stat" data-stat="${st.key}" style="margin-top: 14px;">SHARE</button>
+    </div>`;
+}
+
+function cityNumbers(city) {
+  const panels = cityStats(city).map(statPanel).join('');
+  if (!panels) return '';
+  return `
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px;">${panels}
+  </div>`;
+}
+
 function board(data, yoursId) {
   const rows = podBoard(data).map((p) => {
     const yours = p.id === yoursId;
@@ -163,6 +221,7 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
     ${explainer()}
     ${cityScore(city)}
     ${yourPodCard(data, whoami)}
+    ${cityNumbers(city)}
     ${board(data, yoursId)}
     ${breachMap(city)}
     ${yourPartPanel(state, yoursPod?.label)}

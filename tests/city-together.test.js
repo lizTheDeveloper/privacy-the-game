@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { renderCityTogether } from '../src/screens/city-together.js';
+import { renderCityTogether, cityStats } from '../src/screens/city-together.js';
 import { createInitialState } from '../src/state.js';
 import { shouldAutoLoad } from '../src/utils/collective.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
@@ -88,5 +88,78 @@ describe('shouldAutoLoad', () => {
     expect(shouldAutoLoad('stats', 'idle')).toBe(false);
     expect(shouldAutoLoad('ghost', 'idle', ['ghost', 'ghost-done'])).toBe(true);
     expect(shouldAutoLoad('ghost', 'error', ['ghost'])).toBe(false);
+  });
+});
+
+describe('The Whole City: the city in numbers', () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
+
+  const FULL = {
+    ...DATA,
+    city: { ...DATA.city, breachChecks: 9388, breachRatePct: 58, breach3PlusPct: 46, actions: 22534, districts: 365,
+            passwords: 1683, twoFactor: 1502, creditFreezes: 151, privacy: 1312, brokerOptOuts: 402, historyReviewed: 96,
+            countries: 97, phonePct: 74 },
+  };
+  const panel = (html, key) => {
+    const at = html.indexOf(`data-stat-panel="${key}"`);
+    return at < 0 ? null : html.slice(at, html.indexOf('</button>', at));
+  };
+
+  it('one panel per numeric figure, in order', () => {
+    expect(cityStats(FULL.city).map((s) => s.key)).toEqual([
+      'players', 'actions', 'breachChecks', 'breachRatePct', 'passwords', 'twoFactor', 'creditFreezes', 'privacy',
+      'brokerOptOuts', 'historyReviewed', 'districts', 'countries', 'phonePct', 'ghosts', 'optedOut',
+    ]);
+  });
+
+  it('renders each figure with its words', () => {
+    const html = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: FULL } });
+    expect(panel(html, 'players')).toMatch(/11,865/);
+    expect(panel(html, 'actions')).toMatch(/22,534/);
+    expect(panel(html, 'breachChecks')).toMatch(/9,388/);
+    expect(panel(html, 'breachRatePct')).toMatch(/58%[\s\S]*46% in three or more/);
+    expect(panel(html, 'passwords')).toMatch(/1,683[\s\S]*PASSWORDS CHANGED|PASSWORDS CHANGED[\s\S]*1,683/);
+    expect(panel(html, 'twoFactor')).toMatch(/1,502/);
+    expect(panel(html, 'creditFreezes')).toMatch(/151/);
+    expect(panel(html, 'privacy')).toMatch(/1,312/);
+    expect(panel(html, 'brokerOptOuts')).toMatch(/402/);
+    expect(panel(html, 'historyReviewed')).toMatch(/96/);
+    expect(panel(html, 'districts')).toMatch(/365/);
+    expect(panel(html, 'countries')).toMatch(/97/);
+    expect(panel(html, 'phonePct')).toMatch(/74%/);
+    expect(panel(html, 'ghosts')).toMatch(/3/);
+    expect(panel(html, 'optedOut')).toMatch(/12/);
+  });
+
+  it('each panel offers SHARE', () => {
+    const html = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: FULL } });
+    for (const s of cityStats(FULL.city)) expect(panel(html, s.key)).toContain(`data-action="share-stat" data-stat="${s.key}"`);
+  });
+
+  it('figures that are absent or not numbers get no panel', () => {
+    const city = { players: 11865, passwords: 'lots', twoFactor: null, phonePct: NaN, breach3PlusPct: 40 };
+    expect(cityStats(city).map((s) => s.key)).toEqual(['players']);
+    const html = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: { ...DATA, city } } });
+    expect(html).not.toContain('data-stat-panel="passwords"');
+    expect(html).not.toMatch(/undefined|NaN/);
+  });
+
+  it('breach rate without the 3+ figure has no sub line', () => {
+    expect(cityStats({ breachRatePct: 58 })[0].sub).toBe('');
+  });
+
+  it('the existing panels are still there, unchanged', () => {
+    const before = renderCityTogether(createInitialState(), { collective: ready });
+    const after = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: FULL } });
+    for (const marker of ['CITY FORTIFIED', 'PLACES', 'ADDRESSES FOUND IN A KNOWN BREACH', 'YOUR PART', 'GO GHOST', 'anonymous browser sessions']) {
+      expect(after).toContain(marker);
+      expect(before).toContain(marker);
+    }
+  });
+
+  it('no figures panel while loading or on error', () => {
+    for (const status of ['loading', 'error']) {
+      expect(renderCityTogether(createInitialState(), { collective: { status } })).not.toContain('data-stat-panel');
+    }
   });
 });

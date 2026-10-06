@@ -6,6 +6,7 @@ import { renderScout } from '../components/scout.js';
 import { GHOST_DIALOGUE } from '../data/dialogue.js';
 import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
 import { DISTRICT_DIALOGUE, pick } from '../data/dialogue.js';
+import { backdropPods, displayPodId } from '../utils/collective.js';
 
 // ---------------------------------------------------------------------------
 // Isometric grid. Classic 2:1 diamond tiles: a tile at (col, row) sits at
@@ -58,6 +59,36 @@ const BACKDROP_DEFS = [
   { at: [2, -1], tier: 'mid', tiles: [[0, 0, 0], [0, 1, 1], [1, 1, 0]] },
   { at: [-1, 2], tier: 'mid', tiles: [[0, 0, 0], [1, 0, 1], [1, 1, 0]] },
 ];
+
+// Where the broader city goes when the collective data is in: first the
+// backdrop positions above, nearest the districts first, then rings further
+// out to the left and right, past the 960px map, which only wide screens see.
+// d = bc - br (left/right), s = bc + br (back/front); x = 120d, y = 60s + 20.
+const PLAZA = blockCentre(1, 1);
+const nearness = ([bc, br]) => {
+  const { x, y } = blockCentre(bc, br);
+  return Math.hypot(x - PLAZA.x, y - PLAZA.y);
+};
+const MAP_SLOTS = BACKDROP_DEFS
+  .map((def, i) => ({ key: `map-${def.at.join('_')}`, at: def.at, tier: def.tier, tiles: def.tiles, layer: 'map', i }))
+  .sort((a, b) => nearness(a.at) - nearness(b.at) || a.i - b.i);
+const WIDE_SLOTS = [];
+for (let ring = 5; ring <= 10; ring += 1) {
+  const row = [];
+  for (let s = -2; s <= 6; s += 1) {
+    if ((s + ring) % 2) continue;
+    for (const d of [-ring, ring]) row.push({ d, s });
+  }
+  row.sort((a, b) => Math.abs(a.s - 2) - Math.abs(b.s - 2) || a.s - b.s || a.d - b.d);
+  for (const { d, s } of row) {
+    const at = [(s + d) / 2, (s - d) / 2];
+    const tiles = BACKDROP_DEFS[WIDE_SLOTS.length % BACKDROP_DEFS.length].tiles;
+    WIDE_SLOTS.push({ key: `wide-${at.join('_')}`, at, tier: 'far', tiles, layer: 'wide' });
+  }
+}
+export const BACKDROP_SLOTS = [...MAP_SLOTS, ...WIDE_SLOTS];
+// The map is capped at 960px; the wide layer shows only once the window has room beside it.
+const WIDE_MIN = 1000;
 
 // Vertical data packets that fall through the skyline. [left%, duration s, delay s, color, z]
 const STREAMS = [
@@ -177,19 +208,104 @@ function renderDistrictBlocks(state) {
   }).join('');
 }
 
-function renderBackdropBlocks() {
+// Without collective data (`placed` null) this is exactly the old silhouette
+// backdrop; with it, backdrop positions holding a pod show that pod instead.
+function renderBackdropBlocks(placed) {
+  const bySlot = new Map((placed || []).filter((p) => p.slot.layer === 'map').map((p) => [p.slot.key, p]));
   return BACKDROP_DEFS.map((def) => {
-    const [bc, br] = def.at;
-    const lot = lotStyle(bc, br);
-    const imgs = def.tiles.map((tile) => placeInLot(tile, tile[2] === 1)).map((p) => (
-      `<img src="assets/${p.tower ? 'iso_tower_occ.png' : 'iso_occupied.png'}" alt="" style="left: ${p.left.toFixed(1)}px; bottom: ${p.bottom}px; width: ${p.w.toFixed(1)}px; z-index: ${p.z};">`
-    ));
-    return `
+    const pod = bySlot.get(`map-${def.at.join('_')}`);
+    return pod ? renderPodBlock(pod) : renderGenericBlock(def);
+  }).join('');
+}
+
+function escAttr(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// One pod of the broader city: the slot's own buildings, taller for more
+// players (log scale), with a share of them lit for the pod's fortified %.
+function renderPodBlock(p) {
+  const slot = p.slot;
+  const [bc, br] = slot.at;
+  const lot = lotStyle(bc, br);
+  const size = Math.max(0.6, 1.25 * p.height);
+  const litCount = p.lit === null ? 0 : Math.round(p.lit * slot.tiles.length);
+  const placed = slot.tiles.map((tile) => placeInLot([tile[0], tile[1], tile[2], (tile[3] || 1) * size], tile[2] === 1));
+  const imgs = placed.map((pl, i) => {
+    const lit = i < litCount;
+    const src = pl.tower ? (lit ? 'iso_tower_lib.png' : 'iso_tower_occ.png') : (lit ? 'iso_liberated.png' : 'iso_occupied.png');
+    return `<img src="assets/${src}" alt="" class="${lit ? 'is-lit' : ''}" style="left: ${pl.left.toFixed(1)}px; bottom: ${pl.bottom}px; width: ${pl.w.toFixed(1)}px; z-index: ${pl.z};">`;
+  });
+  const peak = Math.min(...placed.map((pl) => pl.top));
+  const label = escAttr(p.text);
+  const cls = ['city-block', 'city-pod', `city-pod--${slot.tier}`];
+  if (p.yours) cls.push('is-yours');
+  return `
+    <a class="${cls.join(' ')}" href="#/city-together" data-pod="${escAttr(p.id)}" data-slot="${slot.key}" data-label="${label}" aria-label="${label}"
+       style="${lot.style} --peak: ${(2 * TH - peak + 8).toFixed(0)}px;">
+      <span class="city-pod__lot"></span>
+      ${imgs.join('\n      ')}
+    </a>`;
+}
+
+function renderGenericBlock(def) {
+  const [bc, br] = def.at;
+  const lot = lotStyle(bc, br);
+  const imgs = def.tiles.map((tile) => placeInLot(tile, tile[2] === 1)).map((p) => (
+    `<img src="assets/${p.tower ? 'iso_tower_occ.png' : 'iso_occupied.png'}" alt="" style="left: ${p.left.toFixed(1)}px; bottom: ${p.bottom}px; width: ${p.w.toFixed(1)}px; z-index: ${p.z};">`
+  ));
+  return `
     <div class="city-block city-block--${def.tier}" style="${lot.style}">
       ${imgs.join('\n      ')}
     </div>`;
-  }).join('');
 }
+
+// Pods placed beyond the map's frame, on a full-width layer behind it.
+function renderWideCity(placed) {
+  const wide = placed.filter((p) => p.slot.layer === 'wide');
+  if (!wide.length) return '';
+  return `
+<div class="city-wide">
+  <div class="city-wide__iso">
+    ${wide.map(renderPodBlock).join('')}
+  </div>
+</div>`;
+}
+
+const POD_STYLE = `
+  <style>
+    .city-pod { pointer-events: auto; display: block; text-decoration: none; cursor: pointer; transition: filter 200ms ease, opacity 200ms ease; }
+    .city-pod--far { opacity: 0.5; }
+    .city-pod--mid { opacity: 0.62; }
+    .city-pod img { filter: brightness(0.34) saturate(0.2); }
+    .city-pod img.is-lit { filter: brightness(0.8) saturate(0.8) drop-shadow(0 0 6px rgba(0,229,255,0.35)); }
+    .city-pod__lot { position: absolute; inset: -4px -8px; pointer-events: none; z-index: 0; opacity: 0;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background: radial-gradient(ellipse at 50% 55%, rgba(255,45,155,0.28) 0%, rgba(255,45,155,0.08) 60%, transparent 100%); }
+    .city-pod.is-yours { opacity: 0.8; }
+    .city-pod.is-yours .city-pod__lot { opacity: 1; }
+    .city-pod::after { content: attr(data-label); position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
+      font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
+      padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.94); box-shadow: 0 0 12px rgba(0,229,255,0.25);
+      opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; transform-origin: 50% 100%; }
+    .city-pod.is-yours::after { color: var(--magenta); border-color: rgba(255,45,155,0.55); }
+    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); z-index: 40; outline: none; }
+    .city-pod:hover::after, .city-pod:focus-visible::after { opacity: 1; transform: translate(-50%, -6px); }
+    .city-wide { display: none; }
+    @media (min-width: ${WIDE_MIN}px) {
+      body:has(.city-wide) { overflow-x: clip; }
+      .city-wide { display: block; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; height: 720px; overflow: hidden;
+        z-index: -1; pointer-events: none;
+        background: linear-gradient(180deg, #03050b 0%, #070912 22%, #0b0f1a 55%, #101626 100%); }
+      .city-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 60;
+        background: linear-gradient(180deg, rgba(9,11,16,0) 70%, rgba(9,11,16,0.95) 100%),
+          linear-gradient(90deg, rgba(9,11,16,0.8) 0%, rgba(9,11,16,0) 22%, rgba(9,11,16,0) 78%, rgba(9,11,16,0.8) 100%); }
+      .city-wide .city-pod--far { opacity: 0.4; }
+      .city-wide .city-pod.is-yours { opacity: 0.8; }
+      .city-wide__iso { position: absolute; left: 50%; top: ${ORIGIN_TOP}px; width: 0; height: 0; }
+    }
+    @media (max-width: 768px) { .city-pod::after { display: none; } }
+  </style>`;
 
 // The empty centre block: a lit plaza the whole city is arranged around.
 function renderPlaza() {
@@ -569,10 +685,13 @@ const STYLE = `
     }
   </style>`;
 
-export function renderCityMap(state) {
+export function renderCityMap(state, { collective, whoami } = {}) {
   if (Object.values(state.accounts).every((a) => !a.enabled)) {
     return renderAllOffline();
   }
+  const data = collective?.status === 'ready' ? collective.data : null;
+  const placed = data ? backdropPods(data, displayPodId(data, whoami?.status === 'ready' ? whoami.data : null), BACKDROP_SLOTS) : null;
+  const hasPods = Boolean(placed && placed.length);
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
   const progress = DISTRICTS.map((d) => calcDistrictProgress(state, d.id).percent);
   const securedCount = progress.filter((p) => p >= 100).length;
@@ -582,7 +701,7 @@ export function renderCityMap(state) {
   const plaza = blockCentre(1, 1);
   return `
 <div class="city-map scanlines">
-  ${STYLE}
+  ${STYLE}${hasPods ? POD_STYLE : ''}
   <div class="city-stars"></div>
   <div class="city-circuit"></div>
   <div class="city-haze" style="background:
@@ -608,7 +727,7 @@ export function renderCityMap(state) {
     <div class="city-horizon"></div>
     <div class="city-iso">
       <div class="city-ground"></div>
-      ${renderBackdropBlocks()}
+      ${renderBackdropBlocks(placed)}
       ${renderPlaza()}
       ${renderDistrictBlocks(state)}
     </div>
@@ -621,5 +740,5 @@ export function renderCityMap(state) {
     ${renderDistrictLabels(state, startHere)}
   </div>
   <div class="city-scout">${renderCityScout(state)}</div>
-</div>`;
+</div>${hasPods ? renderWideCity(placed) : ''}`;
 }

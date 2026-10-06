@@ -10,13 +10,13 @@ import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS } from './data/missions.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { DISTRICTS } from './data/districts.js';
-import { generateMilestoneCard, shareMilestoneCard } from './utils/milestone-card.js';
+import { generateMilestoneCard, shareMilestoneCard, shareStatCard } from './utils/milestone-card.js';
 import { renderCityMap } from './screens/city-map.js';
 import { renderDistrict } from './screens/district.js';
 import { renderBriefing } from './screens/briefing.js';
 import { renderDebrief } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
-import { renderCityTogether } from './screens/city-together.js';
+import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
 import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
@@ -75,7 +75,7 @@ function loadWhoami() {
 }
 
 const screens = {
-  city: () => renderCityMap(state),
+  city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView }),
   district: ({ id, tab }) => renderDistrict(state, id, tab),
   briefing: ({ id }) => renderBriefing(state, id),
   debrief: ({ id }) => renderDebrief(state, id),
@@ -366,6 +366,9 @@ app.addEventListener('click', async (e) => {
     renderCurrentRoute();
   } else if (action === 'share-card') {
     handleShareCard(el.dataset.district);
+  } else if (action === 'share-stat') {
+    const stat = cityStats(collectiveData()?.city).find((st) => st.key === el.dataset.stat);
+    if (stat) shareStatCard(stat);
   } else if (action === 'quiz-verdict') {
     const msgId = Number(el.dataset.msgId);
     const verdict = el.dataset.verdict;

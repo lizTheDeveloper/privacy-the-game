@@ -82,8 +82,38 @@ export function fmt(n) {
 }
 
 // Screens that read the collective data; load it once on entry, never re-trigger from error.
-export const COLLECTIVE_SCREENS = ['together'];
+export const COLLECTIVE_SCREENS = ['together', 'city'];
 
 export function shouldAutoLoad(screen, status, screens = COLLECTIVE_SCREENS) {
   return screens.includes(screen) && status === 'idle';
+}
+
+// The broader city behind the player's districts: one block per published pod
+// (a pod with a player count). The player's own pod takes the nearest slot,
+// the rest fill the slots largest first. `slots` is ordered nearest first.
+// Returns null without data, so the map keeps its plain backdrop.
+export function backdropPods(collective, displayId, slots) {
+  if (!collective || !Array.isArray(collective.pods)) return null;
+  const published = collective.pods.filter((p) => p && typeof p.id === 'string' && typeof p.players === 'number' && Number.isFinite(p.players) && p.players > 0);
+  if (!published.length || !slots?.length) return [];
+  const maxLog = Math.log(Math.max(2, ...published.map((p) => p.players)));
+  const yours = published.find((p) => p.id === displayId) || null;
+  const rest = published.filter((p) => p !== yours)
+    .sort((a, b) => b.players - a.players || String(a.label).localeCompare(String(b.label)));
+  const ordered = yours ? [yours, ...rest] : rest;
+  return ordered.slice(0, slots.length).map((p, i) => {
+    const pct = typeof p.fortified?.pct === 'number' && Number.isFinite(p.fortified.pct) ? p.fortified.pct : null;
+    const parts = [String(p.label ?? p.id), `${fmt(p.players)} players`];
+    if (pct !== null) parts.push(`${fmt(pct)}% fortified`);
+    return {
+      slot: slots[i],
+      id: p.id,
+      label: String(p.label ?? p.id),
+      players: p.players,
+      height: Math.min(1, Math.log(Math.max(2, p.players)) / maxLog),
+      lit: pct === null ? null : Math.min(1, Math.max(0, pct / 100)),
+      yours: p === yours,
+      text: parts.join(' · '),
+    };
+  });
 }

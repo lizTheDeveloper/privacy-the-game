@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { parseCollective, fetchCollective, fetchWhoami, findPod, displayPodId, podBoard, yourPart, fmt } from '../src/utils/collective.js';
+import { parseCollective, fetchCollective, fetchWhoami, findPod, displayPodId, podBoard, yourPart, fmt, backdropPods, COLLECTIVE_SCREENS } from '../src/utils/collective.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
 import { createInitialState } from '../src/state.js';
 
@@ -86,5 +86,66 @@ describe('fmt', () => {
     expect(fmt(11865)).toBe('11,865');
     expect(fmt(undefined)).toBe('');
     expect(fmt(NaN)).toBe('');
+  });
+});
+
+describe('backdropPods', () => {
+  const SLOTS = ['near', 's1', 's2', 's3'];
+  const pod = (id, players, pct) => ({ id, label: id.toUpperCase(), players, ...(pct === undefined ? {} : { fortified: { pct } }) });
+  const doc = (pods) => ({ asOf: 'x', city: {}, pods });
+
+  it('returns null without collective data (the backdrop stays as it is)', () => {
+    expect(backdropPods(null, null, SLOTS)).toBeNull();
+    expect(backdropPods(undefined, 'a', SLOTS)).toBeNull();
+  });
+
+  it('places published pods largest first, one per slot, dropping the overflow', () => {
+    const out = backdropPods(doc([pod('a', 60, 10), pod('b', 4100, 16), pod('c', 264, 24), pod('d', 300), pod('e', 51, 5)]), null, SLOTS);
+    expect(out.map((p) => p.id)).toEqual(['b', 'd', 'c', 'a']);
+    expect(out.map((p) => p.slot)).toEqual(SLOTS);
+  });
+
+  it('skips pods that publish no player count', () => {
+    const out = backdropPods(doc([pod('a', 60), { id: 'gb', label: 'United Kingdom' }, { id: 'x', label: 'X', players: NaN }]), null, SLOTS);
+    expect(out.map((p) => p.id)).toEqual(['a']);
+  });
+
+  it('puts your pod in the nearest slot, highlighted, whatever its size', () => {
+    const out = backdropPods(doc([pod('big', 4100, 16), pod('mine', 60, 30), pod('mid', 300, 20)]), 'mine', SLOTS);
+    expect(out[0]).toMatchObject({ id: 'mine', slot: 'near', yours: true });
+    expect(out.slice(1).map((p) => [p.id, p.yours])).toEqual([['big', false], ['mid', false]]);
+  });
+
+  it('ignores a display pod that is not published', () => {
+    const out = backdropPods(doc([pod('a', 60, 10)]), 'gone', SLOTS);
+    expect(out[0]).toMatchObject({ id: 'a', yours: false });
+  });
+
+  it('lit fraction is fortified pct / 100; no pct means dim (null)', () => {
+    const out = backdropPods(doc([pod('a', 264, 24), pod('b', 60)]), null, SLOTS);
+    expect(out[0].lit).toBeCloseTo(0.24);
+    expect(out[1].lit).toBeNull();
+  });
+
+  it('height grows with log(players), the largest pod is 1', () => {
+    const out = backdropPods(doc([pod('a', 10000), pod('b', 100)]), null, SLOTS);
+    expect(out[0].height).toBe(1);
+    expect(out[1].height).toBeCloseTo(0.5);
+  });
+
+  it('labels read "Seattle · 264 players · 24% fortified"', () => {
+    const out = backdropPods(doc([{ id: 's', label: 'Seattle', players: 264, fortified: { pct: 24 } }, { id: 'g', label: 'Glasgow', players: 1234 }]), null, SLOTS);
+    expect(out.map((p) => p.text)).toEqual(['Glasgow · 1,234 players', 'Seattle · 264 players · 24% fortified']);
+  });
+
+  it('empty slot list or no published pods places nothing', () => {
+    expect(backdropPods(doc([pod('a', 60)]), null, [])).toEqual([]);
+    expect(backdropPods(doc([]), null, SLOTS)).toEqual([]);
+  });
+});
+
+describe('COLLECTIVE_SCREENS', () => {
+  it('the city map loads the collective data too', () => {
+    expect(COLLECTIVE_SCREENS).toEqual(expect.arrayContaining(['together', 'city']));
   });
 });
