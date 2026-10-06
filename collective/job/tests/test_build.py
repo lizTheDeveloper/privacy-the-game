@@ -125,6 +125,14 @@ class PodTest(unittest.TestCase):
         self.assertEqual(ids["us-wa-seattle"]["players"], 61)
         self.assertEqual(ids["us-il-chicago"]["players"], 59)
 
+    def test_cities_with_colliding_slugs_merge_into_one_pod(self):
+        players(50, region="US-MO", city="St. Louis")
+        players(10, region="US-MO", city="St Louis")
+        doc = build()
+        matching = [p for p in doc["pods"] if p["id"] == "us-mo-st-louis"]
+        self.assertEqual(len(matching), 1)
+        self.assertEqual(matching[0]["players"], 60)
+
     def test_pod_below_k_after_moves_publishes_no_figures(self):
         chi = players(50, city="Chicago")
         players(60, region="US-WA", city="Seattle")
@@ -182,6 +190,8 @@ class TotalsTest(unittest.TestCase):
         ids = [a["id"] for a in doc["city"]["byAddress"]]
         self.assertEqual(ids, ["gmail"])
         self.assertEqual(doc["city"]["byAddress"][0]["breachRatePct"], 100)
+        for entry in doc["city"]["byAddress"]:
+            self.assertEqual(set(entry), {"id", "breachRatePct"})
 
     def test_actions_districts_ghosts_optouts(self):
         sids = players(60)
@@ -211,6 +221,49 @@ class PurgeThenBuildTest(unittest.TestCase):
         doc = json.loads([l for l in out.splitlines() if l.startswith("{")][0])
         self.assertEqual(doc["city"]["players"], 59)
         self.assertEqual(doc["city"]["optedOut"], 1)
+
+
+class NoResidualTest(unittest.TestCase):
+    """City figure minus the sum of published pod figures must never reveal a suppressed pod."""
+
+    def setUp(self):
+        PG.reset()
+
+    def test_city_equals_sum_of_pods_that_publish_the_figure(self):
+        chi = players(50, city="Chicago")
+        sea = players(60, region="US-WA", city="Seattle")
+        pdx = players(70, region="US-OR", city="Portland")
+        den = players(80, region="US-CO", city="Denver")
+        # One Chicagoan moves to Seattle: Chicago (49) drops under K and publishes nothing.
+        events([chi[0]], "mission-started", {"pod": "us-wa-seattle"})
+        def breach(sids, finding):
+            events(sids, "mission-completed",
+                   {"mission": "gmail-recon-breach", "finding": finding, "status": "completed"})
+        def fix(sids):
+            events(sids, "mission-completed", {"mission": "gmail-fortify-password", "status": "completed"})
+        breach(chi, "1-2-breaches")                       # includes the mover (lands in Seattle)
+        fix(chi[:30])
+        breach(sea, "3plus-breaches")
+        fix(sea[:10])
+        breach(pdx[:25], "no-breaches")                   # Portland: 55 checks (>=K) but only 30 breached (<K)
+        breach(pdx[25:55], "1-2-breaches")
+        fix(pdx[25:35])
+        breach(den[:60], "1-2-breaches")
+        fix(den[:20])
+        events(chi[:5] + sea[:3] + den[:2], "district-completed", {"district": "master-keys"})
+        events(chi[:2] + pdx[:2] + den[:1], "went-ghost")
+        doc = build()
+        by = pods_by_id(doc)
+        self.assertNotIn("players", by["us-il-chicago"])
+        self.assertNotIn("fortified", by["us-or-portland"])
+        self.assertIn("breachChecks", by["us-or-portland"])
+        self.assertEqual(doc["city"]["players"], 61 + 70 + 80)
+        for key in ("players", "actions", "districts", "ghosts", "breachChecks"):
+            self.assertEqual(doc["city"][key], sum(p[key] for p in doc["pods"] if key in p), key)
+        for key in ("fixed", "breached"):
+            self.assertEqual(doc["city"]["fortified"][key],
+                             sum(p["fortified"][key] for p in doc["pods"] if "fortified" in p), key)
+        self.assertGreater(doc["city"]["fortified"]["breached"], 0)
 
 
 if __name__ == "__main__":
