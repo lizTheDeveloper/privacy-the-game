@@ -174,7 +174,7 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
 
   it('upgrades and backups are never core; a save without a manager answer keeps its totals', () => {
     const core = getMissionsForDistrict('master-keys').filter(isCoreMission);
-    expect(core.map((m) => m.id).filter((id) => id.startsWith('password_manager-'))).toEqual(['password_manager-recon-report']);
+    expect(core.map((m) => m.id).filter((id) => id.startsWith('password_manager-'))).toEqual(['password_manager-recon-report', 'password_manager-fortify-burst']);
     const vaultCore = getMissionsForDistrict('vault').filter(isCoreMission);
     for (const m of [...core, ...vaultCore]) {
       expect(m.id).not.toMatch(/-fortify-2fa-(upgrade|backup)$/);
@@ -252,30 +252,31 @@ describe('password manager recon', () => {
   it('asks which enabled accounts with password missions were flagged', () => {
     let s = { ...createInitialState(), passwordManager: '1password' };
     s = toggleAccount(s, 'yahoo', false);
-    const q = pm.debriefQs[0];
+    const q = pm.debriefQs.find((x) => x.id === 'flagged');
     expect(q.multi).toBe(true);
-    expect(q.label).toBe('Which of your accounts did it flag as compromised or reused?');
+    expect(q.label).toBe('Which of your accounts here did it flag as compromised or reused?');
     const opts = questionOptions(q, s);
     const values = opts.map((o) => o.value);
     expect(values).toContain('gmail');
     expect(values).toContain('primary_bank');
     expect(values).not.toContain('yahoo');        // disabled
     expect(values).not.toContain('instagram');    // no password mission
-    expect(values.slice(-2)).toEqual(['none', 'skip']);
+    // "Couldn't check right now" moved to the count question (item 11a).
+    expect(values.slice(-1)).toEqual(['none']);
     expect(opts.find((o) => o.value === 'gmail').text).toBe(ACCOUNTS.gmail.name);
-    expect(opts.at(-2).text).toBe('None were flagged');
-    expect(opts.at(-1).text).toBe('Couldn’t check right now');
+    expect(opts.at(-1).text).toBe('None of these were flagged');
   });
 
   it('stores flagged account ids', () => {
     const s = { ...createInitialState(), passwordManager: '1password' };
-    const r = debriefRecord(pm, { flagged: ['gmail', 'paypal'] }, s);
+    const counts = { flagged_count: '12', throwaway_count: '0' };
+    const r = debriefRecord(pm, { ...counts, flagged: ['gmail', 'paypal'] }, s);
     expect(r.record.status).toBe('completed');
     expect(r.pmFlagged).toEqual(['gmail', 'paypal']);
-    expect(debriefRecord(pm, { flagged: ['none'] }, s).pmFlagged).toEqual([]);
-    const skip = debriefRecord(pm, { flagged: ['skip'] }, s);
+    expect(debriefRecord(pm, { ...counts, flagged: ['none'] }, s).pmFlagged).toEqual([]);
+    const skip = debriefRecord(pm, { flagged_count: 'skip' }, s);
     expect(skip.record.status).toBe('skipped');
     expect(skip.pmFlagged).toBeUndefined();
-    expect(debriefRecord(pm, { flagged: [] }, s)).toBeNull();
+    expect(debriefRecord(pm, { ...counts, flagged: [] }, s)).toBeNull();
   });
 });

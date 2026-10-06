@@ -1,6 +1,7 @@
 // What counts as done, and which missions are in play for this player.
 import { ACCOUNTS } from '../data/accounts.js';
 import { twoFactorMethod } from './two-factor.js';
+import { pmNumbers } from './pm-numbers.js';
 
 // 'not-needed' is a password reset the player's own recon showed wasn't
 // needed. It counts as done for progress, never as a security action.
@@ -18,6 +19,11 @@ export function isMissionAvailable(state, mission) {
     // A finished report keeps counting if the answer later changes to "none".
     if (isMissionDone(state.missions?.[mission.id])) return true;
     return Boolean(state.passwordManager) && state.passwordManager !== 'none';
+  }
+  if (u.type === 'pm-burst') {
+    if (isMissionDone(state.missions?.[mission.id])) return true;
+    const hasManager = Boolean(state.passwordManager) && state.passwordManager !== 'none';
+    return hasManager && (pmNumbers(state)?.left || 0) > 0;
   }
   const rec = state.missions?.[u.mission];
   if (rec?.status !== 'completed') return false;

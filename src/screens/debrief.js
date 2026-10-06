@@ -4,6 +4,9 @@ import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
 import { calcDistrictProgress } from '../utils/calc.js';
 import { questionOptions } from '../utils/debrief.js';
+import { renderPasswordProgress } from '../components/password-progress.js';
+import { PM_MISSION_ID } from '../utils/password-need.js';
+import { PM_BURST_ID } from '../utils/bursts.js';
 import { twoFactorMethod, CODE_METHODS } from '../utils/two-factor.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
@@ -49,7 +52,17 @@ function lockedRow(opt) {
 // question it depends on has one of its values.
 function showIfAttrs(q) {
   if (!q.showIf) return '';
-  return ` hidden data-show-if-q="${q.showIf.question}" data-show-if-values="${q.showIf.values.join(',')}"`;
+  const rule = q.showIf.values
+    ? `data-show-if-values="${q.showIf.values.join(',')}"`
+    : `data-show-if-not="${q.showIf.notValues.join(',')}"`;
+  return ` hidden data-show-if-q="${q.showIf.question}" ${rule}`;
+}
+
+// A number answer: typed in, with any options (like "couldn't check") beside it.
+function numberInput(q) {
+  const max = q.max !== undefined ? ` max="${q.max}"` : '';
+  return `
+      <input type="number" name="q_${q.id}" min="${q.min ?? 0}"${max} inputmode="numeric" step="1" aria-label="${q.label}" style="width: 140px; max-width: 100%; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 18px; padding: 10px 12px; font-family: var(--font-mono);">`;
 }
 
 function questionGroup(q, state) {
@@ -58,8 +71,13 @@ function questionGroup(q, state) {
     <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
     ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
     ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
+    ${q.scout ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin: -4px 0 12px;">
+      <img src="assets/characters/scout_0.png" alt="" style="width: 28px; height: 28px; flex-shrink: 0;">
+      <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; font-style: italic;">${q.scout}</div>
+    </div>` : ''}
     <div style="display: flex; flex-direction: column; gap: 6px;">
-      ${questionOptions(q, state).map((opt) => optionRow(q, opt)).join('')}
+      ${q.type === 'number' ? numberInput(q) : ''}
+      ${questionOptions(q, state).map((opt) => optionRow(q.type === 'number' ? { ...q, multi: true } : q, opt)).join('')}
     </div>
   </div>`;
 }
@@ -72,7 +90,7 @@ function completedGroup(q, stored, state) {
   const row = opts.length
     ? `<div style="display: flex; flex-direction: column; gap: 6px;">${opts.map(lockedRow).join('')}</div>`
     : `<div style="${ROW}">
-        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${value || 'Not recorded'}</span>
+        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${value ?? 'Not recorded'}</span>
        </div>`;
   return `
   <div style="margin-bottom: 28px;">
@@ -172,8 +190,9 @@ export function renderDebrief(state, missionId) {
     scoutLine = mission.scoutDialog?.briefing || 'Report back — what did you find?';
   }
 
+  const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
   const questions = completed
-    ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}`
+    ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}${progressPanel}`
     : `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state)).join('')}</div>`;
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';

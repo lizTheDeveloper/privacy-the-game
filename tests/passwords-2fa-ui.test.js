@@ -107,7 +107,7 @@ describe('password manager report debrief', () => {
 
   it('a filed report lists what it flagged', () => {
     let s = { ...s0, passwordManager: 'bitwarden', pmFlagged: ['gmail'] };
-    s = set(s, 'password_manager-recon-report', { status: 'completed', action: 'flagged', flagged: ['gmail'] });
+    s = set(s, 'password_manager-recon-report', { status: 'completed', action: 'flagged', flagged: ['gmail'], flagged_count: 9, throwaway_count: 0 });
     const html = renderDebrief(s, 'password_manager-recon-report');
     expect(html).toContain('Gmail');
     expect(html).not.toContain('Not recorded');
@@ -119,7 +119,7 @@ describe('applyDebrief and recordNotNeeded', () => {
     let s = { ...clean(s0), passwordManager: 'bitwarden' };
     s = recordNotNeeded(s, 'gmail-fortify-password');
     expect(s.missions['gmail-fortify-password'].status).toBe('not-needed');
-    s = applyDebrief(s, byId('password_manager-recon-report'), { flagged: ['gmail'] });
+    s = applyDebrief(s, byId('password_manager-recon-report'), { flagged_count: '5', throwaway_count: '0', flagged: ['gmail'] });
     expect(s.pmFlagged).toEqual(['gmail']);
     expect(s.missions['password_manager-recon-report'].status).toBe('completed');
     expect(s.missions['gmail-fortify-password'].status).toBeUndefined();

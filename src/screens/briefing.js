@@ -5,7 +5,9 @@ import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
 import { missionDistrict } from '../data/missions.js';
 import { missionSteps } from '../utils/debrief.js';
-import { isPasswordMission, passwordResetNeed, notNeededReasons } from '../utils/password-need.js';
+import { isPasswordMission, passwordResetNeed, notNeededReasons, PM_MISSION_ID } from '../utils/password-need.js';
+import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
+import { renderPasswordProgress } from '../components/password-progress.js';
 
 function notFound(state) {
   return `
@@ -95,6 +97,7 @@ export function renderBriefing(state, missionId, opts = {}) {
         </div>
         ${isPasswordMission(mission) && (state.pmFlagged || []).includes(mission.accountId) ? FLAGGED_NOTE : ''}
 
+        ${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
           <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${mission.briefing}</div>
@@ -121,7 +124,7 @@ export function renderBriefing(state, missionId, opts = {}) {
         <img src="assets/characters/scout_0.png" style="width: 96px; height: 96px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
         <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
-          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
+          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : mission.id === PM_BURST_ID ? pmBurstBriefingLine(state) : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
         </div>
         ${preview}
         ${renderLoreSection(districtId, state)}

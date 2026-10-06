@@ -1,6 +1,6 @@
 import { DISTRICTS } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
-import { getMissionsForDistrict } from '../data/missions.js';
+import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
 import { calcDistrictProgress, getAccountPhaseGate, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
@@ -9,6 +9,8 @@ import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
 import { isPasswordMission, passwordResetNeed } from '../utils/password-need.js';
 import { twoFactorMethod } from '../utils/two-factor.js';
+import { renderPasswordProgress } from '../components/password-progress.js';
+import { neededResets } from '../utils/bursts.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -268,6 +270,12 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   </div>`;
 }
 
+// Master Keys always; other districts while one of their resets is needed.
+function showsPasswordProgress(state, districtId) {
+  if (districtId === 'master-keys') return true;
+  return neededResets(state).some((m) => missionDistrict(m) === districtId);
+}
+
 function renderPasswordManagerQuestion(state) {
   const chosen = state.passwordManager;
   const chips = PASSWORD_MANAGERS.map((pm) => {
@@ -518,6 +526,7 @@ export function renderDistrict(state, districtId, activeTab) {
         ${buildings}
       </div>
     </div>
+    ${showsPasswordProgress(state, districtId) ? `<div style="padding: 12px 24px 0;">${renderPasswordProgress(state, { withBurst: true })}</div>` : ''}
     ${renderDistrictIntro(state, districtId)}
     ${renderTabs(districtId, activeTab)}
     ${content}

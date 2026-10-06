@@ -23,6 +23,7 @@ export const PASSWORD_EXPOSED_QUESTION = {
 };
 
 const SKIP_LATER = { value: 'later', text: 'I’ll come back to this', severity: 'skip' };
+const SKIP_LATER_NOT_NOW = { value: 'later', text: 'Not now', severity: 'skip' };
 
 // What the 2FA debrief used to ask. Old saves answered this; their summaries
 // still read from it.
@@ -141,15 +142,32 @@ export const PASSWORD_MANAGER_MISSION = {
   stepsByManager: PM_STEPS,
   debriefQs: [
     {
+      // Local only: the numbers never leave this browser.
+      id: 'flagged_count',
+      type: 'number',
+      min: 0,
+      max: 9999,
+      label: 'How many passwords did it flag?',
+      hint: 'Whatever it flags gets a new password; whatever it clears stays as it is.',
+      options: [{ value: 'skip', text: 'Couldn’t check right now', severity: 'skip' }],
+    },
+    {
+      id: 'throwaway_count',
+      type: 'number',
+      min: 0,
+      maxFrom: 'flagged_count',
+      label: 'How many of those are throwaways — test logins, joke passwords, accounts with nothing real behind them?',
+      scout: 'Throwaways don’t need a new password — they need to go. Delete the entry from your password manager, or close the account if it still exists. One catch: a test login on a real service you depend on — your own servers, a work tool — isn’t a throwaway. It can still open a real door.',
+      showIf: { question: 'flagged_count', notValues: ['skip'] },
+      options: [],
+    },
+    {
       id: 'flagged',
       multi: true,
-      label: 'Which of your accounts did it flag as compromised or reused?',
-      hint: 'Whatever it flags gets a new password; whatever it clears stays as it is.',
+      label: 'Which of your accounts here did it flag as compromised or reused?',
+      showIf: { question: 'flagged_count', notValues: ['skip'] },
       optionsFrom: 'password-accounts',
-      options: [
-        { value: 'none', text: 'None were flagged', severity: 'safe' },
-        { value: 'skip', text: 'Couldn’t check right now', severity: 'skip' },
-      ],
+      options: [{ value: 'none', text: 'None of these were flagged', severity: 'safe' }],
     },
   ],
   scoutDialog: {
@@ -161,6 +179,69 @@ export const PASSWORD_MANAGER_MISSION = {
     },
   },
   estimatedMinutes: 5,
+};
+
+// "Change the next 3": the manager's report, three at a time, until every
+// flagged password that matters is changed. Core for players with a count.
+export const PM_BURST_MISSION = {
+  id: 'password_manager-fortify-burst',
+  accountId: 'password_manager',
+  district: 'master-keys',
+  phase: 'fortify',
+  unlock: { type: 'pm-burst' },
+  title: 'Change the next 3',
+  briefing: 'Your password manager’s report is the to-do list. Three at a time keeps it doable, and the order matters: the accounts that can unlock other accounts go first.',
+  steps: PM_STEPS.other,
+  stepsBuilder: 'pm-burst',
+  reportSteps: PM_STEPS,
+  debriefQs: [
+    {
+      id: 'changed',
+      label: 'How many did you change?',
+      options: [
+        { value: '1', text: '1', severity: 'safe' },
+        { value: '2', text: '2', severity: 'safe' },
+        { value: '3', text: '3', severity: 'safe' },
+        { value: 'more', text: 'More than 3', severity: 'safe' },
+        { value: '0', text: 'None changed — only junk this time' },
+        SKIP_LATER_NOT_NOW,
+      ],
+    },
+    {
+      id: 'changed_more',
+      type: 'number',
+      min: 4,
+      max: 9999,
+      label: 'How many?',
+      showIf: { question: 'changed', values: ['more'] },
+      options: [],
+    },
+    {
+      id: 'junk',
+      label: 'Were any of them junk?',
+      showIf: { question: 'changed', notValues: ['later'] },
+      options: [
+        { value: 'no', text: 'No junk this time' },
+        { value: 'yes', text: 'Some were junk — I deleted them' },
+      ],
+    },
+    {
+      id: 'junk_count',
+      type: 'number',
+      min: 1,
+      max: 9999,
+      label: 'How many did you delete?',
+      showIf: { question: 'junk', values: ['yes'] },
+      options: [],
+    },
+  ],
+  scoutDialog: {
+    briefing: '"Three at a time, and the scary ones first."',
+    debrief: {
+      later: '"Fair enough. The list will keep — come back for the next three."',
+    },
+  },
+  estimatedMinutes: 10,
 };
 
 // Accounts with a -fortify-2fa mission (checked by tests against MISSIONS).
@@ -256,6 +337,7 @@ function backupMission(acct) {
 
 export const PASSWORD_MISSIONS = [
   PASSWORD_MANAGER_MISSION,
+  PM_BURST_MISSION,
   ...TWO_FA_ACCOUNTS.map(upgradeMission),
   ...CRITICAL_ACCOUNTS.map(backupMission),
 ];

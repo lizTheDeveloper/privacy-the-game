@@ -28,6 +28,19 @@ export function passwordResetNeed(state, accountId) {
   return 'unknown';
 }
 
+// Why a reset is needed: any of 'breach' (the leak included the password, or
+// not sure), 'pm' (the password manager flagged it), 'login' (someone else
+// was in the account). Empty when it isn't needed.
+export function resetNeedSources(state, accountId) {
+  const out = [];
+  const breach = done(state, `${accountId}-recon-breach`);
+  const loginRec = done(state, `${accountId}-recon-login`);
+  if (breach && BREACHED.has(breach.finding) && breach.password_exposed !== 'no') out.push('breach');
+  if ((state.pmFlagged || []).includes(accountId)) out.push('pm');
+  if (loginRec && BREACHED.has(loginRec.finding)) out.push('login');
+  return out;
+}
+
 // Why no reset is needed: only the things that are true.
 export function notNeededReasons(state, accountId) {
   if (passwordResetNeed(state, accountId) !== 'not-needed') return [];

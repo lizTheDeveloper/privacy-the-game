@@ -8,7 +8,8 @@ import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from '
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS, missionDistrict } from './data/missions.js';
-import { applyDebrief, recordNotNeeded, missionEventData } from './utils/debrief.js';
+import { fileDebrief, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
+import { ensureBurst, startBurst } from './utils/bursts.js';
 import { isMissionDone } from './utils/mission-status.js';
 import { keyActivationTarget } from './utils/keyboard.js';
 import { ACCOUNTS } from './data/accounts.js';
@@ -34,7 +35,7 @@ import { shouldAskPermission, requestPermission, checkStreakReminder } from './u
 initErrorTracking();
 
 
-let state = loadState();
+let state = ensureBurst(loadState());
 let started = hasSavedState();
 
 const app = document.getElementById('app');
@@ -153,21 +154,28 @@ function submitDebrief(missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return navigate('#/city');
 
+  // Nothing happens until every question on screen is answered.
+  const filed = fileDebrief(state, mission, readAnswers(app, mission));
+  if (!filed) return;
+  setState(ensureBurst(updateStreak(filed.state)));
+  afterMissionRecorded(mission, filed.event);
+}
+
+// What the debrief form says now: radio values, pick-all lists, numbers
+// (or the option beside a number, like "couldn't check").
+function readAnswers(root, mission) {
   const answers = {};
   for (const q of mission.debriefQs) {
-    if (q.multi) {
-      const values = [...app.querySelectorAll(`input[name="q_${q.id}"]:checked`)].map((el) => el.value);
-      if (values.length) answers[q.id] = values;
-    } else {
-      const el = app.querySelector(`input[name="q_${q.id}"]:checked`);
-      if (el) answers[q.id] = el.value;
-    }
+    const checked = [...root.querySelectorAll(`input[name="q_${q.id}"]:checked`)].map((el) => el.value);
+    if (q.type === 'number') {
+      const typed = root.querySelector(`input[type="number"][name="q_${q.id}"]`)?.value;
+      if (checked.length) answers[q.id] = checked[0];
+      else if (typed !== undefined && typed !== '') answers[q.id] = typed;
+    } else if (q.multi) {
+      if (checked.length) answers[q.id] = checked;
+    } else if (checked.length) answers[q.id] = checked[0];
   }
-  // Nothing happens until every question on screen is answered.
-  const next = applyDebrief(state, mission, answers);
-  if (!next) return;
-  setState(updateStreak(next));
-  afterMissionRecorded(mission);
+  return answers;
 }
 
 // "GOT IT" on a password reset the player's own recon showed isn't needed.
@@ -176,16 +184,17 @@ function markNotNeeded(missionId) {
   if (!mission) return;
   const next = recordNotNeeded(state, missionId);
   if (next === state) return;
-  setState(updateStreak(next));
-  afterMissionRecorded(mission);
+  setState(ensureBurst(updateStreak(next)));
+  afterMissionRecorded(mission, { status: 'not-needed' });
 }
 
 // Shared tail of filing a mission: progress check-ins, the event, the
 // district milestone or back to the district.
-function afterMissionRecorded(mission) {
+// event: what to track ({ status }), or null to send nothing.
+function afterMissionRecorded(mission, event) {
   const missionId = mission.id;
   const record = state.missions[missionId];
-  const status = record.status;
+  const status = event?.status;
   const districtId = missionDistrict(mission);
 
   // Track progress milestones for Scout check-ins
@@ -207,7 +216,9 @@ function afterMissionRecorded(mission) {
     if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
   }
 
-  track('mission-completed', missionEventData(mission, record));
+  // A "Change the next 3" burst stays open, so its event carries the
+  // burst's own status; no counts are ever sent.
+  if (event) track('mission-completed', missionEventData(mission, { ...record, status: event.status }));
   if (status === 'completed' && shouldAskPermission(state)) {
     requestPermission();
   }
@@ -349,6 +360,9 @@ app.addEventListener('click', async (e) => {
     markNotNeeded(el.dataset.mission);
   } else if (action === 'reset-anyway') {
     resetAnywayMission = el.dataset.mission;
+    renderCurrentRoute();
+  } else if (action === 'line-up-burst') {
+    setState(startBurst(state));
     renderCurrentRoute();
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
@@ -593,9 +607,10 @@ app.addEventListener('keydown', (e) => {
   el.click();
 });
 
-// Debrief follow-ups appear once the answer they depend on is picked; in a
-// pick-all-that-apply list, "none" and "couldn't check" stand alone.
-app.addEventListener('change', (e) => {
+// Debrief follow-ups appear once the answers they depend on are given; in a
+// pick-all-that-apply list, "none" and "couldn't check" stand alone, and a
+// "couldn't check" beside a number clears the number (and the other way round).
+function refreshDebriefForm(e) {
   const input = e.target;
   if (!(input instanceof HTMLInputElement) || !input.name.startsWith('q_')) return;
   const form = input.closest('[data-debrief]');
@@ -604,14 +619,20 @@ app.addEventListener('change', (e) => {
     const alone = input.value === 'none' || input.value === 'skip';
     for (const other of form.querySelectorAll(`input[name="${input.name}"]`)) {
       if (other === input) continue;
+      if (other.type === 'number') { if (alone) other.value = ''; continue; }
       if (alone || other.value === 'none' || other.value === 'skip') other.checked = false;
     }
   }
-  for (const group of form.querySelectorAll('[data-show-if-q]')) {
-    const picked = form.querySelector(`input[name="q_${group.dataset.showIfQ}"]:checked`)?.value;
-    group.hidden = !group.dataset.showIfValues.split(',').includes(picked);
+  if (input.type === 'number' && input.value !== '') {
+    for (const other of form.querySelectorAll(`input[type="checkbox"][name="${input.name}"]`)) other.checked = false;
   }
-});
+  const mission = MISSIONS.find((m) => m.id === form.dataset.debrief);
+  if (!mission) return;
+  const shown = new Set(visibleQuestions(mission, readAnswers(form, mission)).map((q) => q.id));
+  for (const group of form.querySelectorAll('[data-question]')) group.hidden = !shown.has(group.dataset.question);
+}
+app.addEventListener('change', refreshDebriefForm);
+app.addEventListener('input', refreshDebriefForm);
 
 window.reclaimCity = {
   navigate,
