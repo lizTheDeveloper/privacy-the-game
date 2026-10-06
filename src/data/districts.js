@@ -1,6 +1,7 @@
 export const DISTRICTS = [
   {
     id: 'master-keys',
+    pmCategory: 'email and the accounts you sign in with',
     name: 'The Master Keys',
     chapter: 1,
     description: 'Email & Identity Providers — the foundation everything else sits on',
@@ -10,6 +11,7 @@ export const DISTRICTS = [
   },
   {
     id: 'vault',
+    pmCategory: 'banks, payment apps, investments',
     name: 'The Vault',
     chapter: 2,
     description: 'Financial — banks, payment apps, investments',
@@ -18,6 +20,7 @@ export const DISTRICTS = [
   },
   {
     id: 'square',
+    pmCategory: 'social media and messaging',
     name: 'The Square',
     chapter: 3,
     description: 'Social media & messaging',
@@ -26,6 +29,7 @@ export const DISTRICTS = [
   },
   {
     id: 'archives',
+    pmCategory: 'cloud storage and work accounts',
     name: 'The Archives',
     chapter: 4,
     description: 'Cloud storage & work accounts',
@@ -34,6 +38,7 @@ export const DISTRICTS = [
   },
   {
     id: 'marketplace',
+    pmCategory: 'shopping and streaming',
     name: 'The Marketplace',
     chapter: 5,
     description: 'Shopping & streaming',
@@ -42,6 +47,7 @@ export const DISTRICTS = [
   },
   {
     id: 'capitol',
+    pmCategory: 'government accounts',
     name: 'The Capitol',
     chapter: 6,
     description: 'Government accounts',
@@ -50,6 +56,7 @@ export const DISTRICTS = [
   },
   {
     id: 'perimeter',
+    pmCategory: 'your phone carrier and device accounts',
     name: 'The Perimeter',
     chapter: 7,
     description: 'Borders & scam defense',
@@ -60,6 +67,7 @@ export const DISTRICTS = [
   },
   {
     id: 'foundry',
+    pmCategory: 'AI tools and assistants',
     name: 'The Foundry',
     chapter: 10,
     description: 'AI training opt-outs — stop your data from building the models',
@@ -68,6 +76,7 @@ export const DISTRICTS = [
   },
   {
     id: 'freeway',
+    pmCategory: 'car apps and connected-vehicle accounts',
     name: 'The Freeway',
     chapter: 9,
     description: 'Connected vehicles — your car is a surveillance device on wheels',
@@ -77,6 +86,7 @@ export const DISTRICTS = [
   },
   {
     id: 'reclamation',
+    pmCategory: 'credit bureaus and data-broker accounts',
     name: 'The Reclamation',
     chapter: 8,
     description: 'Data broker opt-outs',
@@ -93,6 +103,7 @@ export const DISTRICTS = [
   },
   {
     id: 'clinic',
+    pmCategory: 'health, fitness and genetic-testing accounts',
     name: 'The Clinic',
     chapter: 11,
     description: 'Health, fitness, and genetic data',
@@ -103,6 +114,7 @@ export const DISTRICTS = [
   },
   {
     id: 'grid',
+    pmCategory: 'smart home devices and apps',
     name: 'The Grid',
     chapter: 10,
     description: 'Smart home devices — your house is listening',
@@ -113,6 +125,7 @@ export const DISTRICTS = [
   },
   {
     id: 'trail',
+    pmCategory: 'loyalty programs and everyday apps',
     name: 'The Trail',
     chapter: 12,
     description: 'The passive data trail you leave everywhere',

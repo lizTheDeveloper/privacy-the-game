@@ -152,7 +152,7 @@ describe('11a and 12a: the report asks how many (local only)', () => {
     expect(r.state.pmThrowaway).toBe(78);
     expect(r.state.pmChanged).toBe(0);
     const r2 = fileDebrief(withPm, PM_REPORT, { flagged_count: '78', throwaway_count: '30', flagged: ['none'] });
-    expect(pmNumbers(r2.state)).toEqual({ flagged: 78, throwaway: 30, real: 48, changed: 0, left: 48 });
+    expect(pmNumbers(r2.state)).toMatchObject({ flagged: 78, throwaway: 30, real: 48, changed: 0, left: 48 });
   });
 
   it('rejects numbers out of range', () => {
@@ -190,13 +190,14 @@ describe('11b and 12c: Change the next 3', () => {
 
   it('re-opens after each burst and is done when all real ones are changed', () => {
     let r = fileDebrief(counted(5), BURST, { changed: '3', junk: 'no' });
-    expect(r.event).toEqual({ status: 'completed' });
+    expect(r.event).toBeNull();               // 14b: one event, when the whole job is done
     expect(r.state.pmChanged).toBe(3);
     expect(isMissionDone(r.state.missions[BURST.id])).toBe(false);
     expect(isMissionInPlay(r.state, BURST)).toBe(true);
     r = fileDebrief(r.state, BURST, { changed: 'more', changed_more: '9', junk: 'no' });
     expect(r.state.pmChanged).toBe(5);       // capped
     expect(isMissionDone(r.state.missions[BURST.id])).toBe(true);
+    expect(r.event).toEqual({ status: 'completed' });
   });
 
   it('junk raises throwaways, not changes, and alone sends nothing', () => {
@@ -205,12 +206,14 @@ describe('11b and 12c: Change the next 3', () => {
     expect(r.state.pmChanged).toBe(0);
     expect(r.event).toBeNull();
     const both = fileDebrief(counted(10), BURST, { changed: '1', junk: 'yes', junk_count: '2' });
-    expect(both.event).toEqual({ status: 'completed' });
+    expect(both.event).toBeNull();            // 14b: not done yet, so nothing sent
+    const last = fileDebrief(counted(3), BURST, { changed: '1', junk: 'yes', junk_count: '2' });
+    expect(last.event).toEqual({ status: 'completed' });
   });
 
   it('caps: changed + throwaway never exceed flagged', () => {
     expect(applyBurst(pmNumbers(counted(10, 2, 5)), 9, 9)).toEqual({ pmThrowaway: 5, pmChanged: 5 });
-    expect(pmNumbers(counted(10, 50, 50))).toEqual({ flagged: 10, throwaway: 10, real: 0, changed: 0, left: 0 });
+    expect(pmNumbers(counted(10, 50, 50))).toMatchObject({ flagged: 10, throwaway: 10, real: 0, changed: 0, left: 0 });
   });
 
   it('"not now" is a skip and changes nothing', () => {
@@ -236,8 +239,9 @@ describe('11b and 12c: Change the next 3', () => {
     expect(text).toMatch(/compromised or leaked passwords before reused ones, and reused before weak/);
   });
 
-  it('core for Master Keys while in play', () => {
-    expect(calcDistrictProgress(counted(5), 'master-keys').total).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').total + 1);
+  it('a bonus since 14b: never adds to the Master Keys core total while pending', () => {
+    expect(calcDistrictProgress(counted(5), 'master-keys').total).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').total);
+    expect(calcDistrictProgress(counted(5), 'master-keys').bonusTotal).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').bonusTotal + 1);
   });
 });
 

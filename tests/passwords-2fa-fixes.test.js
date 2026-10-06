@@ -26,7 +26,7 @@ describe('fix 1: the password-manager debrief knows its district', () => {
 describe('fix 2 and 6: privacy copy', () => {
   it('the explainer uses the ruled phrase', () => {
     expect(COLLECTIVE_DIALOGUE.explainer).toContain(
-      'some of what you pick in debriefs (what a breach check found, whether it included a password, how an account is protected)',
+      'some of what you pick in debriefs — like what a breach check found or how an account is protected —',
     );
   });
 

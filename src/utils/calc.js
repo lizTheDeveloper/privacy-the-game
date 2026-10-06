@@ -13,7 +13,7 @@ function weightedScore(missions, isDone) {
   let total = 0;
   let done = 0;
   for (const m of missions) {
-    const weight = m.optional ? OPTIONAL_WEIGHT : 1;
+    const weight = m.optional && !m.countsWhenDone ? OPTIONAL_WEIGHT : 1;
     total += weight;
     if (isDone(m)) done += weight;
   }
@@ -46,9 +46,11 @@ export function calcExposure(state) {
 
 export function calcDistrictProgress(state, districtId) {
   const inDistrict = getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m));
-  const relevant = inDistrict.filter(isCoreMission);
-  const bonus = inDistrict.filter((m) => m.phase !== 'survey' && m.optional);
   const isDone = (m) => isMissionDone(state.missions[m.id]);
+  // A bonus that counts like core once done (countsWhenDone) never lowers %.
+  const countsAsCore = (m) => isCoreMission(m) || (m.countsWhenDone && isDone(m));
+  const relevant = inDistrict.filter(countsAsCore);
+  const bonus = inDistrict.filter((m) => m.phase !== 'survey' && m.optional && !countsAsCore(m));
   const completed = relevant.filter(isDone).length;
   const bonusCompleted = bonus.filter(isDone).length;
   return {

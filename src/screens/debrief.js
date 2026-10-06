@@ -6,7 +6,7 @@ import { calcDistrictProgress } from '../utils/calc.js';
 import { questionOptions } from '../utils/debrief.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
-import { PM_BURST_ID } from '../utils/bursts.js';
+import { PM_BURST_ID, pmNumbers } from '../utils/bursts.js';
 import { twoFactorMethod, CODE_METHODS } from '../utils/two-factor.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
@@ -102,6 +102,15 @@ function completedGroup(q, stored, state) {
 // The questions a filed debrief shows: follow-ups only when answered, and a
 // save from before a question changed shows the question it answered then.
 function completedQuestions(mission, stored, state) {
+  // "Change the next 3" finished before its answers were kept: show the total.
+  if (mission.id === PM_BURST_ID && stored.changed === undefined) {
+    const total = pmNumbers(state)?.changed ?? (Number.isFinite(state.pmChanged) ? state.pmChanged : 0);
+    return `
+  <div style="margin-bottom: 28px;">
+    <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${mission.debriefQs[0].label.toUpperCase()}</div>
+    <div style="${ROW}"><span style="flex: 1; font-size: 14px; color: var(--offwhite);">${total} changed in all</span></div>
+  </div>`;
+  }
   return mission.debriefQs.map((q) => {
     if (stored[q.id] !== undefined) return completedGroup(q, stored, state);
     if (q.legacy && stored[q.legacy.id] !== undefined) return completedGroup(q.legacy, stored, state);

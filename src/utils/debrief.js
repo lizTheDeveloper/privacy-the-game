@@ -149,9 +149,13 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
     let next = { ...state, ...nums, pmBurstAt: now };
     // The mission stays open for the next burst until every real one is changed.
     const allDone = pmNumbers(next).left === 0;
-    next = updateMission(next, mission.id, { status: allDone ? 'completed' : undefined, lastBurstAt: now });
-    // Deleting junk alone isn't a security action: nothing is sent.
-    return { state: next, event: r.burst.changed >= 1 ? { status: 'completed' } : null };
+    // The last burst's answers, for the filed debrief (local; never tracked —
+    // missionEventData doesn't read them).
+    const last = { changed: String(r.burst.changed), junk: r.burst.junk > 0 ? 'yes' : 'no', junk_count: r.burst.junk > 0 ? r.burst.junk : undefined };
+    next = updateMission(next, mission.id, { status: allDone ? 'completed' : undefined, lastBurstAt: now, ...last });
+    // One event for the whole job, when it's done — not one per burst — so the
+    // count of actions matches what restore would resend.
+    return { state: next, event: allDone ? { status: 'completed' } : null };
   }
   const update = Object.fromEntries(ANSWER_KEYS.map((k) => [k, undefined]));
   let next = updateMission(state, mission.id, { ...update, ...r.record });

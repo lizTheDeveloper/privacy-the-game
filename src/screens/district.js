@@ -9,7 +9,7 @@ import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
 import { isPasswordMission, passwordResetNeed } from '../utils/password-need.js';
 import { twoFactorMethod } from '../utils/two-factor.js';
-import { renderPasswordProgress } from '../components/password-progress.js';
+import { renderPasswordProgress, renderCategoryAsk, renderCategoryQuiet } from '../components/password-progress.js';
 import { neededResets } from '../utils/bursts.js';
 
 function renderDistrictIntro(state, districtId) {
@@ -270,6 +270,12 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   </div>`;
 }
 
+// The per-category password-manager ask, at the top of every district.
+function categoryAskBlock(state, districtId) {
+  const html = renderCategoryAsk(state, districtId);
+  return html ? `<div style="padding: 0 24px;">${html}</div>` : '';
+}
+
 // Master Keys always; other districts while one of their resets is needed.
 function showsPasswordProgress(state, districtId) {
   if (districtId === 'master-keys') return true;
@@ -422,12 +428,14 @@ function renderFacilityDistrict(state, district) {
           <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
         </div>
         <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
         <span class="stat-value" style="color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.3);">${progress.percent}%</span>
         <span class="stat-label" style="color: rgba(0,229,255,0.5);">SECURED</span>
       </div>
     </div>
+    ${categoryAskBlock(state, district.id)}
     <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT FACILITIES</div>
       <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap; padding-bottom: 4px;">
@@ -514,12 +522,14 @@ export function renderDistrict(state, districtId, activeTab) {
           <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
         </div>
         <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
         <span class="stat-value" style="color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.3);">${progress.percent}%</span>
         <span class="stat-label" style="color: rgba(0,229,255,0.5);">SECURED</span>
       </div>
     </div>
+    ${categoryAskBlock(state, district.id)}
     <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT BUILDINGS</div>
       <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap; padding-bottom: 4px;">

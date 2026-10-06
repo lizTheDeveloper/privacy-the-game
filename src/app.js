@@ -10,6 +10,7 @@ import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS, missionDistrict } from './data/missions.js';
 import { fileDebrief, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
 import { ensureBurst, startBurst } from './utils/bursts.js';
+import { applyCategoryAction } from './utils/pm-categories.js';
 import { isMissionDone } from './utils/mission-status.js';
 import { keyActivationTarget } from './utils/keyboard.js';
 import { ACCOUNTS } from './data/accounts.js';
@@ -216,8 +217,8 @@ function afterMissionRecorded(mission, event) {
     if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
   }
 
-  // A "Change the next 3" burst stays open, so its event carries the
-  // burst's own status; no counts are ever sent.
+  // "Change the next 3" sends one event, when the whole job is done (not per
+  // burst); no counts are ever sent.
   if (event) track('mission-completed', missionEventData(mission, { ...record, status: event.status }));
   if (status === 'completed' && shouldAskPermission(state)) {
     requestPermission();
@@ -364,6 +365,16 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'line-up-burst') {
     setState(startBurst(state));
     renderCurrentRoute();
+  } else if (action.startsWith('pm-cat-')) {
+    // The per-category ask. Local only: nothing here is ever tracked.
+    const districtId = el.dataset.district;
+    const kind = { 'pm-cat-flag': 'flag', 'pm-cat-changed': 'changed', 'pm-cat-none': 'clear', 'pm-cat-clear': 'clear', 'pm-cat-reopen': 'reopen' }[action];
+    const raw = app.querySelector(`#pm-cat-num-${districtId}`)?.value;
+    const next = applyCategoryAction(state, districtId, kind, raw);
+    if (next !== state) {
+      setState(next);
+      renderCurrentRoute();
+    }
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
     renderCurrentRoute();
@@ -601,6 +612,12 @@ app.addEventListener('click', async (e) => {
 
 // role="button" actions answer Enter and Space like real buttons.
 app.addEventListener('keydown', (e) => {
+  // Enter in a per-category number box files it, like its button.
+  if (e.key === 'Enter' && e.target?.id?.startsWith?.('pm-cat-num-')) {
+    const btn = e.target.closest('[data-pm-category]')?.querySelector('[data-action="pm-cat-flag"], [data-action="pm-cat-changed"]');
+    if (btn) { e.preventDefault(); btn.click(); }
+    return;
+  }
   const el = keyActivationTarget(e);
   if (!el || !app.contains(el)) return;
   e.preventDefault();

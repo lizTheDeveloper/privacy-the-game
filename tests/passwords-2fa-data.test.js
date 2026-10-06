@@ -174,7 +174,7 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
 
   it('upgrades and backups are never core; a save without a manager answer keeps its totals', () => {
     const core = getMissionsForDistrict('master-keys').filter(isCoreMission);
-    expect(core.map((m) => m.id).filter((id) => id.startsWith('password_manager-'))).toEqual(['password_manager-recon-report', 'password_manager-fortify-burst']);
+    expect(core.map((m) => m.id).filter((id) => id.startsWith('password_manager-'))).toEqual(['password_manager-recon-report']);   // "Change the next 3" is a bonus since 14b
     const vaultCore = getMissionsForDistrict('vault').filter(isCoreMission);
     for (const m of [...core, ...vaultCore]) {
       expect(m.id).not.toMatch(/-fortify-2fa-(upgrade|backup)$/);

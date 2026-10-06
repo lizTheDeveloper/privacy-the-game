@@ -2,7 +2,8 @@
 // passwords need changing":
 //  - the password manager's own number (state.pmFlaggedCount, minus the
 //    throwaways the player deleted, state.pmThrowaway) — when present, the
-//    "Change the next 3" mission IS the burst;
+//    "Change the next 3" bonus mission is the burst, and the per-category
+//    asks on each district (pm-categories.js) count toward the same total;
 //  - otherwise the game's own accounts whose reset is needed
 //    (passwordResetNeed === 'needed'), paced three at a time with
 //    state.passwordBurst = { ids, startedAt }.
@@ -11,11 +12,10 @@ import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { DISTRICTS } from '../data/districts.js';
 import { isMissionDone } from './mission-status.js';
 import { isPasswordMission, passwordResetNeed, resetNeedSources } from './password-need.js';
-import { pmNumbers } from './pm-numbers.js';
+import { pmNumbers, BURST_SIZE } from './pm-numbers.js';
+import { openCategoryCount, usedCategories } from './pm-categories.js';
 
-export { pmNumbers, applyBurst } from './pm-numbers.js';
-
-export const BURST_SIZE = 3;
+export { pmNumbers, applyBurst, BURST_SIZE } from './pm-numbers.js';
 export const PM_BURST_ID = 'password_manager-fortify-burst';
 const RETURN_AFTER_MS = 6 * 60 * 60 * 1000;
 const plural = (n, one, many) => (n === 1 ? one : many);
@@ -46,6 +46,7 @@ export function resetCounts(state) {
 }
 
 export function pmDoneLine(n) {
+  if (n.real === 0) return "All junk — nothing real to change. Delete the throwaways and you're done.";
   return n.throwaway > 0
     ? `That's all ${n.real} that matter. The junk's gone, the real ones are changed.`
     : `That's all ${n.flagged}. Every password your manager flagged is changed.`;
@@ -62,6 +63,9 @@ export function passwordProgressLines(state) {
     let progress = n.left === 0 ? pmDoneLine(n) : `${n.changed} of ${n.real} changed`;
     if (game.left > 0) progress += `, and ${game.left} ${plural(game.left, 'account here needs', 'accounts here need')} a new password`;
     lines.push(progress);
+    if (n.left > 0 && usedCategories(state)) {
+      lines.push(`${openCategoryCount(state)} of ${DISTRICTS.length} categories still open.`);
+    }
     return lines;
   }
   if (game.total === 0) return [];

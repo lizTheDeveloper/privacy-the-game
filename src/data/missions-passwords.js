@@ -182,12 +182,17 @@ export const PASSWORD_MANAGER_MISSION = {
 };
 
 // "Change the next 3": the manager's report, three at a time, until every
-// flagged password that matters is changed. Core for players with a count.
+// flagged password that matters is changed. A bonus since Task 14b (Liz,
+// 2026-10-06): the per-category asks on each district do the same job, so
+// this never blocks Master Keys. A save that finished it while it was core
+// keeps that progress (countsWhenDone: counted like core once done).
 export const PM_BURST_MISSION = {
   id: 'password_manager-fortify-burst',
   accountId: 'password_manager',
   district: 'master-keys',
   phase: 'fortify',
+  optional: true,
+  countsWhenDone: true,
   unlock: { type: 'pm-burst' },
   title: 'Change the next 3',
   briefing: 'Your password manager’s report is the to-do list. Three at a time keeps it doable, and the order matters: the accounts that can unlock other accounts go first.',
