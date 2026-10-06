@@ -1,5 +1,7 @@
 import { isAnalyticsOff, setAnalyticsOff } from './utils/analytics-pref.js';
 import { track, trackPageview, trackThenStop } from './utils/analytics.js';
+import { fetchCollective, fetchWhoami } from './utils/collective.js';
+import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
@@ -29,6 +31,29 @@ let started = hasSavedState();
 
 const app = document.getElementById('app');
 
+let collectiveView = { status: 'idle' };
+let whoamiView = { status: 'idle' };
+let podPickerOpen = false;
+
+function loadCollective() {
+  if (collectiveView.status === 'loading' || collectiveView.status === 'ready') return;
+  collectiveView = { status: 'loading' };
+  fetchCollective().then((r) => {
+    collectiveView = r.ok ? { status: 'ready', data: r.data } : { status: 'error' };
+    renderCurrentRoute();
+  });
+}
+
+function loadWhoami() {
+  if (whoamiView.status === 'loading') return;
+  whoamiView = { status: 'loading' };
+  renderCurrentRoute();
+  fetchWhoami().then((r) => {
+    whoamiView = r.ok ? { status: 'ready', data: r.data } : { status: 'error' };
+    renderCurrentRoute();
+  });
+}
+
 const screens = {
   city: () => renderCityMap(state),
   district: ({ id, tab }) => renderDistrict(state, id, tab),
@@ -39,7 +64,7 @@ const screens = {
   phishing: () => renderPhishingQuiz(state),
   garage: () => renderGarage(state),
   timeline: () => renderTimeline(state),
-  stats: () => renderStats(state),
+  stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen }),
 };
 
 function renderWelcome() {
@@ -358,6 +383,24 @@ app.addEventListener('click', async (e) => {
     } catch (error) {
       captureError(error, { screen: 'saveState' });
     }
+    renderCurrentRoute();
+  } else if (action === 'whoami-open') {
+    loadCollective();
+    loadWhoami();
+  } else if (action === 'pod-pick-open') {
+    podPickerOpen = true;
+    loadCollective();
+    renderCurrentRoute();
+  } else if (action === 'pod-pick') {
+    setChosenPod(el.dataset.pod);
+    podPickerOpen = false;
+    renderCurrentRoute();
+  } else if (action === 'pod-pick-clear') {
+    setChosenPod(null);
+    podPickerOpen = false;
+    renderCurrentRoute();
+  } else if (action === 'whoami-confirm') {
+    podPickerOpen = false;
     renderCurrentRoute();
   }
 });

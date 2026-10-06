@@ -1,4 +1,6 @@
 import { isAnalyticsOff } from '../utils/analytics-pref.js';
+import { getChosenPod } from '../utils/pod-pref.js';
+import { findPod } from '../utils/collective.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICTS } from '../data/districts.js';
 import {
@@ -62,7 +64,83 @@ function findingCard({ label, value, color, tint }) {
   </div>`;
 }
 
-export function renderStats(state) {
+function esc(v) {
+  return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const WHOAMI_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 10px;';
+
+function whoamiShell(inner) {
+  return `
+    <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
+      <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 16px;">WHAT WE KNOW ABOUT YOU</div>
+      ${inner}
+    </div>`;
+}
+
+function joinParts(parts, sep) {
+  return parts.filter((v) => v !== null && v !== undefined && v !== '').map(esc).join(sep);
+}
+
+function podPicker(collective) {
+  const pods = collective?.status === 'ready' && Array.isArray(collective.data?.pods) ? collective.data.pods : null;
+  if (!pods) return `<div style="${WHOAMI_TEXT}">We can't load the list of places right now.</div>`;
+  return `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">${pods
+    .map((p) => `<button class="btn-secondary" data-action="pod-pick" data-pod="${esc(p.id)}">${esc(p.label)}</button>`)
+    .join('')}</div>`;
+}
+
+export function renderWhoamiPanel(view = {}) {
+  const who = view.whoami || { status: 'idle' };
+  if (who.status === 'loading') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">Asking our analytics&hellip;</div>`);
+  }
+  if (who.status === 'error') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">We couldn't reach our analytics just now. Nothing was sent.</div>
+      <button class="btn-secondary" data-action="whoami-open">TRY AGAIN</button>`);
+  }
+  if (who.status !== 'ready') {
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">Our analytics can see a few things about every visit. Want to see exactly what they see about you?</div>
+      <button class="btn-secondary" data-action="whoami-open">SHOW ME</button>`);
+  }
+
+  const d = who.data || {};
+  const place = joinParts([d.city, d.region, d.country], ', ');
+  const locationLine = place
+    ? `<b>${place}</b> &mdash; from your connection's address, looked up the way most websites do. We don't store the address itself.`
+    : `We couldn't place you from your connection.`;
+  const device = joinParts([d.device, d.os, d.browser, d.language], ' \u00b7 ');
+  const deviceLine = device ? `<div style="${WHOAMI_TEXT}">${device} &mdash; from what your browser tells every site.</div>` : '';
+
+  const collectiveData = view.collective?.status === 'ready' ? view.collective.data : null;
+  const chosenId = getChosenPod();
+  const chosen = findPod(collectiveData, chosenId);
+  const whoPodLabel = d.pod && d.pod.label ? esc(d.pod.label) : null;
+  let podLine = '';
+  if (chosen && whoPodLabel && d.pod.id !== chosen.id) {
+    podLine = `<div style="${WHOAMI_TEXT}">We'll count you in <b>${esc(chosen.label)}</b>. Our analytics still recorded ${whoPodLabel} from your connection.</div>
+      <button class="btn-secondary" data-action="pod-pick-clear">USE WHERE YOU ARE</button>`;
+  } else if (chosen && !whoPodLabel) {
+    podLine = `<div style="${WHOAMI_TEXT}">We'll count you in <b>${esc(chosen.label)}</b>.</div>
+      <button class="btn-secondary" data-action="pod-pick-clear">USE WHERE YOU ARE</button>`;
+  } else if (whoPodLabel) {
+    podLine = `<div style="${WHOAMI_TEXT}">You count toward <b>${whoPodLabel}</b>.</div>`;
+  }
+  const buttons = `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+      <button class="btn-secondary" data-action="whoami-confirm">THAT'S RIGHT</button>
+      <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
+    </div>`;
+
+  return whoamiShell(`
+      <div style="${WHOAMI_TEXT}">${locationLine}</div>
+      ${deviceLine}
+      <div style="${WHOAMI_TEXT}">We don't have your name, email, or any of your accounts.</div>
+      ${podLine}
+      ${buttons}
+      ${view.podPickerOpen ? podPicker(view.collective) : ''}`);
+}
+
+export function renderStats(state, view = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
   const findings = calcFindings(state);
@@ -129,6 +207,7 @@ export function renderStats(state) {
         ${findingCard({ label: 'OPT-OUTS FILED', value: findings.optOutsFiled, color: '#FF9F00', tint: 'rgba(255,159,0,0.1)' })}
       </div>
     </div>
+    ${renderWhoamiPanel(view)}
     <div class="panel" style="padding: 20px 24px; margin-top: 16px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 10px;">PLAY STATS</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 14px;">We count anonymous gameplay events &mdash; missions started and finished, districts cleared &mdash; on our own self-hosted analytics, with no ads and no third parties. It helps us see which missions people get stuck on. ${isAnalyticsOff() ? 'Sharing is off. Nothing from this browser is sent.' : 'Sharing is on. Turning it off stops all tracking. Tonight we delete what this device sent us this month and keep only the fact that one more person opted out. Server backups that may still hold it roll over within about a week.'}</div>
