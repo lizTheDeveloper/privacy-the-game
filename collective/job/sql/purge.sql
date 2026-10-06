@@ -32,6 +32,12 @@ UPDATE rc_collective.counters
   SET value = greatest(0, value - (SELECT count(*) FROM rc_restored WHERE kind = 'ghost-early'))
   WHERE name = 'ghosts_early_total';
 
+-- Keep how many sessions brought data back (the public `restored` figure),
+-- since the events themselves go next.
+UPDATE rc_collective.counters
+  SET value = value + (SELECT count(DISTINCT session_id) FROM rc_restored)
+  WHERE name = 'restored_total';
+
 DELETE FROM event_data
   WHERE website_id = :'website'
     AND website_event_id IN (SELECT event_id FROM website_event

@@ -21,11 +21,11 @@ def build(k=K):
     return json.loads(lines[0])
 
 
-def players(n, country="US", region="US-IL", city="Chicago"):
+def players(n, country="US", region="US-IL", city="Chicago", device=None):
     # One round trip for n sessions (per-row ssh inserts are too slow).
     out = PG.sql(
-        "INSERT INTO session (session_id, website_id, country, region, city) "
-        f"SELECT gen_random_uuid(), '{WEBSITE}', {q(country)}, {q(region)}, {q(city)} "
+        "INSERT INTO session (session_id, website_id, country, region, city, device) "
+        f"SELECT gen_random_uuid(), '{WEBSITE}', {q(country)}, {q(region)}, {q(city)}, {q(device)} "
         f"FROM generate_series(1, {n}) RETURNING session_id;")
     return out.split()
 
@@ -238,6 +238,122 @@ class TotalsTest(unittest.TestCase):
 
 
 
+def done(sids, mission, status="completed"):
+    events(sids, "mission-completed", {"mission": mission, "status": status})
+
+
+class MoreFiguresTest(unittest.TestCase):
+    """Task 13: what players did, counted by kind, each gated by K contributing players."""
+
+    def setUp(self):
+        PG.reset()
+
+    def test_passwords_and_two_factor_count_completed_missions_by_kind(self):
+        sids = players(60)
+        done(sids[:40], "gmail-fortify-password")
+        done(sids[40:], "streaming-fortify-passwords")
+        done(sids[:10], "yahoo-fortify-password", status="skipped")   # skipped: not counted
+        done(sids[:30], "gmail-fortify-2fa")
+        done(sids[30:50], "whatsapp-fortify-reglock")
+        done(sids[50:], "telegram-fortify-twostep")
+        done(sids[:5], "gmail-fortify-2fa")                           # sent twice: still one
+        doc = build()
+        self.assertEqual(doc["city"]["passwords"], 60)
+        self.assertEqual(doc["city"]["twoFactor"], 60)
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertEqual(pod["passwords"], 60)
+        self.assertEqual(pod["twoFactor"], 60)
+
+    def test_city_only_kinds(self):
+        sids = players(60)
+        done(sids, "credit_freeze-fortify-equifax")
+        done(sids[:10], "credit_freeze-fortify-extras")               # not a freeze
+        done(sids[:3], "govt_id_defense-fortify-ssa-lock")
+        done(sids[:2], "irs-fortify-ip-pin")
+        done(sids[:1], "govt_id_defense-fortify-irs-pin")
+        done(sids, "gmail-reclaim-privacy")
+        done(sids[:4], "device_security-reclaim-app-permissions")
+        done(sids[:30], "people_search-fortify-web-forms")
+        done(sids[30:], "location_brokers-fortify-optout")
+        done(sids[:7], "enterprise_data-fortify-lexisnexis")
+        done(sids[:8], "ad_trackers-fortify-bulk")
+        done(sids[:9], "people_search-recon-find-yourself")           # recon: not an opt-out
+        done(sids[:20], "instagram-reclaim-early-years")
+        done(sids[20:40], "facebook-reclaim-middle")
+        done(sids[40:], "twitter-reclaim-bulk")
+        done(sids[:6], "tiktok-reclaim-review")
+        done(sids[:5], "facebook-reclaim-prep")                       # prep: not history
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["creditFreezes"], 66)
+        self.assertEqual(city["privacy"], 64)
+        self.assertEqual(city["brokerOptOuts"], 75)
+        self.assertEqual(city["historyReviewed"], 66)
+        pod = pods_by_id(doc)["us-il-chicago"]
+        for key in ("creditFreezes", "privacy", "brokerOptOuts", "historyReviewed", "countries", "phonePct"):
+            self.assertNotIn(key, pod, key)
+
+    def test_each_kind_absent_under_k_contributing_players(self):
+        sids = players(60)
+        for mission in ("gmail-fortify-password", "gmail-fortify-2fa", "credit_freeze-fortify-equifax",
+                        "gmail-reclaim-privacy", "people_search-fortify-web-forms", "twitter-reclaim-review"):
+            done(sids[:49], mission)
+            done(sids[:49], mission.replace("gmail", "yahoo").replace("equifax", "experian")
+                 .replace("web-forms", "removal-links").replace("twitter", "tiktok"))  # many missions, still 49 players
+        doc = build()
+        for key in ("passwords", "twoFactor", "creditFreezes", "privacy", "brokerOptOuts", "historyReviewed"):
+            self.assertNotIn(key, doc["city"], key)
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertNotIn("passwords", pod)
+        self.assertNotIn("twoFactor", pod)
+        self.assertEqual(doc["city"]["players"], 60)
+
+    def test_countries_counts_places_with_any_player(self):
+        players(60)
+        players(1, country="GB", region="GB-ENG", city="London")
+        players(1, country="FR", region="FR-IDF", city="Paris")
+        players(1, country="", region="", city="")
+        doc = build()
+        self.assertEqual(doc["city"]["countries"], 3)
+
+    def test_countries_absent_without_k_players(self):
+        players(30)
+        players(10, country="GB", region="GB-ENG", city="London")
+        doc = build()
+        self.assertNotIn("countries", doc["city"])
+
+    def test_phone_pct_over_sessions_with_a_known_device(self):
+        players(45, device="mobile")
+        players(15, device="desktop")
+        players(20)                                                  # unknown device: left out
+        doc = build()
+        self.assertEqual(doc["city"]["phonePct"], 75)
+
+    def test_phone_pct_absent_under_k_known_devices(self):
+        players(30, device="mobile")
+        players(19, device="laptop")
+        players(30)
+        doc = build()
+        self.assertNotIn("phonePct", doc["city"])
+        self.assertEqual(doc["city"]["players"], 79)
+
+    def test_restored_is_published_from_k_sessions(self):
+        players(60)
+        PG.sql("UPDATE rc_collective.counters SET value = 49 WHERE name = 'restored_total';")
+        self.assertNotIn("restored", build()["city"])
+        PG.sql("UPDATE rc_collective.counters SET value = 50 WHERE name = 'restored_total';")
+        self.assertEqual(build()["city"]["restored"], 50)
+
+    def test_purge_then_build_counts_restoring_sessions(self):
+        sids = players(60)
+        events(sids[:50], "data-restored", {"kind": "opted-out"})
+        events(sids[:5], "data-restored", {"kind": "opted-out"})      # sent twice: one session
+        out = PG.run_files(SQL_DIR / "purge.sql", SQL_DIR / "purge_mig.sql", SQL_DIR / "build.sql",
+                           variables={"website": WEBSITE, "k": K})
+        doc = json.loads([l for l in out.splitlines() if l.startswith("{")][0])
+        self.assertEqual(doc["city"]["restored"], 50)
+
+
 class PurgeThenBuildTest(unittest.TestCase):
     def setUp(self):
         PG.reset()
@@ -294,13 +410,27 @@ class NoResidualTest(unittest.TestCase):
         fix(den[:20])
         events(chi[:5] + sea[:3] + den[:2], "district-completed", {"district": "master-keys"})
         events(chi[:2] + pdx[:2] + den[:1], "went-ghost")
+        # Passwords: Seattle 55 players (incl. the mover), Portland 30 (< K, suppressed), Denver 60.
+        events(chi + sea[:54] + pdx[:30] + den[:60], "mission-completed",
+               {"mission": "yahoo-fortify-password", "status": "completed"})
+        # Two-factor: Seattle 49 (< K), Portland 50, Denver 80.
+        events(sea[:49] + pdx[:50] + den, "mission-completed",
+               {"mission": "gmail-fortify-2fa", "status": "completed"})
         doc = build()
         by = pods_by_id(doc)
         self.assertNotIn("players", by["us-il-chicago"])
         self.assertNotIn("fortified", by["us-or-portland"])
         self.assertIn("breachChecks", by["us-or-portland"])
         self.assertEqual(doc["city"]["players"], 61 + 70 + 80)
-        for key in ("players", "actions", "districts", "ghosts", "breachChecks"):
+        self.assertNotIn("passwords", by["us-or-portland"])
+        self.assertNotIn("twoFactor", by["us-wa-seattle"])
+        # The gmail-fortify-password fixes above count too: Seattle 55 + 11 (sea[:10] + the mover),
+        # Denver 60 + 20; Portland's 35 password players stay under K.
+        self.assertEqual(by["us-wa-seattle"]["passwords"], 66)
+        self.assertEqual(by["us-co-denver"]["passwords"], 80)
+        self.assertEqual(doc["city"]["passwords"], 66 + 80)
+        self.assertEqual(doc["city"]["twoFactor"], 50 + 80)
+        for key in ("players", "actions", "districts", "ghosts", "breachChecks", "passwords", "twoFactor"):
             self.assertEqual(doc["city"][key], sum(p[key] for p in doc["pods"] if key in p), key)
         for key in ("fixed", "breached"):
             self.assertEqual(doc["city"]["fortified"][key],

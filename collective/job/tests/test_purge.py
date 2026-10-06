@@ -248,6 +248,18 @@ class CancelAndRestoreTest(unittest.TestCase):
         self.assertEqual(PG.count("session", a), 1)  # the restored game itself is kept
         self.assertEqual(int(PG.sql(f"SELECT count(*) FROM website_event WHERE session_id = '{a}' AND event_name = 'mission-completed';").strip()), 1)
 
+    def test_restoring_sessions_are_counted_once(self):
+        a = PG.insert_session()
+        b = PG.insert_session()
+        PG.insert_event(a, "data-restored", {"kind": "opted-out"})
+        PG.insert_event(a, "data-restored", {"kind": "opted-out"})  # double send: one session
+        PG.insert_event(b, "data-restored", {"kind": "ghost-early"})
+        PG.insert_event(PG.insert_session(), "data-restored", {"kind": "bogus"})
+        self.purge()
+        self.assertEqual(self.counter("restored_total"), 2)
+        self.purge()  # already counted: must not move again
+        self.assertEqual(self.counter("restored_total"), 2)
+
     def test_decrement_clamps_at_zero(self):
         for _ in range(3):
             PG.insert_event(PG.insert_session(), "data-restored", {"kind": "ghost-early"})

@@ -15,6 +15,22 @@ The runner then adds `asOf` (UTC time) and a human-readable `label` to every pod
 
 K is 50. A pod is a place: a city, a region, a country, or "rest of" a larger place. A pod is published only if it has at least K players; smaller places are folded into the "Rest of ..." pod above them, and the last remainder into "Rest of the World". City figures are counted only over places (pods) where that figure is published, so no published number can be subtracted from another to reveal a group under 50.
 
+## What the city publishes
+
+Besides players, fortified, breach checks and rates, actions, districts, ghosts, opt-outs and the breach map by address, `city` carries these figures. Each is counted only over pods that are published (players >= K), and each is left out if fewer than K distinct players contributed to it:
+
+- `passwords` - completed missions ending `-fortify-password` or `-fortify-passwords`. Also per pod.
+- `twoFactor` - completed missions ending `-fortify-2fa`, `-fortify-twostep` or `-fortify-reglock`. Also per pod.
+- `creditFreezes` - completed `credit_freeze-fortify-*` missions except `credit_freeze-fortify-extras`, plus `govt_id_defense-fortify-ssa-lock`, `irs-fortify-ip-pin` and `govt_id_defense-fortify-irs-pin`.
+- `privacy` - completed missions containing `-reclaim-privacy` or `-reclaim-app-permissions`.
+- `brokerOptOuts` - completed `people_search-fortify-*`, `location_brokers-fortify-*`, `enterprise_data-fortify-*` and `ad_trackers-fortify-*` missions.
+- `historyReviewed` - completed missions ending `-reclaim-` + `early`, `middle`, `recent`, `history`, `early-years`, `middle-years`, `bulk` or `review`.
+- `countries` - how many distinct countries have at least one player (a count of places, published whenever `players` is).
+- `phonePct` - share of sessions with a known device whose device is `mobile`; left out under K sessions with a known device.
+- `restored` - sessions that sent `data-restored`, all time. The purge counts them into the `restored_total` counter before it deletes those events; published from K.
+
+A mission one session sent twice counts once. `passwords` and `twoFactor` follow the same residual rule as the other per-pod figures: the city value is the sum over the pods that publish that figure, so subtracting pods never reveals a suppressed one. The mission ids were checked against `src/data/missions*.js`.
+
 ## Going ghost
 
 There are two kinds of ghost, and both switch analytics off in the game:

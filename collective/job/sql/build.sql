@@ -11,6 +11,7 @@ SELECT s.session_id,
        upper(coalesce(nullif(trim(s.country), ''), '')) AS country,
        coalesce(nullif(trim(s.region), ''), '')          AS region,
        coalesce(nullif(trim(s.city), ''), '')            AS city,
+       lower(coalesce(nullif(trim(s.device), ''), ''))   AS device,
        (SELECT d.string_value
           FROM website_event e JOIN event_data d ON d.website_event_id = e.event_id
          WHERE e.website_id = s.website_id AND e.session_id = s.session_id AND d.data_key = 'pod'
@@ -111,21 +112,53 @@ SELECT DISTINCT session_id FROM website_event WHERE website_id = :'website' AND 
 CREATE TEMP TABLE rc_districts ON COMMIT DROP AS
 SELECT session_id FROM website_event WHERE website_id = :'website' AND event_name = 'district-completed';
 
+-- What players did, by kind: one row per session, mission and kind (a mission
+-- sent twice by one session counts once). Mission ids checked against
+-- src/data/missions*.js.
+CREATE TEMP TABLE rc_done ON COMMIT DROP AS
+SELECT DISTINCT session_id, mission FROM rc_mc WHERE status = 'completed' AND mission IS NOT NULL;
+
+CREATE TEMP TABLE rc_kinds ON COMMIT DROP AS
+SELECT session_id, mission, 'passwords' AS kind FROM rc_done
+ WHERE mission LIKE '%-fortify-password' OR mission LIKE '%-fortify-passwords'
+UNION ALL
+SELECT session_id, mission, 'twoFactor' FROM rc_done
+ WHERE mission LIKE '%-fortify-2fa' OR mission LIKE '%-fortify-twostep' OR mission LIKE '%-fortify-reglock'
+UNION ALL
+SELECT session_id, mission, 'creditFreezes' FROM rc_done
+ WHERE (mission LIKE 'credit\_freeze-fortify-%' AND mission <> 'credit_freeze-fortify-extras')
+    OR mission IN ('govt_id_defense-fortify-ssa-lock', 'irs-fortify-ip-pin', 'govt_id_defense-fortify-irs-pin')
+UNION ALL
+SELECT session_id, mission, 'privacy' FROM rc_done
+ WHERE mission LIKE '%-reclaim-privacy%' OR mission LIKE '%-reclaim-app-permissions%'
+UNION ALL
+SELECT session_id, mission, 'brokerOptOuts' FROM rc_done
+ WHERE mission LIKE 'people\_search-fortify-%' OR mission LIKE 'location\_brokers-fortify-%'
+    OR mission LIKE 'enterprise\_data-fortify-%' OR mission LIKE 'ad\_trackers-fortify-%'
+UNION ALL
+SELECT session_id, mission, 'historyReviewed' FROM rc_done
+ WHERE mission ~ '-reclaim-(early|middle|recent|history|early-years|middle-years|bulk|review)$';
+
 -- Which figures each pod publishes. City figures are built only from pods that
 -- publish the same figure, so city minus the sum of pods never reveals a pod
 -- that was suppressed.
 CREATE TEMP TABLE rc_flags ON COMMIT DROP AS
 SELECT s.pod, count(*) AS players,
        count(*) FILTER (WHERE s.session_id IN (SELECT session_id FROM rc_breached)) AS bp,
-       count(*) FILTER (WHERE s.session_id IN (SELECT session_id FROM rc_checks)) AS cp
+       count(*) FILTER (WHERE s.session_id IN (SELECT session_id FROM rc_checks)) AS cp,
+       count(*) FILTER (WHERE s.session_id IN (SELECT session_id FROM rc_kinds WHERE kind = 'passwords')) AS pw,
+       count(*) FILTER (WHERE s.session_id IN (SELECT session_id FROM rc_kinds WHERE kind = 'twoFactor')) AS tf
   FROM rc_s s GROUP BY s.pod;
 
 -- City totals over published pods only. Figures follow each pod's own gates.
 CREATE OR REPLACE FUNCTION pg_temp.rc_city(k int) RETURNS jsonb LANGUAGE sql AS $$
-  WITH f  AS (SELECT pod, players >= k AS pp, players >= k AND bp >= k AS pf, players >= k AND cp >= k AS pc FROM rc_flags),
+  WITH f  AS (SELECT pod, players >= k AS pp, players >= k AND bp >= k AS pf, players >= k AND cp >= k AS pc,
+                     players >= k AND pw >= k AS ppw, players >= k AND tf >= k AS ptf FROM rc_flags),
        sp AS (SELECT s.session_id FROM rc_s s JOIN f ON f.pod = s.pod WHERE f.pp),
        sf AS (SELECT s.session_id FROM rc_s s JOIN f ON f.pod = s.pod WHERE f.pf),
        sc AS (SELECT s.session_id FROM rc_s s JOIN f ON f.pod = s.pod WHERE f.pc),
+       spw AS (SELECT s.session_id FROM rc_s s JOIN f ON f.pod = s.pod WHERE f.ppw),
+       stf AS (SELECT s.session_id FROM rc_s s JOIN f ON f.pod = s.pod WHERE f.ptf),
        chk AS (SELECT c.* FROM rc_checks c JOIN sc USING (session_id)),
        br  AS (SELECT b.* FROM rc_breached b JOIN sf USING (session_id)),
        n   AS (SELECT (SELECT count(*) FROM sp) AS players,
@@ -144,7 +177,19 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_city(k int) RETURNS jsonb LANGUAGE sql AS 
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'actions', (SELECT count(*) FROM rc_mc m JOIN sp USING (session_id) WHERE m.status = 'completed'),
     'districts', (SELECT count(*) FROM rc_districts d JOIN sp USING (session_id)),
-    'ghosts', (SELECT count(*) FROM rc_ghost g JOIN sp USING (session_id))
+    'ghosts', (SELECT count(*) FROM rc_ghost g JOIN sp USING (session_id)),
+    -- Per-pod figures too: only over pods that publish them (no residual).
+    'passwords', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN spw USING (session_id) WHERE kind = 'passwords'),
+    'twoFactor', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN stf USING (session_id) WHERE kind = 'twoFactor'),
+    -- City-only figures: over published pods, k contributing players.
+    'creditFreezes', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'creditFreezes'),
+    'privacy', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'privacy'),
+    'brokerOptOuts', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'brokerOptOuts'),
+    'historyReviewed', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'historyReviewed'),
+    -- A count of places, not people.
+    'countries', (SELECT count(DISTINCT s.country) FROM rc_s s JOIN sp USING (session_id) WHERE s.country <> ''),
+    'phonePct', (SELECT CASE WHEN count(*) >= k THEN round(100.0 * count(*) FILTER (WHERE s.device = 'mobile') / count(*)) END
+                   FROM rc_s s JOIN sp USING (session_id) WHERE s.device <> '')
   )) END
   FROM n
 $$;
@@ -170,7 +215,9 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_totals(pod_filter text, k int) RETURNS jso
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'actions', (SELECT count(*) FROM rc_mc m JOIN s USING (session_id) WHERE m.status = 'completed'),
     'districts', (SELECT count(*) FROM rc_districts d JOIN s USING (session_id)),
-    'ghosts', (SELECT count(*) FROM rc_ghost g JOIN s USING (session_id))
+    'ghosts', (SELECT count(*) FROM rc_ghost g JOIN s USING (session_id)),
+    'passwords', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN s USING (session_id) WHERE kind = 'passwords'),
+    'twoFactor', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN s USING (session_id) WHERE kind = 'twoFactor')
   )) END
   FROM n
 $$;
@@ -195,7 +242,11 @@ SELECT jsonb_build_object(
                                            WHERE session_id IN (SELECT s.session_id FROM rc_s s JOIN rc_flags f ON f.pod = s.pod
                                                                  WHERE f.players >= :k AND f.cp >= :k)
                                            GROUP BY acct) a
-                                   WHERE checks >= :k AND who >= :k), '[]'::jsonb)),
+                                   WHERE checks >= :k AND who >= :k), '[]'::jsonb))
+          -- Sessions that brought deleted data back (counted by purge.sql
+          -- before it deletes the data-restored events); shown from k.
+          || jsonb_strip_nulls(jsonb_build_object('restored',
+               (SELECT value FROM rc_collective.counters WHERE name = 'restored_total' AND value >= :k))),
   'pods', coalesce((SELECT jsonb_agg(
             jsonb_strip_nulls(jsonb_build_object('id', p.id, 'level', p.level, 'country', nullif(p.country, ''),
                               'region', nullif(p.region, ''), 'city', nullif(p.city, ''),
