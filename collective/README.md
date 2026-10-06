@@ -6,7 +6,7 @@ A nightly job that turns Reclaim City's analytics events into one public file, `
 
 `job/run.py` does two things, each in its own database transaction (one psql run). The purge commits first, so deleting opted-out sessions never depends on the build succeeding:
 
-1. **Purge.** Deletes the rows of every session that sent an `opted-out` event this month (`purge.sql`), and the same sessions' rows in the `_rc_mig_*` migration backup tables while those tables exist (`purge_mig.sql`).
+1. **Purge.** Deletes the rows of every session this month that opted out or went ghost early and did not cancel (`purge.sql`, see below), and the same sessions' rows in the `_rc_mig_*` migration backup tables while those tables exist (`purge_mig.sql`). Before that it applies any `data-restored` events (see "Bringing data back").
 2. **Build.** Computes the totals (`build.sql`) and prints one JSON line.
 
 The runner then adds `asOf` (UTC time) and a human-readable `label` to every pod and every address entry (names come from `job/names.tsv`; unknown codes fall back to the code or id), and replaces `collective.json` atomically. It also refreshes the GeoLite copy in `geo/` from the Umami container, so the lookup service uses the same database Umami does.
@@ -15,10 +15,32 @@ The runner then adds `asOf` (UTC time) and a human-readable `label` to every pod
 
 K is 50. A pod is a place: a city, a region, a country, or "rest of" a larger place. A pod is published only if it has at least K players; smaller places are folded into the "Rest of ..." pod above them, and the last remainder into "Rest of the World". City figures are counted only over places (pods) where that figure is published, so no published number can be subtracted from another to reveal a group under 50.
 
+## Going ghost
+
+There are two kinds of ghost, and both switch analytics off in the game:
+
+- **Final-mission ghosts** take back the whole city first, then send `went-ghost`. Nothing is deleted: what they did stays in the totals, and they are counted from their kept `went-ghost` event (city figure over published pods only, like every other city figure; pods publish `ghosts` too).
+- **Early ghosts** go ghost before that and send `went-ghost-early`. Tonight's run deletes the session exactly like an opt-out and adds one to the `ghosts_early_total` counter. `city.ghosts` = kept ghosts + `ghosts_early_total`; pod `ghosts` count kept ghosts only (an early ghost's rows, and so their place, are gone). An early ghost who also opted out counts once, as an opt-out.
+
+## Cancelling before the run
+
+Both deletions can be called off from the same browser and connection (that is what Umami's session is) until the nightly run:
+
+- An early ghost cancels with `ghost-cancelled`. A session is purged as an early ghost only if its latest of (`went-ghost-early`, `ghost-cancelled`), ordered by `created_at` then `event_id`, is `went-ghost-early`. Going ghost again after cancelling purges it again.
+- Turning sharing back on while an opt-out is pending sends `opt-out-cancelled`. A session is purged as an opt-out only if its latest of (`opted-out`, `opt-out-cancelled`) is `opted-out`.
+
+## Bringing data back
+
+After a deletion went through, the player's browser still holds their whole saved game, and they can send it again:
+
+- The game sends `data-restored` with `kind` = `opted-out` or `ghost-early`, then one `mission-completed` per completed or skipped mission and one `district-completed` per finished district, each with `restored: '1'`. Those restored events are ordinary rows (in a new session) and count in the totals as usual; their timestamps are the restore time, not when the mission was played.
+- The next run takes one off the matching counter (`opted_out_total` or `ghosts_early_total`) per distinct session that sent `data-restored` with that kind, never below zero, then deletes the `data-restored` events so they are counted once.
+- Anyone can send `data-restored`, like `opted-out`: a scripted sender could lower the published opt-out or ghost counts (never below zero), but cannot touch anyone else's data.
+
 ## Opting out
 
 - Opting out deletes the rows this browser sent this month from the connection it's on now (Umami's session is the sender's IP, browser and a monthly salt, so that is what the job can find) from the analytics database, including the `_rc_mig_*` migration backups. Hetzner's automatic server backups of the games box (daily, about a week kept) still hold those rows until they roll over.
-- Anyone can send an `opted-out` event. Umami derives the session from the sender's own IP and browser, so a forged event only purges the sender's own session (or others sharing the same IP and browser, whom Umami already treats as one). It can inflate the opt-out count.
+- Anyone can send an `opted-out` (or `went-ghost-early`) event. Umami derives the session from the sender's own IP and browser, so a forged event only purges the sender's own session (or others sharing the same IP and browser, whom Umami already treats as one). It can inflate the opt-out count.
 
 - `/whoami` (like Umami) trusts client-supplied IP and geo headers: `cf-connecting-ip`, `true-client-ip`, the first hop of `x-forwarded-for`, and provider geo headers. Spoofing them only changes the caller's own echo.
 
