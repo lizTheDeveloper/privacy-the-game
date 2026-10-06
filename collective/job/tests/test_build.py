@@ -266,5 +266,21 @@ class NoResidualTest(unittest.TestCase):
         self.assertGreater(doc["city"]["fortified"]["breached"], 0)
 
 
+class RunnerScriptTest(unittest.TestCase):
+    def setUp(self):
+        PG.reset()
+
+    def test_runner_script_runs_with_and_without_mig_tables(self):
+        import sys
+        sys.path.insert(0, str(SQL_DIR.parent))
+        import run
+        players(60)
+        out = PG.sql(run.sql_script(), variables={"website": WEBSITE, "k": K})
+        self.assertEqual(len([l for l in out.splitlines() if l.startswith("{")]), 1)
+        PG.sql("DROP TABLE _rc_mig_event_data, _rc_mig_events, _rc_mig_sessions;")
+        out = PG.sql(run.sql_script(), variables={"website": WEBSITE, "k": K})
+        self.assertEqual(len([l for l in out.splitlines() if l.startswith("{")]), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

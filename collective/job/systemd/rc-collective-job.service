@@ -1,0 +1,19 @@
+[Unit]
+Description=Reclaim City collective score: purge opt-outs, publish collective.json
+Documentation=file:///opt/reclaim-city-collective/README.md
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/reclaim-city-collective/job
+EnvironmentFile=/opt/reclaim-city-collective/job.env
+ExecStart=/usr/bin/python3 /opt/reclaim-city-collective/job/run.py
+# Exit 1 = the run failed and yesterday's file is still being served.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ReadWritePaths=/opt/reclaim-city-collective
+
+[Install]
+WantedBy=multi-user.target

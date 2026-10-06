@@ -1,0 +1,123 @@
+US	United States
+CA	Canada
+GB	United Kingdom
+AU	Australia
+DE	Germany
+BR	Brazil
+NL	Netherlands
+ES	Spain
+CH	Switzerland
+FR	France
+SE	Sweden
+NZ	New Zealand
+IT	Italy
+MX	Mexico
+PL	Poland
+IE	Ireland
+NO	Norway
+IN	India
+BE	Belgium
+FI	Finland
+AT	Austria
+PT	Portugal
+AR	Argentina
+JP	Japan
+CL	Chile
+PR	Puerto Rico
+RO	Romania
+DK	Denmark
+US-AK	Alaska
+US-AL	Alabama
+US-AR	Arkansas
+US-AZ	Arizona
+US-CA	California
+US-CO	Colorado
+US-CT	Connecticut
+US-DC	Washington, D.C.
+US-FL	Florida
+US-GA	Georgia
+US-HI	Hawaii
+US-IA	Iowa
+US-ID	Idaho
+US-IL	Illinois
+US-IN	Indiana
+US-KS	Kansas
+US-KY	Kentucky
+US-LA	Louisiana
+US-MA	Massachusetts
+US-MD	Maryland
+US-ME	Maine
+US-MI	Michigan
+US-MN	Minnesota
+US-MO	Missouri
+US-NC	North Carolina
+US-NE	Nebraska
+US-NH	New Hampshire
+US-NJ	New Jersey
+US-NM	New Mexico
+US-NV	Nevada
+US-NY	New York
+US-OH	Ohio
+US-OK	Oklahoma
+US-OR	Oregon
+US-PA	Pennsylvania
+US-RI	Rhode Island
+US-SC	South Carolina
+US-TN	Tennessee
+US-TX	Texas
+US-UT	Utah
+US-VA	Virginia
+US-VT	Vermont
+US-WA	Washington
+US-WI	Wisconsin
+CA-AB	Alberta
+CA-BC	British Columbia
+CA-MB	Manitoba
+CA-ON	Ontario
+CA-QC	Quebec
+AU-NSW	New South Wales
+AU-QLD	Queensland
+AU-SA	South Australia
+AU-VIC	Victoria
+AU-WA	Western Australia
+GB-ENG	England
+GB-SCT	Scotland
+GB-WLS	Wales
+DE-BE	Berlin
+DE-BW	Baden-Württemberg
+DE-BY	Bavaria
+DE-HE	Hesse
+DE-NW	North Rhine-Westphalia
+DE-SN	Saxony
+NL-NH	North Holland
+NL-ZH	South Holland
+CH-ZH	Zurich
+NZ-AUK	Auckland
+ES-CT	Catalonia
+ES-MD	Madrid
+SE-AB	Stockholm
+FR-IDF	Île-de-France
+IE-L	Leinster
+BR-SP	São Paulo
+MX-CMX	Mexico City
+account:gmail	Gmail
+account:google	Google
+account:yahoo	Yahoo
+account:outlook	Outlook
+account:microsoft	Microsoft
+account:icloud	iCloud
+account:apple_id	Apple ID
+account:protonmail	ProtonMail
+account:facebook	Facebook
+account:instagram	Instagram
+account:paypal	PayPal
+account:primary_bank	Bank
+account:credit_card	Credit card
+account:venmo	Venmo
+account:amazon	Amazon
+account:uber	Uber
+account:cashapp	Cash App
+account:ebay	eBay
+account:linkedin	LinkedIn
+account:discord	Discord
+account:investment_account	Investment account
