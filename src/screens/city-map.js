@@ -228,7 +228,9 @@ function renderPodBlock(p) {
   const slot = p.slot;
   const [bc, br] = slot.at;
   const lot = lotStyle(bc, br);
-  const size = Math.max(0.6, 1.25 * p.height);
+  // In the map, never bigger than the old silhouettes (they must stay clear of
+  // the HUD band on phones); out on the wide layer the big places may tower.
+  const size = Math.min(slot.layer === 'map' ? 1 : 1.25, Math.max(0.6, 1.25 * p.height));
   const litCount = p.lit === null ? 0 : Math.round(p.lit * slot.tiles.length);
   const placed = slot.tiles.map((tile) => placeInLot([tile[0], tile[1], tile[2], (tile[3] || 1) * size], tile[2] === 1));
   const imgs = placed.map((pl, i) => {
@@ -289,7 +291,7 @@ const POD_STYLE = `
       padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.94); box-shadow: 0 0 12px rgba(0,229,255,0.25);
       opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; transform-origin: 50% 100%; }
     .city-pod.is-yours::after { color: var(--magenta); border-color: rgba(255,45,155,0.55); }
-    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); z-index: 40; outline: none; }
+    .city-pod:hover, .city-pod:focus-visible { opacity: 1; filter: brightness(1.35); outline: none; }
     .city-pod:hover::after, .city-pod:focus-visible::after { opacity: 1; transform: translate(-50%, -6px); }
     .city-wide { display: none; }
     @media (min-width: ${WIDE_MIN}px) {

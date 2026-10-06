@@ -126,7 +126,7 @@ describe('The Whole City: the city in numbers', () => {
     expect(panel(html, 'historyReviewed')).toMatch(/96/);
     expect(panel(html, 'districts')).toMatch(/365/);
     expect(panel(html, 'countries')).toMatch(/97/);
-    expect(panel(html, 'phonePct')).toMatch(/74%/);
+    expect(panel(html, 'phonePct')).toMatch(/74%[\s\S]*of players whose device we know play on a phone/);
     expect(panel(html, 'ghosts')).toMatch(/3/);
     expect(panel(html, 'optedOut')).toMatch(/12/);
   });

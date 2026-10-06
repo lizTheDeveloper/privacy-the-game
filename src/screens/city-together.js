@@ -101,7 +101,7 @@ const STATS = [
   ['historyReviewed', 'amber', 'OLD POSTS', () => 'rounds of old posts reviewed and cleaned up'],
   ['districts', 'lime', 'DISTRICTS', (n) => `${plural(n, 'district', 'districts')} taken back`],
   ['countries', 'cyan', 'COUNTRIES', (n) => `${plural(n, 'country', 'countries')} with someone playing`],
-  ['phonePct', 'cyan', 'ON PHONES', () => 'of players play on a phone', '%'],
+  ['phonePct', 'cyan', 'ON PHONES', () => 'of players whose device we know play on a phone', '%'],
   ['ghosts', 'amber', 'GONE GHOST', (n) => (n === 1 ? 'person has gone ghost' : 'people have gone ghost')],
   ['optedOut', 'pink', 'OPTED OUT', (n) => `${plural(n, 'person', 'people')} turned sharing off and had their data deleted`],
 ];

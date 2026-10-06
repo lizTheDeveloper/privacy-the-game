@@ -34,8 +34,17 @@ export function navigate(path) {
   location.hash = path;
 }
 
+// Why a screen is being drawn. Only a navigation (first load, hashchange) is
+// a pageview; re-drawing the same screen because data arrived or an action
+// changed state is not.
+export const RENDER_CAUSE = { NAVIGATE: 'navigate', REFRESH: 'refresh' };
+
+export function tracksPageview(cause) {
+  return cause === RENDER_CAUSE.NAVIGATE;
+}
+
 export function initRouter(onRoute) {
-  const handle = () => onRoute(parseRoute(location.hash));
+  const handle = () => onRoute(parseRoute(location.hash), RENDER_CAUSE.NAVIGATE);
   window.addEventListener('hashchange', handle);
   handle();
 }

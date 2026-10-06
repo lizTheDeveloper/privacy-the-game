@@ -4,7 +4,7 @@ import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
-import { initRouter, navigate, parseRoute } from './router.js';
+import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
 import { MISSIONS } from './data/missions.js';
@@ -102,7 +102,7 @@ function renderWelcome() {
   </div>`;
 }
 
-function render(route) {
+function render(route, cause = RENDER_CAUSE.REFRESH) {
   if (!started) {
     app.innerHTML = renderWelcome();
     return;
@@ -119,7 +119,7 @@ function render(route) {
       state.lastCityVisit = new Date().toISOString();
       setState(state);
     }
-    trackPageview(location.hash, route.screen);
+    if (tracksPageview(cause)) trackPageview(location.hash, route.screen);
   } catch (error) {
     captureError(error, { screen: route.screen, params: route.params });
     app.innerHTML = `<div style="padding: 40px; text-align: center;">
@@ -129,8 +129,10 @@ function render(route) {
   }
 }
 
-function renderCurrentRoute() {
-  render(parseRoute(location.hash));
+// Re-draw the current screen (data arrived, an action changed state). Not a
+// pageview unless the caller says this is the player arriving on the screen.
+function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
+  render(parseRoute(location.hash), cause);
 }
 
 function setState(next) {
@@ -324,7 +326,7 @@ app.addEventListener('click', async (e) => {
       const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
       track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     }
-    setTimeout(renderCurrentRoute, 0);
+    setTimeout(() => renderCurrentRoute(), 0);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
   } else if (action === 'toggle-account') {
@@ -512,7 +514,8 @@ app.addEventListener('click', async (e) => {
     } catch (error) {
       captureError(error, { screen: 'saveState' });
     }
-    renderCurrentRoute();
+    // Leaving the welcome screen is the first real view of the game.
+    renderCurrentRoute(RENDER_CAUSE.NAVIGATE);
   } else if (action === 'whoami-open') {
     loadCollective();
     loadWhoami();

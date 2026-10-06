@@ -109,3 +109,28 @@ describe('city map: the broader city', () => {
     expect(html).not.toContain('<img src=x>');
   });
 });
+
+describe('city map: backdrop pods stay behind your city', () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
+  const big = { ...DATA, pods: Array.from({ length: 20 }, (_, i) => POD(`p${i}`, `Place ${i}`, 50000 - i, 30)) };
+
+  it('in-map pods are never drawn larger than the old silhouettes (scale capped at 1)', () => {
+    const html = renderCityMap(createInitialState(), ready(big));
+    const mapPart = html.slice(0, html.indexOf('<div class="city-wide"'));
+    const blocks = [...mapPart.matchAll(/<a class="city-block city-pod[\s\S]*?<\/a>/g)].map((m) => m[0]);
+    expect(blocks).toHaveLength(9);
+    for (const b of blocks) {
+      for (const [, w] of b.matchAll(/width: ([\d.]+)px; z-index/g)) expect(Number(w)).toBeLessThanOrEqual(80);
+    }
+    const wide = html.slice(html.indexOf('<div class="city-wide"'));
+    const wideWidths = [...wide.matchAll(/width: ([\d.]+)px; z-index/g)].map((m) => Number(m[1]));
+    expect(Math.max(...wideWidths)).toBeGreaterThan(80); // the wide layer may still go bigger
+  });
+
+  it('hover/focus does not lift a pod above the district clusters', () => {
+    const html = renderCityMap(createInitialState(), ready(DATA));
+    const rule = html.match(/\.city-pod:hover, \.city-pod:focus-visible \{[^}]*\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[0]).not.toMatch(/z-index/);
+  });
+});
