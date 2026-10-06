@@ -381,6 +381,56 @@ class PurgeThenBuildTest(unittest.TestCase):
         self.assertEqual(doc["city"]["optedOut"], 0)
 
 
+class HonestPasswordsTest(unittest.TestCase):
+    """Task 14: a reset recon showed wasn't needed is not a password change or an action;
+    2FA by passkey/app and upgrades from codes are city-only figures."""
+
+    def setUp(self):
+        PG.reset()
+
+    def test_not_needed_password_is_not_counted(self):
+        sids = players(60)
+        done(sids, "gmail-fortify-password", status="not-needed")
+        done(sids[:50], "yahoo-fortify-password")
+        doc = build()
+        self.assertEqual(doc["city"]["passwords"], 50)
+        self.assertEqual(doc["city"]["actions"], 50)
+        self.assertEqual(pods_by_id(doc)["us-il-chicago"]["passwords"], 50)
+
+    def test_not_needed_alone_publishes_no_passwords(self):
+        sids = players(60)
+        done(sids, "gmail-fortify-password", status="not-needed")
+        doc = build()
+        self.assertNotIn("passwords", doc["city"])
+        self.assertEqual(doc["city"]["actions"], 0)
+
+    def test_passkey_or_app_counts_accounts_city_only(self):
+        sids = players(60)
+        events(sids[:30], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "passkey"})
+        events(sids[30:], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "authenticator"})
+        events(sids[:50], "mission-completed", {"mission": "yahoo-fortify-2fa", "status": "completed", "method": "sms"})
+        events(sids[:50], "mission-completed", {"mission": "yahoo-fortify-2fa-upgrade", "status": "completed", "method": "authenticator"})
+        # Same account twice (2FA by app, then an upgrade): one account.
+        events(sids[:5], "mission-completed", {"mission": "gmail-fortify-2fa-upgrade", "status": "completed", "method": "passkey"})
+        events(sids[:7], "mission-completed", {"mission": "outlook-fortify-2fa", "status": "skipped", "method": "none"})
+        doc = build()
+        self.assertEqual(doc["city"]["passkeyOrApp"], 110)   # 60 gmail + 50 yahoo upgraded
+        self.assertEqual(doc["city"]["smsUpgrades"], 55)
+        self.assertEqual(doc["city"]["twoFactor"], 110)      # upgrades are not more 2FA missions
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertNotIn("passkeyOrApp", pod)
+        self.assertNotIn("smsUpgrades", pod)
+
+    def test_new_figures_absent_under_k(self):
+        sids = players(60)
+        events(sids[:49], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "passkey"})
+        events(sids[:49], "mission-completed", {"mission": "yahoo-fortify-2fa-upgrade", "status": "completed", "method": "passkey"})
+        events(sids[49:], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "sms"})
+        doc = build()
+        self.assertNotIn("passkeyOrApp", doc["city"])
+        self.assertNotIn("smsUpgrades", doc["city"])
+
+
 class NoResidualTest(unittest.TestCase):
     """City figure minus the sum of published pod figures must never reveal a suppressed pod."""
 

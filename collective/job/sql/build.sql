@@ -91,7 +91,8 @@ CREATE TEMP TABLE rc_mc ON COMMIT DROP AS
 SELECT e.session_id,
        max(d.string_value) FILTER (WHERE d.data_key = 'mission') AS mission,
        max(d.string_value) FILTER (WHERE d.data_key = 'finding') AS finding,
-       max(d.string_value) FILTER (WHERE d.data_key = 'status')  AS status
+       max(d.string_value) FILTER (WHERE d.data_key = 'status')  AS status,
+       max(d.string_value) FILTER (WHERE d.data_key = 'method')  AS method
   FROM website_event e JOIN event_data d ON d.website_event_id = e.event_id
  WHERE e.website_id = :'website' AND e.event_name = 'mission-completed'
  GROUP BY e.event_id, e.session_id;
@@ -137,7 +138,19 @@ SELECT session_id, mission, 'brokerOptOuts' FROM rc_done
     OR mission LIKE 'enterprise\_data-fortify-%' OR mission LIKE 'ad\_trackers-fortify-%'
 UNION ALL
 SELECT session_id, mission, 'historyReviewed' FROM rc_done
- WHERE mission ~ '-reclaim-(early|middle|recent|history|early-years|middle-years|bulk|review)$';
+ WHERE mission ~ '-reclaim-(early|middle|recent|history|early-years|middle-years|bulk|review)$'
+UNION ALL
+-- Accounts whose second step is a passkey or authenticator app: a 2FA
+-- mission answered that way, or an upgrade from text/email codes. Keyed by
+-- account, so 2FA plus an upgrade on one account counts once. ('not-needed'
+-- and every other status but completed never count, here or above.)
+SELECT DISTINCT session_id, regexp_replace(mission, '-fortify-2fa(-upgrade)?$', ''), 'passkeyOrApp' FROM rc_mc
+ WHERE status = 'completed'
+   AND ((mission LIKE '%-fortify-2fa' AND method IN ('passkey', 'authenticator'))
+        OR mission LIKE '%-fortify-2fa-upgrade')
+UNION ALL
+SELECT session_id, mission, 'smsUpgrades' FROM rc_done
+ WHERE mission LIKE '%-fortify-2fa-upgrade';
 
 -- Which figures each pod publishes. City figures are built only from pods that
 -- publish the same figure, so city minus the sum of pods never reveals a pod
@@ -186,6 +199,8 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_city(k int) RETURNS jsonb LANGUAGE sql AS 
     'privacy', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'privacy'),
     'brokerOptOuts', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'brokerOptOuts'),
     'historyReviewed', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'historyReviewed'),
+    'passkeyOrApp', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'passkeyOrApp'),
+    'smsUpgrades', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN sp USING (session_id) WHERE kind = 'smsUpgrades'),
     -- A count of places, not people.
     'countries', (SELECT count(DISTINCT s.country) FROM rc_s s JOIN sp USING (session_id) WHERE s.country <> ''),
     'phonePct', (SELECT CASE WHEN count(*) >= k THEN round(100.0 * count(*) FILTER (WHERE s.device = 'mobile') / count(*)) END

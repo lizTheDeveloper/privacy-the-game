@@ -98,7 +98,7 @@ describe('The Whole City: the city in numbers', () => {
     ...DATA,
     city: { ...DATA.city, breachChecks: 9388, breachRatePct: 58, breach3PlusPct: 46, actions: 22534, districts: 365,
             passwords: 1683, twoFactor: 1502, creditFreezes: 151, privacy: 1312, brokerOptOuts: 402, historyReviewed: 96,
-            countries: 97, phonePct: 74 },
+            countries: 97, phonePct: 74, passkeyOrApp: 640, smsUpgrades: 88 },
   };
   const panel = (html, key) => {
     const at = html.indexOf(`data-stat-panel="${key}"`);
@@ -107,7 +107,7 @@ describe('The Whole City: the city in numbers', () => {
 
   it('one panel per numeric figure, in order', () => {
     expect(cityStats(FULL.city).map((s) => s.key)).toEqual([
-      'players', 'actions', 'breachChecks', 'breachRatePct', 'passwords', 'twoFactor', 'creditFreezes', 'privacy',
+      'players', 'actions', 'breachChecks', 'breachRatePct', 'passwords', 'twoFactor', 'passkeyOrApp', 'smsUpgrades', 'creditFreezes', 'privacy',
       'brokerOptOuts', 'historyReviewed', 'districts', 'countries', 'phonePct', 'ghosts', 'optedOut',
     ]);
   });
@@ -120,6 +120,8 @@ describe('The Whole City: the city in numbers', () => {
     expect(panel(html, 'breachRatePct')).toMatch(/58%[\s\S]*46% in three or more/);
     expect(panel(html, 'passwords')).toMatch(/1,683[\s\S]*PASSWORDS CHANGED|PASSWORDS CHANGED[\s\S]*1,683/);
     expect(panel(html, 'twoFactor')).toMatch(/1,502/);
+    expect(panel(html, 'passkeyOrApp')).toMatch(/640[\s\S]*accounts protected by a passkey or authenticator app/);
+    expect(panel(html, 'smsUpgrades')).toMatch(/88[\s\S]*accounts upgraded from text or email codes/);
     expect(panel(html, 'creditFreezes')).toMatch(/151/);
     expect(panel(html, 'privacy')).toMatch(/1,312/);
     expect(panel(html, 'brokerOptOuts')).toMatch(/402/);
