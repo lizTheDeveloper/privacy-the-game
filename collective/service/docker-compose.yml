@@ -1,0 +1,20 @@
+# rc-collective: serves collective.json and /whoami for Reclaim City.
+# Traefik route: ops/multiverse-games-hel1/traefik-dynamic/reclaim-city-collective.yml (monorepo).
+services:
+  rc-collective:
+    build: .
+    container_name: rc-collective
+    restart: unless-stopped
+    read_only: true
+    environment:
+      - COLLECTIVE_FILE=/data/collective.json
+      - GEO_PATH=/geo/GeoLite2-City.mmdb
+    volumes:
+      - /opt/reclaim-city-collective/public:/data:ro
+      - /opt/reclaim-city-collective/geo:/geo:ro
+    networks: [coolify]
+    logging:
+      driver: none
+networks:
+  coolify:
+    external: true
