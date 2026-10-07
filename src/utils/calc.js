@@ -80,10 +80,13 @@ export function isBreachFound(missionId, record) {
     && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
 }
 
-// Email addresses found in a breach in this district, or null when the
-// district has no address checks (only The Master Keys does).
+// Email addresses found in a breach in this district, or null until an
+// address was checked (completed with a breach answer; only The Master Keys
+// has address checks).
 export function districtBreachedAddresses(state, districtId) {
-  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id));
+  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)
+    && state.missions?.[m.id]?.status === 'completed'
+    && ['no-breaches', ...BREACH_FINDINGS].includes(state.missions[m.id].finding));
   if (checks.length === 0) return null;
   return checks.filter((m) => isBreachFound(m.id, state.missions?.[m.id])).length;
 }

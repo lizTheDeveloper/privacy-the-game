@@ -202,10 +202,15 @@ function getProgressCheckIn(state, districtId, percent, dialogue) {
 
 const SEVERITY_RANK = { crit: 3, warn: 2, safe: 1, skip: 0 };
 
+// On a tie, the account's activity speaks first: money that moved is the
+// more urgent fact, and its line already ends with "change the password".
+const TIE_FIRST = ['activity'];
+
 function mostSevere(mission, stored, values) {
   const rank = (v) => {
     const q = mission.debriefQs.find((x) => stored[x.id] === v);
-    return SEVERITY_RANK[q?.options?.find((o) => o.value === v)?.severity] ?? -1;
+    const sev = SEVERITY_RANK[q?.options?.find((o) => o.value === v)?.severity] ?? -1;
+    return sev * 10 + (TIE_FIRST.includes(q?.id) ? 1 : 0);
   };
   return values.reduce((best, v) => (best === undefined || rank(v) > rank(best) ? v : best), undefined);
 }

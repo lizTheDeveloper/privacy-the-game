@@ -454,11 +454,16 @@ describe('promise 6: Q-PW pre-fill and the report list', () => {
     expect(html.match(/name="q_activity"[^>]* checked/g)).toBeNull();
   });
 
-  it('the flaggable list holds every enabled account with a recon mission, and none disabled', () => {
+  // Edited by the builder for ruling 5 (2026-10-07): only accounts with a
+  // password the player could change (password/passwords/lockdown mission,
+  // or a recon that asks pw_status), not every account with a recon mission.
+  it('the flaggable list holds every enabled account with a changeable password, and none disabled', () => {
     const s = allOn();
     const list = pmReportAccounts(s);
-    const withRecon = new Set(MISSIONS.filter((m) => m.phase === 'recon' && ACCOUNTS[m.accountId]).map((m) => m.accountId));
-    expect(new Set(list)).toEqual(withRecon);
+    const withPassword = new Set(MISSIONS.filter((m) => ACCOUNTS[m.accountId]
+      && (/-fortify-(password|passwords|lockdown)$/.test(m.id) || (m.phase === 'recon' && !m.legacy && m.debriefQs.some((q) => q.id === 'pw_status'))))
+      .map((m) => m.accountId));
+    expect(new Set(list)).toEqual(withPassword);
     const off = { ...s, accounts: { ...s.accounts, instagram: { ...s.accounts.instagram, enabled: false } } };
     expect(pmReportAccounts(off)).not.toContain('instagram');
     expect(list).toContain('amazon');

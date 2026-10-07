@@ -256,7 +256,7 @@ describe('Q-PW pre-fill and the widened report list', () => {
     expect(renderDebrief(allOn(), 'primary_bank-recon-password')).not.toMatch(/ checked/);
   });
 
-  it('the report can flag every account with a recon mission, and remembers what it offered', () => {
+  it('the report can flag every account the new recon asks about, and remembers what it offered', () => {
     const s = { ...allOn(), passwordManager: '1password' };
     const ids = pmReportAccounts(s);
     for (const m of RECON_ACCOUNT_MISSIONS) expect(ids, m.accountId).toContain(m.accountId);
@@ -313,6 +313,26 @@ describe('district lists are unchanged in size', () => {
       const now = getMissionsForDistrict(d.id).filter((m) => m.phase === 'recon').length;
       const before = MISSIONS.filter((m) => !m.replaces && missionDistrict(m) === d.id && m.phase === 'recon').length;
       expect(now, d.id).toBe(before);
+    }
+  });
+});
+
+describe('ruling: the report flags only accounts with a password the player could change', () => {
+  it('password, passwords or lockdown missions, or a recon that asks about the password', () => {
+    const ids = pmReportAccounts(allOn());
+    for (const a of ['gmail', 'primary_bank', 'amazon', 'instagram', 'dropbox', 'uber', 'slack', 'netflix']) expect(ids, a).toContain(a);
+    for (const a of ['people_search', 'car_toyota', 'smart_tv', 'browser_fingerprint', 'photo_metadata', 'scam_defense', 'location_brokers']) expect(ids, a).not.toContain(a);
+    for (const m of RECON_ACCOUNT_MISSIONS) if (m.debriefQs.some((q) => q.id === 'pw_status')) expect(ids, m.accountId).toContain(m.accountId);
+  });
+});
+
+describe('severity tie: money that moved speaks before a flagged password', () => {
+  it('activity-confirmed beats pw-leaked, and its line already says to change the password', () => {
+    for (const m of RECON_ACCOUNT_MISSIONS.filter((x) => x.debriefQs.some((q) => q.id === 'activity'))) {
+      const s = updateMission(allOn(), m.id, { status: 'completed', pw_status: 'pw-leaked', activity: 'activity-confirmed' });
+      const line = debriefReaction(s, m).line;
+      expect(line, m.id).toBe(m.scoutDialog.debrief['activity-confirmed']);
+      expect(line, m.id).toMatch(/[Cc]hange the password/);
     }
   });
 });

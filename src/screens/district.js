@@ -482,7 +482,9 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
   const progress = calcDistrictProgress(state, districtId);
 
   if (!activeTab) {
-    const hasCompletedAny = getMissionsForDistrict(districtId).some((m) => state.missions[m.id]?.status === 'completed');
+    // A filed legacy record counts too: an old save opens on Recon, not Survey.
+    const filed = (id) => state.missions[id]?.status === 'completed';
+    const hasCompletedAny = getMissionsForDistrict(districtId).some((m) => filed(m.id) || (m.replaces && filed(m.replaces)));
     activeTab = hasCompletedAny ? 'recon' : 'survey';
   }
 

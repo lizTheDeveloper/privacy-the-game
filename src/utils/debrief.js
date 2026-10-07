@@ -20,12 +20,20 @@ export function questionOptions(q, state) {
 }
 
 // The accounts the password-manager report can flag: every enabled account
-// with a recon mission (recon Phase 2; it used to be password-reset accounts
-// only, so Amazon, Instagram, Discord... could never be marked flagged).
+// with a password the player could change (ruling 2026-10-07) — one with a
+// password, passwords or lockdown mission, or a recon that asks about its
+// password (Dropbox, Uber). Never data brokers, devices, cars, metadata or
+// fingerprints.
+const HAS_PASSWORD = /-fortify-(password|passwords|lockdown)$/;
+
+function hasChangeablePassword(m) {
+  return HAS_PASSWORD.test(m.id) || (m.phase === 'recon' && !m.legacy && m.debriefQs?.some((q) => q.id === 'pw_status'));
+}
+
 export function pmReportAccounts(state) {
   const accounts = [];
   for (const m of MISSIONS) {
-    if (m.phase !== 'recon' || !ACCOUNTS[m.accountId]) continue;
+    if (!ACCOUNTS[m.accountId] || !hasChangeablePassword(m)) continue;
     if (!state?.accounts?.[m.accountId]?.enabled || accounts.includes(m.accountId)) continue;
     accounts.push(m.accountId);
   }

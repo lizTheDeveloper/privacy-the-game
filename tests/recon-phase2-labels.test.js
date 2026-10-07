@@ -76,3 +76,15 @@ describe('The Whole City', () => {
     expect(html).not.toMatch(/breached accounts? and fixed/);
   });
 });
+
+describe('ruling: the chapter stat hides until an address was checked', () => {
+  it('Master Keys with no address check shows no breach stat; a clean check shows 0', () => {
+    expect(districtBreachedAddresses(s0, 'master-keys')).toBe(null);
+    expect(renderMilestone(s0, 'master-keys')).not.toMatch(/FOUND IN A BREACH/);
+    const skipped = updateMission(s0, 'gmail-recon-breach', { status: 'skipped', finding: 'skip' });
+    expect(districtBreachedAddresses(skipped, 'master-keys')).toBe(null);
+    const clean = breach(s0, 'gmail', 'no-breaches');
+    expect(districtBreachedAddresses(clean, 'master-keys')).toBe(0);
+    expect(renderMilestone(clean, 'master-keys')).toMatch(/ADDRESSES FOUND IN A BREACH/);
+  });
+});
