@@ -49,7 +49,7 @@ export const PERIMETER_MISSIONS = [
     title: "Lock Down Your Phone Number",
     briefing: "SIM swapping is when an attacker calls your carrier, pretends to be you, and transfers your number to their SIM card. Your phone goes dead. Their phone starts receiving your texts -- including every SMS two-factor code. The whole attack takes fifteen minutes. Your defense is a carrier account PIN and a port-out lock. These are two settings, one phone call or website visit, and they block the most common way high-value accounts get stolen.",
     steps: [
-      { text: "T-Mobile: Open t-mobile.com/account → Profile → Security → set a unique Account PIN (not your birthday or SSN). Then enable \"Account Takeover Protection\" under the same Security page.", url: "https://www.t-mobile.com/account/profile/security" },
+      { text: 'T-Mobile: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
       { text: "AT&T: Open att.com/myatt → Profile → Sign-in info → set a Wireless Passcode. Then go to Account → Security → enable \"Extra Security\" (this requires the passcode for ALL account changes).", url: "https://www.att.com/acctmgmt/profile" },
       { text: "Verizon: Open myverizon.com → Account → Security → set an Account PIN. Then enable \"Number Lock\" on the same page.", url: "https://secure.verizon.com/signin" },
       { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
@@ -253,7 +253,7 @@ export const PERIMETER_MISSIONS = [
     briefing: "Now connect the clean email to your real accounts as a backup recovery method. This is the bridge: your real accounts gain a recovery path through the clean email, so when you're safely through the border, you can reset your way back in. Important: test the recovery flow before you travel. Reset one account's password through the clean email to confirm it works. Don't discover a problem at the airport.",
     steps: [
       { text: "Google: myaccount.google.com/security → scroll to \"Ways we can verify it's you\" → add the clean email as a recovery email', url: 'https://myaccount.google.com/security" },
-      { text: "Apple: icloud.com/settings → Sign-In and Security → add the clean email as a notification/recovery contact", url: "https://www.icloud.com/settings/" },
+      { text: "Apple: account.apple.com → Sign-In and Security → add the clean email as a notification/recovery contact", url: "https://account.apple.com" },
       { text: "Microsoft: account.live.com/proofs/manage → add the clean email as an alternate email", url: "https://account.live.com/proofs/manage" },
       { text: "Test it: sign out of ONE account, then recover it using \"Forgot password\" with the clean email. Confirm the reset email arrives and works. Then change the password back." },
     ],

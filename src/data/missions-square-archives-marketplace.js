@@ -1181,7 +1181,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: Amazon",
     briefing: "Amazon stores payment methods and your home address. 2FA here prevents unauthorized purchases even if your password leaks from another service. One reused password + one breach = someone else's packages on your card.",
     steps: [
-      { text: 'Open Amazon Login & Security', url: 'https://www.amazon.com/gp/css/account/info/ref=ya_manage_login_and_security' },
+      { text: 'Open Your Account → Login & security', url: 'https://www.amazon.com/your-account' },
       { text: `Click "Edit" next to Password → open your password manager, generate a random 20+ character password, save it, paste in` },
       { text: `Click "Edit" next to "Two-Step Verification (2SV)" → click "Get Started"` },
       { text: `Choose "Authenticator app" → scan the QR code → enter the 6-digit code to confirm` },

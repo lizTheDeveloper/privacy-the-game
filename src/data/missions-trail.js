@@ -115,7 +115,7 @@ export const TRAIL_MISSIONS = [
     title: "Audit Your Cloud Photo Location History",
     briefing: "Google Photos and Apple Photos both build a complete location map from your photo library. Every geotagged photo becomes a pin on a map that shows everywhere you've been, on what date, for years. This is a more detailed location history than most people realize they've created -- and it's accessible to anyone who gets into your cloud account.",
     steps: [
-      { text: "Google Photos: Open photos.google.com/map in a browser. This is your photo location history -- every place you've taken a photo, clustered by area. Zoom in on your home area and notice how many pins there are.", url: "https://photos.google.com/map" },
+      { text: 'Google Photos: search for your town or neighborhood. Every photo that comes up was tagged with a place. Notice how many are tagged at home.' },
       { text: "Apple Photos: Open the Photos app on Mac or iPhone > Albums > Places. This is the same thing -- a map of everywhere your photos were taken." },
       { text: "Consider: would you want someone who got into your Google or Apple account to see this map? This is why the Master Keys district comes first -- your email account protects this data." },
       { text: "Google Photos: Settings > Sharing > check that partner sharing and shared libraries aren't exposing location data to people you didn't intend.", url: "https://photos.google.com/settings" },
@@ -167,8 +167,8 @@ export const TRAIL_MISSIONS = [
     briefing: "Most loyalty programs have a privacy settings page where you can opt out of data sharing with third parties. The setting exists because of CCPA and state privacy laws -- they're legally required to let you opt out of data sale. But they bury it. This mission walks you through the major ones.",
     steps: [
       { text: "CVS ExtraCare: Log into CVS.com > Account Settings > Privacy Preferences > opt out of 'sharing for marketing purposes' and 'sharing for analytics'", url: "https://www.cvs.com/account/compliance/do-not-sell" },
-      { text: "Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): Log into kroger.com > My Account > Communication Preferences. Also submit a data deletion request through their privacy portal.", url: "https://www.kroger.com/account/privacy-choices" },
-      { text: "Target Circle: Log into target.com > Account > Settings > Privacy. Opt out of targeted advertising and data sharing.", url: "https://www.target.com/circle/account" },
+      { text: 'Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): in your kroger.com account, review communication preferences. For a data deletion request, use the rights section of its privacy policy.', url: 'https://www.kroger.com/i/privacy-policy' },
+      { text: 'Target Circle: sign in to target.com → Account and review its privacy and advertising settings.', url: 'https://www.target.com/account' },
       { text: "Starbucks: Open the Starbucks app > Account > Privacy Settings. Or visit starbucks.com privacy page.", url: "https://www.starbucks.com/terms/privacy-policy/" },
       { text: "For any loyalty program not listed: search '[company name] do not sell my personal information' -- CCPA requires a page with this exact language." },
     ],
@@ -267,7 +267,7 @@ export const TRAIL_MISSIONS = [
     title: "Review Credit Card Data Sharing",
     briefing: "Visa and Mastercard sell aggregated transaction data to marketers and analytics firms. Your card issuer (Chase, Citi, Amex, etc.) also has its own data-sharing agreements. The aggregated data is supposedly anonymized, but researchers have repeatedly shown that credit card transaction records can be de-anonymized with just a few data points -- the store, the date, and the amount are often enough to identify a specific person.",
     steps: [
-      { text: "Chase: Log into chase.com > Profile & Settings > Privacy Preferences > opt out of sharing for marketing", url: "https://www.chase.com/digital/data-privacy/manage-settings" },
+      { text: 'Chase: sign in and review the privacy and marketing preferences in your profile settings to opt out of sharing for marketing' },
       { text: "Capital One: Log in > Settings > Privacy > 'Limit sharing of personal information'", url: "https://www.capitalone.com/privacy/" },
       { text: "American Express: Log in > Account Services > Privacy > opt out of 'sharing information with Amex business partners'", url: "https://global.americanexpress.com/privacy/opt-out" },
       { text: "Bank of America: Log in > Profile & Settings > Privacy > 'Manage your ad choices'", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
