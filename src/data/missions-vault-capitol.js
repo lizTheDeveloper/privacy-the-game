@@ -674,7 +674,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'state_dmv',
     phase: 'recon',
     title: 'Claim Your DMV Account',
-    briefing: `Your driver's license number is in more databases than you think -- every landlord application, car rental, background check, and bar that scanned your ID made a copy. If your state's DMV has an online account, open it to check the address on your record. If it offers alerts (Wisconsin's eNotify, for example), turn them on. Alerts are what catch a duplicate license or an address change.`,
+    briefing: `Your driver's license number is in more databases than you think -- every landlord application, car rental, background check, and bar that scanned your ID made a copy. If your state's DMV has an online account, open it to check the address on your record. If it offers alerts about changes to your record, turn them on. Alerts are what catch a duplicate license or an address change.`,
     steps: [
       { text: 'Search "[your state] DMV online account" in your browser' },
       { text: `Create an account if you don't have one` },
