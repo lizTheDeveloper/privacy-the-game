@@ -206,6 +206,63 @@ class TotalsTest(unittest.TestCase):
         for entry in doc["city"]["byAddress"]:
             self.assertEqual(set(entry), {"id", "breachRatePct"})
 
+    # X6 allowlist (recon Phase 2): breach figures count only the three breach
+    # answers, and only on the 8 email-address accounts' -recon-breach missions.
+    def test_old_service_breach_check_is_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        self.breach(sids, "primary_bank", "3plus-breaches")   # old event, still restored from saves
+        self.breach(sids, "linkedin", "1-2-breaches")
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual(city["breach3PlusPct"], 0)
+        self.assertNotIn("fortified", city)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertEqual(pod["breachChecks"], 60)
+        self.assertEqual(pod["breachRatePct"], 0)
+
+    def test_new_password_activity_and_service_events_are_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        events(sids, "mission-completed", {"mission": "primary_bank-recon-password", "status": "completed",
+                                           "pw_status": "pw-leaked", "activity": "activity-confirmed"})
+        events(sids, "mission-completed", {"mission": "linkedin-recon-service", "status": "completed",
+                                           "service_breach": "in-service-breach"})
+        events(sids, "mission-completed", {"mission": "amazon-recon-activity", "status": "completed",
+                                           "activity": "activity-unknown"})
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        self.assertEqual(city["actions"], 240)   # still actions, just not breach checks
+
+    def test_unknown_finding_value_is_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        self.breach(sids, "google", "same-as-gmail")
+        self.breach(sids, "outlook", "in-service-breach")
+        self.breach(sids, "yahoo", "skip', text: 'I'll look later', severity: 'skip")
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertNotIn("fortified", city)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+
+    def test_every_email_address_account_still_counts(self):
+        sids = players(60)
+        accts = ("gmail", "outlook", "icloud", "yahoo", "protonmail", "google", "apple_id", "microsoft")
+        for a in accts:
+            self.breach(sids, a, "1-2-breaches")
+        doc = build()
+        self.assertEqual(doc["city"]["breachChecks"], 60 * len(accts))
+        self.assertEqual(doc["city"]["breachRatePct"], 100)
+        self.assertEqual(sorted(a["id"] for a in doc["city"]["byAddress"]), sorted(accts))
+
     def test_actions_districts_ghosts_optouts(self):
         sids = players(60)
         events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed"})

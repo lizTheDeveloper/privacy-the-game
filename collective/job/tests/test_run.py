@@ -37,6 +37,17 @@ class LabelTest(unittest.TestCase):
             self.assertEqual(run.load_names(p), {"US": "United States", "US-IL": "Illinois", "BR-SP": "S\u00e3o Paulo"})
 
 
+    def test_names_tsv_labels_only_email_address_accounts(self):
+        # byAddress carries email-address accounts only (build.sql allowlist).
+        names = run.load_names(str(Path(run.__file__).resolve().parent / "names.tsv"))
+        accts = {k[len("account:"):] for k in names if k.startswith("account:")}
+        self.assertEqual(accts, {"gmail", "outlook", "icloud", "yahoo", "protonmail",
+                                 "google", "apple_id", "microsoft"})
+        sql = (Path(run.__file__).resolve().parent / "sql" / "build.sql").read_text()
+        for a in accts:
+            self.assertIn(f"'{a}'", sql)
+
+
 class WriteTest(unittest.TestCase):
     def test_write_atomic_replaces_and_leaves_no_temp(self):
         d = tempfile.mkdtemp()

@@ -97,9 +97,18 @@ SELECT e.session_id,
  WHERE e.website_id = :'website' AND e.event_name = 'mission-completed'
  GROUP BY e.event_id, e.session_id;
 
+-- Breach checks: an allowlist, never "anything but skip". Only the three
+-- breach answers count, and only on the email-address accounts' HIBP checks
+-- (HIBP searches by address). Old service "-recon-breach" events (bank,
+-- PayPal, LinkedIn...) re-checked the same address, and restore.js resends
+-- them from saved games, so they are excluded by mission id; any other
+-- finding value (new or malformed) is excluded by value.
 CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
-SELECT session_id, left(mission, length(mission) - length('-recon-breach')) AS acct, finding
-  FROM rc_mc WHERE mission LIKE '%-recon-breach' AND finding IS NOT NULL AND finding <> 'skip';
+SELECT session_id, acct, finding
+  FROM (SELECT session_id, left(mission, length(mission) - length('-recon-breach')) AS acct, finding
+          FROM rc_mc WHERE mission LIKE '%-recon-breach') c
+ WHERE finding IN ('no-breaches', '1-2-breaches', '3plus-breaches')
+   AND acct IN ('gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft');
 
 CREATE TEMP TABLE rc_breached ON COMMIT DROP AS
 SELECT DISTINCT c.session_id, c.acct,
@@ -185,7 +194,7 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_city(k int) RETURNS jsonb LANGUAGE sql AS 
         'breached', (SELECT count(*) FROM br)) END,
     'breachChecks', CASE WHEN n.check_players >= k THEN (SELECT count(*) FROM chk) END,
     'breachRatePct', CASE WHEN n.check_players >= k THEN
-        round(100.0 * (SELECT count(*) FILTER (WHERE finding <> 'no-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
+        round(100.0 * (SELECT count(*) FILTER (WHERE finding IN ('1-2-breaches', '3plus-breaches')) FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'breach3PlusPct', CASE WHEN n.check_players >= k THEN
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'actions', (SELECT count(*) FROM rc_mc m JOIN sp USING (session_id) WHERE m.status = 'completed'),
@@ -225,7 +234,7 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_totals(pod_filter text, k int) RETURNS jso
         'breached', (SELECT count(*) FROM br)) END,
     'breachChecks', CASE WHEN n.check_players >= k THEN (SELECT count(*) FROM chk) END,
     'breachRatePct', CASE WHEN n.check_players >= k THEN
-        round(100.0 * (SELECT count(*) FILTER (WHERE finding <> 'no-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
+        round(100.0 * (SELECT count(*) FILTER (WHERE finding IN ('1-2-breaches', '3plus-breaches')) FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'breach3PlusPct', CASE WHEN n.check_players >= k THEN
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'actions', (SELECT count(*) FROM rc_mc m JOIN s USING (session_id) WHERE m.status = 'completed'),
@@ -252,7 +261,7 @@ SELECT jsonb_build_object(
                                   SELECT jsonb_agg(jsonb_build_object('id', acct, 'breachRatePct', pct)
                                                    ORDER BY checks DESC, acct)
                                     FROM (SELECT acct, count(*) AS checks, count(DISTINCT session_id) AS who,
-                                                 round(100.0 * count(*) FILTER (WHERE finding <> 'no-breaches') / count(*)) AS pct
+                                                 round(100.0 * count(*) FILTER (WHERE finding IN ('1-2-breaches', '3plus-breaches')) / count(*)) AS pct
                                             FROM rc_checks
                                            WHERE session_id IN (SELECT s.session_id FROM rc_s s JOIN rc_flags f ON f.pod = s.pod
                                                                  WHERE f.players >= :k AND f.cp >= :k)
