@@ -2,7 +2,10 @@
 // rule as build.sql's allowlist, and every label says what it counts.
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createInitialState, updateMission } from '../src/state.js';
+import { calcFindings, getBuildingState, isBreachFound, districtBreachedAddresses } from '../src/utils/calc.js';
 import { yourPart } from '../src/utils/collective.js';
+import { renderMilestone } from '../src/screens/milestone.js';
+import { milestoneCardLine } from '../src/utils/milestone-card.js';
 import { renderCityTogether } from '../src/screens/city-together.js';
 
 beforeEach(() => {
@@ -12,6 +15,49 @@ beforeEach(() => {
 
 const s0 = createInitialState();
 const breach = (s, acct, finding) => updateMission(s, `${acct}-recon-breach`, { status: 'completed', finding });
+
+describe('breach found = an email address breach check that found one', () => {
+  it('an old service breach record is no longer a breach found', () => {
+    const s = breach(breach(s0, 'primary_bank', '3plus-breaches'), 'gmail', '1-2-breaches');
+    expect(isBreachFound('primary_bank-recon-breach', s.missions['primary_bank-recon-breach'])).toBe(false);
+    expect(isBreachFound('gmail-recon-breach', s.missions['gmail-recon-breach'])).toBe(true);
+    expect(calcFindings(s).breachesFound).toBe(1);
+  });
+
+  it('a bank fully done after an old "breached" email re-check is not scarred', () => {
+    let s = breach(s0, 'primary_bank', '3plus-breaches');
+    for (const kind of ['password', '2fa', 'alerts']) s = updateMission(s, `primary_bank-fortify-${kind}`, { status: 'completed' });
+    expect(getBuildingState(s, 'primary_bank')).toBe('liberated');
+  });
+});
+
+describe('the chapter-complete screen and share card', () => {
+  it('Master Keys counts addresses found in a breach, with a label that says so', () => {
+    const s = breach(breach(breach(s0, 'gmail', '1-2-breaches'), 'yahoo', '3plus-breaches'), 'outlook', 'no-breaches');
+    expect(districtBreachedAddresses(s, 'master-keys')).toBe(2);
+    const html = renderMilestone(s, 'master-keys');
+    expect(html).not.toContain('BREACHES FIXED');
+    expect(html).toContain('ADDRESSES FOUND IN A BREACH');
+    expect(html).toMatch(/color: var\(--amber\)[^>]*>2</);
+  });
+
+  it('a district with no address checks shows no breach stat at all', () => {
+    const s = breach(s0, 'primary_bank', '3plus-breaches');
+    expect(districtBreachedAddresses(s, 'vault')).toBe(null);
+    const html = renderMilestone(s, 'vault');
+    expect(html).not.toMatch(/BREACH/);
+  });
+
+  it('the card line names addresses, and leaves them out where there are none to count', () => {
+    expect(milestoneCardLine({ accountsSecured: 8, addressesBreached: 2, integrityPercent: 40 }))
+      .toBe('8 accounts secured · 2 addresses found in a breach · 40% integrity');
+    expect(milestoneCardLine({ accountsSecured: 8, addressesBreached: 1, integrityPercent: 40 }))
+      .toBe('8 accounts secured · 1 address found in a breach · 40% integrity');
+    expect(milestoneCardLine({ accountsSecured: 5, addressesBreached: null, integrityPercent: 40 }))
+      .toBe('5 accounts secured · 40% integrity');
+    expect(milestoneCardLine({ accountsSecured: 5, integrityPercent: 40 })).not.toMatch(/fixed/);
+  });
+});
 
 describe('The Whole City', () => {
   it('your part counts email addresses, not service re-checks', () => {

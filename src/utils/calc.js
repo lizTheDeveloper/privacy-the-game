@@ -71,11 +71,21 @@ export function isEmailBreachCheck(missionId) {
     && EMAIL_ACCOUNT_IDS.has(missionId.slice(0, -'-recon-breach'.length));
 }
 
-// A breach found: a breach check that found one. Login, device, car, AI and
-// smart-home answers reuse "finding" with other meanings, so they never count.
+// A breach found: an email address's breach check that found one (the same
+// rule as build.sql's allowlist). Login, device, car, AI and smart-home
+// answers reuse "finding" with other meanings, and an old "breach check" on a
+// bank or service only re-checked the email address, so none of them count.
 export function isBreachFound(missionId, record) {
-  return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
+  return isEmailBreachCheck(missionId)
     && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
+}
+
+// Email addresses found in a breach in this district, or null when the
+// district has no address checks (only The Master Keys does).
+export function districtBreachedAddresses(state, districtId) {
+  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id));
+  if (checks.length === 0) return null;
+  return checks.filter((m) => isBreachFound(m.id, state.missions?.[m.id])).length;
 }
 
 export function calcFindings(state) {

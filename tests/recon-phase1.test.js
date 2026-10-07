@@ -222,8 +222,8 @@ describe('X7: breaches found and scarred buildings count only real breach findin
     let s = createInitialState();
     s = updateMission(s, 'smart_tv-recon-acr', { status: 'completed', finding: 'no-issues' });
     const html = renderMilestone(s, 'grid');
-    const n = html.match(/color: var\(--amber\)[^>]*>(\d+)</);
-    expect(n?.[1]).toBe('0');
+    // Phase 2: a district with no email-address checks shows no breach stat at all.
+    expect(html).not.toMatch(/BREACH/);
   });
 
   it('a breach check with breaches still counts and scars', () => {
