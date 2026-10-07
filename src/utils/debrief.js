@@ -60,8 +60,11 @@ export function debriefRecord(mission, answers) {
     a[q.id] = q.type === 'number' ? numberAnswer(q, answers[q.id], answers) : answers[q.id];
     if (a[q.id] === undefined) return null;
   }
-  const values = Object.values(a).flat();
-  let status = values.some((v) => DEFERRED.has(v)) ? 'skipped' : 'completed';
+  // Deferred: a "skip"/"later" value, or any option marked severity 'skip'
+  // (like "Need to create an account first -- I'll come back").
+  const deferred = shown.some((q) => [a[q.id]].flat().some((v) => DEFERRED.has(v)
+    || q.options?.some((o) => o.value === v && o.severity === 'skip')));
+  let status = deferred ? 'skipped' : 'completed';
   const record = { status, finding: a.finding, action: a.action };
   for (const key of ['password_exposed', 'method', 'method_setup']) if (a[key] !== undefined) record[key] = a[key];
   if (mission.debriefQs.some((q) => q.kind === 'two-factor')) record.action = twoFactorAction(a);

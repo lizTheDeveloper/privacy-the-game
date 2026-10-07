@@ -65,6 +65,32 @@ describe('X2: every debrief option is a real value + text', () => {
     expect(wrong).toEqual([]);
   });
 
+  it("every option marked severity 'skip' files as skipped, in every mission", () => {
+    const wrong = [];
+    let checked = 0;
+    for (const m of MISSIONS) {
+      for (const q of m.debriefQs || []) {
+        if (q.showIf) continue;
+        for (const o of q.options || []) {
+          if (o.severity !== 'skip') continue;
+          const answers = {};
+          for (const q2 of m.debriefQs) if (!q2.showIf) answers[q2.id] = q2 === q ? o.value : q2.options?.[0]?.value;
+          const r = debriefRecord(m, answers);
+          checked += 1;
+          if (r?.status !== 'skipped') wrong.push(`${m.id} / ${q.id} = ${o.value} -> ${r?.status}`);
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(100);
+    expect(wrong).toEqual([]);
+  });
+
+  it('"Need to create an account first" on a bureau freeze files as skipped', () => {
+    for (const id of ['credit_freeze-fortify-equifax', 'credit_freeze-fortify-experian', 'credit_freeze-fortify-transunion']) {
+      expect(debriefRecord(byId(id), { freeze_status: 'no-account-yet' }).status).toBe('skipped');
+    }
+  });
+
   it.each([
     ['people_search-recon-find-yourself', 'broker_recon', 'skip'],
     ['credit_freeze-fortify-equifax', 'freeze_status', 'skip'],
