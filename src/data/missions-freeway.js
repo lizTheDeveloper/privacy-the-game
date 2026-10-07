@@ -160,7 +160,7 @@ function makeManufacturerMissions(accountId) {
       accountId,
       phase: 'recon',
       title: `Insurance Data Check: ${name}`,
-      briefing: `Driving data reaches insurers through data exchanges run by LexisNexis and Verisk. Your consumer reports from each show what they hold. ${acct.insuranceStep}`,
+      briefing: `Driving data reaches insurers through data exchanges run by LexisNexis and Verisk. Your consumer reports from each show what they hold.${insuranceLine} The last step checks ${name}'s side.`,
       steps: [
         { text: 'Request your LexisNexis Consumer Disclosure Report. Its telematics section shows driving data insurers received', url: 'https://consumer.risk.lexisnexis.com/request' },
         { text: 'Request your Verisk report and look for Driving Data. Verisk’s driving-data exchange shut down in April 2024, so it shows past data', url: 'https://fcra.verisk.com' },
