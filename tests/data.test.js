@@ -44,8 +44,9 @@ describe('ACCOUNTS', () => {
 
 describe('MISSIONS', () => {
   it('every mission references a valid account', () => {
-    // The password-manager report belongs to no account; it names its district instead.
-    const accountless = new Set(['password_manager-recon-report', 'password_manager-fortify-burst']);
+    // The password-manager report belongs to no account; it names its district
+    // instead. So does the vehicle privacy report (any car; recon audit #56).
+    const accountless = new Set(['password_manager-recon-report', 'password_manager-fortify-burst', 'car_general-recon-vin']);
     for (const m of MISSIONS) {
       if (accountless.has(m.id)) {
         expect(DISTRICTS.some((d) => d.id === m.district), `${m.id} needs a valid district`).toBe(true);

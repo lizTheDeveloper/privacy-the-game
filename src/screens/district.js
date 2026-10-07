@@ -97,7 +97,8 @@ const NO_RESET_STYLE = 'letter-spacing: 1px; color: var(--lime); background: rgb
 // A mission with no account (the password-manager report) has no building.
 function missionIcon(state, mission) {
   if (ACCOUNTS[mission.accountId]) return renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32);
-  return '<div aria-hidden="true" style="width: 32px; text-align: center; font-size: 20px; color: var(--cyan); flex-shrink: 0;">&#128273;</div>';
+  const icon = mission.inPlayIfAny ? '&#128663;' : '&#128273;';
+  return `<div aria-hidden="true" style="width: 32px; text-align: center; font-size: 20px; color: var(--cyan); flex-shrink: 0;">${icon}</div>`;
 }
 
 function renderNotFound() {

@@ -229,3 +229,117 @@ describe('old saves on replaced questions', () => {
     expect(restoreEvents(fixed).some((e) => e.data.mission === 'enterprise_data-recon-supply-chain' && e.data.status === 'completed')).toBe(true);
   });
 });
+
+describe('The Freeway', () => {
+  const MAKES = {
+    car_gm: ['GM', 'https://www.gm.com/consumer-privacy'],
+    car_toyota: ['Toyota', 'https://privacy.toyota.com/'],
+    car_honda: ['Honda', 'https://privacyportal.onetrust.com/webform/50eb4a6d-ca54-42d6-9746-67aa2da0e52f/6ec559a6-cf6f-48b2-b98e-543b3bcd65a6'],
+    car_ford: ['Ford', 'https://privacyportal.onetrust.com/webform/1d20b685-0942-4b4d-a0af-b799c97f5cf6/2e4928b6-d77a-4f76-9518-1bfb9721669d'],
+    car_hyundai: ['Hyundai', 'https://owners.hyundaiusa.com/us/en/privacy/data-request/new-request'],
+    car_kia: ['Kia', 'https://customercare.kiausa.com'],
+    car_nissan: ['Nissan', 'https://privacyportal.onetrust.com/webform/00db3d80-61f2-406b-9665-493b342a269d/57adada6-a5f9-4204-85a3-5e5162bca5c8'],
+    car_subaru: ['Subaru', 'https://privacyportal.onetrust.com/webform/1d87978c-8b58-46ba-83c1-acbc9aa41e6a/fb603d38-a944-4a5c-90e0-3b0aabb3052a'],
+    car_tesla: ['Tesla', 'https://www.tesla.com/contactus?issue=dataPrivacyRequest'],
+    car_bmw: ['BMW', 'https://my.bmwusa.com/dataprivacy?type=access'],
+    car_vw: ['Volkswagen', 'https://privacy.vwgoa.com/'],
+    car_stellantis: ['Stellantis', 'https://privacyportal.onetrust.com/webform/abdee64f-f547-46bd-97a7-f56d58479fce/d33c9846-4a86-4ee4-97fc-92dae7e3a7cf'],
+  };
+
+  it.each(Object.entries(MAKES))('%s data audit files a request at the right form', (acct, [name, url]) => {
+    const m = byId(`${acct}-recon-audit`);
+    expect(m.title).toBe(`File a data request: ${name}`);
+    expect(stepUrls(m)).toEqual([url]);
+    expect(stepText(m)).toMatch(/45 days/);
+    expect(m.debriefQs.map((q) => q.id)).toEqual(['request']);
+    expect(values(m, 'request')).toEqual(['request-filed', 'already-filed', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    filesCleanly(m, 'request');
+  });
+
+  it('no Freeway link is one of the dead or wrong ones', () => {
+    const all = MISSIONS.filter((m) => m.district === 'freeway' || ACCOUNTS[m.accountId]?.district === 'freeway');
+    const urls = all.flatMap(stepUrls).concat(Object.values(ACCOUNTS).filter((a) => a.district === 'freeway').map((a) => a.securityUrl));
+    for (const bad of ['ksupport.kiausa.com', '/draft/', 'fsgroupprivacy', 'tesla.com/support/contact', 'privacynotincluded', '664c75ee', 'honda.com/privacy/your-privacy-choices', 'subaru.com/support/consumer-privacy']) {
+      expect(urls.filter((u) => u?.includes(bad)), bad).toEqual([]);
+    }
+  });
+
+  it('the vehicle privacy report is for every car owner, with its own answers', async () => {
+    const { isMissionInPlay } = await import('../src/utils/mission-status.js');
+    const { createInitialState } = await import('../src/state.js');
+    const m = byId('car_general-recon-vin');
+    expect(m.accountId).toBeUndefined();
+    expect(m.district).toBe('freeway');
+    const s = createInitialState();
+    const cars = Object.keys(s.accounts).filter((id) => id.startsWith('car_'));
+    const off = { ...s, accounts: Object.fromEntries(Object.entries(s.accounts).map(([id, a]) => [id, { ...a, enabled: cars.includes(id) ? false : a.enabled }])) };
+    expect(isMissionInPlay(off, m)).toBe(false);
+    const toyota = { ...off, accounts: { ...off.accounts, car_toyota: { ...off.accounts.car_toyota, enabled: true } } };
+    expect(isMissionInPlay(toyota, m)).toBe(true);
+    expect(stepUrls(m)).toEqual(['https://vehicleprivacyreport.com/']);
+    expect(text(m)).not.toMatch(/Mozilla|risk level/);
+    expect(values(m, 'vehicle_label')).toEqual(['collects-little', 'collects-location', 'shares-or-sells', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    filesCleanly(m, 'vehicle_label');
+  });
+
+  const INSURANCE = {
+    car_gm: [/Smart Driver ended in April 2024/, /FTC/],
+    car_toyota: [/Data Privacy Portal/, /Insure Connect/],
+    car_honda: [/Driver Feedback ended in April 2024/],
+    car_kia: [/Kia Access/, /LexisNexis/],
+    car_subaru: [/odometer/],
+    car_vw: [/DriveView/],
+  };
+
+  it.each(Object.entries(INSURANCE))('%s insurance check uses both reports and the true make-specific step', (acct, facts) => {
+    const m = byId(`${acct}-recon-insurance`);
+    expect(m.title).toMatch(/^Insurance Data Check: /);
+    expect(stepUrls(m)).toEqual(['https://consumer.risk.lexisnexis.com/request', 'https://fcra.verisk.com']);
+    for (const f of facts) expect(stepText(m)).toMatch(f);
+    expect(values(m, 'insurer_data')).toEqual(['none-found', 'program-on', 'found-in-report', 'requested', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    expect(stepText(m)).not.toMatch(/Settings > Privacy/);
+    filesCleanly(m, 'insurer_data');
+  });
+
+  it('no mission says an ended program, STARLINK or Car-Net shares driving data with insurers now', () => {
+    for (const acct of ['car_gm', 'car_honda', 'car_subaru', 'car_vw']) {
+      for (const m of MISSIONS.filter((x) => x.accountId === acct)) {
+        expect(text(m), m.id).not.toMatch(/is the pipeline sending|program shares driving data with insurance|feeding your driving data straight/);
+        expect(text(m), m.id).not.toMatch(/Car-Net/);
+      }
+    }
+    expect(byId('car_subaru-optout-app').briefing).toContain('not an insurance program');
+    for (const acct of ['car_gm', 'car_honda']) expect(byId(`${acct}-optout-app`).briefing).toContain('ended in April 2024');
+  });
+
+  it('opt-out timing is 15 business days, not 45 days', () => {
+    const m = byId('car_toyota-optout-privacy');
+    expect(text(m)).not.toMatch(/45 days/);
+    expect(m.briefing).toContain('15 business days');
+    expect(text(byId('car_toyota-reclaim-delete'))).not.toMatch(/no more data on their servers/);
+  });
+});
+
+describe('Freeway old saves', () => {
+  it('an old car audit or VIN report answer still shows, counts and restores', async () => {
+    const { renderDebrief } = await import('../src/screens/debrief.js');
+    const { restoreEvents } = await import('../src/utils/restore.js');
+    const { calcDistrictProgress } = await import('../src/utils/calc.js');
+    const { createInitialState } = await import('../src/state.js');
+    let s = createInitialState();
+    s = { ...s, accounts: { ...s.accounts, car_gm: { ...s.accounts.car_gm, enabled: true } } };
+    const before = calcDistrictProgress(s, 'freeway').completed;
+    s = { ...s, missions: {
+      'car_gm-recon-audit': { status: 'completed', finding: 'some-sharing' },
+      'car_general-recon-vin': { status: 'completed', finding: 'full-sharing' },
+    } };
+    expect(calcDistrictProgress(s, 'freeway').completed).toBe(before + 2);
+    expect(renderDebrief(s, 'car_gm-recon-audit')).toContain('Some data sharing active');
+    expect(renderDebrief(s, 'car_general-recon-vin')).toContain('Full data sharing including insurance');
+    const ev = restoreEvents(s).filter((e) => e.data.mission?.startsWith('car_'));
+    expect(ev.map((e) => e.data.district)).toEqual(['freeway', 'freeway']);
+  });
+});
