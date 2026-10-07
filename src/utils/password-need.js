@@ -13,7 +13,7 @@
 // player's email address, so it is ignored: it proves nothing either way.
 import { MISSIONS } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
-import { EMAIL_ACCOUNT_IDS } from './calc.js';
+import { EMAIL_ACCOUNT_IDS, ADDRESS_PARTNER, isSameAddress } from './calc.js';
 
 const BREACHED = new Set(['1-2-breaches', '3plus-breaches']);
 const PW_FLAGGED = new Set(['pw-leaked', 'pw-reused']);
@@ -45,10 +45,24 @@ function filed(state, id) {
   return FILED.has(r?.status) ? r : null;
 }
 
+// A check answered "same address as <partner>" (X4) is the partner's check.
+function ownOrPartner(state, accountId, suffix) {
+  const r = done(state, `${accountId}${suffix}`);
+  if (isSameAddress(r) && ADDRESS_PARTNER[accountId]) return done(state, `${ADDRESS_PARTNER[accountId]}${suffix}`);
+  return r;
+}
+
 // The email address's breach check, or null (every other account's old
 // -recon-breach re-checked the email and is ignored).
-function emailBreach(state, accountId) {
-  return EMAIL_ACCOUNT_IDS.has(accountId) ? done(state, `${accountId}-recon-breach`) : null;
+export function emailBreachRecord(state, accountId) {
+  return EMAIL_ACCOUNT_IDS.has(accountId) ? ownOrPartner(state, accountId, '-recon-breach') : null;
+}
+const emailBreach = emailBreachRecord;
+
+// The login check that says something (the partner's, when it's the same account).
+function loginCheck(state, accountId) {
+  const r = ownOrPartner(state, accountId, '-recon-login');
+  return r && !isSameAddress(r) ? r : null;
 }
 
 // The new recon's answers for this account, merged.
@@ -91,7 +105,7 @@ export function isPmFlagged(state, accountId) {
 export function resetNeedSources(state, accountId) {
   const out = [];
   const breach = emailBreach(state, accountId);
-  const loginRec = done(state, `${accountId}-recon-login`);
+  const loginRec = loginCheck(state, accountId);
   const ev = evidence(state, accountId);
   if (breach && BREACHED.has(breach.finding) && breach.password_exposed !== 'no') out.push('breach');
   if ((state.pmFlagged || []).includes(accountId) || PW_FLAGGED.has(ev.pw)) out.push('pm');
@@ -119,7 +133,7 @@ export function notNeededReasons(state, accountId) {
   const breach = emailBreach(state, accountId);
   const ev = evidence(state, accountId);
   if (breach?.finding === 'no-breaches') reasons.push('Your breach check found no breaches.');
-  else if (breach) reasons.push('The breaches you found didn’t include your password.');
+  else if (breach && BREACHED.has(breach.finding)) reasons.push('The breaches you found didn’t include your password.');
   if (ev.pw === 'pw-clean' || done(state, PM_MISSION_ID)) reasons.push('Your password manager didn’t flag it.');
   if (ev.activity === 'activity-clean') reasons.push('Everything in its recent activity was yours.');
   if (ev.serviceHadPasswords && ev.service === 'not-in-service-breach') {
@@ -128,7 +142,7 @@ export function notNeededReasons(state, accountId) {
   if (ev.serviceHadPasswords && ev.service === 'in-service-breach' && ev.changedSince === 'yes') {
     reasons.push('You’ve changed it since its own breach.');
   }
-  if (done(state, `${accountId}-recon-login`)) reasons.push('Your login history looked clean.');
+  if (loginCheck(state, accountId)) reasons.push('Your login history looked clean.');
   return reasons;
 }
 

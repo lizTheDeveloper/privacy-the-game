@@ -66,6 +66,16 @@ export function calcDistrictProgress(state, districtId) {
 export const EMAIL_ACCOUNT_IDS = new Set(['gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft']);
 const BREACH_FINDINGS = new Set(['1-2-breaches', '3plus-breaches']);
 
+// Recon X4: the second account of each pair is usually the same address and
+// the same account as the first. Its checks ask "same address?" first
+// (same_address); "same" files without a finding, and its evidence is the
+// partner's.
+export const ADDRESS_PARTNER = { google: 'gmail', apple_id: 'icloud', microsoft: 'outlook' };
+
+export function isSameAddress(record) {
+  return typeof record?.same_address === 'string' && record.same_address.startsWith('same-as-');
+}
+
 export function isEmailBreachCheck(missionId) {
   return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
     && EMAIL_ACCOUNT_IDS.has(missionId.slice(0, -'-recon-breach'.length));

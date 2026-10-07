@@ -105,9 +105,18 @@ SELECT e.session_id, e.event_id, e.created_at AS at,
 -- finding value (new or malformed) is excluded by value.
 -- One check per session and address: the latest filing wins (a restored or
 -- refiled check is the same check; a refile to "skip" is no check).
-CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
-SELECT session_id, acct, finding
-  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding
+-- Recon X4: Google/Gmail, Apple ID/iCloud and Microsoft/Outlook are nearly
+-- always one address. A new "same address" filing sends no finding, so it is
+-- no check; an old save may hold both checks of a pair, and they count as one
+-- address per player (the later answer), under the first account's id when
+-- the player checked it, else under the second's.
+CREATE OR REPLACE FUNCTION pg_temp.rc_pair(acct text) RETURNS text LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE acct WHEN 'google' THEN 'gmail' WHEN 'apple_id' THEN 'icloud' WHEN 'microsoft' THEN 'outlook' ELSE acct END
+$$;
+
+CREATE TEMP TABLE rc_checks_acct ON COMMIT DROP AS
+SELECT session_id, acct, finding, at, event_id
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id
           FROM (SELECT session_id, event_id, at, finding,
                        left(mission, length(mission) - length('-recon-breach')) AS acct
                   FROM rc_mc WHERE mission LIKE '%-recon-breach') c
@@ -115,10 +124,25 @@ SELECT session_id, acct, finding
          ORDER BY session_id, acct, at DESC, event_id DESC) latest
  WHERE finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
 
+CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
+SELECT DISTINCT ON (c.session_id, pg_temp.rc_pair(c.acct)) c.session_id,
+       CASE WHEN EXISTS (SELECT 1 FROM rc_checks_acct p WHERE p.session_id = c.session_id AND p.acct = pg_temp.rc_pair(c.acct))
+            THEN pg_temp.rc_pair(c.acct) ELSE c.acct END AS acct,
+       c.finding
+  FROM rc_checks_acct c
+ ORDER BY c.session_id, pg_temp.rc_pair(c.acct), c.at DESC, c.event_id DESC;
+
+-- Fixed by either account of a pair (one address, one password).
+CREATE OR REPLACE FUNCTION pg_temp.rc_members(acct text) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE pg_temp.rc_pair(acct) WHEN 'gmail' THEN ARRAY['gmail', 'google'] WHEN 'icloud' THEN ARRAY['icloud', 'apple_id']
+              WHEN 'outlook' THEN ARRAY['outlook', 'microsoft'] ELSE ARRAY[acct] END
+$$;
+
 CREATE TEMP TABLE rc_breached ON COMMIT DROP AS
 SELECT DISTINCT c.session_id, c.acct,
-       EXISTS (SELECT 1 FROM rc_mc f WHERE f.session_id = c.session_id AND f.status = 'completed'
-                 AND f.mission IN (c.acct || '-fortify-password', c.acct || '-fortify-2fa')) AS fixed
+       EXISTS (SELECT 1 FROM rc_mc f, unnest(pg_temp.rc_members(c.acct)) a
+                WHERE f.session_id = c.session_id AND f.status = 'completed'
+                  AND f.mission IN (a || '-fortify-password', a || '-fortify-2fa')) AS fixed
   FROM rc_checks c WHERE c.finding IN ('1-2-breaches', '3plus-breaches');
 
 CREATE TEMP TABLE rc_ghost ON COMMIT DROP AS

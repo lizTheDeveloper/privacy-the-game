@@ -254,14 +254,81 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
 
     def test_every_email_address_account_still_counts(self):
-        sids = players(60)
-        accts = ("gmail", "outlook", "icloud", "yahoo", "protonmail", "google", "apple_id", "microsoft")
-        for a in accts:
-            self.breach(sids, a, "1-2-breaches")
+        # Each account counts; the second of a pair (Google, Apple ID,
+        # Microsoft) counts under its own id when its partner wasn't checked.
+        first = players(60)
+        second = players(60)
+        for a in ("gmail", "outlook", "icloud", "yahoo", "protonmail"):
+            self.breach(first, a, "1-2-breaches")
+        for a in ("google", "apple_id", "microsoft"):
+            self.breach(second, a, "1-2-breaches")
         doc = build()
-        self.assertEqual(doc["city"]["breachChecks"], 60 * len(accts))
+        self.assertEqual(doc["city"]["breachChecks"], 60 * 8)
         self.assertEqual(doc["city"]["breachRatePct"], 100)
-        self.assertEqual(sorted(a["id"] for a in doc["city"]["byAddress"]), sorted(accts))
+        self.assertEqual(sorted(a["id"] for a in doc["city"]["byAddress"]),
+                         sorted(("gmail", "outlook", "icloud", "yahoo", "protonmail", "google", "apple_id", "microsoft")))
+
+    # Recon X4: one address in a pair counts once per player.
+    def test_old_save_with_both_checks_of_a_pair_counts_one_address(self):
+        sids = players(60)
+        for first, second in (("gmail", "google"), ("icloud", "apple_id"), ("outlook", "microsoft")):
+            events(sids, "mission-completed", {"mission": f"{first}-recon-breach", "finding": "3plus-breaches", "status": "completed"},
+                   at="now() - interval '2 hours'")
+            events(sids, "mission-completed", {"mission": f"{second}-recon-breach", "finding": "3plus-breaches", "status": "completed"},
+                   at="now() - interval '1 hour'")
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 180)
+        self.assertEqual(sorted(a["id"] for a in city["byAddress"]), ["gmail", "icloud", "outlook"])
+        self.assertEqual(city["fortified"]["breached"], 180)
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertEqual(pod["breachChecks"], 180)
+        self.assertEqual(pod["fortified"]["breached"], 180)
+
+    def test_pair_counts_the_later_answer(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "3plus-breaches", "status": "completed"},
+               at="now() - interval '2 hours'")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "finding": "no-breaches", "status": "completed"},
+               at="now() - interval '1 hour'")
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+
+    def test_same_address_filing_is_no_second_check(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "1-2-breaches")
+        # The new "same address as your Gmail?" answer: no finding is sent.
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "status": "completed"})
+        events(sids, "mission-completed", {"mission": "apple_id-recon-breach", "status": "completed"})
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 100)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        self.assertEqual(city["actions"], 180)   # still filed missions
+
+    def test_old_second_check_refiled_as_same_leaves_the_first(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "no-breaches", "status": "completed"},
+               at="now() - interval '3 hours'")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "finding": "3plus-breaches", "status": "completed"},
+               at="now() - interval '2 hours'")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "status": "completed"},
+               at="now() - interval '1 hour'")
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+
+    def test_either_account_of_a_pair_fixes_the_address(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "1-2-breaches")
+        self.fix(sids[:30], "google", "password")
+        self.fix(sids[30:45], "gmail", "2fa")
+        self.fix(sids[:10], "outlook", "password")   # another address: not a fix
+        city = build()["city"]
+        self.assertEqual(city["fortified"], {"pct": 75, "fixed": 45, "breached": 60})
 
     # One check per player and address, latest filing wins (breaker phase 2:
     # restore.js resends the check, and players refile).

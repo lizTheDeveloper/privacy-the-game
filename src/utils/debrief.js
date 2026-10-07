@@ -44,6 +44,11 @@ export function pmReportAccounts(state) {
 // listed and not flagged -> not flagged. Nothing when the report never offered
 // the account (an older report only listed password-reset accounts).
 export function prefillAnswer(q, mission, state) {
+  // A login check's "same address?" follows the breach check's answer (X4).
+  if (q.prefill === 'same-address') {
+    const v = state?.missions?.[`${mission.accountId}-recon-breach`]?.same_address;
+    return q.options.some((o) => o.value === v && o.value !== 'skip') ? v : undefined;
+  }
   if (q.prefill !== 'pm-report') return undefined;
   const report = state?.missions?.[PM_MISSION_ID];
   if (report?.status !== 'completed') return undefined;
@@ -64,9 +69,15 @@ export function showIfMatches(showIf, answer) {
   return true;
 }
 
-// Questions shown for these answers, in order.
+// Questions shown for these answers, in order. A follow-up of a hidden
+// question is hidden too, whatever answer is left on it.
 export function visibleQuestions(mission, answers = {}) {
-  return mission.debriefQs.filter((q) => !q.showIf || showIfMatches(q.showIf, answers[q.showIf.question]));
+  const shown = new Set();
+  return mission.debriefQs.filter((q) => {
+    const show = !q.showIf || (shown.has(q.showIf.question) && showIfMatches(q.showIf, answers[q.showIf.question]));
+    if (show) shown.add(q.id);
+    return show;
+  });
 }
 
 // A number answer (or one of the question's options, like "skip"), or

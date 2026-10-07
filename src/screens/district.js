@@ -82,6 +82,8 @@ function optionText(mission, value) {
 
 function missionSummary(mission, record) {
   const parts = [optionText(mission, record.finding), optionText(mission, record.password_exposed)];
+  // "Same address as my Gmail" (X4): the answer is the whole report.
+  if (record.same_address && !record.finding) parts.push(optionText(mission, record.same_address));
   if (record.method) parts.push(optionText(mission, twoFactorMethod(record)));
   else if (Array.isArray(record.flagged)) {
     const names = record.flagged.filter((v) => ACCOUNTS[v]).map((v) => ACCOUNTS[v].name);

@@ -3,7 +3,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
 import { calcDistrictProgress, isEmailBreachCheck } from '../utils/calc.js';
-import { questionOptions, prefillAnswer } from '../utils/debrief.js';
+import { questionOptions, prefillAnswer, visibleQuestions } from '../utils/debrief.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmNumbers } from '../utils/bursts.js';
@@ -52,12 +52,13 @@ function lockedRow(opt) {
 
 // A follow-up question (showIf) starts hidden; app.js shows it once the
 // question it depends on has one of its values.
-function showIfAttrs(q) {
+// It starts shown when a pre-filled answer already shows it.
+function showIfAttrs(q, shown) {
   if (!q.showIf) return '';
   const rule = q.showIf.values
     ? `data-show-if-values="${q.showIf.values.join(',')}"`
     : `data-show-if-not="${q.showIf.notValues.join(',')}"`;
-  return ` hidden data-show-if-q="${q.showIf.question}" ${rule}`;
+  return `${shown ? '' : ' hidden'} data-show-if-q="${q.showIf.question}" ${rule}`;
 }
 
 // A number answer: typed in, with any options (like "couldn't check") beside it.
@@ -67,14 +68,17 @@ function numberInput(q) {
       <input type="number" name="q_${q.id}" min="${q.min ?? 0}"${max} inputmode="numeric" step="1" aria-label="${q.label}" style="width: 140px; max-width: 100%; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 18px; padding: 10px 12px; font-family: var(--font-mono);">`;
 }
 
-function questionGroup(q, state, mission) {
+function questionGroup(q, state, mission, shown = false) {
   const pre = mission ? prefillAnswer(q, mission, state) : undefined;
+  const preNote = q.prefill === 'same-address'
+    ? 'Filled in from your breach check. Change it if that’s wrong.'
+    : 'Filled in from your password manager report. Change it if the report says something else.';
   return `
-  <div data-question="${q.id}"${showIfAttrs(q)} style="margin-bottom: 28px;">
+  <div data-question="${q.id}"${showIfAttrs(q, shown)} style="margin-bottom: 28px;">
     <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
     ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
     ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
-    ${pre ? `<div data-prefilled="${q.id}" style="font-size: 12px; color: var(--cyan); line-height: 1.5; margin: -6px 0 12px;">Filled in from your password manager report. Change it if the report says something else.</div>` : ''}
+    ${pre ? `<div data-prefilled="${q.id}" style="font-size: 12px; color: var(--cyan); line-height: 1.5; margin: -6px 0 12px;">${preNote}</div>` : ''}
     ${q.scout ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin: -4px 0 12px;">
       <img src="assets/characters/scout_0.png" alt="" style="width: 28px; height: 28px; flex-shrink: 0;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; font-style: italic;">${q.scout}</div>
@@ -129,7 +133,9 @@ function completedQuestions(mission, stored, state) {
   return mission.debriefQs.map((q) => {
     if (stored[q.id] !== undefined) return completedGroup(q, stored, state);
     if (q.legacy && stored[q.legacy.id] !== undefined) return completedGroup(q.legacy, stored, state);
-    if (q.showIf) return '';
+    // Asked only since a later release (X4's "same address?"): a save filed
+    // before it never answered it.
+    if (q.showIf || q.addedLater) return '';
     return completedGroup(q, stored, state);
   }).join('');
 }
@@ -247,6 +253,17 @@ export function debriefReaction(state, mission) {
   };
 }
 
+// The open form. Follow-ups a pre-filled answer already shows start shown.
+function debriefForm(state, mission) {
+  const pre = {};
+  for (const q of mission.debriefQs) {
+    const v = prefillAnswer(q, mission, state);
+    if (v !== undefined) pre[q.id] = v;
+  }
+  const shown = new Set(visibleQuestions(mission, pre).map((q) => q.id));
+  return `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id))).join('')}</div>`;
+}
+
 export function renderDebrief(state, missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return notFound(state);
@@ -266,7 +283,7 @@ export function renderDebrief(state, missionId) {
   const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
   const questions = completed
     ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}${progressPanel}`
-    : `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state, mission)).join('')}</div>`;
+    : debriefForm(state, mission);
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const footer = completed
