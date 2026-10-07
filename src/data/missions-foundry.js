@@ -11,6 +11,22 @@ const AI_AUDIT_DEBRIEF = [
   },
 ];
 
+// Meta has no US opt-out (recon audit #75): what a player can really do. A
+// new question id; an old save's finding still shows (question.legacy).
+const META_AI_DEBRIEF = [
+  {
+    id: 'meta_ai',
+    label: 'What could you do?',
+    legacy: AI_AUDIT_DEBRIEF[0],
+    options: [
+      { value: 'no-option', text: 'No opt-out where I live (US)', severity: 'warn' },
+      { value: 'objected', text: 'Filed an objection (EU/UK)', severity: 'safe' },
+      { value: 'limited-public', text: 'Made more of my posts private', severity: 'safe' },
+      { value: 'skip', text: "Couldn't check right now", severity: 'skip' },
+    ],
+  },
+];
+
 const AI_OPTOUT_DEBRIEF = [
   {
     id: 'action',
@@ -46,15 +62,16 @@ export const FOUNDRY_MISSIONS = [
     title: 'AI Training Audit: Meta',
     briefing: "Meta uses your public Facebook posts, Instagram photos, comments, and Meta AI conversations to train their AI models. In the US, there is no toggle to opt out — but you can limit exposure by making accounts private and avoiding Meta AI. EU/UK users have a 'Right to object' form in the Privacy Centre.",
     steps: [
-      { text: 'Open Meta Privacy Centre', url: 'https://www.facebook.com/privacy/center/' },
-      { text: 'Check your Instagram privacy: Settings > Account > Data use for AI improvement' },
-      { text: 'Review if your posts are set to Public (these feed the AI)' },
-      { text: 'Note whether you have opt-out options (varies by region)' },
+      { text: 'Open Meta’s Privacy Center', url: 'https://www.facebook.com/privacy/center/' },
+      { text: 'US: there’s no opt-out. Check which of your Facebook and Instagram posts are Public, because those are what Meta trains on. Avoid putting personal details into Meta AI chats' },
+      { text: 'EU/UK: in the Privacy Center, use the “right to object” form. Since May 27, 2025 an objection only covers future data' },
     ],
-    debriefQs: AI_AUDIT_DEBRIEF,
+    debriefQs: META_AI_DEBRIEF,
     scoutDialog: {
       briefing: '"Meta is training their AI on every public post, photo, and comment you\'ve ever made. Let\'s see what options you have."',
       debrief: {
+        'objected': '"Objection filed. It covers what you post from here on."',
+        'limited-public': '"Less public, less to train on. That\'s the lever you have."',
         'no-sharing': '"Already locked down. Rare for Meta — nice work."',
         'was-on': '"Good catch. That toggle was feeding years of your content into their models."',
         'no-option': '"No opt-out available in your region. We\'ll focus on limiting what\'s public instead."',
@@ -68,12 +85,12 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_meta',
     phase: 'fortify',
     title: 'Limit Meta AI Training',
-    briefing: "Since Meta doesn't offer a universal opt-out for US users, the best defense is reducing what's public. Make your Instagram private, restrict Facebook post visibility to Friends, and avoid using Meta AI features — every conversation with Meta AI is training data.",
+    briefing: "Since Meta doesn't offer a universal opt-out for US users, the best defense is reducing what's public. Make your Instagram private, restrict Facebook post visibility to Friends, and avoid putting personal details into Meta AI — Meta says it can use those conversations to train its models.",
     steps: [
-      { text: 'Instagram: Settings > Account privacy > Toggle "Private account" on' },
-      { text: 'Facebook: Settings > Audience > Change default post audience to "Friends"' },
-      { text: 'Instagram: Settings > Account > Data use for AI improvement > Don\'t allow (if available)' },
-      { text: 'Avoid using Meta AI in chats — every message trains the model' },
+      { text: 'Instagram: Settings → Account privacy → turn on “Private account”' },
+      { text: 'Facebook: Settings → Audience → change your default post audience to “Friends”' },
+      { text: 'EU/UK: use the “right to object” form in Meta’s Privacy Center' },
+      { text: 'Avoid putting personal details into Meta AI chats. Meta says it can use them to train its models' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
     scoutDialog: {
@@ -95,10 +112,10 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_google',
     phase: 'recon',
     title: 'AI Training Audit: Google',
-    briefing: "Google uses your Gemini prompts, shared files, and connected app data to train their AI models. The 'Gemini Apps Activity' setting controls whether your conversations are reviewed and used for training. Even when turned off, chats are still saved for 72 hours for safety.",
+    briefing: "Google uses your Gemini prompts, shared files, and connected app data to train their AI models. The 'Keep Activity' setting controls whether your conversations are reviewed and used for training. Even when turned off, chats are still saved for 72 hours for safety.",
     steps: [
       { text: 'Open Gemini Activity settings', url: 'https://myactivity.google.com/product/gemini' },
-      { text: 'Check if "Gemini Apps Activity" is on or off' },
+      { text: 'Check if "Keep Activity" is on or off' },
       { text: 'Review your stored Gemini conversations' },
       { text: 'Check Google Account > Data & privacy for broader AI settings' },
     ],
@@ -119,10 +136,10 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_google',
     phase: 'fortify',
     title: 'Disable Gemini Training',
-    briefing: "Turn off Gemini Apps Activity to stop Google from using your conversations for training. Then clear your existing Gemini history so past conversations aren't used in future training cycles.",
+    briefing: "Turn off Keep Activity to stop Google from using your conversations for training. Then clear your existing Gemini history so past conversations aren't used in future training cycles.",
     steps: [
       { text: 'Open Gemini Activity', url: 'https://myactivity.google.com/product/gemini' },
-      { text: 'Turn off "Gemini Apps Activity"' },
+      { text: 'Turn off "Keep Activity"' },
       { text: 'Click "Delete activity" to clear conversation history' },
       { text: 'Select "All time" and confirm deletion' },
     ],
@@ -148,7 +165,7 @@ export const FOUNDRY_MISSIONS = [
     title: 'AI Training Audit: ChatGPT',
     briefing: "OpenAI uses your ChatGPT conversations to improve their models unless you opt out. Every prompt, every uploaded file, every code snippet you paste — it all potentially feeds the next training run. Business and API users are excluded by default, but consumer users are opted in.",
     steps: [
-      { text: 'Open ChatGPT Settings', url: 'https://chat.openai.com/settings' },
+      { text: 'Open ChatGPT and go to Settings (your profile menu)', url: 'https://chatgpt.com/' },
       { text: 'Go to Data controls' },
       { text: 'Check if "Improve the model for everyone" is toggled on' },
       { text: 'Review what data ChatGPT stores about you' },
@@ -172,7 +189,7 @@ export const FOUNDRY_MISSIONS = [
     title: 'Disable ChatGPT Training',
     briefing: "One toggle stops OpenAI from using your conversations to train future models. Your chats still work normally — you just stop contributing to the training dataset.",
     steps: [
-      { text: 'Open ChatGPT Settings', url: 'https://chat.openai.com/settings' },
+      { text: 'Open ChatGPT and go to Settings (your profile menu)', url: 'https://chatgpt.com/' },
       { text: 'Click "Data controls"' },
       { text: 'Toggle off "Improve the model for everyone"' },
       { text: 'Confirm the change is saved' },
@@ -181,7 +198,7 @@ export const FOUNDRY_MISSIONS = [
     scoutDialog: {
       briefing: '"One switch. That\'s it. They made this one easy, at least."',
       debrief: {
-        'opted-out': '"Done. Your prompts stay private from here on."',
+        'opted-out': '"Done. New chats won\'t be used to train their models."',
         'no-account': '"No ChatGPT account — nothing to train on."',
         'later': '"Come back for this one. It\'s quick."',
       },
@@ -278,12 +295,12 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_amazon',
     phase: 'recon',
     title: 'Voice Data Audit: Alexa',
-    briefing: "Amazon stores your Alexa voice recordings and uses them to improve AI models. Every 'Hey Alexa' command, every music request, every smart home command — recorded and stored. You can review and delete these recordings, and opt out of the human review program.",
+    briefing: "Amazon stores your Alexa voice recordings and uses them to improve AI models. Every 'Hey Alexa' command, every music request, every smart home command — recorded and stored. You can review and delete these recordings, and stop Amazon using them to improve Alexa.",
     steps: [
-      { text: 'Open Alexa Privacy', url: 'https://www.amazon.com/alexa-privacy/apd/rvd' },
-      { text: 'Review your voice recording history' },
-      { text: 'Check "Manage Your Alexa Data" for how long recordings are kept' },
-      { text: 'Note if "Help improve Amazon services" is enabled' },
+      { text: 'Alexa app → More → Alexa Privacy → Review Voice History' },
+      { text: 'Open Manage Your Alexa Data and check how long recordings are kept' },
+      { text: 'Check whether Help improve Alexa → Use of voice recordings is on' },
+      { text: 'Note: since March 2025, Echo devices send audio to the cloud. The old “Do Not Send Voice Recordings” option is gone' },
     ],
     debriefQs: AI_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -302,12 +319,12 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_amazon',
     phase: 'fortify',
     title: 'Disable Alexa AI Training',
-    briefing: "Stop Amazon from using your voice recordings for AI training, and delete your stored voice history. You keep all Alexa functionality — she just stops sending your recordings to Amazon's training pipeline.",
+    briefing: "Stop Amazon from using your voice recordings for AI training, and delete your stored voice history. You keep all Alexa functionality. Amazon just stops keeping your recordings and using them to improve Alexa.",
     steps: [
-      { text: 'Alexa app: More > Settings > Alexa Privacy' },
-      { text: 'Tap "Manage Your Alexa Data"' },
-      { text: 'Turn off "Help improve Amazon services and develop new features"' },
-      { text: 'Delete voice recording history: Choose "Delete all recordings"' },
+      { text: 'Alexa app → More → Alexa Privacy → Manage Your Alexa Data' },
+      { text: 'Set recordings to “Don’t save recordings”, or to delete automatically after 3 months' },
+      { text: 'Under Help improve Alexa, turn off Use of voice recordings' },
+      { text: 'Back in Review Voice History, delete the recordings already saved' },
     ],
     debriefQs: HISTORY_DEBRIEF,
     scoutDialog: {

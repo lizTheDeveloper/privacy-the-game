@@ -343,3 +343,38 @@ describe('Freeway old saves', () => {
     expect(ev.map((e) => e.data.district)).toEqual(['freeway', 'freeway']);
   });
 });
+
+describe('The Foundry', () => {
+  it('Meta: no invented Instagram toggle; US players have no opt-out; answers fit', () => {
+    const m = byId('ai_meta-recon');
+    expect(text(m)).not.toContain('Data use for AI improvement');
+    expect(text(byId('ai_meta-optout'))).not.toContain('Data use for AI improvement');
+    expect(stepText(m)).toMatch(/US: there’s no opt-out/);
+    expect(stepText(m)).toMatch(/May 27, 2025/);
+    expect(values(m, 'meta_ai')).toEqual(['no-option', 'objected', 'limited-public', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    filesCleanly(m, 'meta_ai');
+  });
+
+  it('Gemini’s setting is Keep Activity', () => {
+    for (const id of ['ai_google-recon', 'ai_google-optout']) {
+      expect(text(byId(id))).not.toContain('Gemini Apps Activity');
+      expect(text(byId(id))).toContain('Keep Activity');
+    }
+  });
+
+  it('Alexa: Help improve Alexa → Use of voice recordings; the old local option is gone', () => {
+    for (const id of ['ai_amazon-recon', 'ai_amazon-optout']) {
+      expect(text(byId(id))).not.toContain('Help improve Amazon services');
+      expect(stepText(byId(id))).toContain('Use of voice recordings');
+    }
+    expect(text(byId('ai_amazon-recon'))).toMatch(/March 2025/);
+  });
+
+  it('ChatGPT links go to chatgpt.com and promise nothing more than the toggle does', () => {
+    for (const id of ['ai_openai-recon', 'ai_openai-optout']) {
+      expect(text(byId(id))).not.toContain('chat.openai.com');
+    }
+    expect(text(byId('ai_openai-optout'))).not.toMatch(/stay private/);
+  });
+});
