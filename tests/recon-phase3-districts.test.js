@@ -413,3 +413,54 @@ describe('The Grid', () => {
     expect(line).toContain('the deal died in 2024');
   });
 });
+
+describe('The Clinic', () => {
+  it('Fitbit is a Google account now; Garmin’s settings moved', () => {
+    const m = byId('fitness-audit-data-sharing');
+    expect(text(m)).not.toContain('fitbit.com/settings');
+    expect(stepText(m)).toContain('Manage connected apps');
+    expect(stepUrls(m)).toEqual(['https://myaccount.google.com/linkedapps', 'https://connect.garmin.com/app/settings']);
+    for (const id of ['fitness-limit-sharing', 'fitness-export-data']) expect(text(byId(id))).not.toMatch(/fitbit\.com\/settings|connect\.garmin\.com\/modern/);
+  });
+
+  it('Natural Cycles says it doesn’t sell or share cycle data', () => {
+    const t = text(byId('health-apps-period-tracker-audit'));
+    expect(t).not.toMatch(/Natural Cycles shares data with advertisers/);
+    expect(t).toContain('never sells or shares cycle or health data');
+  });
+
+  it('therapy app check: refunds were automatic, its own answers', () => {
+    const m = byId('health-apps-mental-health-audit');
+    expect(m.title).toBe('Therapy app data check');
+    expect(text(m)).not.toMatch(/eligible for the FTC settlement refund|might be owed money/);
+    expect(text(m)).toMatch(/automatically/);
+    expect(stepUrls(m)).not.toContain('https://www.ftc.gov/legal-library/browse/cases-proceedings/2023169-betterhelp-inc');
+    expect(values(m, 'therapy_apps')).toEqual(['none-used', 'no-record', 'has-record', 'requested-delete', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('health_audit');
+    filesCleanly(m, 'therapy_apps');
+  });
+
+  it('the telehealth audit is about prescriptions and pharmacies now, not a copy', () => {
+    const m = byId('telehealth-therapy-app-audit');
+    expect(m.title).toBe('Prescription & pharmacy data check');
+    expect(text(m)).not.toMatch(/BetterHelp|qualify for the FTC refund|owed money/);
+  });
+
+  it('23andMe was sold to TTAM in July 2025', () => {
+    const m = byId('genetic-delete-23andme');
+    expect(m.title).not.toMatch(/URGENT/);
+    expect(m.briefing).toContain('TTAM Research Institute');
+    expect(text(m)).not.toMatch(/highest bidder|auction block|bankruptcy sale could happen/);
+  });
+
+  it('Virgin Pulse is Personify Health now', () => {
+    expect(text(byId('health-insurance-wellness-programs'))).toContain('Personify Health (formerly Virgin Pulse)');
+  });
+
+  it('no Clinic step links a dead page', () => {
+    const urls = MISSIONS.filter((m) => ['fitness_trackers', 'health_apps', 'genetic_testing', 'telehealth', 'health_insurance'].includes(m.accountId)).flatMap(stepUrls);
+    for (const bad of ['myfitnesspal.com/account/delete_account', 'ancestry.com/account/settings', 'myheritage.com/dna/settings', '2023169-betterhelp-inc"', 'you.23andme.com']) {
+      expect(urls.filter((u) => `${u}"`.includes(bad)), bad).toEqual([]);
+    }
+  });
+});
