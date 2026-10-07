@@ -99,44 +99,50 @@ export function localDay(date = new Date()) {
   return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
 }
 
-function addDays(day, n) {
-  const d = new Date(`${day}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+const DAY_MS = 86400000;
+
+// A YYYY-MM-DD day as a UTC-midnight timestamp, or null if it isn't one.
+function dayValue(day) {
+  if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const t = Date.parse(`${day}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === day ? t : null;
 }
 
-// Saves from before streakLocalDay wrote lastDate as the UTC date. That UTC
-// day covers two local days: the one before it west of UTC, the one after it
-// east of UTC. Either may be the day the player actually filed.
-function possibleLastDays(state, now) {
-  const { lastDate } = state.streak;
-  if (!lastDate) return [];
-  if (state.streakLocalDay) return [lastDate];
+// A lastDate at most this far after local today is travel or a clock set
+// back (time zones are at most ~26h apart): keep the streak. Further ahead is
+// a broken clock: start again.
+const AHEAD_TOLERANCE_DAYS = 2;
+
+// How many days after local today the last filing may have been (0 = today,
+// -1 = yesterday). Saves from before streakLocalDay wrote lastDate as the UTC
+// date, which covers two local days: the one before it west of UTC, the one
+// after it east of UTC.
+function lastDayOffsets(state, now, todayValue) {
+  const last = dayValue(state.streak.lastDate);
+  if (last === null) return null;
+  const d = Math.round((last - todayValue) / DAY_MS);
+  if (state.streakLocalDay) return [d];
   const offset = now.getTimezoneOffset(); // minutes; > 0 west of UTC
-  if (offset > 0) return [addDays(lastDate, -1), lastDate];
-  if (offset < 0) return [lastDate, addDays(lastDate, 1)];
-  return [lastDate];
+  if (offset > 0) return [d - 1, d];
+  if (offset < 0) return [d, d + 1];
+  return [d];
 }
 
 export function updateStreak(state) {
   const now = new Date();
   const today = localDay(now);
   const { current, best } = state.streak;
-  const last = possibleLastDays(state, now);
+  const offsets = lastDayOffsets(state, now, dayValue(today));
+  const set = (n) => ({ ...state, streakLocalDay: 1, streak: { current: n, best: Math.max(best, n), lastDate: today } });
 
-  if (state.streakLocalDay && last[0] === today) return state;
-
-  let newCurrent;
-  if (last.includes(today)) newCurrent = Math.max(current, 1); // same day (an old save's may be ambiguous): no double count
-  else if (last.includes(addDays(today, -1))) newCurrent = current + 1;
-  else newCurrent = 1;
-  const newBest = Math.max(best, newCurrent);
-
-  return {
-    ...state,
-    streakLocalDay: 1,
-    streak: { current: newCurrent, best: newBest, lastDate: today },
-  };
+  if (offsets === null) return set(1); // no lastDate, or one that isn't a date
+  if (state.streakLocalDay && offsets[0] === 0) return state;
+  if (offsets.includes(0)) return set(Math.max(current, 1)); // same day (an old save's may be ambiguous): no double count
+  if (offsets.includes(-1)) return set(current + 1);
+  // Ahead of today: travelled west or the clock went back. lastDate never
+  // moves backwards, so the same real day can't count twice.
+  if (offsets.some((d) => d > 0 && d <= AHEAD_TOLERANCE_DAYS)) return state;
+  return set(1);
 }
 
 // After a debrief is filed: a skipped filing doesn't extend the streak.
