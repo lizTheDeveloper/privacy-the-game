@@ -13,7 +13,8 @@ function cleanId(v) {
 
 function isSkipAnswer(mission, key, value) {
   if (DEFERRED.has(value)) return true;
-  const q = mission?.debriefQs?.find((x) => x.id === key);
+  // A question replaced since (question.legacy) still knows its old options.
+  const q = mission?.debriefQs?.find((x) => x.id === key) || mission?.debriefQs?.find((x) => x.legacy?.id === key)?.legacy;
   return Boolean(q?.options?.some((o) => o.value === value && o.severity === 'skip'));
 }
 

@@ -190,3 +190,42 @@ describe('The Capitol', () => {
     expect(m.scoutDialog.debrief.claimed).not.toMatch(/No one can apply/);
   });
 });
+
+describe('The Reclamation', () => {
+  it('data supply chain: request the two reports, read CLEAR’s page; answers record requests', () => {
+    const m = byId('enterprise_data-recon-supply-chain');
+    expect(stepUrls(m)).toEqual([
+      'https://consumer.risk.lexisnexis.com/request',
+      'https://employees.theworknumber.com/employment-data-report',
+      'https://legal.thomsonreuters.com/en/legal-notices/privacy-records',
+    ]);
+    expect(text(m)).not.toMatch(/every pay period|reports every paycheck/);
+    expect(m.debriefQs.map((q) => q.id)).toEqual(['report_requests']);
+    expect(values(m, 'report_requests')).toEqual(['requested-both', 'requested-one', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('broker_recon');
+    filesCleanly(m, 'report_requests');
+  });
+
+  it('ad trackers: live ad-profile pages and answers about ad profiles', () => {
+    const m = byId('ad_trackers-recon-understand');
+    expect(stepUrls(m)).toEqual(['https://myadcenter.google.com/home', 'https://accountscenter.facebook.com/ad_preferences']);
+    expect(stepText(m)).toContain('Settings → Privacy & Security → Tracking');
+    expect(values(m, 'ad_profile')).toEqual(['few-signals', 'some-signals', 'lots-signals', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('broker_recon');
+    filesCleanly(m, 'ad_profile');
+  });
+});
+
+describe('old saves on replaced questions', () => {
+  it('a pre-4.7.1 broken broker_recon answer on the supply-chain brief still repairs, shows and restores', async () => {
+    const { migrateBrokenAnswers } = await import('../src/utils/migrate-answers.js');
+    const { restoreEvents } = await import('../src/utils/restore.js');
+    const { renderDebrief } = await import('../src/screens/debrief.js');
+    const { createInitialState } = await import('../src/state.js');
+    const s = { ...createInitialState(), missions: { 'enterprise_data-recon-supply-chain': { status: 'completed', broker_recon: "found-all', text: 'I'm listed on all of them', severity: 'crit" } } };
+    const fixed = migrateBrokenAnswers(s);
+    expect(fixed.missions['enterprise_data-recon-supply-chain'].broker_recon).toBe('found-all');
+    expect(renderDebrief(fixed, 'enterprise_data-recon-supply-chain')).toContain('I\'m listed on all of them');
+    expect(restoreEvents(fixed).some((e) => e.data.mission === 'enterprise_data-recon-supply-chain' && e.data.status === 'completed')).toBe(true);
+  });
+});

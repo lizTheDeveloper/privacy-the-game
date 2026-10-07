@@ -54,6 +54,36 @@ const BROKER_RECON_DEBRIEF = [
   },
 ];
 
+// Recon audit #52: the steps request reports, so the answer records that (a
+// new question id; an old save's broker_recon answer still shows).
+const REPORT_REQUESTS_DEBRIEF = [
+  {
+    id: "report_requests",
+    label: "Did you request your reports?",
+    legacy: BROKER_RECON_DEBRIEF[0],
+    options: [
+      { value: "requested-both", text: "Requested both reports", severity: "safe" },
+      { value: "requested-one", text: "Requested one", severity: "warn" },
+      { value: "skip", text: "I'll do it later", severity: "skip" },
+    ],
+  },
+];
+
+// Recon audit #53: what the ad profiles showed (new id; old answers still show).
+const AD_PROFILE_DEBRIEF = [
+  {
+    id: "ad_profile",
+    label: "What did your ad profiles show?",
+    legacy: BROKER_RECON_DEBRIEF[0],
+    options: [
+      { value: "few-signals", text: "Not much: ads are mostly generic", severity: "safe" },
+      { value: "some-signals", text: "Some interests and apps tracking me", severity: "warn" },
+      { value: "lots-signals", text: "Detailed profile, lots of apps allowed to track", severity: "crit" },
+      { value: "skip", text: "I'll look later", severity: "skip" },
+    ],
+  },
+];
+
 const OPTOUT_DEBRIEF = [
   {
     id: "optout_result",
@@ -433,15 +463,17 @@ export const RECLAMATION_MISSIONS = [
     title: "Intel Brief: The Data Supply Chain",
     briefing: "People-search sites are the retail end of the data broker economy. Enterprise aggregators are the wholesale end. Companies like LexisNexis, Thomson Reuters, and CoreLogic buy records from courts, utilities, employers, and DMVs -- then repackage everything into profiles they sell to banks, insurers, employers, landlords, and law enforcement. Even if you removed yourself from Spokeo and Whitepages, LexisNexis still has your data because they buy from different sources. You have to opt out of both layers.",
     steps: [
-      { text: "Read what LexisNexis collects about you on their opt-out page", url: "https://optout.lexisnexis.com/" },
-      { text: "Read about Thomson Reuters CLEAR -- this is the tool investigators use", url: "https://legalsolutions.thomsonreuters.com/law-products/clear/consumer-privacy-form" },
-      { text: "Look up Equifax Workforce Solutions (The Work Number) -- your employer reports your salary here every pay period", url: "https://www.equifax.com/personal/help/workforce-solutions-contact/" },
-      { text: "Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement" },
+      { text: 'Request your LexisNexis Consumer Disclosure Report. It arrives by mail or download and shows what they hold', url: 'https://consumer.risk.lexisnexis.com/request' },
+      { text: 'Request your employment data report from The Work Number (Equifax). The same site offers a data freeze', url: 'https://employees.theworknumber.com/employment-data-report' },
+      { text: 'Read Thomson Reuters CLEAR’s privacy page. Deletion there is only for public officials, people at risk of harm, and identity theft victims', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
+      { text: 'Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement' },
     ],
-    debriefQs: BROKER_RECON_DEBRIEF,
+    debriefQs: REPORT_REQUESTS_DEBRIEF,
     scoutDialog: {
-      briefing: "\"People-search sites are the corner stores. Enterprise aggregators are the warehouses. LexisNexis sells to law enforcement, insurance, and landlords. Thomson Reuters CLEAR is what investigators actually use to find people. CoreLogic knows every property you've ever rented or owned. And Equifax Workforce Solutions -- separate from your credit file -- has your employment and salary history because your employer reports every paycheck there. The supply chain goes: public records flow into brokers, brokers sell to aggregators, aggregators sell to banks, insurers, landlords, and law enforcement. You have to cut the chain at every level.\"",
+      briefing: "\"People-search sites are the corner stores. Enterprise aggregators are the warehouses. LexisNexis sells to law enforcement, insurance, and landlords. Thomson Reuters CLEAR is what investigators actually use to find people. CoreLogic knows every property you've ever rented or owned. And The Work Number, run by Equifax and separate from your credit file, holds employment and salary history from the employers that use it. The supply chain goes: public records flow into brokers, brokers sell to aggregators, aggregators sell to banks, insurers, landlords, and law enforcement. You have to cut the chain at every level.\"",
       debrief: {
+        "requested-both": "\"Both requested. When they arrive, you'll see what the wholesale layer holds on you.\"",
+        "requested-one": "\"One down. The other report is worth asking for too -- they buy from different sources.\"",
         "not-found": "\"Unusual. Either you're very new to the system or very good at staying out of it.\"",
         "found-some": "\"Some enterprise exposure. Normal -- these companies have been building profiles for decades.\"",
         "found-all": "\"Deep exposure. These aggregators have been compiling your data since before you had an email address. But they're all subject to opt-out laws.\"",
@@ -553,14 +585,17 @@ export const RECLAMATION_MISSIONS = [
     title: "Intel Brief: Ad & Tracking Brokers",
     briefing: "People-search brokers sell your identity. Ad data brokers sell your behavior -- what you browse, buy, search for, and where you go. These profiles include your real name, email, phone, home address, and detailed behavioral data. The distinction matters: people-search opt-outs remove your public records. Ad network opt-outs remove your behavioral profile.",
     steps: [
-      { text: "Check what Google knows about your ad profile", url: "https://myadcenter.google.com/personalization" },
-      { text: "Check what Meta/Facebook knows about your ad profile", url: "https://www.facebook.com/adpreferences/ad_settings" },
-      { text: "On your phone, check how many apps have tracking permission (iOS: Settings → Privacy → Tracking)" },
+      { text: 'Check what Google uses for your ads in My Ad Center', url: 'https://myadcenter.google.com/home' },
+      { text: 'Check your Meta ad preferences in Accounts Center', url: 'https://accountscenter.facebook.com/ad_preferences' },
+      { text: 'On iPhone, check how many apps can track you: Settings → Privacy & Security → Tracking' },
     ],
-    debriefQs: BROKER_RECON_DEBRIEF,
+    debriefQs: AD_PROFILE_DEBRIEF,
     scoutDialog: {
       briefing: "\"Three layers of data brokers, three kinds of data. People-search sells your identity. Enterprise aggregators sell your records. Ad brokers sell your behavior -- what you buy, where you go, what you read, what you search for. Together, they let a stranger build a complete picture of who you are. We cleared the first two layers. This is the third.\"",
       debrief: {
+        "few-signals": "\"Not much to go on. Either you're already using privacy tools or you don't use many apps.\"",
+        "some-signals": "\"Some behavioral tracking. Google and Meta are the biggest -- we'll tackle them plus the bulk opt-out tools.\"",
+        "lots-signals": "\"A detailed profile. That's the default for anyone who uses the internet normally. The bulk opt-out tools are next.\"",
         "not-found": "\"Minimal tracking footprint. Either you're already using privacy tools or you don't use many apps.\"",
         "found-some": "\"Some behavioral tracking. Google and Meta are the biggest -- we'll tackle them plus the bulk opt-out tools.\"",
         "found-all": "\"Deep behavioral tracking. That's the default for anyone who uses the internet normally. The good news: bulk opt-out tools cover a hundred networks at once.\"",
