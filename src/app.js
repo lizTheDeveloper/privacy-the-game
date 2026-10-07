@@ -19,7 +19,7 @@ import { generateMilestoneCard, shareMilestoneCard, shareStatCard } from './util
 import { renderCityMap } from './screens/city-map.js';
 import { renderDistrict } from './screens/district.js';
 import { renderBriefing } from './screens/briefing.js';
-import { renderDebrief } from './screens/debrief.js';
+import { renderDebrief, debriefReaction } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
@@ -58,6 +58,9 @@ let cityArrival;
 let twoFactorHugShown = false;
 // Scout is cheering the player out of the briefing; ignore further clicks.
 let leavingBriefing = false;
+// Scout's reaction to the report just filed, shown on the district the player
+// lands on: { districtId, reaction, landed }. Kept for that one visit.
+let landingReaction = null;
 
 function setNotice(text, hash = location.hash) {
   notice = { hash, text };
@@ -92,7 +95,9 @@ function loadWhoami() {
 
 const screens = {
   city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival }),
-  district: ({ id, tab }) => renderDistrict(state, id, tab),
+  district: ({ id, tab }) => renderDistrict(state, id, tab, {
+    reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
+  }),
   briefing: ({ id }) => renderBriefing(state, id, { resetAnyway: resetAnywayMission === id }),
   debrief: ({ id }) => renderDebrief(state, id),
   milestone: ({ districtId }) => renderMilestone(state, districtId),
@@ -134,6 +139,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
     if (tracksPageview(cause)) trackPageview(location.href, route.screen);
+    // Landing after SUBMIT REPORT: start at Scout's reaction, not the debrief's scroll position.
+    if (tracksPageview(cause) && route.screen === 'district' && landingReaction?.landed) app.querySelector('[data-scout-reaction]')?.scrollIntoView({ block: 'start' });
     if (route.screen === 'city') {
       state.lastCityVisit = new Date().toISOString();
       setState(state);
@@ -159,6 +166,10 @@ function startScreenVisit(route) {
     setState(markTwoFactorHugSeen(state));
   }
   if (route.screen === 'city') cityArrival = { before: state.lastCityVisit || null };
+  if (landingReaction) {
+    const arriving = !landingReaction.landed && route.screen === 'district' && route.params.id === landingReaction.districtId;
+    landingReaction = arriving ? { ...landingReaction, landed: true } : null;
+  }
   if (route.screen === 'debrief' && twoFactorHugDue(state, route.params.id)) twoFactorHugShown = true;
 }
 
@@ -236,6 +247,9 @@ function afterMissionRecorded(mission, event) {
   // Already taken back before this filing (a bonus mission in a finished
   // district): no second district-completed, no second milestone.
   const wasComplete = Boolean(state.seenProgress?.[districtId]?.includes(100));
+  // Scout's reaction, before this filing's progress check-in is marked seen
+  // below; picked once so a re-draw doesn't change the line.
+  const reaction = debriefReaction(state, mission);
 
   // Track progress milestones for Scout check-ins
   if (districtId && isMissionDone(record)) {
@@ -269,6 +283,9 @@ function afterMissionRecorded(mission, event) {
     navigate(`#/milestone/${districtId}`);
   } else {
     const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
+    landingReaction = reaction ? { districtId, reaction, landed: false } : null;
+    // The first-2FA hug plays on the landing screen, so it counts as seen.
+    if (reaction?.feeling === 'hug') setState(markTwoFactorHugSeen(state));
     navigate(`#/district/${districtId}${targetTab}`);
   }
 }
