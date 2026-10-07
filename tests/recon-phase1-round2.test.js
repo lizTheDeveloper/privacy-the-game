@@ -191,3 +191,103 @@ describe('streakAfterFiling', () => {
     } finally { vi.useRealTimers(); }
   });
 });
+
+// ── Round 2: the burst keeps the chosen option ─────────────────────
+describe('"Change the next 3" stores the option the player picked', () => {
+  const pm = () => ({ ...createInitialState(), passwordManager: 'other', pmFlaggedCount: 10, pmThrowaway: 0, pmChanged: 0 });
+  const burst = () => byId('password_manager-fortify-burst');
+
+  it('"More than 3" stores changed: more plus changed_more, adds N, and reopens with both', () => {
+    // Five flagged, five changed: the job is done, so the debrief is filed.
+    const filed = fileDebrief({ ...pm(), pmFlaggedCount: 5 }, burst(), { changed: 'more', changed_more: '5', junk: 'no' });
+    const rec = filed.state.missions[burst().id];
+    expect(rec).toMatchObject({ status: 'completed', changed: 'more', changed_more: 5 });
+    expect(filed.state.pmChanged).toBe(5);
+    const html = renderDebrief(filed.state, burst().id);
+    expect(html).toContain('More than 3');
+    expect(html).toMatch(/>5</);
+    expect(html).not.toMatch(/Not recorded/);
+  });
+
+  it('a listed number stays its option value, and totals still add across bursts', () => {
+    let s = fileDebrief(pm(), burst(), { changed: '2', junk: 'no' }).state;
+    expect(s.missions[burst().id].changed).toBe('2');
+    expect(s.missions[burst().id].changed_more).toBeUndefined();
+    s = fileDebrief(s, burst(), { changed: '3', junk: 'yes', junk_count: '1' }).state;
+    expect(s.pmChanged).toBe(5);
+    expect(s.pmThrowaway).toBe(1);
+  });
+
+  it('an old save that stored "More than 3" as its number reopens as "More than 3"', () => {
+    const s = pm();
+    s.missions[burst().id] = { status: 'completed', changed: '7', junk: 'no' };
+    const html = renderDebrief(s, burst().id);
+    expect(html).toContain('More than 3');
+    expect(html).not.toMatch(/Not recorded/);
+  });
+
+  it('no burst answer reaches track()', () => {
+    globalThis.umami = { track: vi.fn() };
+    const filed = fileDebrief(pm(), burst(), { changed: 'more', changed_more: '10', junk: 'no' });
+    expect(filed.event).toEqual({ status: 'completed' });
+    track('mission-completed', missionEventData(burst(), { ...filed.state.missions[burst().id], status: 'completed' }));
+    for (const e of restoreEvents(filed.state)) track(e.name, e.data);
+    for (const [, d] of globalThis.umami.track.mock.calls) {
+      for (const k of ['changed', 'changed_more', 'junk', 'junk_count']) expect(k in (d || {})).toBe(false);
+    }
+  });
+});
+
+// ── Round 2: streak days are the player's local calendar day ───────
+describe('streak uses the local calendar day', () => {
+  const realTZ = process.env.TZ;
+  const inZone = (tz, iso) => { process.env.TZ = tz; vi.useFakeTimers({ toFake: ['Date'], now: new Date(iso) }); };
+  afterEach(() => { vi.useRealTimers(); process.env.TZ = realTZ; });
+  const start = () => ({ ...createInitialState(), streak: { current: 0, best: 0, lastDate: null } });
+
+  it('Pacific evening filings on consecutive local days extend the streak', () => {
+    inZone('America/Los_Angeles', '2026-10-06T20:00:00-07:00'); // 03:00Z on the 7th
+    let s = streakAfterFiling(start(), { status: 'completed' });
+    expect(s.streak).toEqual({ current: 1, best: 1, lastDate: '2026-10-06' });
+    vi.setSystemTime(new Date('2026-10-07T21:00:00-07:00')); // 04:00Z on the 8th
+    s = streakAfterFiling(s, { status: 'completed' });
+    expect(s.streak).toEqual({ current: 2, best: 2, lastDate: '2026-10-07' });
+  });
+
+  it('two filings on one local day that straddle midnight UTC count once', () => {
+    inZone('America/Los_Angeles', '2026-10-07T16:30:00-07:00'); // 23:30Z
+    const once = streakAfterFiling(start(), { status: 'completed' });
+    vi.setSystemTime(new Date('2026-10-07T17:30:00-07:00')); // 00:30Z on the 8th
+    expect(streakAfterFiling(once, { status: 'completed' })).toBe(once);
+    expect(once.streak.current).toBe(1);
+  });
+
+  it('a Pacific old save with a UTC lastDate a day ahead of local today neither resets nor double counts', () => {
+    // Filed 2026-10-07 18:00 PDT: the old code wrote the UTC date, 10-08.
+    inZone('America/Los_Angeles', '2026-10-07T20:00:00-07:00');
+    const old = { ...createInitialState(), streak: { current: 4, best: 6, lastDate: '2026-10-08' } };
+    const same = streakAfterFiling(old, { status: 'completed' });
+    expect(same.streak).toEqual({ current: 4, best: 6, lastDate: '2026-10-07' });
+    vi.setSystemTime(new Date('2026-10-08T09:00:00-07:00'));
+    expect(streakAfterFiling(same, { status: 'completed' }).streak).toEqual({ current: 5, best: 6, lastDate: '2026-10-08' });
+  });
+
+  it('a Pacific old save whose UTC lastDate equals local yesterday extends', () => {
+    inZone('America/Los_Angeles', '2026-10-08T09:00:00-07:00');
+    const old = { ...createInitialState(), streak: { current: 4, best: 6, lastDate: '2026-10-07' } };
+    expect(streakAfterFiling(old, { status: 'completed' }).streak).toEqual({ current: 5, best: 6, lastDate: '2026-10-08' });
+  });
+
+  it('a Tokyo old save whose UTC lastDate lags local yesterday by a day does not reset', () => {
+    // Filed 2026-10-08 08:00 JST: the old code wrote the UTC date, 10-07.
+    inZone('Asia/Tokyo', '2026-10-09T20:00:00+09:00');
+    const old = { ...createInitialState(), streak: { current: 4, best: 6, lastDate: '2026-10-07' } };
+    expect(streakAfterFiling(old, { status: 'completed' }).streak).toEqual({ current: 5, best: 6, lastDate: '2026-10-09' });
+  });
+
+  it('a real two-day gap still resets, old save or new', () => {
+    inZone('America/Los_Angeles', '2026-10-10T12:00:00-07:00');
+    const old = { ...createInitialState(), streak: { current: 4, best: 6, lastDate: '2026-10-07' } };
+    expect(streakAfterFiling(old, { status: 'completed' }).streak).toEqual({ current: 1, best: 6, lastDate: '2026-10-10' });
+  });
+});

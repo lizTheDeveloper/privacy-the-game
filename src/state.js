@@ -93,19 +93,48 @@ export function toggleAccount(state, accountId, enabled) {
   };
 }
 
+// Streak days are the player's local calendar day (YYYY-MM-DD).
+export function localDay(date = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+
+function addDays(day, n) {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+// Saves from before streakLocalDay wrote lastDate as the UTC date. That UTC
+// day covers two local days: the one before it west of UTC, the one after it
+// east of UTC. Either may be the day the player actually filed.
+function possibleLastDays(state, now) {
+  const { lastDate } = state.streak;
+  if (!lastDate) return [];
+  if (state.streakLocalDay) return [lastDate];
+  const offset = now.getTimezoneOffset(); // minutes; > 0 west of UTC
+  if (offset > 0) return [addDays(lastDate, -1), lastDate];
+  if (offset < 0) return [lastDate, addDays(lastDate, 1)];
+  return [lastDate];
+}
+
 export function updateStreak(state) {
-  const today = new Date().toISOString().split('T')[0];
-  const { lastDate, current, best } = state.streak;
+  const now = new Date();
+  const today = localDay(now);
+  const { current, best } = state.streak;
+  const last = possibleLastDays(state, now);
 
-  if (lastDate === today) return state;
+  if (state.streakLocalDay && last[0] === today) return state;
 
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const isConsecutive = lastDate === yesterday;
-  const newCurrent = isConsecutive ? current + 1 : 1;
+  let newCurrent;
+  if (last.includes(today)) newCurrent = Math.max(current, 1); // same day (an old save's may be ambiguous): no double count
+  else if (last.includes(addDays(today, -1))) newCurrent = current + 1;
+  else newCurrent = 1;
   const newBest = Math.max(best, newCurrent);
 
   return {
     ...state,
+    streakLocalDay: 1,
     streak: { current: newCurrent, best: newBest, lastDate: today },
   };
 }

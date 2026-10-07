@@ -120,6 +120,10 @@ function completedQuestions(mission, stored, state) {
     <div style="${ROW}"><span style="flex: 1; font-size: 14px; color: var(--offwhite);">${total} changed in all</span></div>
   </div>`;
   }
+  // Before v4.7.1 "More than 3" was kept as its number: show it as picked.
+  if (mission.id === PM_BURST_ID && /^\d+$/.test(String(stored.changed)) && Number(stored.changed) > 3) {
+    stored = { ...stored, changed: 'more', changed_more: Number(stored.changed) };
+  }
   return mission.debriefQs.map((q) => {
     if (stored[q.id] !== undefined) return completedGroup(q, stored, state);
     if (q.legacy && stored[q.legacy.id] !== undefined) return completedGroup(q.legacy, stored, state);

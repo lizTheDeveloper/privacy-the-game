@@ -158,7 +158,15 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
     const allDone = pmNumbers(next).left === 0;
     // The last burst's answers, for the filed debrief (local; never tracked —
     // missionEventData doesn't read them).
-    const last = { changed: String(r.burst.changed), junk: r.burst.junk > 0 ? 'yes' : 'no', junk_count: r.burst.junk > 0 ? r.burst.junk : undefined };
+    // The option picked ('1'-'3', '0', or 'more' with changed_more), so the
+    // reopened debrief shows it.
+    const more = r.record.changed === 'more';
+    const last = {
+      changed: more ? 'more' : String(r.burst.changed),
+      changed_more: more ? r.burst.changed : undefined,
+      junk: r.burst.junk > 0 ? 'yes' : 'no',
+      junk_count: r.burst.junk > 0 ? r.burst.junk : undefined,
+    };
     next = updateMission(next, mission.id, { status: allDone ? 'completed' : undefined, lastBurstAt: now, ...last });
     // One event for the whole job, when it's done — not one per burst — so the
     // count of actions matches what restore would resend.
