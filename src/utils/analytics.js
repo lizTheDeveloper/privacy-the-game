@@ -19,9 +19,19 @@ export function track(name, data) {
   if (u) u.track(name, withPod(data));
 }
 
-// Pageviews: Umami's script records one per screen change by itself (and
-// stops when sharing is off, through `umami.disabled`). The game sends none:
-// a hand-built pageview without the website id is rejected (400).
+// Pageviews. Umami's script records the page load by itself but not the
+// game's hash screen changes, so the game sends those: every arrival after
+// the first. The payload must start from Umami's own props (they carry the
+// website id); without them Umami rejects it with a 400.
+let pageLoadView = true;
+export function trackPageview(url, title) {
+  if (pageLoadView) {
+    pageLoadView = false;
+    return;
+  }
+  const u = tracker();
+  if (u) u.track((props) => ({ ...props, url, title }));
+}
 
 // Send one event and wait for it (bounded). True if a send was attempted.
 export async function trackNow(name, data, { timeoutMs = 1500 } = {}) {

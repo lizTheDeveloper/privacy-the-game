@@ -1,5 +1,5 @@
 import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce } from './utils/analytics-pref.js';
-import { track, trackNow, trackThenStop, waitForTracker } from './utils/analytics.js';
+import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
@@ -133,6 +133,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   try {
     const renderFn = screens[route.screen] || screens.city;
     app.innerHTML = renderFn(route.params);
+    if (tracksPageview(cause)) trackPageview(location.href, route.screen);
     if (route.screen === 'city') {
       state.lastCityVisit = new Date().toISOString();
       setState(state);
