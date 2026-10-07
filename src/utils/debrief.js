@@ -65,8 +65,9 @@ export function debriefRecord(mission, answers) {
   const deferred = shown.some((q) => [a[q.id]].flat().some((v) => DEFERRED.has(v)
     || q.options?.some((o) => o.value === v && o.severity === 'skip')));
   let status = deferred ? 'skipped' : 'completed';
-  const record = { status, finding: a.finding, action: a.action };
-  for (const key of ['password_exposed', 'method', 'method_setup']) if (a[key] !== undefined) record[key] = a[key];
+  // Every answered question is kept by its id, so a reopened debrief shows it.
+  // Local only: missionEventData sends just its own keys.
+  const record = { ...a, status, finding: a.finding, action: a.action };
   if (mission.debriefQs.some((q) => q.kind === 'two-factor')) record.action = twoFactorAction(a);
   const out = { status, record };
   if ('flagged_count' in a) {
@@ -79,7 +80,10 @@ export function debriefRecord(mission, answers) {
       record.throwaway_count = a.throwaway_count;
       out.pmFlagged = ids;
       out.pm = { pmFlaggedCount: a.flagged_count, pmThrowaway: Math.min(a.throwaway_count, a.flagged_count) };
-    } else record.action = 'skip';
+    } else {
+      record.action = 'skip';
+      for (const k of ['flagged', 'flagged_count', 'throwaway_count']) delete record[k];
+    }
   }
   if ('changed' in a) {
     // A burst of "Change the next 3".
@@ -160,7 +164,8 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
     // count of actions matches what restore would resend.
     return { state: next, event: allDone ? { status: 'completed' } : null };
   }
-  const update = Object.fromEntries(ANSWER_KEYS.map((k) => [k, undefined]));
+  const keys = [...ANSWER_KEYS, ...mission.debriefQs.flatMap((q) => (q.legacy ? [q.id, q.legacy.id] : [q.id]))];
+  const update = Object.fromEntries(keys.map((k) => [k, undefined]));
   let next = updateMission(state, mission.id, { ...update, ...r.record });
   if (r.pmFlagged) next = { ...next, pmFlagged: r.pmFlagged };
   if (r.pm) next = { ...next, ...r.pm, pmChanged: Math.min(next.pmChanged || 0, r.pm.pmFlaggedCount - r.pm.pmThrowaway) };

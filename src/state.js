@@ -1,5 +1,6 @@
 import { captureError } from './utils/errors.js';
 import { ACCOUNTS } from './data/accounts.js';
+import { migrateBrokenAnswers } from './utils/migrate-answers.js';
 
 export const STATE_VERSION = 1;
 const STORAGE_KEY = 'reclaim-city-state';
@@ -33,7 +34,7 @@ export function loadState(storage = localStorage) {
         parsed.accounts[id] = { enabled: true, name: a.name, district: a.district };
       }
     }
-    return parsed;
+    return migrateBrokenAnswers(parsed);
   } catch (error) {
     captureError(error, { operation: 'loadState' });
     return createInitialState();
@@ -107,4 +108,10 @@ export function updateStreak(state) {
     ...state,
     streak: { current: newCurrent, best: newBest, lastDate: today },
   };
+}
+
+// After a debrief is filed: a skipped filing doesn't extend the streak.
+// event is fileDebrief's ({ status }), or null for a mid-job burst (real work).
+export function streakAfterFiling(state, event) {
+  return event?.status === 'skipped' ? state : updateStreak(state);
 }

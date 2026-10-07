@@ -84,6 +84,13 @@ function questionGroup(q, state) {
   </div>`;
 }
 
+// A stored answer that matches no option: a number answer shows its number;
+// anything else (an old save's broken string) is "Not recorded", never raw.
+function shownValue(q, value) {
+  if (q.type === 'number' && /^\d+$/.test(String(value ?? ''))) return String(value);
+  return 'Not recorded';
+}
+
 function completedGroup(q, stored, state) {
   const value = stored[q.id];
   const options = questionOptions(q, state);
@@ -92,7 +99,7 @@ function completedGroup(q, stored, state) {
   const row = opts.length
     ? `<div style="display: flex; flex-direction: column; gap: 6px;">${opts.map(lockedRow).join('')}</div>`
     : `<div style="${ROW}">
-        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${value ?? 'Not recorded'}</span>
+        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${shownValue(q, value)}</span>
        </div>`;
   return `
   <div style="margin-bottom: 28px;">
@@ -130,7 +137,8 @@ function passwordScoutLine(mission, stored) {
     const line = TWO_FA_DIALOGUE[twoFactorMethod(stored)];
     if (line) return line;
   }
-  if (BREACHED.has(stored.finding) && stored.password_exposed === 'no') return PASSWORD_DIALOGUE.breachNoPassword;
+  // "Your address leaked; your password didn't": only true of an email address.
+  if (isEmailBreachCheck(mission.id) && BREACHED.has(stored.finding) && stored.password_exposed === 'no') return PASSWORD_DIALOGUE.breachNoPassword;
   return null;
 }
 
