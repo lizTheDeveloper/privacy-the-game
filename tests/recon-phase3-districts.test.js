@@ -164,3 +164,29 @@ describe('The Archives', () => {
     }
   });
 });
+
+describe('The Capitol', () => {
+  it('IRS: no unsourced figure, no promise that an account blocks fraud', () => {
+    const m = byId('irs-recon-claim');
+    expect(text(m)).not.toMatch(/5\.7 billion|prevents someone else/);
+    expect(text(byId('irs-fortify-ip-pin'))).not.toMatch(/5\.7 billion/);
+    expect(stepUrls(m)).toEqual(['https://www.irs.gov/payments/online-account-for-individuals']);
+    expect(stepText(m)).toContain('photo ID');
+    expect(stepText(m)).toMatch(/transcripts/);
+  });
+
+  it('DMV: alerts are the protection, not claiming the account', () => {
+    const m = byId('state_dmv-recon-claim');
+    expect(text(m)).not.toMatch(/so no one can create one/);
+    expect(m.briefing).toContain('alerts');
+    expect(m.scoutDialog.debrief.claimed).not.toMatch(/One fewer way/);
+  });
+
+  it('StudentAid: an FSA ID, not Login.gov, and My Aid is linked', () => {
+    const m = byId('student_loans-recon-claim');
+    expect(text(m)).not.toContain('Login.gov');
+    expect(stepUrls(m)).toEqual(['https://studentaid.gov/fsa-id/create-account/launch', 'https://studentaid.gov/my-aid/']);
+    expect(m.briefing).not.toContain('borrowers"');
+    expect(m.scoutDialog.debrief.claimed).not.toMatch(/No one can apply/);
+  });
+});
