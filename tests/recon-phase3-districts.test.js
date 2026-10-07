@@ -83,3 +83,84 @@ describe('The Master Keys', () => {
     expect(text(m)).not.toMatch(/common hit|533 million/);
   });
 });
+
+describe('The Square', () => {
+  it('X connected apps: its own apps_audit answers, not login answers', () => {
+    const m = byId('twitter-recon-apps');
+    expect(m.debriefQs.map((q) => q.id)).toEqual(['apps_audit']);
+    expect(values(m, 'apps_audit')).toEqual(['apps-clean', 'apps-revoked', 'apps-unknown', 'skip']);
+    expect(stepText(m)).toContain('Security and account access → Apps and sessions');
+    filesCleanly(m, 'apps_audit');
+    // An old save's login-style answer still shows.
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+  });
+
+  it('TikTok device check has no Have I Been Pwned step and uses device answers', () => {
+    const m = byId('tiktok-recon-devices');
+    expect(text(m)).not.toMatch(/haveibeenpwned/i);
+    expect(stepText(m)).toContain('Security & permissions');
+    expect(stepText(m)).toContain('Manage devices');
+    expect(m.debriefQs[0].options.map((o) => o.text).slice(0, 3)).toEqual(['All my devices', 'A device I don’t recognize', 'Several I don’t recognize']);
+  });
+
+  it('LinkedIn names where permitted services live', () => {
+    expect(stepText(byId('linkedin-recon-login'))).toContain('Data privacy → Other applications');
+  });
+
+  it('WhatsApp and Signal give both phone paths', () => {
+    const w = stepText(byId('whatsapp-recon-devices'));
+    expect(w).toContain('iPhone');
+    expect(w).toContain('Android');
+    const s = stepText(byId('signal-recon-devices'));
+    expect(s).toContain('iPhone');
+    expect(s).toContain('Android');
+  });
+
+  it('Discord token audit makes no unconfirmed claims', () => {
+    const m = byId('discord-recon-tokens');
+    expect(stepText(m)).toContain('Authorized Apps');
+    expect(stepText(m)).toMatch(/If you see Devices/);
+    expect(text(m)).not.toMatch(/invalidates|kills all stolen tokens|kills the token/);
+    expect(m.debriefQs[0].options.map((o) => o.text).slice(0, 3)).toEqual(['Nothing suspicious', 'Found an app or session I don’t recognize', 'Confirmed someone else was in']);
+  });
+
+  it('old Instagram and Uber checks (legacy) drop facts that aren’t true', () => {
+    expect(text(byId('instagram-recon-breach'))).not.toContain('Chtrbox');
+    expect(text(byId('uber-recon-breach'))).not.toMatch(/Also check the phone number/);
+  });
+
+  it('the X privacy review dates the scrape correctly', () => {
+    expect(text(byId('twitter-reclaim-privacy'))).not.toContain('2023 scrape');
+  });
+});
+
+describe('The Archives', () => {
+  it('Google Drive: the real People filter, and its own shares_audit answers', () => {
+    const m = byId('gdrive-recon-shares');
+    expect(stepText(m)).toContain('Anyone with the link');
+    expect(stepText(m)).toContain('sharedwith:public');
+    expect(stepText(m)).toContain('Restricted');
+    expect(stepText(m)).not.toContain('type:document');
+    expect(m.debriefQs.map((q) => q.id)).toEqual(['shares_audit']);
+    expect(values(m, 'shares_audit')).toEqual(['shares-none', 'shares-restricted', 'shares-many', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    filesCleanly(m, 'shares_audit');
+  });
+
+  it('GitHub: the log shows keys and tokens added, not each clone', () => {
+    const m = byId('github-recon-security');
+    expect(stepUrls(m)).toEqual([
+      'https://github.com/settings/security-log', 'https://github.com/settings/sessions',
+      'https://github.com/settings/keys', 'https://github.com/settings/tokens',
+    ]);
+    expect(text(m)).not.toMatch(/silently cloned|SSH key usage|may have cloned/);
+    expect(m.briefing).toContain('added a key or token');
+  });
+
+  it('no Scout line in the district ends with a stray backtick', () => {
+    for (const id of ['gdrive-recon-shares', 'github-recon-security']) {
+      for (const line of Object.values(byId(id).scoutDialog.debrief)) expect(line, id).not.toMatch(/`$/);
+      expect(byId(id).scoutDialog.briefing).not.toMatch(/'Anyone with the link"/);
+    }
+  });
+});
