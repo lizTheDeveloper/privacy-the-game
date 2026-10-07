@@ -182,7 +182,7 @@ function yourPartPanel(state, podLabel) {
   if (found === 0) {
     body = 'Run a breach check in The Master Keys to add yourself to the map.';
   } else {
-    body = `You found ${found} breached ${plural(found, 'account', 'accounts')} and fixed ${fixed}.`;
+    body = `You found ${found} email ${plural(found, 'address', 'addresses')} in a known breach and fixed ${fixed}.`;
     if (found > fixed) body += ` Fixing the rest moves ${esc(podLabel || 'the city')} too.`;
   }
   return `
@@ -197,6 +197,7 @@ function footer(data) {
   const lines = [];
   const when = data.asOf ? new Date(data.asOf) : null;
   if (when && !Number.isNaN(when.getTime())) lines.push(`As of ${esc(when.toLocaleString())}.`);
+  lines.push('Breach rates now count email addresses only.');
   lines.push('Loading this page doesn\'t track you.');
   lines.push('“Players” are anonymous browser sessions. Places with fewer than 50 players are grouped into a bigger place.');
   const tail = [];

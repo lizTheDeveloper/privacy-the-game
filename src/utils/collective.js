@@ -1,4 +1,5 @@
 import { getChosenPod } from './pod-pref.js';
+import { isEmailBreachCheck } from './calc.js';
 
 // Relative to /reclaim-city/: served by rc-collective behind Traefik.
 export const COLLECTIVE_URL = 'api/collective.json';
@@ -68,7 +69,9 @@ export function yourPart(state) {
   let found = 0;
   let fixed = 0;
   for (const [id, m] of Object.entries(state?.missions || {})) {
-    if (!id.endsWith('-recon-breach') || m?.status !== 'completed' || !BREACHED.has(m.finding)) continue;
+    // Email addresses only (build.sql's allowlist): an old service "breach
+    // check" re-checked the same address.
+    if (!isEmailBreachCheck(id) || m?.status !== 'completed' || !BREACHED.has(m.finding)) continue;
     found += 1;
     const acct = id.slice(0, -'-recon-breach'.length);
     const done = (mid) => state.missions[mid]?.status === 'completed';
