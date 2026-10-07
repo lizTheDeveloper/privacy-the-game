@@ -48,7 +48,7 @@ export function generateMilestoneCard(districtName, stats) {
 
   ctx.fillStyle = '#00E5FF';
   ctx.font = '400 14px "JetBrains Mono", monospace';
-  ctx.fillText(milestoneCardLine(stats || {}), 300, 208);
+  ctx.fillText(milestoneCardLine(stats || {}), 300, 208, 540);
 
   ctx.fillStyle = 'rgba(237,239,243,0.4)';
   ctx.font = '400 11px "JetBrains Mono", monospace';

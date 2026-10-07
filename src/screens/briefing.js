@@ -9,6 +9,7 @@ import { isPasswordMission, passwordResetNeed, notNeededReasons, isPmFlagged, pa
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
+import { EMAIL_ACCOUNT_IDS } from '../utils/calc.js';
 
 function notFound(state) {
   return `
@@ -151,9 +152,13 @@ function reopenedLine(state, mission) {
 }
 
 // "Clean record" only when the breach check found nothing.
+// Only an email address has a breach check that means anything here; any
+// other account's not-needed came from its own evidence (pw-clean).
 function noResetScoutLine(state, mission) {
-  const finding = state.missions[`${mission.accountId}-recon-breach`]?.finding;
-  return finding === 'no-breaches' ? PASSWORD_DIALOGUE.notNeeded : PASSWORD_DIALOGUE.notNeededAfterLeak;
+  const breach = EMAIL_ACCOUNT_IDS.has(mission.accountId) ? state.missions[`${mission.accountId}-recon-breach`] : null;
+  if (breach?.status === 'completed' && breach.finding === 'no-breaches') return PASSWORD_DIALOGUE.notNeeded;
+  if (breach?.status === 'completed' && breach.finding) return PASSWORD_DIALOGUE.notNeededAfterLeak;
+  return PASSWORD_DIALOGUE.notNeededPm;
 }
 
 function renderNoResetPanel(state, mission) {

@@ -143,9 +143,13 @@ function renderMissionRow(state, mission) {
   const noResetYet = !completed && isPasswordMission(mission) && passwordResetNeed(state, mission.accountId) === 'not-needed';
 
   let statusCell;
-  if (notNeeded) {
+  if (notNeeded && passwordResetNeed(state, mission.accountId) === 'not-needed') {
     // A link, so the player can still choose "Reset it anyway" from the briefing.
     statusCell = `<a class="badge" style="${NO_RESET_STYLE} text-decoration: none;" href="#/mission/${mission.id}/briefing">NO RESET NEEDED</a>`;
+  } else if (notNeeded) {
+    // Filed "not needed" on evidence that no longer says so (an old email
+    // re-check): it keeps its status and progress, but no longer claims it.
+    statusCell = `<a class="badge" style="letter-spacing: 1px; color: rgba(237,239,243,0.55); background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.12); text-decoration: none;" href="#/mission/${mission.id}/briefing">FILED</a>`;
   } else if (completed) {
     statusCell = `<div class="badge" style="letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);">SECURED</div>`;
   } else if (skipped) {

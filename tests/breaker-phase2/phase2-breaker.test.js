@@ -403,7 +403,9 @@ describe('promise 2: password-need follows each account’s own evidence', () =>
       let s = rec(base(), `${a}-recon-password`, { pw_status: 'pw-clean', activity: 'activity-confirmed' });
       const line = fraudContactLine(s, a);
       if (a === 'primary_bank' || a === 'credit_card') expect(line).toMatch(/back of your card/);
-      else expect(line).toMatch(new RegExp(`Report it to ${ACCOUNTS[a].name}`));
+      // Edited by the builder for the reviewer's low (2026-10-07): the debrief's
+      // generic names ("your brokerage", "your exchange"), never a building name.
+      else expect(line).toMatch(new RegExp(`Report it to ${{ paypal: 'PayPal', venmo: 'Venmo', cashapp: 'Cash App', crypto_exchange: 'your exchange', investment_account: 'your brokerage' }[a]} `));
       s = rec(base(), `${a}-recon-password`, { pw_status: 'pw-clean', activity: 'activity-unknown' });
       expect(fraudContactLine(s, a)).toBeNull();
     }

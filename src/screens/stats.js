@@ -269,7 +269,7 @@ export function renderStats(state, view = {}) {
     <div class="panel" style="padding: 20px 24px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 16px;">FINDINGS LOG</div>
       <div style="display: flex; flex-wrap: wrap; gap: 16px;">
-        ${findingCard({ label: 'BREACHES FOUND', value: findings.breachesFound, color: '#FF2D9B', tint: 'rgba(255,45,155,0.1)' })}
+        ${findingCard({ label: 'ADDRESSES IN A BREACH', value: findings.breachesFound, color: '#FF2D9B', tint: 'rgba(255,45,155,0.1)' })}
         ${findingCard({ label: 'PASSWORDS RESET', value: findings.passwordsReset, color: '#00E5FF', tint: 'rgba(0,229,255,0.1)' })}
         ${findingCard({ label: '2FA ENABLED', value: findings.twoFactorEnabled, color: '#C6FF00', tint: 'rgba(198,255,0,0.1)' })}
         ${findingCard({ label: 'OPT-OUTS FILED', value: findings.optOutsFiled, color: '#FF9F00', tint: 'rgba(255,159,0,0.1)' })}

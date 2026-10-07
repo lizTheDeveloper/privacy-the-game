@@ -376,6 +376,7 @@ export const GHOST_DIALOGUE = {
 export const PASSWORD_DIALOGUE = {
   notNeeded: `Clean record. No leaked password, nothing flagged — changing it now would just be busywork. Moving on.`,
   notNeededAfterLeak: `There were leaks, but your password wasn't in them, and nothing's flagged it. Changing it now would just be busywork.`,
+  notNeededPm: `Your password manager has nothing on this one, and nothing else says it leaked. Changing it now would just be busywork.`,
   breachNoPassword: `Your address leaked; your password didn't. Expect a bit more spam and a few more phishing attempts aimed at that inbox — but these leaks didn't hand anyone your key.`,
   noManager: `No password manager yet? Worth getting one — it makes a different strong password for every account and remembers them all, so you don't have to. Your phone or browser probably has one built in.`,
   hasManager: `Good. Most managers can tell you which of your passwords leaked or got reused — there's a recon mission for reading that report.`,

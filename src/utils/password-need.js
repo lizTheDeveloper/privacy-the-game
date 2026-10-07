@@ -27,6 +27,8 @@ export const PM_MISSION_ID = 'password_manager-recon-report';
 // Money accounts, and who to call when something moved that the player
 // didn't move. Nothing to do with passwords: it stops the money first.
 const CARD_LINE = 'Call the number on the back of your card and tell them what you didn’t do. Use that number, not one from an email or text.';
+// The debrief's own words for each money account (never a building name).
+const MONEY_NAMES = { paypal: 'PayPal', venmo: 'Venmo', cashapp: 'Cash App', crypto_exchange: 'your exchange', investment_account: 'your brokerage' };
 export const MONEY_ACCOUNTS = new Set(['primary_bank', 'credit_card', 'paypal', 'venmo', 'cashapp', 'crypto_exchange', 'investment_account']);
 
 export function isPasswordMission(mission) {
@@ -136,7 +138,7 @@ export function fraudContactLine(state, accountId) {
   if (!MONEY_ACCOUNTS.has(accountId)) return null;
   if (evidence(state, accountId).activity !== 'activity-confirmed') return null;
   if (accountId === 'primary_bank' || accountId === 'credit_card') return CARD_LINE;
-  const name = ACCOUNTS[accountId]?.name || 'the company';
+  const name = MONEY_NAMES[accountId] || ACCOUNTS[accountId]?.name || 'the company';
   return `Report it to ${name} from inside its app or its own website, not through a link or number from an email or text.`;
 }
 

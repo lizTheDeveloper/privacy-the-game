@@ -259,7 +259,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'Your brokerage or retirement account may hold more than your bank account, behind a password you set at signup. Account takeovers there usually work by changing the beneficiary, the linked bank or the mailing address first. This check looks at those, and at the password.',
     steps: [
       pmStep('your brokerage'),
-      { text: 'Open your brokerage’s own security page and look at recent logins or devices. Schwab: Profile → Security Settings → Previous Login. Robinhood: Security and privacy → Devices. Vanguard app: Profile → Settings → Login & security → Device management. Fidelity: Security Center.' },
+      { text: 'Open your brokerage’s own security page and look at recent logins or devices. Schwab: Profile → Security Settings → Previous Login. Robinhood: Security and privacy → Devices. Vanguard app: Profile → Login & security / Device management. Fidelity: Security Center.' },
       { text: 'Check beneficiaries, linked bank accounts and the mailing address.' },
       { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021, emails only). It’s the one brokerage in that list.' },
     ],
@@ -300,7 +300,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     ],
     scoutDialog: scout('"Medical fraud hides in paperwork nobody reads. Today we read it."', {
       'activity-confirmed': '"Call your insurer’s fraud line, using the number on your insurance card, and tell them which claims weren’t yours. Then change the password."',
-      'on-hhs-list': '"They’re on the list. That means your records may be out there. Watch your claims, and the password is worth changing."',
+      'on-hhs-list': '"They’re on the list. That means your records may be out there. Keep watching your claims for anything you didn’t get."',
       'not-on-hhs-list': '"Not on the list. That only covers breaches of 500 or more people, but it’s a good sign."',
     }),
   }),
@@ -388,7 +388,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     replaces: 'reddit-recon-breach',
     accountId: 'reddit',
     title: 'Password Recon: Reddit',
-    briefing: 'Reddit’s 2018 breach (a backup of early accounts from 2007) isn’t in Have I Been Pwned’s list, so an email check says nothing about it. Your password manager can say whether the Reddit password is leaked or reused, and changing the password signs out your other sessions.',
+    briefing: 'Reddit’s 2018 breach (a backup of early accounts from 2007) isn’t in Have I Been Pwned’s list, so an email check says nothing about it. Your password manager can say whether the Reddit password is leaked or reused, and resetting the password signs out your other sessions.',
     steps: [
       pmStep('Reddit'),
       { text: 'Reddit’s help describes an account activity page that shows recent IP addresses and can log out all your sessions. Reddit doesn’t give the menu path, so look for it in your account settings. Check the email address on the account too.' },
