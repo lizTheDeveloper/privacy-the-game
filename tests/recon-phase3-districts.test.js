@@ -378,3 +378,38 @@ describe('The Foundry', () => {
     expect(text(byId('ai_openai-optout'))).not.toMatch(/stay private/);
   });
 });
+
+describe('The Grid', () => {
+  it('TV paths include the missing menus', () => {
+    const t = stepText(byId('smart_tv-recon-acr'));
+    expect(t).toContain('General & Privacy → Terms & Privacy');
+    expect(t).toContain('User Agreements');
+    expect(t).toContain('Analytics & Improvements');
+    expect(t).toContain('Walmart');
+  });
+
+  it('voice assistant paths are current', () => {
+    const t = stepText(byId('voice_assistant-recon-recordings'));
+    expect(t).toContain('Apple Intelligence & Siri');
+    expect(t).toContain('Analytics & Improvements');
+    expect(t).toContain('Include voice and audio activity');
+    expect(t).toContain('Use of voice recordings');
+  });
+
+  it('camera access: real paths, who-has-access answers, the true Wyze history', () => {
+    const m = byId('smart_camera-recon-access');
+    expect(stepText(m)).toContain('Control Center → User Permissions');
+    expect(stepText(m)).toContain('Home settings');
+    expect(values(m, 'camera_access')).toEqual(['only-me', 'removed-old', 'stranger', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    expect(text(m)).not.toMatch(/didn't disclose it for two years|for two years and said nothing/);
+    expect(m.briefing).toContain('within days');
+    filesCleanly(m, 'camera_access');
+  });
+
+  it('Amazon never bought iRobot', () => {
+    const line = byId('smart_appliances-recon-inventory').scoutDialog.briefing;
+    expect(line).not.toMatch(/Amazon bought iRobot/);
+    expect(line).toContain('the deal died in 2024');
+  });
+});

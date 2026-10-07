@@ -40,6 +40,22 @@ const NETWORK_DEBRIEF = [
   },
 ];
 
+// Who can see your cameras (recon audit #81): a new question id; an old
+// save's finding still shows (question.legacy).
+const CAMERA_ACCESS_DEBRIEF = [
+  {
+    id: "camera_access",
+    label: "Who had access?",
+    legacy: DEVICE_AUDIT_DEBRIEF[0],
+    options: [
+      { value: "only-me", text: "Only me / my household", severity: "safe" },
+      { value: "removed-old", text: "Removed old shared users", severity: "safe" },
+      { value: "stranger", text: "Someone I didn't know had access", severity: "crit" },
+      { value: "skip", text: "Couldn't check right now", severity: "skip" },
+    ],
+  },
+];
+
 function scoutDevice(clean, some, major) {
   return {
     "no-issues": clean,
@@ -68,12 +84,12 @@ export const GRID_MISSIONS = [
     title: "Disable ACR on Your TV",
     briefing: "Your smart TV has a feature called Automatic Content Recognition. It takes a fingerprint of what's on screen several times per second and sends it to a server that identifies what you're watching -- live TV, streaming, Blu-ray, even video calls. Vizio paid $2.2 million to the FTC for doing this without telling anyone. Samsung, LG, Roku, and Fire TV all do it too, they just buried the consent in the terms of service. The good news: you can turn it off. The bad news: every manufacturer hides the setting somewhere different.",
     steps: [
-      { text: "Samsung: Settings > General & Privacy > Privacy Choices > Viewing Information Services > toggle OFF" },
-      { text: "LG: Settings > All Settings > General > System > Additional Settings > LivePlus > toggle OFF" },
+      { text: "Samsung: Settings → All Settings → General & Privacy → Terms & Privacy → untick Viewing Information Services" },
+      { text: "LG: Settings > All Settings > General > System > Additional Settings > LivePlus > toggle OFF. Also Settings → General → System → User Agreements → untick Viewing Information (and “Who.Where.What?” on 2022 and later sets)" },
       { text: "Roku/TCL: Settings > Privacy > Smart TV Experience > toggle OFF 'Use Information from TV Inputs'" },
       { text: "Fire TV/Insignia: Settings > Preferences > Privacy Settings > Device Usage Data > toggle OFF; also Collect App Usage Data > OFF" },
-      { text: "Vizio: System > Reset & Admin > Viewing Data > toggle OFF" },
-      { text: "Apple TV: Settings > General > Privacy & Security > Analytics > toggle OFF Share Apple TV Analytics" },
+      { text: "Vizio: System > Reset & Admin > Viewing Data > toggle OFF. Newer Vizio sets (Vizio is now owned by Walmart) may also have a separate setting for data shared with Walmart" },
+      { text: "Apple TV: Settings → General → Privacy & Security → Analytics & Improvements → turn off Share Apple TV Analytics" },
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -122,11 +138,11 @@ export const GRID_MISSIONS = [
     steps: [
       { text: "Alexa: Open the Alexa app > More > Settings > Alexa Privacy > Manage Your Alexa Data" },
       { text: "Alexa: Under 'Choose how long to save recordings,' select 'Don't save recordings'" },
-      { text: "Alexa: Tap 'Delete All Recordings' to clear history" },
+      { text: "Alexa: Under Help improve Alexa, turn off Use of voice recordings. Then delete the recordings in Review Voice History" },
       { text: "Google: Go to myactivity.google.com > Filter by 'Voice & Audio'" },
-      { text: "Google: Delete all voice recordings, then go to Activity Controls > Web & App Activity > turn off 'Include audio recordings'" },
-      { text: "Siri (iPhone/Mac): Settings > Siri & Search > Siri & Dictation History > Delete Siri & Dictation History" },
-      { text: "Siri: Settings > Privacy & Security > Analytics > toggle OFF 'Improve Siri & Dictation'" },
+      { text: "Google: Delete all voice recordings, then go to Activity Controls > Web & App Activity > untick 'Include voice and audio activity'" },
+      { text: "Siri (iPhone/Mac): Settings → Siri (on newer iPhones: Apple Intelligence & Siri) → Siri & Dictation History → Delete Siri & Dictation History" },
+      { text: "Siri: Settings → Privacy & Security → Analytics & Improvements → turn off Improve Siri & Dictation" },
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -173,23 +189,28 @@ export const GRID_MISSIONS = [
     accountId: "smart_camera",
     phase: "recon",
     title: "Audit Camera Access and Sharing",
-    briefing: "Smart cameras -- Ring, Nest, Wyze, Arlo -- have user management features. Anyone with access to your camera account can watch the live feed, review recordings, and sometimes download footage. If you shared access with an ex-partner, a former roommate, or a contractor who installed the camera, they may still have access. Wyze had a data breach in 2019 that exposed 2.4 million customer records and didn't disclose it for two years.",
+    briefing: "Smart cameras -- Ring, Nest, Wyze, Arlo -- have user management features. Anyone with access to your camera account can watch the live feed, review recordings, and sometimes download footage. If you shared access with an ex-partner, a former roommate, or a contractor who installed the camera, they may still have access. Wyze exposed 2.4 million customers' data in 2019 and disclosed it within days. Its long silence was about something else: a camera vulnerability it left unpatched for about three years, reported in 2022.",
     steps: [
-      { text: "Ring: Open the Ring app > Devices > select each camera > Shared Users > remove anyone who shouldn't have access" },
-      { text: "Nest/Google: Google Home app > select camera > Settings > manage linked accounts and shared users" },
-      { text: "Wyze: Wyze app > Account > Sharing > review and remove old shared users" },
-      { text: "Arlo: Arlo app > Settings > Grant Access > review and remove" },
-      { text: "Check for any unfamiliar linked email addresses on the camera account itself" },
-      { text: "Change the camera account password if you haven't done so recently" },
+      { text: 'Ring: open the Ring app → menu → Control Center → User Permissions. Remove Shared and Guest users who shouldn’t have access' },
+      { text: 'Nest/Google: Google Home app → your profile → Home settings → tap a person → Remove' },
+      { text: 'Wyze: Wyze app → Account → Sharing → review and remove old shared users' },
+      { text: 'Arlo: Arlo app → Settings → Account → Grant Access → review and remove' },
+      { text: 'Check for any unfamiliar linked email addresses on the camera account itself' },
+      { text: 'Change the camera account password if you haven’t done so recently' },
     ],
-    debriefQs: DEVICE_AUDIT_DEBRIEF,
+    debriefQs: CAMERA_ACCESS_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Your camera sees everything in its field of view, 24/7. Who else can see it? Former roommates, ex-partners, the contractor who installed it -- if they were ever shared access, they might still have it. Wyze left 2.4 million users exposed for two years and said nothing. Let's check who's watching your cameras.\"",
-      debrief: scoutDevice(
+      briefing: "\"Your camera sees everything in its field of view, 24/7. Who else can see it? Former roommates, ex-partners, the contractor who installed it -- if they were ever shared access, they might still have it. Let's check who's watching your cameras.\"",
+      debrief: {
+        "only-me": "\"Only your household. That's how it should be.\"",
+        "removed-old": "\"Old shared users removed. Good catch -- they could have kept watching.\"",
+        "stranger": "\"Someone you didn't know had access. That's a safety issue, not just privacy. Remove them, change the password, and turn on two-factor.\"",
+        ...scoutDevice(
         "\"Access is clean. Only you can see your feeds. That's how it should be.\"",
         "\"Found some old shared users. Good catch -- they could have been watching this whole time.\"",
         "\"Multiple unauthorized viewers on your cameras. That's not just a privacy issue, that's a safety issue. They're removed now.\""
       ),
+      },
     },
     estimatedMinutes: 8,
   },
@@ -259,7 +280,7 @@ export const GRID_MISSIONS = [
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Amazon bought iRobot -- the Roomba company -- for $1.7 billion. They already have your shopping history, your voice recordings, and your doorbell camera. Now they want the floor plan of your house. Let's find out what every connected device in your home is sending and to whom.\"",
+      briefing: "\"Amazon tried to buy iRobot, the Roomba company, for $1.7 billion. Regulators balked and the deal died in 2024. A robot vacuum maps your home, and that map is data. Let's find out what every connected device in your home is sending and to whom.\"",
       debrief: scoutDevice(
         "\"Everything accounted for and locked down. Your home network is cleaner than most corporate offices.\"",
         "\"Found some devices phoning home. That's normal -- the default is always maximum data collection. Now you know what's there.\"",
