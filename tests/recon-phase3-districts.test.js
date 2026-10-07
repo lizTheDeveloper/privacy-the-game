@@ -464,3 +464,19 @@ describe('The Clinic', () => {
     }
   });
 });
+
+describe('The Trail', () => {
+  it('Plaid: the Portal shows connections now; the data request is a separate, slower form', () => {
+    const m = byId('payment_trail-recon-plaid');
+    expect(stepUrls(m)).toEqual(['https://my.plaid.com', 'https://my.plaid.com/data-subject-request-form']);
+    expect(text(m)).not.toContain('plaid.com/legal/data-protection-request');
+    expect(m.briefing).toMatch(/announced in 2021 and approved in 2022/);
+    expect(values(m, 'plaid_connections')).toEqual(['none', 'disconnected', 'many', 'skip']);
+    expect(m.debriefQs[0].legacy.id).toBe('finding');
+    filesCleanly(m, 'plaid_connections');
+  });
+
+  it('the 83% figure is labelled as EFF’s 2010 study', () => {
+    expect(byId('browser_fingerprint-recon-test').briefing).toContain('In EFF’s 2010 study, 83% of browsers were unique');
+  });
+});

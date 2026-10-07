@@ -39,6 +39,23 @@ function scoutTrail(completed, alreadyDone, na) {
   };
 }
 
+// Plaid connections (recon audit #92): the Plaid Portal shows them now, so
+// the answer is about them. A new question id; an old save's finding still
+// shows (question.legacy).
+const PLAID_DEBRIEF = [
+  {
+    id: "plaid_connections",
+    label: "What did the Plaid Portal show?",
+    legacy: AUDIT_DEBRIEF[0],
+    options: [
+      { value: "none", text: "No connections", severity: "safe" },
+      { value: "disconnected", text: "Found old connections and disconnected them", severity: "safe" },
+      { value: "many", text: "Lots of connections, including apps I forgot", severity: "warn" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
+    ],
+  },
+];
+
 export const TRAIL_MISSIONS = [
 
   // ══════════════════════════════════════════════════════
@@ -198,17 +215,19 @@ export const TRAIL_MISSIONS = [
     accountId: "payment_trail",
     phase: "recon",
     title: "Review Your Plaid Connections",
-    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, Mint, YNAB, or any budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. But Plaid was sued (and settled for $58 million) for collecting more transaction data than users authorized and sharing it with third parties. You can request your Plaid data and delete it.",
+    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, Mint, YNAB, or any budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. Plaid was sued for allegedly collecting more transaction data than users authorized, and settled for $58 million (announced in 2021 and approved in 2022). The Plaid Portal shows which apps you've connected, and lets you disconnect them.",
     steps: [
-      { text: "Go to Plaid's data protection request page", url: "https://plaid.com/legal/data-protection-request/" },
-      { text: "Submit a request to see what data Plaid has on you. Select 'Access my data' first to see what they have before deciding whether to delete." },
-      { text: "After reviewing: submit a deletion request if you no longer use the apps that connected through Plaid." },
-      { text: "For apps you still use: check if the app offers a direct bank connection (ACH) that bypasses Plaid. Some do, most don't advertise it." },
+      { text: 'Open the Plaid Portal and sign in with your phone number. It lists every app you’ve connected through Plaid', url: 'https://my.plaid.com' },
+      { text: 'Disconnect apps you no longer use' },
+      { text: 'To get a full copy of your data, use Plaid’s data request form. It takes a while', url: 'https://my.plaid.com/data-subject-request-form' },
     ],
-    debriefQs: AUDIT_DEBRIEF,
+    debriefQs: PLAID_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Plaid settled a class action for $58 million because they scraped more transaction data than users consented to. Every time you 'connected your bank account' to an app, Plaid logged in as you and downloaded your full transaction history -- not just the data the app needed. Your rent payments, your medical bills, your donations, your bar tabs. All of it in Plaid's database. You can ask to see it and ask to delete it. The form takes two minutes.\"",
+      briefing: "\"Plaid settled a class action for $58 million over claims it took more transaction data than users consented to. Every time you 'connected your bank account' to an app, Plaid logged in as you and downloaded your full transaction history -- not just the data the app needed. Your rent payments, your medical bills, your donations, your bar tabs. All of it in Plaid's database. The Portal shows your connections in a couple of minutes.\"",
       debrief: {
+        "none": "\"No connections. Fewer copies of your bank history out there.\"",
+        "disconnected": "\"Old connections cut. The budgeting app you tried once doesn't need your bank anymore.\"",
+        "many": "\"Lots of connections. Disconnect the ones you don't use when you can.\"",
         "no-breaches": "\"No Plaid connections, or nothing concerning. That's unusual -- most people have at least one app that used Plaid without their knowledge.\"",
         "1-2-breaches": "\"Found some connections you forgot about. Common. The budgeting app you tried for a month in 2021 still has access to your transaction history through Plaid.\"",
         "3plus-breaches": "\"Multiple Plaid connections. Each one has your full bank transaction history. Submitting the deletion request is the right move.\"",
@@ -274,7 +293,7 @@ export const TRAIL_MISSIONS = [
     accountId: "browser_fingerprint",
     phase: "recon",
     title: "Test Your Browser Fingerprint",
-    briefing: "Cookies are yesterday's tracking. Browser fingerprinting is the technique that identifies you without storing anything on your device. Your browser's exact configuration -- screen resolution, installed fonts, WebGL renderer, timezone, language, plugins, canvas rendering -- creates a fingerprint that is unique among millions. EFF's research found that 83% of browsers have a unique fingerprint. Private browsing mode doesn't help, because the fingerprint is your browser's configuration, not its stored data.",
+    briefing: "Cookies are yesterday's tracking. Browser fingerprinting is the technique that identifies you without storing anything on your device. Your browser's exact configuration -- screen resolution, installed fonts, WebGL renderer, timezone, language, plugins, canvas rendering -- creates a fingerprint that is unique among millions. In EFF’s 2010 study, 83% of browsers were unique. Private browsing mode doesn't help, because the fingerprint is your browser's configuration, not its stored data.",
     steps: [
       { text: "Open EFF's Cover Your Tracks tool (formerly Panopticlick)", url: "https://coveryourtracks.eff.org/" },
       { text: "Click 'Test Your Browser' and wait for the results. It will tell you how unique your browser fingerprint is." },
