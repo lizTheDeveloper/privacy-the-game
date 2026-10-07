@@ -2,7 +2,7 @@ import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
-import { calcDistrictProgress } from '../utils/calc.js';
+import { calcDistrictProgress, isEmailBreachCheck } from '../utils/calc.js';
 import { questionOptions } from '../utils/debrief.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
@@ -196,8 +196,13 @@ export function debriefReaction(state, mission) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
   const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
     || mission.scoutDialog?.debrief?.[stored.method];
-  const variants = dialogue?.debrief?.[mapDebriefCategory(stored)];
-  const line = passwordScoutLine(mission, stored) || (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
+  // The district's clean/minor/major lines talk about breaches: only an email
+  // address's breach check gets them, and only when the mission has no line
+  // of its own for this answer.
+  const category = mapDebriefCategory(stored);
+  const breachLine = category === 'clean' || category === 'minor' || category === 'major';
+  const variants = breachLine && !isEmailBreachCheck(mission.id) ? null : dialogue?.debrief?.[category];
+  const line = passwordScoutLine(mission, stored) || inlineResponse || (variants ? pick(variants) : null) || 'Report received. Good work, agent.';
   const progress = calcDistrictProgress(state, districtId);
   return {
     line,

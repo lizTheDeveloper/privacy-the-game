@@ -10,8 +10,8 @@ const ACTION_DEBRIEF = [
     options: [
       { value: "completed", text: "Done", severity: "safe" },
       { value: "already-done", text: "Already had this in place", severity: "safe" },
-      { value: "not-applicable', text: 'Doesn't apply to me', severity: 'safe" },
-      { value: "later', text: 'I'll come back to this', severity: 'skip" },
+      { value: "not-applicable", text: "Doesn't apply to me", severity: "safe" },
+      { value: "later", text: "I'll come back to this", severity: "skip" },
     ],
   },
 ];
@@ -23,7 +23,7 @@ const PHISHING_DEBRIEF = [
     options: [
       { value: "no-breaches", text: "I can spot these reliably now", severity: "safe" },
       { value: "1-2-breaches", text: "Got tripped up on a couple", severity: "warn" },
-      { value: "skip', text: 'I'll come back to this', severity: 'skip" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
     ],
   },
 ];

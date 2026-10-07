@@ -6,7 +6,7 @@ import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
-import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
+import { calcDistrictProgress, calcIntegrity, isBreachFound } from './utils/calc.js';
 import { MISSIONS, missionDistrict } from './data/missions.js';
 import { fileDebrief, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
 import { ensureBurst, startBurst } from './utils/bursts.js';
@@ -293,10 +293,7 @@ function afterMissionRecorded(mission, event) {
 function districtCardStats(districtId) {
   const missions = MISSIONS.filter((m) => ACCOUNTS[m.accountId]?.district === districtId);
   const completed = missions.filter((m) => state.missions[m.id]?.status === 'completed');
-  const breachesFixed = completed.filter((m) => {
-    const f = state.missions[m.id]?.finding;
-    return f && f !== 'no-breaches';
-  }).length;
+  const breachesFixed = completed.filter((m) => isBreachFound(m.id, state.missions[m.id])).length;
   const accountsSecured = Object.entries(ACCOUNTS).filter(
     ([id, a]) => a.district === districtId && state.accounts[id]?.enabled,
   ).length;

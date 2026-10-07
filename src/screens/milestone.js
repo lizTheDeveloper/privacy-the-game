@@ -1,7 +1,7 @@
 import { DISTRICTS } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict } from '../data/missions.js';
-import { calcIntegrity, getBuildingState } from '../utils/calc.js';
+import { calcIntegrity, getBuildingState, isBreachFound } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { scoutSprite } from '../components/scout.js';
@@ -29,10 +29,7 @@ export function renderMilestone(state, districtId) {
     .map(([id]) => id);
   const enabledAccounts = districtAccountIds.filter((id) => state.accounts[id]?.enabled);
   const accountsSecured = enabledAccounts.length;
-  const breachesFixed = getMissionsForDistrict(districtId).filter((m) => {
-    const s = state.missions[m.id];
-    return s?.status === 'completed' && s.finding && s.finding !== 'no-breaches';
-  }).length;
+  const breachesFixed = getMissionsForDistrict(districtId).filter((m) => isBreachFound(m.id, state.missions[m.id])).length;
   const integrity = calcIntegrity(state);
   const nextDistrict = DISTRICTS.find((d) => d.chapter === district.chapter + 1);
   const continueLink = nextDistrict
