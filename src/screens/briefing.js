@@ -5,7 +5,7 @@ import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
 import { missionDistrict } from '../data/missions.js';
 import { missionSteps } from '../utils/debrief.js';
-import { isPasswordMission, passwordResetNeed, notNeededReasons, isPmFlagged, passwordReconNotes, PM_MISSION_ID } from '../utils/password-need.js';
+import { isPasswordMission, passwordResetNeed, notNeededReasons, isPmFlagged, passwordReconNotes, reopenReasonLine, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
@@ -126,7 +126,7 @@ export function renderBriefing(state, missionId, opts = {}) {
         ${briefingScout(noReset ? 'happy' : undefined)}
         <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
-          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : mission.id === PM_BURST_ID ? pmBurstBriefingLine(state) : (mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
+          <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${noReset ? noResetScoutLine(state, mission) : mission.id === PM_BURST_ID ? pmBurstBriefingLine(state) : (reopenedLine(state, mission) || mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.')}</div>
         </div>
         ${preview}
         ${renderLoreSection(districtId, state)}
@@ -141,6 +141,13 @@ const BRIEFING_SCOUT = 'margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,
 export function briefingScout(feeling) {
   if (!feeling) return `<img src="assets/characters/scout_0.png" data-scout="briefing" style="width: 96px; height: 96px; ${BRIEFING_SCOUT}">`;
   return scoutSprite(feeling, { size: 96, style: BRIEFING_SCOUT, attrs: 'data-scout="briefing"' });
+}
+
+// A reset filed "not needed" that the player's new answer put back on.
+function reopenedLine(state, mission) {
+  const rec = state.missions?.[mission.id];
+  if (!isPasswordMission(mission) || !rec?.reopened || rec.status) return null;
+  return reopenReasonLine(rec.reopened);
 }
 
 // "Clean record" only when the breach check found nothing.

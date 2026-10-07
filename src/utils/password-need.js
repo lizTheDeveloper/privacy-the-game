@@ -161,8 +161,24 @@ export function reopenStaleNotNeeded(state) {
     if (!isPasswordMission(m)) continue;
     if (state.missions?.[m.id]?.status !== 'not-needed') continue;
     if (passwordResetNeed(state, m.accountId) !== 'needed') continue;
+    // Reopened by the player's own new answer: remember why, so the
+    // briefing can say it (ruling 2026-10-07).
     const { status, ...rest } = out.missions[m.id];
-    out = { ...out, missions: { ...out.missions, [m.id]: rest } };
+    out = { ...out, missions: { ...out.missions, [m.id]: { ...rest, reopened: resetNeedSources(state, m.accountId) } } };
   }
   return out;
+}
+
+// Scout on a reset that was "not needed" and is back on, by the first reason.
+const REOPEN_LINES = {
+  pm: 'Your password manager has flagged this password since you filed it as not needed. So the reset is back on.',
+  activity: 'Your recon found activity on this account you didn’t recognize or didn’t do. So the reset is back on.',
+  service: 'This service’s own breach included passwords, and you haven’t changed it since. So the reset is back on.',
+  login: 'Your login check found someone else in this account. So the reset is back on.',
+  breach: 'Your breach check found a leak that may include this password. So the reset is back on.',
+};
+
+export function reopenReasonLine(sources) {
+  const first = (sources || []).find((x) => REOPEN_LINES[x]);
+  return first ? REOPEN_LINES[first] : null;
 }

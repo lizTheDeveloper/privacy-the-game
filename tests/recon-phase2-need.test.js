@@ -6,7 +6,11 @@ import { describe, it, expect } from 'vitest';
 import { createInitialState, updateMission } from '../src/state.js';
 import {
   passwordResetNeed, resetNeedSources, notNeededReasons, isPmFlagged, fraudContactLine, passwordReconNotes,
+  reopenStaleNotNeeded, reopenReasonLine,
 } from '../src/utils/password-need.js';
+import { fileDebrief } from '../src/utils/debrief.js';
+import { MISSIONS } from '../src/data/missions.js';
+const byIdNeed = (id) => MISSIONS.find((m) => m.id === id);
 import { renderBriefing } from '../src/screens/briefing.js';
 import { PASSWORD_EXPOSED_QUESTION } from '../src/data/missions-passwords.js';
 
@@ -137,5 +141,54 @@ describe('the Password Reset briefing carries the recon’s notes', () => {
     expect(passwordReconNotes(notSaved, 'paypal')).toEqual(['If you’ve used this password anywhere else, change it.']);
     expect(renderBriefing(notSaved, 'paypal-fortify-password')).toContain('If you’ve used this password anywhere else, change it.');
     expect(passwordReconNotes(pw(s0, 'paypal', 'pw-clean'), 'paypal')).toEqual([]);
+  });
+});
+
+describe('ruling: a not-needed reset reopens only on the player’s new evidence', () => {
+  const base = () => {
+    let s = legacy(s0, 'primary_bank', 'no-breaches');
+    s = set(s, 'primary_bank-fortify-password', { status: 'not-needed' });
+    return { ...s, accounts: { ...s.accounts, primary_bank: { ...s.accounts.primary_bank, enabled: true } } };
+  };
+  const bank = byIdNeed('primary_bank-recon-password');
+
+  it('the rule change alone keeps the filed not-needed (progress unchanged)', () => {
+    const s = base();
+    expect(passwordResetNeed(s, 'primary_bank')).toBe('unknown');
+    expect(s.missions['primary_bank-fortify-password'].status).toBe('not-needed');
+    expect(reopenStaleNotNeeded(s).missions['primary_bank-fortify-password'].status).toBe('not-needed');
+  });
+
+  it.each([
+    [{ pw_status: 'pw-leaked', activity: 'activity-clean' }, 'pm', /password manager/],
+    [{ pw_status: 'pw-reused', activity: 'activity-clean' }, 'pm', /password manager/],
+    [{ pw_status: 'pw-clean', activity: 'activity-unknown' }, 'activity', /didn’t recognize/],
+    [{ pw_status: 'pw-clean', activity: 'activity-confirmed' }, 'activity', /didn’t do/],
+  ])('filing %o reopens it, says why on the briefing', (answers, source, line) => {
+    const filed = fileDebrief(base(), bank, answers);
+    const rec = filed.state.missions['primary_bank-fortify-password'];
+    expect(rec.status).toBeUndefined();
+    expect(rec.reopened).toContain(source);
+    const html = renderBriefing(filed.state, 'primary_bank-fortify-password');
+    expect(html).toMatch(line);
+    expect(html).toContain('NOT NOW');
+    expect(html).not.toContain('NO RESET NEEDED');
+  });
+
+  it('clean new evidence keeps it not-needed', () => {
+    const filed = fileDebrief(base(), bank, { pw_status: 'pw-clean', activity: 'activity-clean' });
+    expect(filed.state.missions['primary_bank-fortify-password'].status).toBe('not-needed');
+  });
+
+  it('a service breach that had passwords reopens it too', () => {
+    // No account with a password-bearing service breach has a Password Reset
+    // mission today; the rule is generic, so check it on the evidence alone.
+    expect(reopenReasonLine(['service'])).toMatch(/breach included/);
+  });
+
+  it('the reopen note goes once the reset is filed again', () => {
+    const filed = fileDebrief(base(), bank, { pw_status: 'pw-leaked', activity: 'activity-clean' });
+    const s = set(filed.state, 'primary_bank-fortify-password', { status: 'completed', action: 'reset-password' });
+    expect(renderBriefing(s, 'primary_bank-fortify-password')).not.toMatch(/back on/);
   });
 });
