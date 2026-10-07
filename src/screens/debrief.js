@@ -206,8 +206,12 @@ export function debriefReaction(state, mission) {
   if (stored.status !== 'completed') return null;
   const districtId = missionDistrict(mission) || '';
   const dialogue = DISTRICT_DIALOGUE[districtId];
-  const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
-    || mission.scoutDialog?.debrief?.[stored.method];
+  // The mission's own line for an answer: finding first, then every answered
+  // question in debriefQs order (action and method for older saves).
+  const ownLines = mission.scoutDialog?.debrief || {};
+  const answerKeys = ['finding', ...mission.debriefQs.map((q) => q.id), 'action', 'method'];
+  const answered = answerKeys.map((k) => stored[k]).find((v) => typeof v === 'string' && Object.hasOwn(ownLines, v));
+  const inlineResponse = answered ? ownLines[answered] : null;
   // The district's clean/minor/major lines talk about breaches: only an email
   // address's breach check gets them, and only when the mission has no line
   // of its own for this answer.

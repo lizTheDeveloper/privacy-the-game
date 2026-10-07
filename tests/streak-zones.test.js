@@ -3,7 +3,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { createInitialState, streakAfterFiling } from '../src/state.js';
 
-const ZONES = ['UTC', 'America/Los_Angeles', 'Asia/Tokyo', 'Australia/Sydney'];
+const ZONES = ['UTC', 'America/Los_Angeles', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney'];
 const realTZ = process.env.TZ;
 afterEach(() => { vi.useRealTimers(); process.env.TZ = realTZ; });
 
@@ -74,14 +74,13 @@ describe.each(ZONES)('streak in %s', (zone) => {
   });
 
   // A UTC date covers parts of two local days, so an old save filed
-  // yesterday evening can't be told from one filed earlier today: it never
-  // resets, and counts at most once more (the same day never counts twice).
-  it('an old save (UTC lastDate) from yesterday evening never resets', () => {
+  // yesterday evening can't always be told from one filed earlier today.
+  // Reviewer ruling: when it's ambiguous, give the +1 (a missed day costs the
+  // player more than a rare double count).
+  it('an old save (UTC lastDate) from yesterday evening extends today', () => {
     const lastDate = localInstant(7, 20).toISOString().slice(0, 10);
     at(8, 9);
-    const out = streakAfterFiling(save({ current: 4, best: 4, lastDate }, false), DONE);
-    expect([4, 5]).toContain(out.streak.current);
-    expect(out.streak.lastDate).toBe(day(8));
+    expect(streakAfterFiling(save({ current: 4, best: 4, lastDate }, false), DONE).streak).toEqual({ current: 5, best: 5, lastDate: day(8) });
   });
 
   it('an old save (UTC lastDate) from yesterday morning extends today', () => {
@@ -90,13 +89,23 @@ describe.each(ZONES)('streak in %s', (zone) => {
     expect(streakAfterFiling(save({ current: 4, best: 4, lastDate }, false), DONE).streak.current).toBe(5);
   });
 
-  it('an old save (UTC lastDate) from earlier today does not double count', () => {
+  it('an old save (UTC lastDate) from earlier today never resets and adds at most 1', () => {
     for (const [h1, h2] of [[7, 21], [20, 23]]) {
       const lastDate = localInstant(8, h1).toISOString().slice(0, 10);
       at(8, h2);
       const out = streakAfterFiling(save({ current: 4, best: 4, lastDate }, false), DONE);
-      expect(out.streak.current).toBe(4);
-      expect(out.streak.best).toBe(4);
+      expect([4, 5]).toContain(out.streak.current);
+      expect(out.streak.lastDate).toBe(day(8));
     }
+  });
+});
+
+describe("the reviewer's Berlin case", () => {
+  it('an old save filed yesterday at 20:00 in Berlin gets +1 today', () => {
+    process.env.TZ = 'Europe/Berlin';
+    const lastDate = new Date(2026, 9, 7, 20).toISOString().slice(0, 10); // '2026-10-07' (18:00Z)
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 9, 8, 9) });
+    const out = streakAfterFiling(save({ current: 4, best: 4, lastDate }, false), DONE);
+    expect(out.streak).toEqual({ current: 5, best: 5, lastDate: '2026-10-08' });
   });
 });

@@ -137,8 +137,10 @@ export function updateStreak(state) {
 
   if (offsets === null) return set(1); // no lastDate, or one that isn't a date
   if (state.streakLocalDay && offsets[0] === 0) return state;
-  if (offsets.includes(0)) return set(Math.max(current, 1)); // same day (an old save's may be ambiguous): no double count
+  // An old save's day may be yesterday or today: give the +1 (a missed day
+  // costs the player more than a rare double count).
   if (offsets.includes(-1)) return set(current + 1);
+  if (offsets.includes(0)) return set(Math.max(current, 1)); // same day: no double count
   // Ahead of today: travelled west or the clock went back. lastDate never
   // moves backwards, so the same real day can't count twice.
   if (offsets.some((d) => d > 0 && d <= AHEAD_TOLERANCE_DAYS)) return state;
