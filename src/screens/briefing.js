@@ -58,7 +58,7 @@ export function renderBriefing(state, missionId, opts = {}) {
     return `
     <div style="display: flex; gap: 14px; align-items: flex-start;">
       <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--cyan); width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">${num}</div>
-      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5;">${body}</div>
+      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}</div>
     </div>`;
   }).join('');
 

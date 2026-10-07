@@ -480,3 +480,21 @@ describe('The Trail', () => {
     expect(byId('browser_fingerprint-recon-test').briefing).toContain('In EFF’s 2010 study, 83% of browsers were unique');
   });
 });
+
+describe('phone width', () => {
+  it('a step with a long unbroken token (a URL path in the text) wraps instead of widening the page', async () => {
+    const { renderBriefing } = await import('../src/screens/briefing.js');
+    const { createInitialState } = await import('../src/state.js');
+    const html = renderBriefing(createInitialState(), 'sim_protection-reclaim-remove-sms');
+    expect(html).toMatch(/line-height: 1\.5; min-width: 0; overflow-wrap: anywhere;">/);
+  });
+
+  it('no mission string starts or ends with a stray backtick', () => {
+    const bad = [];
+    const walk = (id, o) => {
+      if (typeof o === 'string') { if (/^\s*`|`\s*$/.test(o)) bad.push(`${id}: ${o.slice(-40)}`); } else if (o && typeof o === 'object') for (const v of Object.values(o)) walk(id, v);
+    };
+    for (const m of MISSIONS) walk(m.id, m);
+    expect(bad).toEqual([]);
+  });
+});
