@@ -5,7 +5,7 @@ import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
 import { missionDistrict } from '../data/missions.js';
 import { missionSteps } from '../utils/debrief.js';
-import { isPasswordMission, passwordResetNeed, notNeededReasons, PM_MISSION_ID } from '../utils/password-need.js';
+import { isPasswordMission, passwordResetNeed, notNeededReasons, isPmFlagged, passwordReconNotes, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
@@ -96,7 +96,8 @@ export function renderBriefing(state, missionId, opts = {}) {
           <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~${mission.estimatedMinutes} MIN</div>
           ${noReset ? NO_RESET_BADGE : ''}
         </div>
-        ${isPasswordMission(mission) && (state.pmFlagged || []).includes(mission.accountId) ? FLAGGED_NOTE : ''}
+        ${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE : ''}
+        ${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note style="font-size: 13px; color: var(--offwhite); line-height: 1.6; margin: -12px 0 20px; border-left: 2px solid var(--magenta); padding-left: 10px;">${n}</div>`).join('') : ''}
 
         ${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">

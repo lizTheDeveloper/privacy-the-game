@@ -24,7 +24,7 @@ describe('breach checks ask whether the password leaked', () => {
     for (const m of breachMissions) {
       const q = m.debriefQs.find((x) => x.id === 'password_exposed');
       expect(q, m.id).toBeTruthy();
-      expect(q.label).toBe('Did any of those breaches include your password?');
+      expect(q.label).toBe('Did any of those breaches include the password you used on that site?'); // X5, recon Phase 2
       expect(q.options.map((o) => [o.value, o.text])).toEqual([
         ['yes', 'Yes — passwords were in the leaked data'],
         ['no', 'No — only things like email or username'],

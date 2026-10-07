@@ -27,19 +27,19 @@ describe('breach debrief: the password question', () => {
     expect(g).toContain('data-show-if-q="finding"');
     expect(g).toContain('data-show-if-values="1-2-breaches,3plus-breaches"');
     expect(group(html, 'finding')).not.toContain('hidden');
-    expect(html).toContain('DID ANY OF THOSE BREACHES INCLUDE YOUR PASSWORD?');
+    expect(html).toContain('DID ANY OF THOSE BREACHES INCLUDE THE PASSWORD YOU USED ON THAT SITE?');
     expect(html).toContain('Compromised data');
   });
 
   it('a filed clean check shows no password question', () => {
     const html = renderDebrief(clean(s0), 'gmail-recon-breach');
-    expect(html).not.toContain('INCLUDE YOUR PASSWORD');
+    expect(html).not.toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
   });
 
   it('a filed breach shows the answer and Scout says the password is fine', () => {
     const s = set(s0, 'gmail-recon-breach', { status: 'completed', finding: '1-2-breaches', password_exposed: 'no' });
     const html = renderDebrief(s, 'gmail-recon-breach');
-    expect(html).toContain('INCLUDE YOUR PASSWORD');
+    expect(html).toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
     expect(html).toContain('No — only things like email or username');
     expect(html).toContain(PASSWORD_DIALOGUE.breachNoPassword);
   });
@@ -48,7 +48,7 @@ describe('breach debrief: the password question', () => {
     const s = set(s0, 'gmail-recon-breach', { status: 'completed', finding: '1-2-breaches' });
     const html = renderDebrief(s, 'gmail-recon-breach');
     expect(html).toContain('SECURED');
-    expect(html).not.toContain('INCLUDE YOUR PASSWORD');
+    expect(html).not.toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
   });
 });
 

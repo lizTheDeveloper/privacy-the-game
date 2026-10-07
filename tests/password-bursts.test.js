@@ -33,7 +33,9 @@ function allReconDone(s) {
 
 describe('10a: counts across sources (no manager number)', () => {
   it('counts breach, password-manager and login reasons; Master Keys first', () => {
-    let s = leaked(s0, 'primary_bank');
+    // Recon Phase 2: a bank's old "breach check" re-checked the email and is
+    // ignored; the bank's own password-manager verdict is the evidence now.
+    let s = set(s0, 'primary_bank-recon-password', { status: 'completed', pw_status: 'pw-leaked' });
     s = leaked(s, 'yahoo');
     s = set(s, 'gmail-recon-login', { status: 'completed', finding: '1-2-breaches' });
     s = { ...s, pmFlagged: ['outlook'] };

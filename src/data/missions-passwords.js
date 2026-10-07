@@ -12,8 +12,10 @@ const BREACHED = ['1-2-breaches', '3plus-breaches'];
 // Appended to every breach-check debrief.
 export const PASSWORD_EXPOSED_QUESTION = {
   id: 'password_exposed',
-  label: 'Did any of those breaches include your password?',
-  hint: 'Each breach lists what leaked — on Have I Been Pwned it’s under “Compromised data”. Look for “Passwords”.',
+  // X5 (recon audit): the breached site lost the password used THERE. Same
+  // value ids, so password-need.js and analytics are unchanged.
+  label: 'Did any of those breaches include the password you used on that site?',
+  hint: 'Each breach lists what leaked — on Have I Been Pwned it’s under “Compromised data”. Look for “Passwords”. If you ever used that same password for this account, treat this account’s password as leaked.',
   showIf: { question: 'finding', values: BREACHED },
   options: [
     { value: 'yes', text: 'Yes — passwords were in the leaked data', severity: 'crit' },
