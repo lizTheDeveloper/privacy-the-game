@@ -3,6 +3,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
 import { calcDistrictProgress, getAccountPhaseGate, getBuildingState } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
+import { renderScout } from '../components/scout.js';
 import { renderBuilding } from '../components/building.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, pick } from '../data/dialogue.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
@@ -404,7 +405,18 @@ function renderFacilitySection(state, facilityId, district) {
   </div>`;
 }
 
-function renderFacilityDistrict(state, district) {
+// Scout's reaction to the report just filed (app.js passes it on the landing
+// visit only): the same line and feeling the debrief shows when reopened.
+function reactionBlock(reaction) {
+  if (!reaction) return '';
+  return `<div data-scout-reaction style="padding: 16px 24px 0;">
+    <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 8px;">REPORT FILED</div>
+    ${renderScout(reaction.line, { feeling: reaction.feeling })}
+    ${reaction.progressLine || ''}
+  </div>`;
+}
+
+function renderFacilityDistrict(state, district, reaction) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictProgress(state, district.id);
 
@@ -420,6 +432,7 @@ function renderFacilityDistrict(state, district) {
   return `
   <div class="scanlines">
     ${renderHud(state)}
+    ${reactionBlock(reaction)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
@@ -454,12 +467,12 @@ function renderFacilityDistrict(state, district) {
   </div>`;
 }
 
-export function renderDistrict(state, districtId, activeTab) {
+export function renderDistrict(state, districtId, activeTab, { reaction = null } = {}) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
 
   if (district.type === 'facility') {
-    return renderFacilityDistrict(state, district);
+    return renderFacilityDistrict(state, district, reaction);
   }
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
@@ -514,6 +527,7 @@ export function renderDistrict(state, districtId, activeTab) {
   return `
   <div class="scanlines">
     ${renderHud(state)}
+    ${reactionBlock(reaction)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">

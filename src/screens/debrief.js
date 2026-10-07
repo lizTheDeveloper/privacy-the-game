@@ -186,6 +186,26 @@ function getProgressCheckIn(state, districtId, percent, dialogue) {
   return '';
 }
 
+// Scout's reaction to a filed report: the line, the feeling, and any progress
+// check-in. Shown on the debrief when reopened, and on the screen the player
+// lands on right after SUBMIT REPORT. null unless the mission is completed.
+export function debriefReaction(state, mission) {
+  const stored = state.missions[mission.id] || {};
+  if (stored.status !== 'completed') return null;
+  const districtId = missionDistrict(mission) || '';
+  const dialogue = DISTRICT_DIALOGUE[districtId];
+  const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
+    || mission.scoutDialog?.debrief?.[stored.method];
+  const variants = dialogue?.debrief?.[mapDebriefCategory(stored)];
+  const line = passwordScoutLine(mission, stored) || (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
+  const progress = calcDistrictProgress(state, districtId);
+  return {
+    line,
+    progressLine: getProgressCheckIn(state, districtId, progress.percent, dialogue),
+    feeling: twoFactorHugDue(state, mission.id) ? 'hug' : feelingForDebrief(mission, stored),
+  };
+}
+
 export function renderDebrief(state, missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return notFound(state);
@@ -194,17 +214,10 @@ export function renderDebrief(state, missionId) {
   const stored = state.missions[missionId] || {};
   const completed = stored.status === 'completed';
 
-  const dialogue = DISTRICT_DIALOGUE[districtId];
   let scoutLine;
   let progressLine = '';
   if (completed) {
-    const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
-      || mission.scoutDialog?.debrief?.[stored.method];
-    const debriefCategory = mapDebriefCategory(stored);
-    const variants = dialogue?.debrief?.[debriefCategory];
-    scoutLine = passwordScoutLine(mission, stored) || (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
-    const progress = calcDistrictProgress(state, districtId);
-    progressLine = getProgressCheckIn(state, districtId, progress.percent, dialogue);
+    ({ line: scoutLine, progressLine } = debriefReaction(state, mission));
   } else {
     scoutLine = mission.scoutDialog?.briefing || 'Report back — what did you find?';
   }
