@@ -3,7 +3,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
 import { calcDistrictProgress, isEmailBreachCheck } from '../utils/calc.js';
-import { questionOptions } from '../utils/debrief.js';
+import { questionOptions, prefillAnswer } from '../utils/debrief.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmNumbers } from '../utils/bursts.js';
@@ -32,10 +32,10 @@ function badge(severity) {
   return `<span class="badge badge--${severity}" style="flex-shrink: 0;">${severity.toUpperCase()}</span>`;
 }
 
-function optionRow(q, opt) {
+function optionRow(q, opt, checked = false) {
   return `
   <label class="debrief-opt" style="${ROW}">
-    <input type="${q.multi ? 'checkbox' : 'radio'}" name="q_${q.id}" value="${opt.value}" style="width: 16px; height: 16px; flex-shrink: 0;">
+    <input type="${q.multi ? 'checkbox' : 'radio'}" name="q_${q.id}" value="${opt.value}"${checked ? ' checked' : ''} style="width: 16px; height: 16px; flex-shrink: 0;">
     <span style="flex: 1; font-size: 14px; color: var(--offwhite); line-height: 1.5;">${opt.text}</span>
     ${opt.severity ? badge(opt.severity) : ''}
   </label>`;
@@ -67,19 +67,21 @@ function numberInput(q) {
       <input type="number" name="q_${q.id}" min="${q.min ?? 0}"${max} inputmode="numeric" step="1" aria-label="${q.label}" style="width: 140px; max-width: 100%; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 18px; padding: 10px 12px; font-family: var(--font-mono);">`;
 }
 
-function questionGroup(q, state) {
+function questionGroup(q, state, mission) {
+  const pre = mission ? prefillAnswer(q, mission, state) : undefined;
   return `
   <div data-question="${q.id}"${showIfAttrs(q)} style="margin-bottom: 28px;">
     <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
     ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
     ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
+    ${pre ? `<div data-prefilled="${q.id}" style="font-size: 12px; color: var(--cyan); line-height: 1.5; margin: -6px 0 12px;">Filled in from your password manager report. Change it if the report says something else.</div>` : ''}
     ${q.scout ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin: -4px 0 12px;">
       <img src="assets/characters/scout_0.png" alt="" style="width: 28px; height: 28px; flex-shrink: 0;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; font-style: italic;">${q.scout}</div>
     </div>` : ''}
     <div style="display: flex; flex-direction: column; gap: 6px;">
       ${q.type === 'number' ? numberInput(q) : ''}
-      ${questionOptions(q, state).map((opt) => optionRow(q.type === 'number' ? { ...q, multi: true } : q, opt)).join('')}
+      ${questionOptions(q, state).map((opt) => optionRow(q.type === 'number' ? { ...q, multi: true } : q, opt, pre !== undefined && opt.value === pre)).join('')}
     </div>
   </div>`;
 }
@@ -198,6 +200,16 @@ function getProgressCheckIn(state, districtId, percent, dialogue) {
   return '';
 }
 
+const SEVERITY_RANK = { crit: 3, warn: 2, safe: 1, skip: 0 };
+
+function mostSevere(mission, stored, values) {
+  const rank = (v) => {
+    const q = mission.debriefQs.find((x) => stored[x.id] === v);
+    return SEVERITY_RANK[q?.options?.find((o) => o.value === v)?.severity] ?? -1;
+  };
+  return values.reduce((best, v) => (best === undefined || rank(v) > rank(best) ? v : best), undefined);
+}
+
 // Scout's reaction to a filed report: the line, the feeling, and any progress
 // check-in. Shown on the debrief when reopened, and on the screen the player
 // lands on right after SUBMIT REPORT. null unless the mission is completed.
@@ -210,7 +222,10 @@ export function debriefReaction(state, mission) {
   // question in debriefQs order (action and method for older saves).
   const ownLines = mission.scoutDialog?.debrief || {};
   const answerKeys = ['finding', ...mission.debriefQs.map((q) => q.id), 'action', 'method'];
-  const answered = answerKeys.map((k) => stored[k]).find((v) => typeof v === 'string' && Object.hasOwn(ownLines, v));
+  const lined = answerKeys.map((k) => stored[k]).filter((v) => typeof v === 'string' && Object.hasOwn(ownLines, v));
+  // Several answers (recon Phase 2): the most severe one speaks, so a clean
+  // password never hides "something moved that you didn't move".
+  const answered = mission.scoutBySeverity ? mostSevere(mission, stored, lined) : lined[0];
   const inlineResponse = answered ? ownLines[answered] : null;
   // The district's clean/minor/major lines talk about breaches: only an email
   // address's breach check gets them, and only when the mission has no line
@@ -246,7 +261,7 @@ export function renderDebrief(state, missionId) {
   const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
   const questions = completed
     ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}${progressPanel}`
-    : `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state)).join('')}</div>`;
+    : `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state, mission)).join('')}</div>`;
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const footer = completed

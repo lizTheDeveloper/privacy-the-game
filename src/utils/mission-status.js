@@ -11,6 +11,14 @@ export function isMissionDone(record) {
   return DONE_STATUSES.has(record?.status);
 }
 
+// Done for progress: the mission itself, or the old mission it replaces
+// (recon Phase 2), so a save that filed the old breach check keeps its
+// district %, gates and buildings.
+export function isMissionDoneIn(state, mission) {
+  return isMissionDone(state?.missions?.[mission.id])
+    || Boolean(mission.replaces && isMissionDone(state?.missions?.[mission.replaces]));
+}
+
 // Missions that only appear once something is true (mission.unlock).
 export function isMissionAvailable(state, mission) {
   const u = mission.unlock;
@@ -35,7 +43,11 @@ export function isMissionAvailable(state, mission) {
 }
 
 // Enabled account (or a mission that belongs to no account) and unlocked.
+// A legacy mission (replaced) is never in play: hidden from every list and
+// never offered. Its record still loads, restores and counts through
+// isMissionDoneIn on its replacement.
 export function isMissionInPlay(state, mission) {
+  if (mission.legacy) return false;
   const accountOn = ACCOUNTS[mission.accountId] ? Boolean(state.accounts?.[mission.accountId]?.enabled) : true;
   return accountOn && isMissionAvailable(state, mission);
 }

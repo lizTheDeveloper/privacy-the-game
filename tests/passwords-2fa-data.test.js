@@ -260,7 +260,8 @@ describe('password manager recon', () => {
     expect(values).toContain('gmail');
     expect(values).toContain('primary_bank');
     expect(values).not.toContain('yahoo');        // disabled
-    expect(values).not.toContain('instagram');    // no password mission
+    expect(values).toContain('instagram');        // recon Phase 2: every account with a recon mission
+    expect(values).not.toContain('password_manager');
     // "Couldn't check right now" moved to the count question (item 11a).
     expect(values.slice(-1)).toEqual(['none']);
     expect(opts.find((o) => o.value === 'gmail').text).toBe(ACCOUNTS.gmail.name);

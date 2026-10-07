@@ -78,7 +78,7 @@ describe('fix 5: bonus missions that unlock later never lower integrity', () => 
   // What the save scored before Task 14, when unlockable missions didn't
   // exist: the same weighted formula over the other missions.
   function before(s) {
-    const rel = MISSIONS.filter((m) => !m.unlock && m.phase !== 'survey' && s.accounts[m.accountId]?.enabled);
+    const rel = MISSIONS.filter((m) => !m.unlock && !m.legacy && m.phase !== 'survey' && s.accounts[m.accountId]?.enabled);
     let total = 0;
     let done = 0;
     for (const m of rel) {

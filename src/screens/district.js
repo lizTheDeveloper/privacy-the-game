@@ -7,8 +7,8 @@ import { renderScout } from '../components/scout.js';
 import { renderBuilding } from '../components/building.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, pick } from '../data/dialogue.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
-import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
-import { isPasswordMission, passwordResetNeed } from '../utils/password-need.js';
+import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
+import { isPasswordMission, passwordResetNeed, isPmFlagged } from '../utils/password-need.js';
 import { twoFactorMethod } from '../utils/two-factor.js';
 import { renderPasswordProgress, renderCategoryAsk, renderCategoryQuiet } from '../components/password-progress.js';
 import { neededResets } from '../utils/bursts.js';
@@ -164,7 +164,8 @@ function renderMissionRow(state, mission) {
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
-      ${!completed && isPasswordMission(mission) && (state.pmFlagged || []).includes(mission.accountId) ? `<div style="font-size: 11px; color: var(--magenta); margin-top: 2px;">Flagged by your password manager</div>` : ''}
+      ${!completed && mission.replaces && isMissionDone(state.missions[mission.replaces]) ? `<div style="font-size: 11px; color: rgba(237,239,243,0.45); margin-top: 2px;">Your earlier email check still counts toward progress. This one checks the account itself.</div>` : ''}
+      ${!completed && isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? `<div style="font-size: 11px; color: var(--magenta); margin-top: 2px;">Flagged by your password manager</div>` : ''}
     </div>
     ${mission.optional
       ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
@@ -346,8 +347,8 @@ function renderFacilitySection(state, facilityId, district) {
 
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
-  const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId);
-  const completed = missions.filter((m) => isMissionDone(state.missions[m.id])).length;
+  const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId && !m.legacy);
+  const completed = missions.filter((m) => isMissionDoneIn(state, m)).length;
   const total = missions.length;
   const allDone = total > 0 && completed === total;
   const buildingState = getBuildingState(state, facilityId);

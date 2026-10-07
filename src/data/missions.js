@@ -10,6 +10,7 @@ import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
 import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF, PASSWORD_MISSIONS } from './missions-passwords.js';
+import { REPLACEMENT_FOR } from './missions-recon-accounts.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -1134,7 +1135,17 @@ const CHAPTER_1_MISSIONS = [
 
 // Merge all chapter missions into one array — exported as MISSIONS
 // so every existing import picks up the full set
-export const MISSIONS = [
+// Recon Phase 2: an old breach check that re-checked the email address stays
+// (legacy: hidden, never offered; old saves keep its record and progress),
+// followed by the recon that replaces it.
+function withReplacements(list) {
+  return list.flatMap((m) => {
+    const r = REPLACEMENT_FOR[m.id];
+    return r ? [{ ...m, legacy: true, replacedBy: r.id }, r] : [m];
+  });
+}
+
+export const MISSIONS = withReplacements([
   ...CHAPTER_1_MISSIONS,
   ...VAULT_CAPITOL_MISSIONS,
   ...MISSIONS_SQUARE_ARCHIVES_MARKETPLACE,
@@ -1147,7 +1158,7 @@ export const MISSIONS = [
   ...TRAIL_MISSIONS,
   ...OSINT_SIEVE_MISSIONS,
   ...PASSWORD_MISSIONS,
-];
+]);
 
 // A mission's district: its account's, or its own for a mission that belongs
 // to no account (the password-manager report).
@@ -1155,10 +1166,12 @@ export function missionDistrict(mission) {
   return mission?.district || ACCOUNTS[mission?.accountId]?.district;
 }
 
+// The game's missions, without the legacy ones (replaced; only their records
+// remain). Look a legacy mission up in MISSIONS by id.
 export function getMissionsForDistrict(districtId) {
-  return MISSIONS.filter((m) => missionDistrict(m) === districtId);
+  return MISSIONS.filter((m) => !m.legacy && missionDistrict(m) === districtId);
 }
 
 export function getMissionsForAccount(accountId) {
-  return MISSIONS.filter((m) => m.accountId === accountId);
+  return MISSIONS.filter((m) => !m.legacy && m.accountId === accountId);
 }
