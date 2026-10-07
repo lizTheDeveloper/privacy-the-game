@@ -5,8 +5,8 @@ import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
-import { hasSavedState, loadState, saveState, updateMission, updateStreak, toggleAccount, markMissionStarted } from './state.js';
-import { calcDistrictProgress, calcIntegrity } from './utils/calc.js';
+import { hasSavedState, loadState, saveState, updateMission, updateStreak, streakAfterFiling, toggleAccount, markMissionStarted } from './state.js';
+import { calcDistrictProgress, calcIntegrity, isBreachFound } from './utils/calc.js';
 import { MISSIONS, missionDistrict } from './data/missions.js';
 import { fileDebrief, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
 import { ensureBurst, startBurst } from './utils/bursts.js';
@@ -205,7 +205,7 @@ function submitDebrief(missionId) {
   // Nothing happens until every question on screen is answered.
   const filed = fileDebrief(state, mission, readAnswers(app, mission));
   if (!filed) return;
-  setState(ensureBurst(updateStreak(noteFirstTwoFactor(filed.state, mission, filed.state.missions[missionId]))));
+  setState(ensureBurst(streakAfterFiling(noteFirstTwoFactor(filed.state, mission, filed.state.missions[missionId]), filed.event)));
   afterMissionRecorded(mission, filed.event);
 }
 
@@ -293,10 +293,7 @@ function afterMissionRecorded(mission, event) {
 function districtCardStats(districtId) {
   const missions = MISSIONS.filter((m) => ACCOUNTS[m.accountId]?.district === districtId);
   const completed = missions.filter((m) => state.missions[m.id]?.status === 'completed');
-  const breachesFixed = completed.filter((m) => {
-    const f = state.missions[m.id]?.finding;
-    return f && f !== 'no-breaches';
-  }).length;
+  const breachesFixed = completed.filter((m) => isBreachFound(m.id, state.missions[m.id])).length;
   const accountsSecured = Object.entries(ACCOUNTS).filter(
     ([id, a]) => a.district === districtId && state.accounts[id]?.enabled,
   ).length;

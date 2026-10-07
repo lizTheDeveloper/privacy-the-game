@@ -103,7 +103,7 @@ function makeManufacturerMissions(accountId) {
       scoutDialog: {
         briefing: `"The '${acct.insuranceProgram}' feature sounds innocent, but it's feeding your driving data straight to insurance companies. Let's see if it's on."`,
         debrief: {
-          'no-sharing': '"Insurance sharing is off. That means your premiums aren\'t being influenced by ${name}\'s data."',
+          'no-sharing': `"Insurance sharing is off. ${name} isn't sending new driving data to insurers through this program."`,
           'some-sharing': '"Some sharing active. We\'ll shut that down in the opt-out phase."',
           'full-sharing': '"Full insurance data pipeline. Your braking, speed, and trip times are all being scored. Let\'s fix that."',
           'skip': '"Take your time — we\'ll circle back."',

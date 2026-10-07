@@ -11,8 +11,8 @@ const FREEZE_STATUS_DEBRIEF = [
     options: [
       { value: "already-frozen", text: "Yes, already frozen", severity: "safe" },
       { value: "now-frozen", text: "Just froze it", severity: "safe" },
-      { value: "no-account-yet', text: 'Need to create an account first -- I'll come back', severity: 'skip" },
-      { value: "skip', text: 'Couldn't do this right now', severity: 'skip" },
+      { value: "no-account-yet", text: "Need to create an account first -- I'll come back", severity: "skip" },
+      { value: "skip", text: "Couldn't do this right now", severity: "skip" },
     ],
   },
 ];
@@ -24,7 +24,7 @@ const FREEZE_EXTRAS_DEBRIEF = [
     options: [
       { value: "both-frozen", text: "Both frozen -- Innovis and ChexSystems", severity: "safe" },
       { value: "one-frozen", text: "Got one, will come back for the other", severity: "warn" },
-      { value: "skip', text: 'I'll come back to this', severity: 'skip" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
     ],
   },
 ];
@@ -36,7 +36,7 @@ const PINS_STORED_DEBRIEF = [
     options: [
       { value: "stored-both", text: "Yes -- in password manager AND printed", severity: "safe" },
       { value: "stored-digital", text: "In my password manager only", severity: "warn" },
-      { value: "skip', text: 'I'll organize these later', severity: 'skip" },
+      { value: "skip", text: "I'll organize these later", severity: "skip" },
     ],
   },
 ];
@@ -46,10 +46,10 @@ const BROKER_RECON_DEBRIEF = [
     id: "broker_recon",
     label: "What did you find?",
     options: [
-      { value: "not-found', text: 'Couldn't find myself on these sites', severity: 'safe" },
+      { value: "not-found", text: "Couldn't find myself on these sites", severity: "safe" },
       { value: "found-some", text: "Found my info on some of them", severity: "warn" },
-      { value: "found-all', text: 'I'm listed on all of them', severity: 'crit" },
-      { value: "skip', text: 'I'll look later', severity: 'skip" },
+      { value: "found-all", text: "I'm listed on all of them", severity: "crit" },
+      { value: "skip", text: "I'll look later", severity: "skip" },
     ],
   },
 ];
@@ -61,7 +61,7 @@ const OPTOUT_DEBRIEF = [
     options: [
       { value: "all-submitted", text: "Submitted all of them", severity: "safe" },
       { value: "some-submitted", text: "Got through some -- will finish later", severity: "warn" },
-      { value: "skip', text: 'I'll come back to this', severity: 'skip" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
     ],
   },
 ];
@@ -71,9 +71,9 @@ const DEFENSE_DEBRIEF = [
     id: "defense_done",
     label: "Did you complete this?",
     options: [
-      { value: "done', text: 'Yes, it's done', severity: 'safe" },
+      { value: "done", text: "Yes, it's done", severity: "safe" },
       { value: "already-done", text: "Already had this in place", severity: "safe" },
-      { value: "skip', text: 'I'll come back to this', severity: 'skip" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
     ],
   },
 ];
@@ -85,8 +85,8 @@ const ID_SURVEY_DEBRIEF = [
     options: [
       { value: "few", text: "Just a few (bank, employer)", severity: "safe" },
       { value: "moderate", text: "More than I expected (5-10)", severity: "warn" },
-      { value: "many', text: 'A lot -- I've uploaded my ID everywhere', severity: 'crit" },
-      { value: "skip', text: 'I'll think about this later', severity: 'skip" },
+      { value: "many", text: "A lot -- I've uploaded my ID everywhere", severity: "crit" },
+      { value: "skip", text: "I'll think about this later", severity: "skip" },
     ],
   },
 ];
@@ -97,9 +97,9 @@ const CREDIT_CHECK_DEBRIEF = [
     label: "What did your credit reports show?",
     options: [
       { value: "all-clean", text: "Everything is mine -- no surprises", severity: "safe" },
-      { value: "found-something', text: 'Found something I don't recognize', severity: 'warn" },
-      { value: "found-fraud', text: 'Multiple accounts I didn't open', severity: 'crit" },
-      { value: "skip', text: 'I'll pull reports later', severity: 'skip" },
+      { value: "found-something", text: "Found something I don't recognize", severity: "warn" },
+      { value: "found-fraud", text: "Multiple accounts I didn't open", severity: "crit" },
+      { value: "skip", text: "I'll pull reports later", severity: "skip" },
     ],
   },
 ];
@@ -662,7 +662,7 @@ export const RECLAMATION_MISSIONS = [
           { value: "few-apps", text: "Very few -- most are set to Never", severity: "safe" },
           { value: "more-than-expected", text: "More than I expected", severity: "warn" },
           { value: "many-apps", text: "Dozens of apps have location permission", severity: "crit" },
-          { value: "skip', text: 'I'll check later', severity: 'skip" },
+          { value: "skip", text: "I'll check later", severity: "skip" },
         ],
       },
     ],

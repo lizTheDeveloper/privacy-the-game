@@ -7,6 +7,14 @@ import { calcDistrictProgress } from './calc.js';
 import { notYetRun } from './ghost.js';
 
 const RESENT = new Set(['completed', 'skipped', 'not-needed']);
+const ANSWER_KEYS = ['finding', 'password_exposed', 'method'];
+
+// Never resend an answer that isn't a clean id (an old save's broken string).
+function cleanAnswers(data) {
+  const out = { ...data };
+  for (const k of ANSWER_KEYS) if (out[k] !== undefined && !/^[a-z0-9-]+$/.test(String(out[k]))) delete out[k];
+  return out;
+}
 
 // The events the game would have sent, with the same keys, marked restored.
 export function restoreEvents(state) {
@@ -15,7 +23,7 @@ export function restoreEvents(state) {
     if (!RESENT.has(m?.status)) continue;
     const mission = MISSIONS.find((x) => x.id === id);
     if (!mission) continue;
-    out.push({ name: 'mission-completed', data: { ...missionEventData(mission, m), restored: '1' } });
+    out.push({ name: 'mission-completed', data: { ...cleanAnswers(missionEventData(mission, m)), restored: '1' } });
   }
   for (const d of DISTRICTS) {
     const p = calcDistrictProgress(state, d.id);

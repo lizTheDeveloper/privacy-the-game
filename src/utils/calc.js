@@ -62,10 +62,27 @@ export function calcDistrictProgress(state, districtId) {
   };
 }
 
+// Accounts whose breach check is an email address (HIBP looks addresses up).
+export const EMAIL_ACCOUNT_IDS = new Set(['gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft']);
+const BREACH_FINDINGS = new Set(['1-2-breaches', '3plus-breaches']);
+
+export function isEmailBreachCheck(missionId) {
+  return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
+    && EMAIL_ACCOUNT_IDS.has(missionId.slice(0, -'-recon-breach'.length));
+}
+
+// A breach found: a breach check that found one. Login, device, car, AI and
+// smart-home answers reuse "finding" with other meanings, so they never count.
+export function isBreachFound(missionId, record) {
+  return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
+    && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
+}
+
 export function calcFindings(state) {
-  const missions = Object.values(state.missions).filter((m) => m.status === 'completed');
+  const entries = Object.entries(state.missions);
+  const missions = entries.map(([, m]) => m).filter((m) => m.status === 'completed');
   return {
-    breachesFound: missions.filter((m) => m.finding && m.finding !== 'no-breaches').length,
+    breachesFound: entries.filter(([id, m]) => isBreachFound(id, m)).length,
     passwordsReset: missions.filter((m) => m.action === 'reset-password').length,
     twoFactorEnabled: missions.filter((m) => m.action === 'enabled-2fa').length,
     optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
@@ -86,9 +103,6 @@ export function getBuildingState(state, accountId) {
   const completed = missions.filter((m) => isMissionDone(state.missions[m.id]));
   if (completed.length === 0) return 'occupied';
   if (completed.length < missions.length) return 'in-progress';
-  const hadBreach = completed.some((m) => {
-    const s = state.missions[m.id];
-    return s?.finding && s.finding !== 'no-breaches';
-  });
+  const hadBreach = completed.some((m) => isBreachFound(m.id, state.missions[m.id]));
   return hadBreach ? 'liberated-scarred' : 'liberated';
 }

@@ -2,7 +2,7 @@ import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
-import { calcDistrictProgress } from '../utils/calc.js';
+import { calcDistrictProgress, isEmailBreachCheck } from '../utils/calc.js';
 import { questionOptions } from '../utils/debrief.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { PM_MISSION_ID } from '../utils/password-need.js';
@@ -84,6 +84,13 @@ function questionGroup(q, state) {
   </div>`;
 }
 
+// A stored answer that matches no option: a number answer shows its number;
+// anything else (an old save's broken string) is "Not recorded", never raw.
+function shownValue(q, value) {
+  if (q.type === 'number' && /^\d+$/.test(String(value ?? ''))) return String(value);
+  return 'Not recorded';
+}
+
 function completedGroup(q, stored, state) {
   const value = stored[q.id];
   const options = questionOptions(q, state);
@@ -92,7 +99,7 @@ function completedGroup(q, stored, state) {
   const row = opts.length
     ? `<div style="display: flex; flex-direction: column; gap: 6px;">${opts.map(lockedRow).join('')}</div>`
     : `<div style="${ROW}">
-        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${value ?? 'Not recorded'}</span>
+        <span style="flex: 1; font-size: 14px; color: rgba(237,239,243,0.5);">${shownValue(q, value)}</span>
        </div>`;
   return `
   <div style="margin-bottom: 28px;">
@@ -113,6 +120,10 @@ function completedQuestions(mission, stored, state) {
     <div style="${ROW}"><span style="flex: 1; font-size: 14px; color: var(--offwhite);">${total} changed in all</span></div>
   </div>`;
   }
+  // Before v4.7.1 "More than 3" was kept as its number: show it as picked.
+  if (mission.id === PM_BURST_ID && /^\d+$/.test(String(stored.changed)) && Number(stored.changed) > 3) {
+    stored = { ...stored, changed: 'more', changed_more: Number(stored.changed) };
+  }
   return mission.debriefQs.map((q) => {
     if (stored[q.id] !== undefined) return completedGroup(q, stored, state);
     if (q.legacy && stored[q.legacy.id] !== undefined) return completedGroup(q.legacy, stored, state);
@@ -130,7 +141,8 @@ function passwordScoutLine(mission, stored) {
     const line = TWO_FA_DIALOGUE[twoFactorMethod(stored)];
     if (line) return line;
   }
-  if (BREACHED.has(stored.finding) && stored.password_exposed === 'no') return PASSWORD_DIALOGUE.breachNoPassword;
+  // "Your address leaked; your password didn't": only true of an email address.
+  if (isEmailBreachCheck(mission.id) && BREACHED.has(stored.finding) && stored.password_exposed === 'no') return PASSWORD_DIALOGUE.breachNoPassword;
   return null;
 }
 
@@ -194,10 +206,19 @@ export function debriefReaction(state, mission) {
   if (stored.status !== 'completed') return null;
   const districtId = missionDistrict(mission) || '';
   const dialogue = DISTRICT_DIALOGUE[districtId];
-  const inlineResponse = mission.scoutDialog?.debrief?.[stored.finding] || mission.scoutDialog?.debrief?.[stored.action]
-    || mission.scoutDialog?.debrief?.[stored.method];
-  const variants = dialogue?.debrief?.[mapDebriefCategory(stored)];
-  const line = passwordScoutLine(mission, stored) || (variants ? pick(variants) : null) || inlineResponse || 'Report received. Good work, agent.';
+  // The mission's own line for an answer: finding first, then every answered
+  // question in debriefQs order (action and method for older saves).
+  const ownLines = mission.scoutDialog?.debrief || {};
+  const answerKeys = ['finding', ...mission.debriefQs.map((q) => q.id), 'action', 'method'];
+  const answered = answerKeys.map((k) => stored[k]).find((v) => typeof v === 'string' && Object.hasOwn(ownLines, v));
+  const inlineResponse = answered ? ownLines[answered] : null;
+  // The district's clean/minor/major lines talk about breaches: only an email
+  // address's breach check gets them, and only when the mission has no line
+  // of its own for this answer.
+  const category = mapDebriefCategory(stored);
+  const breachLine = category === 'clean' || category === 'minor' || category === 'major';
+  const variants = breachLine && !isEmailBreachCheck(mission.id) ? null : dialogue?.debrief?.[category];
+  const line = passwordScoutLine(mission, stored) || inlineResponse || (variants ? pick(variants) : null) || 'Report received. Good work, agent.';
   const progress = calcDistrictProgress(state, districtId);
   return {
     line,
