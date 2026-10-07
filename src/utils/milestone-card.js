@@ -1,9 +1,19 @@
+// The card's stats line. Breaches are what was found (email addresses only,
+// Master Keys), never "fixed"; districts with no address checks leave it out.
+export function milestoneCardLine({ accountsSecured = 0, addressesBreached = null, integrityPercent = 0 } = {}) {
+  const parts = [`${accountsSecured} accounts secured`];
+  if (Number.isFinite(addressesBreached)) {
+    parts.push(`${addressesBreached} ${addressesBreached === 1 ? 'address' : 'addresses'} found in a breach`);
+  }
+  parts.push(`${integrityPercent}% integrity`);
+  return parts.join(' · ');
+}
+
 export function generateMilestoneCard(districtName, stats) {
   const canvas = document.createElement('canvas');
   canvas.width = 600;
   canvas.height = 315;
   const ctx = canvas.getContext('2d');
-  const { accountsSecured = 0, breachesFixed = 0, integrityPercent = 0 } = stats || {};
   const name = String(districtName || '').toUpperCase();
 
   const gradient = ctx.createLinearGradient(0, 0, 0, 315);
@@ -38,7 +48,7 @@ export function generateMilestoneCard(districtName, stats) {
 
   ctx.fillStyle = '#00E5FF';
   ctx.font = '400 14px "JetBrains Mono", monospace';
-  ctx.fillText(`${accountsSecured} accounts secured · ${breachesFixed} breaches fixed · ${integrityPercent}% integrity`, 300, 208);
+  ctx.fillText(milestoneCardLine(stats || {}), 300, 208, 540);
 
   ctx.fillStyle = 'rgba(237,239,243,0.4)';
   ctx.font = '400 11px "JetBrains Mono", monospace';

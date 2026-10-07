@@ -5,7 +5,7 @@ import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { twoFactorAction, twoFactorMethod } from './two-factor.js';
 import { updateMission } from '../state.js';
-import { isPasswordMission, passwordResetNeed, reopenStaleNotNeeded } from './password-need.js';
+import { isPasswordMission, passwordResetNeed, reopenStaleNotNeeded, PM_MISSION_ID } from './password-need.js';
 import { pmNumbers, applyBurst } from './pm-numbers.js';
 import { isMissionDone } from './mission-status.js';
 
@@ -13,15 +13,46 @@ const DEFERRED = new Set(['skip', 'later']);
 
 export function questionOptions(q, state) {
   if (q.optionsFrom === 'password-accounts') {
-    const accounts = [];
-    for (const m of MISSIONS) {
-      if (!m.id.endsWith('-fortify-password')) continue;
-      if (!state?.accounts?.[m.accountId]?.enabled || accounts.includes(m.accountId)) continue;
-      accounts.push(m.accountId);
-    }
+    const accounts = pmReportAccounts(state);
     return [...accounts.map((id) => ({ value: id, text: ACCOUNTS[id]?.name || id })), ...q.options];
   }
   return q.options;
+}
+
+// The accounts the password-manager report can flag: every enabled account
+// with a password the player could change (ruling 2026-10-07) — one with a
+// password, passwords or lockdown mission, or a recon that asks about its
+// password (Dropbox, Uber). Never data brokers, devices, cars, metadata or
+// fingerprints.
+const HAS_PASSWORD = /-fortify-(password|passwords|lockdown)$/;
+
+function hasChangeablePassword(m) {
+  return HAS_PASSWORD.test(m.id) || (m.phase === 'recon' && !m.legacy && m.debriefQs?.some((q) => q.id === 'pw_status'));
+}
+
+export function pmReportAccounts(state) {
+  const accounts = [];
+  for (const m of MISSIONS) {
+    if (!ACCOUNTS[m.accountId] || !hasChangeablePassword(m)) continue;
+    if (!state?.accounts?.[m.accountId]?.enabled || accounts.includes(m.accountId)) continue;
+    accounts.push(m.accountId);
+  }
+  return accounts;
+}
+
+// Q-PW pre-filled from a filed password-manager report: flagged -> leaked,
+// listed and not flagged -> not flagged. Nothing when the report never offered
+// the account (an older report only listed password-reset accounts).
+export function prefillAnswer(q, mission, state) {
+  if (q.prefill !== 'pm-report') return undefined;
+  const report = state?.missions?.[PM_MISSION_ID];
+  if (report?.status !== 'completed') return undefined;
+  const id = mission.accountId;
+  if ((state.pmFlagged || []).includes(id)) return 'pw-leaked';
+  const offered = Array.isArray(report.flagged_offered)
+    ? report.flagged_offered.includes(id)
+    : MISSIONS.some((m) => m.id === `${id}-fortify-password`);
+  return offered ? 'pw-clean' : undefined;
 }
 
 const answered = (v) => (Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null && v !== '');
@@ -126,8 +157,10 @@ export function missionSteps(mission, state) {
 function pmBurstSteps(mission, state) {
   const report = mission.reportSteps[state?.passwordManager] || mission.reportSteps.other;
   const steps = report.filter((st) => !/^Note which of your accounts/.test(st.text));
+  // Only accounts that have a Password Reset mission to file.
   const inCity = (state?.pmFlagged || [])
-    .filter((id) => ACCOUNTS[id] && !isMissionDone(state.missions?.[`${id}-fortify-password`]))
+    .filter((id) => ACCOUNTS[id] && MISSIONS.some((m) => m.id === `${id}-fortify-password`)
+      && !isMissionDone(state.missions?.[`${id}-fortify-password`]))
     .map((id) => ACCOUNTS[id].name);
   if (inCity.length) {
     steps.push({ text: `Start with the ones that are in the city too: ${inCity.join(', ')} — and file each one’s Password Reset mission as you go` });
@@ -174,6 +207,9 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
   }
   const keys = [...ANSWER_KEYS, ...mission.debriefQs.flatMap((q) => (q.legacy ? [q.id, q.legacy.id] : [q.id]))];
   const update = Object.fromEntries(keys.map((k) => [k, undefined]));
+  // Which accounts the report offered, so a later Q-PW pre-fill can tell
+  // "not flagged" from "never listed". Local only, never tracked.
+  if (r.pmFlagged) update.flagged_offered = pmReportAccounts(state);
   let next = updateMission(state, mission.id, { ...update, ...r.record });
   if (r.pmFlagged) next = { ...next, pmFlagged: r.pmFlagged };
   if (r.pm) next = { ...next, ...r.pm, pmChanged: Math.min(next.pmChanged || 0, r.pm.pmFlaggedCount - r.pm.pmThrowaway) };

@@ -30,14 +30,14 @@ def players(n, country="US", region="US-IL", city="Chicago", device=None):
     return out.split()
 
 
-def events(sids, name, data=None):
+def events(sids, name, data=None, at="now()"):
     """Bulk insert one event (with string data keys) per session in one round trip."""
     ids = ",".join(f"'{s}'" for s in sids)
     data = data or {}
     stmts = [
         "CREATE TEMP TABLE _ev AS SELECT gen_random_uuid() AS eid, s AS sid FROM unnest(ARRAY[" + ids + "]::uuid[]) s;",
         "INSERT INTO website_event (event_id, website_id, session_id, event_name, created_at) "
-        f"SELECT eid, '{WEBSITE}', sid, {q(name)}, now() FROM _ev;",
+        f"SELECT eid, '{WEBSITE}', sid, {q(name)}, {at} FROM _ev;",
     ]
     for k, v in data.items():
         stmts.append("INSERT INTO event_data (event_data_id, website_id, website_event_id, data_key, string_value) "
@@ -205,6 +205,92 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(doc["city"]["byAddress"][0]["breachRatePct"], 100)
         for entry in doc["city"]["byAddress"]:
             self.assertEqual(set(entry), {"id", "breachRatePct"})
+
+    # X6 allowlist (recon Phase 2): breach figures count only the three breach
+    # answers, and only on the 8 email-address accounts' -recon-breach missions.
+    def test_old_service_breach_check_is_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        self.breach(sids, "primary_bank", "3plus-breaches")   # old event, still restored from saves
+        self.breach(sids, "linkedin", "1-2-breaches")
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual(city["breach3PlusPct"], 0)
+        self.assertNotIn("fortified", city)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        pod = pods_by_id(doc)["us-il-chicago"]
+        self.assertEqual(pod["breachChecks"], 60)
+        self.assertEqual(pod["breachRatePct"], 0)
+
+    def test_new_password_activity_and_service_events_are_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        events(sids, "mission-completed", {"mission": "primary_bank-recon-password", "status": "completed",
+                                           "pw_status": "pw-leaked", "activity": "activity-confirmed"})
+        events(sids, "mission-completed", {"mission": "linkedin-recon-service", "status": "completed",
+                                           "service_breach": "in-service-breach"})
+        events(sids, "mission-completed", {"mission": "amazon-recon-activity", "status": "completed",
+                                           "activity": "activity-unknown"})
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        self.assertEqual(city["actions"], 240)   # still actions, just not breach checks
+
+    def test_unknown_finding_value_is_excluded(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        self.breach(sids, "google", "same-as-gmail")
+        self.breach(sids, "outlook", "in-service-breach")
+        self.breach(sids, "yahoo", "skip', text: 'I'll look later', severity: 'skip")
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertNotIn("fortified", city)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+
+    def test_every_email_address_account_still_counts(self):
+        sids = players(60)
+        accts = ("gmail", "outlook", "icloud", "yahoo", "protonmail", "google", "apple_id", "microsoft")
+        for a in accts:
+            self.breach(sids, a, "1-2-breaches")
+        doc = build()
+        self.assertEqual(doc["city"]["breachChecks"], 60 * len(accts))
+        self.assertEqual(doc["city"]["breachRatePct"], 100)
+        self.assertEqual(sorted(a["id"] for a in doc["city"]["byAddress"]), sorted(accts))
+
+    # One check per player and address, latest filing wins (breaker phase 2:
+    # restore.js resends the check, and players refile).
+    def test_a_check_sent_twice_by_one_player_counts_once(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "1-2-breaches", "status": "completed"},
+               at="now() - interval '1 hour'")
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "1-2-breaches", "status": "completed",
+                                           "restored": "1"})
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 100)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+        self.assertEqual(city["fortified"]["breached"], 60)
+
+    def test_a_refiled_check_counts_its_latest_answer(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "3plus-breaches", "status": "completed"},
+               at="now() - interval '2 hours'")
+        events(sids, "mission-completed", {"mission": "gmail-recon-breach", "finding": "no-breaches", "status": "completed"},
+               at="now() - interval '1 hour'")
+        events(sids[:30], "mission-completed", {"mission": "outlook-recon-breach", "finding": "1-2-breaches", "status": "completed"},
+               at="now() - interval '2 hours'")
+        events(sids[:30], "mission-completed", {"mission": "outlook-recon-breach", "finding": "skip", "status": "skipped"})
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+        self.assertEqual(city["breach3PlusPct"], 0)
+        self.assertNotIn("fortified", city)
 
     def test_actions_districts_ghosts_optouts(self):
         sids = players(60)

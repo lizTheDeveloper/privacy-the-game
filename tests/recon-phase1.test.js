@@ -2,7 +2,7 @@
 // car insurance scan's literal ${name}). No analytics value changes meaning.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { MISSIONS, getMissionsForAccount } from '../src/data/missions.js';
-import { debriefRecord } from '../src/utils/debrief.js';
+import { debriefRecord, visibleQuestions } from '../src/utils/debrief.js';
 import { debriefReaction } from '../src/screens/debrief.js';
 import { PASSWORD_DIALOGUE } from '../src/data/dialogue.js';
 import { calcFindings, getBuildingState, isCoreMission } from '../src/utils/calc.js';
@@ -57,6 +57,8 @@ describe('X2: every debrief option is a real value + text', () => {
           if (o.value !== 'skip' && o.value !== 'later') continue;
           const answers = {};
           for (const q2 of m.debriefQs) if (!q2.showIf) answers[q2.id] = q2 === q ? o.value : q2.options?.[0]?.value;
+          // Phase 2: answer any follow-up the other answers made visible (LinkedIn/Dropbox changed_since).
+          for (const q2 of visibleQuestions(m, answers)) if (answers[q2.id] === undefined) answers[q2.id] = q2.options?.[0]?.value;
           const r = debriefRecord(m, answers);
           if (r?.status !== 'skipped') wrong.push(`${m.id} / ${q.id} = ${o.value} -> ${r?.status}`);
         }
@@ -75,6 +77,8 @@ describe('X2: every debrief option is a real value + text', () => {
           if (o.severity !== 'skip') continue;
           const answers = {};
           for (const q2 of m.debriefQs) if (!q2.showIf) answers[q2.id] = q2 === q ? o.value : q2.options?.[0]?.value;
+          // Phase 2: answer any follow-up the other answers made visible (LinkedIn/Dropbox changed_since).
+          for (const q2 of visibleQuestions(m, answers)) if (answers[q2.id] === undefined) answers[q2.id] = q2.options?.[0]?.value;
           const r = debriefRecord(m, answers);
           checked += 1;
           if (r?.status !== 'skipped') wrong.push(`${m.id} / ${q.id} = ${o.value} -> ${r?.status}`);
@@ -218,8 +222,8 @@ describe('X7: breaches found and scarred buildings count only real breach findin
     let s = createInitialState();
     s = updateMission(s, 'smart_tv-recon-acr', { status: 'completed', finding: 'no-issues' });
     const html = renderMilestone(s, 'grid');
-    const n = html.match(/color: var\(--amber\)[^>]*>(\d+)</);
-    expect(n?.[1]).toBe('0');
+    // Phase 2: a district with no email-address checks shows no breach stat at all.
+    expect(html).not.toMatch(/BREACH/);
   });
 
   it('a breach check with breaches still counts and scars', () => {

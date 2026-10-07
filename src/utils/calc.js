@@ -1,5 +1,5 @@
 import { MISSIONS, getMissionsForAccount, getMissionsForDistrict } from '../data/missions.js';
-import { isMissionDone, isMissionInPlay } from './mission-status.js';
+import { isMissionDone, isMissionDoneIn, isMissionInPlay } from './mission-status.js';
 
 export { isMissionDone };
 
@@ -26,27 +26,27 @@ function weightedScore(missions, isDone) {
 // like any core mission once it is in play.
 function scoredMissions(state) {
   return MISSIONS.filter((m) => m.phase !== 'survey' && isMissionInPlay(state, m)
-    && (!(m.unlock && m.optional) || isMissionDone(state.missions[m.id])));
+    && (!(m.unlock && m.optional) || isMissionDoneIn(state, m)));
 }
 
 export function calcIntegrity(state) {
   const relevant = scoredMissions(state);
   if (relevant.length === 0) return 0;
-  const { total, done } = weightedScore(relevant, (m) => isMissionDone(state.missions[m.id]));
+  const { total, done } = weightedScore(relevant, (m) => isMissionDoneIn(state, m));
   if (done === 0) return 0;
   return Math.max(1, Math.round((done / total) * 100));
 }
 
 export function calcExposure(state) {
   const relevant = scoredMissions(state);
-  const { total, done } = weightedScore(relevant, (m) => isMissionDone(state.missions[m.id]));
+  const { total, done } = weightedScore(relevant, (m) => isMissionDoneIn(state, m));
   const perPoint = total > 0 ? 1000 / total : 0;
   return Math.max(0, Math.round(1000 - done * perPoint));
 }
 
 export function calcDistrictProgress(state, districtId) {
   const inDistrict = getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m));
-  const isDone = (m) => isMissionDone(state.missions[m.id]);
+  const isDone = (m) => isMissionDoneIn(state, m);
   // A bonus that counts like core once done (countsWhenDone) never lowers %.
   const countsAsCore = (m) => isCoreMission(m) || (m.countsWhenDone && isDone(m));
   const relevant = inDistrict.filter(countsAsCore);
@@ -71,11 +71,24 @@ export function isEmailBreachCheck(missionId) {
     && EMAIL_ACCOUNT_IDS.has(missionId.slice(0, -'-recon-breach'.length));
 }
 
-// A breach found: a breach check that found one. Login, device, car, AI and
-// smart-home answers reuse "finding" with other meanings, so they never count.
+// A breach found: an email address's breach check that found one (the same
+// rule as build.sql's allowlist). Login, device, car, AI and smart-home
+// answers reuse "finding" with other meanings, and an old "breach check" on a
+// bank or service only re-checked the email address, so none of them count.
 export function isBreachFound(missionId, record) {
-  return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
+  return isEmailBreachCheck(missionId)
     && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
+}
+
+// Email addresses found in a breach in this district, or null until an
+// address was checked (completed with a breach answer; only The Master Keys
+// has address checks).
+export function districtBreachedAddresses(state, districtId) {
+  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)
+    && state.missions?.[m.id]?.status === 'completed'
+    && ['no-breaches', ...BREACH_FINDINGS].includes(state.missions[m.id].finding));
+  if (checks.length === 0) return null;
+  return checks.filter((m) => isBreachFound(m.id, state.missions?.[m.id])).length;
 }
 
 export function calcFindings(state) {
@@ -91,18 +104,19 @@ export function calcFindings(state) {
 
 export function getAccountPhaseGate(state, districtId, accountId, prereqPhase) {
   const prereqMissions = getMissionsForDistrict(districtId).filter(
-    (m) => m.phase === prereqPhase && m.accountId === accountId && !m.optional,
+    (m) => m.phase === prereqPhase && m.accountId === accountId && !m.optional && !m.legacy,
   );
-  const remaining = prereqMissions.filter((m) => !isMissionDone(state.missions[m.id])).length;
+  // A filed legacy recon satisfies its replacement, so nobody is re-locked.
+  const remaining = prereqMissions.filter((m) => !isMissionDoneIn(state, m)).length;
   return { total: prereqMissions.length, remaining, unlocked: remaining === 0 };
 }
 
 export function getBuildingState(state, accountId) {
-  const missions = getMissionsForAccount(accountId).filter(isCoreMission);
+  const missions = getMissionsForAccount(accountId).filter((m) => isCoreMission(m) && !m.legacy);
   if (missions.length === 0) return 'occupied';
-  const completed = missions.filter((m) => isMissionDone(state.missions[m.id]));
+  const completed = missions.filter((m) => isMissionDoneIn(state, m));
   if (completed.length === 0) return 'occupied';
   if (completed.length < missions.length) return 'in-progress';
-  const hadBreach = completed.some((m) => isBreachFound(m.id, state.missions[m.id]));
+  const hadBreach = getMissionsForAccount(accountId).some((m) => isBreachFound(m.id, state.missions[m.id]));
   return hadBreach ? 'liberated-scarred' : 'liberated';
 }

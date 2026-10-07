@@ -49,7 +49,7 @@ describe('The Whole City', () => {
     const s = createInitialState();
     s.missions['gmail-recon-breach'] = { status: 'completed', finding: '3plus-breaches' };
     const html = renderCityTogether(s, { collective: ready });
-    expect(html).toMatch(/You found 1 breached account and fixed 0/);
+    expect(html).toMatch(/You found 1 email address in a known breach and fixed 0/); // recon Phase 2: addresses
   });
 
   it('error shows no collective figures', () => {

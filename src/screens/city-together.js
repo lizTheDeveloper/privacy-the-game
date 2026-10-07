@@ -59,7 +59,7 @@ function cityScore(city) {
   <div class="panel" style="padding: 24px; margin-bottom: 16px; text-align: center; border-color: rgba(198,255,0,0.1);">
     ${ringChart({ fraction: f.pct / 100, color: '#C6FF00', glow: 'rgba(198,255,0,0.4)', track: 'rgba(198,255,0,0.08)', value: `${fmt(f.pct)}%`, unit: '' })}
     <div style="font-family: var(--font-display); font-size: 8px; font-weight: 600; color: rgba(198,255,0,0.5); letter-spacing: 2px;">CITY FORTIFIED</div>
-    <div style="${MUTED} margin-top: 10px;">Of breached accounts found by everyone in places with enough players to count, this share has been fixed.</div>
+    <div style="${MUTED} margin-top: 10px;">Of email addresses found in a known breach by everyone in places with enough players to count, this share has been fixed.</div>
   </div>`;
 }
 
@@ -182,7 +182,7 @@ function yourPartPanel(state, podLabel) {
   if (found === 0) {
     body = 'Run a breach check in The Master Keys to add yourself to the map.';
   } else {
-    body = `You found ${found} breached ${plural(found, 'account', 'accounts')} and fixed ${fixed}.`;
+    body = `You found ${found} email ${plural(found, 'address', 'addresses')} in a known breach and fixed ${fixed}.`;
     if (found > fixed) body += ` Fixing the rest moves ${esc(podLabel || 'the city')} too.`;
   }
   return `
@@ -197,6 +197,7 @@ function footer(data) {
   const lines = [];
   const when = data.asOf ? new Date(data.asOf) : null;
   if (when && !Number.isNaN(when.getTime())) lines.push(`As of ${esc(when.toLocaleString())}.`);
+  lines.push('Breach rates now count email addresses only.');
   lines.push('Loading this page doesn\'t track you.');
   lines.push('“Players” are anonymous browser sessions. Places with fewer than 50 players are grouped into a bigger place.');
   const tail = [];

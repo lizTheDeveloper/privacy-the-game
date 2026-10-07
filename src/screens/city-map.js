@@ -1,7 +1,7 @@
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress, isCoreMission } from '../utils/calc.js';
-import { isMissionDone, isMissionInPlay } from '../utils/mission-status.js';
+import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 import { currentBurst, isHeldBack, returnPacingLine, PM_BURST_ID } from '../utils/bursts.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
@@ -124,18 +124,18 @@ const STREAMS = [
 
 const PHASE_ORDER = ['recon', 'fortify', 'reclaim'];
 
-function nextAvailableMission(state) {
+export function nextAvailableMission(state) {
   // Password resets come in bursts: the current burst first, the rest wait.
   for (const id of currentBurst(state)) {
     const m = MISSIONS.find((x) => x.id === id);
     if (m && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id])) return m;
   }
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => m.phase === phase && isCoreMission(m) && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]) && !isHeldBack(state, m));
+    const mission = MISSIONS.find((m) => m.phase === phase && isCoreMission(m) && isMissionInPlay(state, m) && !isMissionDoneIn(state, m) && !isHeldBack(state, m));
     if (mission) return mission;
   }
   for (const phase of PHASE_ORDER) {
-    const mission = MISSIONS.find((m) => m.phase === phase && m.optional && isMissionInPlay(state, m) && !isMissionDone(state.missions[m.id]));
+    const mission = MISSIONS.find((m) => m.phase === phase && m.optional && isMissionInPlay(state, m) && !isMissionDoneIn(state, m));
     if (mission) return mission;
   }
   return null;
