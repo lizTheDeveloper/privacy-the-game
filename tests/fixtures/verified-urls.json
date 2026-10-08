@@ -183,7 +183,9 @@
     "https://x.com/settings/download_your_data": "curl 200",
     "https://x.com/settings/privacy_and_safety": "curl 200 (redirects to https://x.com/i/jf/onboarding/web)",
     "https://x.com/settings/your_twitter_data/account": "curl 200",
-    "https://yandex.com/images/": "curl 200"
+    "https://yandex.com/images/": "curl 200",
+    "https://on.quad9.net/": "curl 200, 2026-10-08 (Quad9 test page: says whether you are using Quad9)",
+    "https://dns.quad9.net/dns-query": "Quad9 DNS-over-HTTPS endpoint, listed on quad9.net/service/service-addresses-and-features; RFC 8484 GET returned 200, 2026-10-08"
   },
   "dns": {
     "checked": "2026-10-08",
