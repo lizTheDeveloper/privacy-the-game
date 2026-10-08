@@ -90,22 +90,60 @@ export function isBreachFound(missionId, record) {
     && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
 }
 
+// The player's email addresses, counted the way build.sql counts them: one
+// check per address. The two accounts of a pair (Gmail/Google, iCloud/Apple
+// ID, Outlook/Microsoft) are one address, with the later answer, and either
+// account's reset or 2FA fixes it, unless the second account says
+// "different-address": then each is its own address, fixed only by its own.
+// [{ acct, finding, breached, fixed }]
+const CHECK_FINDINGS = new Set(['no-breaches', ...BREACH_FINDINGS]);
+
+export function addressChecks(state) {
+  const rec = (a) => state?.missions?.[`${a}-recon-breach`];
+  const valid = (a) => (rec(a)?.status === 'completed' && CHECK_FINDINGS.has(rec(a).finding) ? rec(a) : null);
+  const fixedBy = (accts) => accts.some((a) => ['-fortify-password', '-fortify-2fa']
+    .some((sfx) => state?.missions?.[`${a}${sfx}`]?.status === 'completed'));
+  const out = [];
+  const push = (acct, r, accts) => out.push({ acct, finding: r.finding, breached: BREACH_FINDINGS.has(r.finding), fixed: fixedBy(accts) });
+  for (const a of EMAIL_ACCOUNT_IDS) {
+    if (ADDRESS_PARTNER[a]) continue; // counted with its partner below
+    const second = Object.keys(ADDRESS_PARTNER).find((k) => ADDRESS_PARTNER[k] === a);
+    const r1 = valid(a);
+    const r2 = second ? valid(second) : null;
+    if (!second || rec(second)?.same_address === 'different-address') {
+      if (r1) push(a, r1, [a]);
+      if (r2) push(second, r2, [second]);
+      continue;
+    }
+    if (!r1 && !r2) continue;
+    // The later answer, as build.sql; with no time to tell them apart (old
+    // saves), the more severe one.
+    const rank = { 'no-breaches': 0, '1-2-breaches': 1, '3plus-breaches': 2 };
+    const t1 = r1?.completedAt || '';
+    const t2 = r2?.completedAt || '';
+    const latest = !r1 ? r2 : !r2 ? r1
+      : t1 !== t2 ? (t2 > t1 ? r2 : r1)
+        : (rank[r2.finding] > rank[r1.finding] ? r2 : r1);
+    push(r1 ? a : second, latest, [a, second]);
+  }
+  return out;
+}
+
 // Email addresses found in a breach in this district, or null until an
 // address was checked (completed with a breach answer; only The Master Keys
-// has address checks).
+// has address checks). Counted like addressChecks.
 export function districtBreachedAddresses(state, districtId) {
-  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)
-    && state.missions?.[m.id]?.status === 'completed'
-    && ['no-breaches', ...BREACH_FINDINGS].includes(state.missions[m.id].finding));
+  const here = new Set(getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)).map((m) => m.accountId));
+  const checks = addressChecks(state).filter((c) => here.has(c.acct));
   if (checks.length === 0) return null;
-  return checks.filter((m) => isBreachFound(m.id, state.missions?.[m.id])).length;
+  return checks.filter((c) => c.breached).length;
 }
 
 export function calcFindings(state) {
   const entries = Object.entries(state.missions);
   const missions = entries.map(([, m]) => m).filter((m) => m.status === 'completed');
   return {
-    breachesFound: entries.filter(([id, m]) => isBreachFound(id, m)).length,
+    breachesFound: addressChecks(state).filter((c) => c.breached).length,
     passwordsReset: missions.filter((m) => m.action === 'reset-password').length,
     twoFactorEnabled: missions.filter((m) => m.action === 'enabled-2fa').length,
     optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
