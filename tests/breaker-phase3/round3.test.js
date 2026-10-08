@@ -164,7 +164,10 @@ describe('restore order', () => {
   // wrong one. Events whose relative order decides the answer must not go in
   // the same concurrent batch.
   it('the two checks of an address pair are never dispatched in one concurrent batch', () => {
-    const size = Number(/for \(let i = 0; i < events\.length; i \+= (\d+)\)/.exec(APP)?.[1]);
+    // Ruling (Phase 3 reviewer I1): restore sends through restore-send.js's
+    // confirmed sender, one event per loop step.
+    const SENDER = readFileSync(new URL('../../src/utils/restore-send.js', import.meta.url), 'utf8');
+    const size = Number(/for \(let i = 0; i < todo\.length; i \+= (\d+)\)/.exec(SENDER)?.[1]);
     expect(size).toBeGreaterThan(0);
     const s = save({
       'gmail-recon-breach': { status: 'completed', finding: '3plus-breaches', completedAt: T(1) },

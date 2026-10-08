@@ -1,58 +1,140 @@
-// Breaker phase 3 round 3 (ruling): restore sends one event at a time, each
-// awaited (bounded), oldest filing first, so Umami's created_at follows the
-// save's order. A send that times out doesn't stop or reorder the rest.
+// Restore delivery (Phase 3 reviewer I1, ruling): Umami's tracker swallows
+// errors, so restore posts each event itself to /api/send, counts it only on
+// res.ok, aborts each request after 15 s, stops at the first failure keeping
+// the restore on offer, and a retry resumes without resending what arrived.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
+import {
+  sendConfirmed, sendRestore, umamiPayload, analyticsHost, eventKey, loadConfirmed, clearConfirmed, WEBSITE_ID, SEND_TIMEOUT_MS,
+} from '../src/utils/restore-send.js';
+import { setAnalyticsOff } from '../src/utils/analytics-pref.js';
 import { trackNow } from '../src/utils/analytics.js';
 
 const APP = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
 const restoreFn = APP.slice(APP.indexOf('async function restoreData()'), APP.indexOf('async function restoreData()') + 3500);
 
-describe('restore sends in order, one at a time', () => {
-  it('the restore loop steps one event at a time and awaits each send', () => {
-    expect(restoreFn).toMatch(/for \(let i = 0; i < events\.length; i \+= 1\) \{\s*await trackNow\(events\[i\]\.name, events\[i\]\.data\);/);
-    // No fire-and-forget send of the restored events.
-    expect(restoreFn).not.toMatch(/track\(e\.name, e\.data\)/);
+let store;
+beforeEach(() => {
+  store = {};
+  globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
+  setAnalyticsOff(false);
+});
+afterEach(() => { vi.useRealTimers(); });
+
+const env = { location: { hostname: 'play.multiversegames.ai', pathname: '/reclaim-city/', search: '' }, screen: { width: 390, height: 844 }, navigator: { language: 'en-US' }, document: { title: 'Reclaim City' } };
+const EVENTS = [
+  { name: 'data-restored', data: { kind: 'opted-out' } },
+  { name: 'mission-completed', data: { mission: 'gmail-recon-breach', status: 'completed', restored: '1' } },
+  { name: 'mission-completed', data: { mission: 'google-recon-breach', status: 'completed', restored: '1' } },
+  { name: 'district-completed', data: { district: 'master-keys', restored: '1' } },
+];
+
+describe('the payload is what Umami’s script sends', () => {
+  it('website id, hostname, url, screen, language, name and data, posted to the same host', () => {
+    const p = umamiPayload('mission-completed', { mission: 'x' }, env);
+    expect(p).toEqual({ type: 'event', payload: { website: WEBSITE_ID, hostname: 'play.multiversegames.ai', language: 'en-US', referrer: '', screen: '390x844', title: 'Reclaim City', url: '/reclaim-city/', name: 'mission-completed', data: { mission: 'x' } } });
+    expect(analyticsHost('play.multiversestudios.xyz')).toBe('https://analytics.multiversestudios.xyz');
+    expect(analyticsHost('play.multiversegames.ai')).toBe('https://analytics.multiversegames.ai');
+  });
+});
+
+describe('sendConfirmed', () => {
+  it('ok only on res.ok', async () => {
+    const calls = [];
+    const fetchImpl = async (url, init) => { calls.push([url, JSON.parse(init.body)]); return { ok: true }; };
+    expect(await sendConfirmed('a', {}, { fetchImpl, env })).toBe(true);
+    expect(calls[0][0]).toBe('https://analytics.multiversegames.ai/api/send');
+    expect(await sendConfirmed('a', {}, { fetchImpl: async () => ({ ok: false, status: 500 }), env })).toBe(false);
+    expect(await sendConfirmed('a', {}, { fetchImpl: async () => { throw new Error('net'); }, env })).toBe(false);
   });
 
-  describe('trackNow', () => {
-    const store = {};
-    beforeEach(() => {
-      globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
-      vi.useFakeTimers();
-    });
-    afterEach(() => { vi.useRealTimers(); delete globalThis.umami; });
+  it('never sends while sharing is off or umami.disabled is set', async () => {
+    const fetchImpl = vi.fn(async () => ({ ok: true }));
+    setAnalyticsOff(true);
+    expect(await sendConfirmed('a', {}, { fetchImpl, env })).toBe(false);
+    setAnalyticsOff(false);
+    store['umami.disabled'] = '1';
+    expect(await sendConfirmed('a', {}, { fetchImpl, env })).toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
 
-    it('a slow first send finishes before the second starts (no abandoning timeout)', async () => {
-      const log = [];
-      const delays = { first: 30000, second: 10 };
-      globalThis.umami = { track: (name) => { log.push(`start ${name}`); return new Promise((res) => setTimeout(() => { log.push(`end ${name}`); res(); }, delays[name])); } };
-      const run = (async () => { for (const name of ['first', 'second']) await trackNow(name, {}); })();
-      await vi.advanceTimersByTimeAsync(20000);
-      expect(log).toEqual(['start first']);
-      await vi.advanceTimersByTimeAsync(20000);
-      await run;
-      expect(log).toEqual(['start first', 'end first', 'start second', 'end second']);
+  it('aborts a request after 15 s and reports failure', async () => {
+    vi.useFakeTimers();
+    let aborted = false;
+    const fetchImpl = (url, init) => new Promise((resolve, reject) => {
+      init.signal.addEventListener('abort', () => { aborted = true; reject(new Error('aborted')); });
     });
+    const p = sendConfirmed('a', {}, { fetchImpl, env });
+    await vi.advanceTimersByTimeAsync(SEND_TIMEOUT_MS - 1);
+    expect(aborted).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(await p).toBe(false);
+    expect(aborted).toBe(true);
+  });
+});
 
-    it('a send that rejects is counted and the next one still goes, in order', async () => {
-      const { failedSends } = await import('../src/utils/analytics.js');
-      const before = failedSends();
-      const log = [];
-      globalThis.umami = { track: (name) => { log.push(name); return name === 'b' ? Promise.reject(new Error('net')) : Promise.resolve(); } };
-      for (const name of ['a', 'b', 'c']) expect(await trackNow(name, {})).toBe(true);
-      expect(log).toEqual(['a', 'b', 'c']);
-      expect(failedSends() - before).toBe(1);
-    });
+describe('sendRestore', () => {
+  it('sends one at a time, in order', async () => {
+    const log = [];
+    const r = await sendRestore(EVENTS, { send: async (name, data) => { log.push(eventKey({ name, data })); return true; } });
+    expect(r).toEqual({ ok: true, sent: 4, total: 4 });
+    expect(log).toEqual(['r:opted-out', 'm:gmail-recon-breach', 'm:google-recon-breach', 'd:master-keys']);
+  });
 
-    it('the cancel paths stay bounded so a hung request never freezes the screen', () => {
-      expect(APP).toMatch(/trackNow\('ghost-cancelled', \{ nonce \}, \{ timeoutMs: 1500 \}\)/);
-      expect(APP).toMatch(/trackNow\('opt-out-cancelled', \{ nonce \}, \{ timeoutMs: 1500 \}\)/);
-    });
+  it('a 500 stops the restore; the retry resumes without resending confirmed events', async () => {
+    const sent = [];
+    let fail = true;
+    const send = async (name, data) => {
+      const k = eventKey({ name, data });
+      if (k === 'm:google-recon-breach' && fail) return false;
+      sent.push(k);
+      return true;
+    };
+    const first = await sendRestore(EVENTS, { send });
+    expect(first).toEqual({ ok: false, sent: 2, total: 4 });
+    expect(loadConfirmed()).toEqual(['r:opted-out', 'm:gmail-recon-breach']);
+    fail = false;
+    const second = await sendRestore(EVENTS, { send });
+    expect(second).toEqual({ ok: true, sent: 4, total: 4 });
+    expect(sent).toEqual(['r:opted-out', 'm:gmail-recon-breach', 'm:google-recon-breach', 'd:master-keys']);
+    clearConfirmed();
+    expect(loadConfirmed()).toEqual([]);
+  });
 
-    it('restore reports sends that failed instead of claiming all arrived', () => {
-      expect(restoreFn).toMatch(/failedSends\(\) - failedBefore/);
-      expect(restoreFn).toMatch(/RESTORE_DIALOGUE\.partial\(failed, events\.length\)/);
-    });
+  it('a timeout stops it the same way (real sender, mock fetch that never answers)', async () => {
+    vi.useFakeTimers();
+    let n = 0;
+    const fetchImpl = (url, init) => {
+      n += 1;
+      if (n === 2) return new Promise((res, rej) => init.signal.addEventListener('abort', () => rej(new Error('aborted'))));
+      return Promise.resolve({ ok: true });
+    };
+    const p = sendRestore(EVENTS, { send: (name, data) => sendConfirmed(name, data, { fetchImpl, env }) });
+    await vi.advanceTimersByTimeAsync(SEND_TIMEOUT_MS + 1);
+    expect(await p).toEqual({ ok: false, sent: 1, total: 4 });
+  });
+});
+
+describe('the app’s restore path', () => {
+  it('uses the confirmed sender and keeps the flags on failure', () => {
+    expect(restoreFn).toMatch(/await sendRestore\(events,/);
+    const failAt = restoreFn.indexOf('if (!result.ok)');
+    const clearAt = restoreFn.indexOf('clearGhost();');
+    expect(failAt).toBeGreaterThan(-1);
+    expect(clearAt).toBeGreaterThan(failAt);
+    expect(restoreFn.slice(failAt, clearAt)).toMatch(/RESTORE_DIALOGUE\.stopped\(result\.sent, result\.total\)[\s\S]*return;/);
+    expect(restoreFn).not.toMatch(/await trackNow\(events\[i\]/);
+  });
+
+  it('trackNow still waits for the tracker’s send to settle, and cancel paths stay bounded', async () => {
+    expect(APP).toMatch(/trackNow\('ghost-cancelled', \{ nonce \}, \{ timeoutMs: 1500 \}\)/);
+    vi.useFakeTimers();
+    const log = [];
+    globalThis.umami = { track: (name) => new Promise((res) => setTimeout(() => { log.push(name); res(); }, name === 'first' ? 30000 : 10)) };
+    const run = (async () => { await trackNow('first', {}); await trackNow('second', {}); })();
+    await vi.advanceTimersByTimeAsync(40000);
+    await run;
+    expect(log).toEqual(['first', 'second']);
+    delete globalThis.umami;
   });
 });

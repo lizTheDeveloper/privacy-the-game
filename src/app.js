@@ -1,5 +1,6 @@
 import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce } from './utils/analytics-pref.js';
-import { track, trackNow, failedSends, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
+import { sendRestore, clearConfirmed } from './utils/restore-send.js';
+import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
@@ -339,30 +340,33 @@ async function restoreData() {
       setNotice(RESTORE_DIALOGUE.failed);
       return;
     }
-    for (const kind of kinds) track('data-restored', { kind });
-    const events = restoreEvents(state);
-    // One at a time, oldest filing first, each send awaited until it settles
-    // (no abandoning timeout): Umami stamps created_at on arrival, and the
-    // collective job's "latest filing wins" must see the save's order
-    // (rulings 2026-10-08). A send that fails is counted and the rest go on.
-    const failedBefore = failedSends();
-    for (let i = 0; i < events.length; i += 1) {
-      await trackNow(events[i].name, events[i].data);
-      if ((i + 1) % 10 === 0 || i + 1 === events.length) {
-        setNotice(RESTORE_DIALOGUE.progress(i + 1, events.length));
-        renderCurrentRoute();
-      }
+    // Restore's own confirmed sender (reviewer I1): each event is posted and
+    // counted only when the analytics server answers ok, one at a time, oldest
+    // filing first, each request aborted after 15 s. The first failure stops
+    // the restore with the ghost and opt-out flags kept, so RESTORE stays on
+    // offer and a retry continues from the last confirmed event.
+    const events = [...kinds.map((kind) => ({ name: 'data-restored', data: { kind } })), ...restoreEvents(state)];
+    const result = await sendRestore(events, {
+      onProgress: (n, total) => {
+        if (n % 10 === 0 || n === total) {
+          setNotice(RESTORE_DIALOGUE.progress(n, total));
+          renderCurrentRoute();
+        }
+      },
+    });
+    if (!result.ok) {
+      setNotice(RESTORE_DIALOGUE.stopped(result.sent, result.total));
+      return;
     }
-    const failed = failedSends() - failedBefore;
+    clearConfirmed();
     clearGhost();
     setOptedOutAt(null);
-    const doneLine = failed > 0 ? RESTORE_DIALOGUE.partial(failed, events.length) : RESTORE_DIALOGUE.done;
     if (parseRoute(location.hash).screen === 'ghost-done') {
-      setNotice(doneLine, '#/stats');
+      setNotice(RESTORE_DIALOGUE.done, '#/stats');
       navigate('#/stats');
       return;
     }
-    setNotice(doneLine);
+    setNotice(RESTORE_DIALOGUE.done);
   } finally {
     restoring = false;
     renderCurrentRoute();

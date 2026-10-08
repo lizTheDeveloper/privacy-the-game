@@ -42,7 +42,10 @@ describe('typed values that held', () => {
   });
 
   it('restore sends strictly one at a time, each awaited', () => {
-    expect(APP).toMatch(/for \(let i = 0; i < events\.length; i \+= 1\) \{\s*await trackNow\(events\[i\]\.name, events\[i\]\.data\);/);
+    // Ruling (Phase 3 reviewer I1): restore uses its own confirmed sender.
+    const SENDER = readFileSync(new URL('../../src/utils/restore-send.js', import.meta.url), 'utf8');
+    expect(SENDER).toMatch(/for \(let i = 0; i < todo\.length; i \+= 1\) \{\s*const ok = await send\(todo\[i\]\.name, todo\[i\]\.data\);/);
+    expect(APP).toMatch(/await sendRestore\(events,/);
     expect(APP).not.toMatch(/events\.slice\(i, i \+ 10\)/);
   });
 

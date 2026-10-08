@@ -114,7 +114,9 @@ describe('trackNow()', () => {
 });
 
 describe('only analytics.js talks to umami', () => {
-  const ALLOWED = new Set(['src/utils/analytics.js', 'src/utils/analytics-pref.js', 'src/index.html']);
+  // restore-send.js posts restored events to Umami's /api/send itself and
+  // checks the answer (Phase 3 reviewer I1 ruling).
+  const ALLOWED = new Set(['src/utils/analytics.js', 'src/utils/analytics-pref.js', 'src/utils/restore-send.js', 'src/index.html']);
   function walk(dir) {
     return readdirSync(dir).flatMap((f) => {
       const p = join(dir, f);
