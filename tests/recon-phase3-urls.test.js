@@ -33,6 +33,26 @@ describe('verified step URLs', () => {
     expect(unverified).toEqual([]);
   });
 
+  // Breaker phase 3: an address written in the step text is a link too.
+  // Exempt: placeholders the player fills in (their own Slack workspace).
+  const TEXT_EXEMPT = [/your-workspace\.slack\.com\/[a-z/]+/gi];
+  it('every address written inside step text is in the allowlist', () => {
+    const known = Object.keys(fixture.urls).map((u) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').toLowerCase());
+    const bad = [];
+    for (const m of MISSIONS) {
+      const lists = [m.steps || [], ...Object.values(m.stepsByManager || {}), ...Object.values(m.reportSteps || {})];
+      for (const st of lists.flat()) {
+        let t = st.text || '';
+        for (const ex of TEXT_EXEMPT) t = t.replace(ex, '');
+        for (const hit of t.match(/\b(?:[a-z0-9-]+\.)+(?:com|org|gov|net|io|me)\/[a-z0-9\-_/.?=]+/gi) || []) {
+          const h = hit.replace(/[./]$/, '').toLowerCase();
+          if (!known.some((k) => k === h || k.endsWith(`.${h}`) || k.endsWith(`/${h}`))) bad.push(`${m.id}: ${hit}`);
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
   it('no step uses a link the audit or the live check found dead or wrong', () => {
     const dead = [
       'ksupport.kiausa.com', 'fsgroupprivacy.com', 'tesla.com/support/contact', '/draft/', 'privacynotincluded',

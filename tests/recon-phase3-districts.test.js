@@ -498,3 +498,26 @@ describe('phone width', () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe('Capitol logins after breaker phase 3', () => {
+  it('StudentAid is an FSA ID, separate from the SSA login', () => {
+    const m = byId('student_loans-fortify-password');
+    expect(text(m)).not.toMatch(/Login\.gov/);
+    expect(m.briefing).toContain('FSA ID');
+  });
+
+  it('SSA lockdown: Self Lock is E-Verify’s (USCIS), and no claim that one login covers IRS, VA and unemployment', () => {
+    const t = text(byId('ssa-fortify-lockdown'));
+    expect(t).not.toMatch(/SSA's Self Lock|Back in SSA: consider enabling|state unemployment/);
+    expect(t).toContain('myE-Verify');
+  });
+});
+
+describe('SSA record lock (breaker phase 3 sweep)', () => {
+  it('names SSA’s real Block Electronic Access, not an in-app Self Lock', () => {
+    const m = byId('govt_id_defense-fortify-ssa-lock');
+    expect(text(m)).not.toMatch(/Self Lock/);
+    expect(stepText(m)).toContain('Block Electronic Access');
+    expect(stepText(m)).toContain('1-800-772-1213');
+  });
+});

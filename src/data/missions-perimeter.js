@@ -105,7 +105,7 @@ export const PERIMETER_MISSIONS = [
       { text: "Notification previews: iPhone → Settings → Notifications → Show Previews → \"When Unlocked.\" Android → Settings → Notifications → Notifications on lock screen → \"Hide content.\"" },
       { text: "Find My: iPhone → Settings → [Your Name] → Find My → Find My iPhone → turn on, enable \"Send Last Location.\" Android → Settings → Security → Find My Device → turn on." },
       { text: "Encryption: Modern iPhones and Androids encrypt by default when you have a lock screen. Confirm yours is on: iPhone -- if you have a passcode, it's encrypted. Android → Settings → Security → Encryption -- should say \"Encrypted.\"" },
-      { text: "Test Find My: Open icloud.com/find (iPhone) or google.com/android/find (Android) in a browser and confirm your device shows up." },
+      { text: "Test Find My: Open icloud.com/find (iPhone) or Google's Find Hub at google.com/android/find (Android) in a browser and confirm your device shows up." },
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
