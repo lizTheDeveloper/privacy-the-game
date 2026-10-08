@@ -50,8 +50,8 @@ export const PERIMETER_MISSIONS = [
     briefing: "SIM swapping is when an attacker calls your carrier, pretends to be you, and transfers your number to their SIM card. Your phone goes dead. Their phone starts receiving your texts -- including every SMS two-factor code. The whole attack takes fifteen minutes. Your defense is a carrier account PIN and a port-out lock. These are two settings, one phone call or website visit, and they block the most common way high-value accounts get stolen.",
     steps: [
       { text: 'T-Mobile: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
-      { text: 'AT&T: in the myAT&T app, turn on Wireless Account Lock (tap the person icon → Wireless account lock, then swipe to lock). That\'s what stops number transfers and other key account changes (unlock it yourself when you switch carriers). Also set your account passcode (for calls and stores) and the extra security passcode, which is for signing in online.', url: 'https://www.att.com/support/article/wireless/000102016/' },
-      { text: 'Verizon: set a 4-digit Account PIN at vzw.com/PIN (or in the My Verizon app). Number Lock is a separate switch: My Verizon app → Account → Edit profile and settings → Security → Number Lock, turned on for each line.', url: 'https://www.verizon.com/support/knowledge-base-309293/' },
+      { text: 'AT&T: in the myAT&T app, turn on Wireless Account Lock (tap the person icon → Wireless account lock, then swipe to lock). AT&T says it blocks specific changes, including moving your number to another carrier (unlock it yourself when you switch). Also set your account passcode (for calls and stores) and the extra security passcode, which is for signing in online.', url: 'https://www.att.com/support/article/wireless/000102016/' },
+      { text: 'Verizon: set a 4-digit Account PIN at vzw.com/PIN (or in the My Verizon app). Number Lock is a separate switch: My Verizon app → Me → Edit profile and settings → Security → Number Lock, or Account → Settings → Security on verizon.com, turned on for each line.', url: 'https://www.verizon.com/support/knowledge-base-309293/' },
       { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
     ],
     debriefQs: ACTION_DEBRIEF,
@@ -75,7 +75,7 @@ export const PERIMETER_MISSIONS = [
       { text: "Google: Open myaccount.google.com/signinoptions/two-step-verification → under \"How you sign in,\" remove your phone number as a verification method. Keep Google Authenticator or your security key.", url: "https://myaccount.google.com/signinoptions/two-step-verification" },
       { text: "Microsoft: Open account.live.com/proofs/manage → remove \"Text a code to my phone\" as a sign-in method. Keep the Microsoft Authenticator app.", url: "https://account.live.com/proofs/manage" },
       { text: "Apple: If you use Trusted Phone Numbers, make sure you also have trusted devices as alternatives (iPhone, iPad, or Mac signed into iCloud)." },
-      { text: "Banks: Log into your primary bank → Security Settings → check if they support authenticator app 2FA instead of SMS. Many now do (Chase, Bank of America, Schwab). Switch if available." },
+      { text: "Banks: log into your primary bank and look in its security settings: if your bank offers an authenticator app or passkey, switch to it from text codes." },
       { text: "For any account where SMS is the ONLY 2FA option: add an authenticator app first, confirm it works, then remove the phone number." },
     ],
     debriefQs: ACTION_DEBRIEF,
@@ -198,7 +198,7 @@ export const PERIMETER_MISSIONS = [
     accountId: "scam_defense",
     phase: "fortify",
     title: "Set Up Your Defense Toolkit",
-    briefing: "Three tools that protect you passively, plus one you use when something looks suspicious. Global Privacy Control tells every website \"do not sell my data\" -- legally enforceable under California law. Your advertising ID is the barcode that lets ad networks track you across apps -- delete it. And bookmark VirusTotal for when a link looks suspicious: paste the URL, don't click it.",
+    briefing: "Three tools that protect you passively, plus one you use when something looks suspicious. Global Privacy Control tells websites you visit \"do not sell or share my data\"; businesses covered by laws like California's must honor it. Your advertising ID is the barcode that lets ad networks track you across apps -- delete it. And bookmark VirusTotal for when a link looks suspicious: paste the URL, don't click it.",
     steps: [
       { text: "Global Privacy Control -- Firefox: Settings → Privacy & Security → check \"Tell websites not to sell or share my data.\" Brave: already on by default. Chrome: install the Privacy Badger extension from the Chrome Web Store." },
       { text: "Verify GPC is working", url: "https://global-privacy-control.vercel.app/" },
@@ -208,7 +208,7 @@ export const PERIMETER_MISSIONS = [
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Three passive defenses and one active tool, all in one mission. GPC is the rare case where a browser setting actually does something -- under California law, it's a legally binding opt-out that applies to every site you visit. The advertising ID is the barcode on your forehead that lets ad networks follow you across apps -- deleting it breaks the easiest tracking mechanism. And VirusTotal is your lab for when a link smells wrong: 70 security engines scan it so your browser doesn't have to.\"",
+      briefing: "\"Three passive defenses and one active tool, all in one mission. GPC is the rare browser setting with law behind it: it tells websites you visit not to sell or share your data, and businesses covered by laws like California's must honor it. The advertising ID is the barcode on your forehead that lets ad networks follow you across apps -- deleting it breaks the easiest tracking mechanism. And VirusTotal is your lab for when a link smells wrong: 70 security engines scan it so your browser doesn't have to.\"",
       debrief: scoutAction(
         "\"Defense toolkit deployed. GPC running, ad tracking disabled, link scanner bookmarked. Your daily browsing just got significantly more private, and you have a tool for when something looks suspicious.\"",
         "\"Already had the toolkit in place. You're operating at a level where the data brokers have to work much harder to track you.\"",
@@ -252,8 +252,8 @@ export const PERIMETER_MISSIONS = [
     title: "Wire the Recovery Path",
     briefing: "Now connect the clean email to your real accounts as a backup recovery method. This is the bridge: your real accounts gain a recovery path through the clean email, so when you're safely through the border, you can reset your way back in. Important: test the recovery flow before you travel. Reset one account's password through the clean email to confirm it works. Don't discover a problem at the airport.",
     steps: [
-      { text: "Google: myaccount.google.com/security → scroll to \"Ways we can verify it's you\" → add the clean email as a recovery email', url: 'https://myaccount.google.com/security" },
-      { text: "Apple: account.apple.com → Sign-In and Security → add the clean email as a notification/recovery contact", url: "https://account.apple.com" },
+      { text: "Google: myaccount.google.com/security → scroll to \"Ways we can verify it's you\" → add the clean email as a recovery email", url: "https://myaccount.google.com/security" },
+      { text: "Apple: account recovery works through the options Apple offers in Sign-In and Security (trusted phone numbers, a recovery contact, a recovery key), not a recovery email. Check they'll work while you travel", url: "https://account.apple.com" },
       { text: "Microsoft: account.live.com/proofs/manage → add the clean email as an alternate email", url: "https://account.live.com/proofs/manage" },
       { text: "Test it: sign out of ONE account, then recover it using \"Forgot password\" with the clean email. Confirm the reset email arrives and works. Then change the password back." },
     ],
