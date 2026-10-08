@@ -400,6 +400,7 @@ export const RESTORE_DIALOGUE = {
   failed: `We couldn't reach our analytics. Try again in a moment.`,
   progress: (n, total) => `Sending your city back… (${n} of ${total})`,
   done: `You're back in the city. Tomorrow's totals will include you again.`,
+  partial: (failed, total) => `You're back in the city, though ${failed} of your ${total} reports didn't get through. Tomorrow's totals will include the rest.`,
   checking: `Checking whether tonight's run has happened…`,
   checkFailed: `We couldn't check whether tonight's run has happened.`,
 };

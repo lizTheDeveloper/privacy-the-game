@@ -1,5 +1,5 @@
 import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce } from './utils/analytics-pref.js';
-import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
+import { track, trackNow, failedSends, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
@@ -308,7 +308,7 @@ async function reconnectAnalytics() {
 async function cancelGhost() {
   // The cancel carries the nonce sent with went-ghost-early: only that matches.
   const nonce = getGhostInfo()?.nonce;
-  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('ghost-cancelled', { nonce }));
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('ghost-cancelled', { nonce }, { timeoutMs: 1500 }));
   clearGhost();
   // From the finale, go where the ghost state (and any failure) is shown.
   const hash = parseRoute(location.hash).screen === 'ghost-done' ? '#/city-together' : location.hash;
@@ -320,7 +320,7 @@ async function cancelGhost() {
 // Sharing back on while an opt-out is still pending: tell tonight's run not to delete.
 async function cancelOptOut() {
   const nonce = getOptedOutNonce();
-  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled', { nonce }));
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled', { nonce }, { timeoutMs: 1500 }));
   if (sent) setOptedOutAt(null);
   else setNotice(GHOST_DIALOGUE.cancelFailed);
 }
@@ -341,10 +341,11 @@ async function restoreData() {
     }
     for (const kind of kinds) track('data-restored', { kind });
     const events = restoreEvents(state);
-    // One at a time, each send awaited (bounded by trackNow's timeout), oldest
-    // filing first: Umami stamps created_at on arrival, and the collective job's
-    // "latest filing wins" must see the save's order (ruling 2026-10-08). A send
-    // that times out doesn't stop the rest or change their order.
+    // One at a time, oldest filing first, each send awaited until it settles
+    // (no abandoning timeout): Umami stamps created_at on arrival, and the
+    // collective job's "latest filing wins" must see the save's order
+    // (rulings 2026-10-08). A send that fails is counted and the rest go on.
+    const failedBefore = failedSends();
     for (let i = 0; i < events.length; i += 1) {
       await trackNow(events[i].name, events[i].data);
       if ((i + 1) % 10 === 0 || i + 1 === events.length) {
@@ -352,14 +353,16 @@ async function restoreData() {
         renderCurrentRoute();
       }
     }
+    const failed = failedSends() - failedBefore;
     clearGhost();
     setOptedOutAt(null);
+    const doneLine = failed > 0 ? RESTORE_DIALOGUE.partial(failed, events.length) : RESTORE_DIALOGUE.done;
     if (parseRoute(location.hash).screen === 'ghost-done') {
-      setNotice(RESTORE_DIALOGUE.done, '#/stats');
+      setNotice(doneLine, '#/stats');
       navigate('#/stats');
       return;
     }
-    setNotice(RESTORE_DIALOGUE.done);
+    setNotice(doneLine);
   } finally {
     restoring = false;
     renderCurrentRoute();

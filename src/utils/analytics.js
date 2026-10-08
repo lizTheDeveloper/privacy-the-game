@@ -33,17 +33,27 @@ export function trackPageview(url, title) {
   if (u) u.track((props) => ({ ...props, url, title }));
 }
 
-// Send one event and wait for it (bounded). True if a send was attempted.
-export async function trackNow(name, data, { timeoutMs = 1500 } = {}) {
+// Send one event and wait for it. True if a send was attempted. With no
+// timeoutMs it waits for the send to settle, so the next send can't overtake
+// it (restore's order depends on this; the tracker's request can't be aborted,
+// so an abandoned one could still land later). A send that rejects is counted
+// in failedSends(). The cancel paths pass a timeoutMs so a hung request can't
+// freeze the screen.
+let failures = 0;
+
+export function failedSends() {
+  return failures;
+}
+
+export async function trackNow(name, data, { timeoutMs = null } = {}) {
   const u = tracker();
   if (!u) return false;
   try {
-    await Promise.race([
-      Promise.resolve(u.track(name, withPod(data))),
-      new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-    ]);
+    const send = Promise.resolve(u.track(name, withPod(data)));
+    if (timeoutMs == null) await send;
+    else await Promise.race([send, new Promise((resolve) => setTimeout(resolve, timeoutMs))]);
   } catch {
-    // Best effort.
+    failures += 1;
   }
   return true;
 }
