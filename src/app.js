@@ -38,7 +38,6 @@ import { shouldAskPermission, requestPermission, checkStreakReminder } from './u
 
 initErrorTracking();
 
-
 let state = ensureBurst(loadState());
 let started = hasSavedState();
 
@@ -326,8 +325,6 @@ async function cancelOptOut() {
   else setNotice(GHOST_DIALOGUE.cancelFailed);
 }
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // Re-send this browser's saved game after tonight's run deleted it.
 async function restoreData() {
   if (restoring) return;
@@ -344,11 +341,16 @@ async function restoreData() {
     }
     for (const kind of kinds) track('data-restored', { kind });
     const events = restoreEvents(state);
-    for (let i = 0; i < events.length; i += 10) {
-      for (const e of events.slice(i, i + 10)) track(e.name, e.data);
-      setNotice(RESTORE_DIALOGUE.progress(Math.min(i + 10, events.length), events.length));
-      renderCurrentRoute();
-      if (i + 10 < events.length) await sleep(500);
+    // One at a time, each send awaited (bounded by trackNow's timeout), oldest
+    // filing first: Umami stamps created_at on arrival, and the collective job's
+    // "latest filing wins" must see the save's order (ruling 2026-10-08). A send
+    // that times out doesn't stop the rest or change their order.
+    for (let i = 0; i < events.length; i += 1) {
+      await trackNow(events[i].name, events[i].data);
+      if ((i + 1) % 10 === 0 || i + 1 === events.length) {
+        setNotice(RESTORE_DIALOGUE.progress(i + 1, events.length));
+        renderCurrentRoute();
+      }
     }
     clearGhost();
     setOptedOutAt(null);
