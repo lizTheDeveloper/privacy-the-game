@@ -202,7 +202,7 @@ export const RECON_ACCOUNT_MISSIONS = [
       pmStep('Venmo'),
       { text: 'In your Venmo settings, open Remembered devices and remove any you don’t recognize.' },
       { text: 'Look through your transactions for anything you didn’t send or request.' },
-      { text: 'While you’re in Settings → Privacy, note whether your default is Public. The privacy mission deals with it.' },
+      { text: 'While you’re in Venmo’s privacy settings, note who can see your payments and your friends list. The privacy mission deals with it.' },
     ],
     debriefQs: [
       pwQuestion('Venmo'),
@@ -256,12 +256,12 @@ export const RECON_ACCOUNT_MISSIONS = [
     replaces: 'investment_account-recon-breach',
     accountId: 'investment_account',
     title: 'Password & Activity Recon: Investment Account',
-    briefing: 'Your brokerage or retirement account may hold more than your bank account, behind a password you set at signup. Account takeovers there usually work by changing the beneficiary, the linked bank or the mailing address first. This check looks at those, and at the password.',
+    briefing: 'Your brokerage or retirement account may hold more than your bank account, behind a password you set at signup. Account takeovers there can work by changing the beneficiary, the linked bank or the mailing address. This check looks at those, and at the password.',
     steps: [
       pmStep('your brokerage'),
       { text: 'Open your brokerage’s own security page and look at recent logins or devices. Schwab: Profile → Security Settings → Previous Login. Robinhood: Security and privacy → Devices. Vanguard app: Profile → Login & security / Device management. Fidelity: Security Center.' },
       { text: 'Check beneficiaries, linked bank accounts and the mailing address.' },
-      { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021, emails only). It’s the one brokerage in that list.' },
+      { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021, emails only).' },
     ],
     debriefQs: [
       pwQuestion('brokerage'),
@@ -456,7 +456,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'eBay’s 2014 breach (145 million names, addresses, birth dates and encrypted passwords) is real, but it isn’t in Have I Been Pwned’s list. If you had eBay before 2014, treat that data as out there. This checks the password and the account’s own activity.',
     steps: [
       pmStep('eBay'),
-      { text: 'eBay → Account → Sign in and security. Check the devices listed there and anything you don’t recognize.' },
+      { text: 'In eBay’s Sign in and security settings, review any devices or activity it lists, and anything you don’t recognize.' },
       { text: 'Check your purchase history and addresses.' },
     ],
     debriefQs: [
@@ -475,7 +475,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'Uber’s 2016 breach (57 million accounts; the license numbers taken were drivers’) isn’t in Have I Been Pwned’s list. A taken-over rider account shows up as trips and orders you didn’t take, paid with your card.',
     steps: [
       pmStep('Uber'),
-      { text: 'Sign in at riders.uber.com and open My Trips. Any you didn’t take? Check Uber Eats orders too.', url: 'https://riders.uber.com' },
+      { text: 'Sign in at riders.uber.com and look through your trips. Any you didn’t take? Check Uber Eats orders too.', url: 'https://riders.uber.com' },
       { text: 'Open Wallet. Any payment method you don’t know?' },
     ],
     debriefQs: [

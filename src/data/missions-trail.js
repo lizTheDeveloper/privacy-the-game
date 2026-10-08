@@ -164,9 +164,9 @@ export const TRAIL_MISSIONS = [
     accountId: "loyalty_programs",
     phase: "fortify",
     title: "Opt Out of Loyalty Data Selling",
-    briefing: "Most loyalty programs have a privacy settings page where you can opt out of data sharing with third parties. The setting exists because of CCPA and state privacy laws -- they're legally required to let you opt out of data sale. But they bury it. This mission walks you through the major ones.",
+    briefing: "Most loyalty programs have a privacy settings page where you can opt out of data sharing with third parties. In states with privacy laws, covered businesses have to let you opt out of data sale, though the setting can be hard to find. This mission walks you through the major ones.",
     steps: [
-      { text: "CVS ExtraCare: Log into CVS.com > Account Settings > Privacy Preferences > opt out of 'sharing for marketing purposes' and 'sharing for analytics'", url: "https://www.cvs.com/account/compliance/do-not-sell" },
+      { text: "CVS ExtraCare: sign in at CVS.com and review its privacy choices to opt out of sharing for marketing", url: "https://www.cvs.com/account/compliance/do-not-sell" },
       { text: 'Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): in your kroger.com account, review communication preferences. For a data deletion request, use the rights section of its privacy policy.', url: 'https://www.kroger.com/i/privacy-policy' },
       { text: 'Target Circle: sign in to target.com → Account and review its privacy and advertising settings.', url: 'https://www.target.com/account' },
       { text: "Starbucks: Open the Starbucks app > Account > Privacy Settings. Or visit starbucks.com privacy page.", url: "https://www.starbucks.com/terms/privacy-policy/" },
@@ -177,7 +177,7 @@ export const TRAIL_MISSIONS = [
       briefing: "\"Every one of these companies has a 'Do Not Sell My Personal Information' page, because California law requires it. Most of them made it hard to find on purpose. The pattern is always the same: log in, find Privacy or Account Settings, look for the opt-out toggle. They're counting on you not looking. Today you look.\"",
       debrief: scoutTrail(
         "\"Opt-outs submitted. The data that's already been sold is gone, but the pipeline from new purchases is narrower now. They'll keep collecting -- they just can't resell it as freely.\"",
-        "\"Already opted out. You found the hidden settings page. That puts you in a very small minority.\"",
+        "\"Already opted out. You found the settings page.\"",
         "\"If you don't have these specific programs, search for the ones you do have. The 'do not sell' page exists for all of them.\"",
       ),
     },
@@ -191,7 +191,7 @@ export const TRAIL_MISSIONS = [
     briefing: "The most effective privacy move is the simplest: close accounts you don't use. Every dormant loyalty account is a database entry that can be breached, sold, or subpoenaed. If you haven't used a rewards program in a year, the points aren't worth the data exposure. Close it. The data already collected stays in their systems, but no new data flows in.",
     steps: [
       { text: "Go through your loyalty program list from the audit mission. For each one you haven't used in 6+ months, log in and look for 'Delete Account,' 'Close Account,' or 'Deactivate.'" },
-      { text: "If there's no obvious delete option: search '[company name] delete my account' or email their privacy team at privacy@[company].com with a CCPA deletion request." },
+      { text: "If there's no obvious delete option: search '[company name] delete my account', or send a deletion request to the privacy contact listed in their privacy policy." },
       { text: "Before deleting: redeem any points or rewards you've accumulated. They disappear with the account." },
       { text: "After deleting: unsubscribe from their emails and remove any physical cards from your wallet or phone." },
     ],
@@ -269,9 +269,9 @@ export const TRAIL_MISSIONS = [
     briefing: "Visa and Mastercard sell aggregated transaction data to marketers and analytics firms. Your card issuer (Chase, Citi, Amex, etc.) also has its own data-sharing agreements. The aggregated data is supposedly anonymized, but researchers have repeatedly shown that credit card transaction records can be de-anonymized with just a few data points -- the store, the date, and the amount are often enough to identify a specific person.",
     steps: [
       { text: 'Chase: sign in and review the privacy and marketing preferences in your profile settings to opt out of sharing for marketing' },
-      { text: "Capital One: Log in > Settings > Privacy > 'Limit sharing of personal information'", url: "https://www.capitalone.com/privacy/" },
+      { text: "Capital One: sign in and review its privacy choices to limit sharing", url: "https://www.capitalone.com/privacy/" },
       { text: "American Express: Log in > Account Services > Privacy > opt out of 'sharing information with Amex business partners'", url: "https://global.americanexpress.com/privacy/opt-out" },
-      { text: "Bank of America: Log in > Profile & Settings > Privacy > 'Manage your ad choices'", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
+      { text: "Bank of America: sign in and review its privacy and ad choices", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
       { text: "For any card not listed: search '[your card issuer] privacy opt out' or call the number on the back of your card and ask for their privacy department." },
     ],
     debriefQs: TRAIL_DEBRIEF,
@@ -328,7 +328,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Firefox is the answer here, and it's not close. Chrome is made by an advertising company -- Google's business model depends on tracking you. Firefox is made by a nonprofit whose mission is internet privacy. The 'resist fingerprinting' flag is the nuclear option: Firefox starts lying to websites about your configuration, making you look like every other Firefox user. The trade-off is that some websites may look slightly different (wrong timezone display, standardized fonts). It's a small price for disappearing from the fingerprinting system.\"",
+      briefing: "\"Firefox is the answer here, and it's not close. Chrome is made by an advertising company -- Google's business model depends on tracking you. Firefox is made by Mozilla, owned by a nonprofit foundation. The 'resist fingerprinting' flag is the nuclear option: Firefox starts lying to websites about your configuration, making you look like every other Firefox user. The trade-off is that some websites may look slightly different (wrong timezone display, standardized fonts). It's a small price for being harder to fingerprint.\"",
       debrief: scoutTrail(
         "\"Browser hardened. You're now significantly harder to fingerprint. Re-test with Cover Your Tracks to see the improvement -- most people go from 'unique' to 'not unique.'\"",
         "\"Already hardened. You're running a privacy-focused setup. The fingerprinters have to work much harder to track you, and most won't bother.\"",

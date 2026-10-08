@@ -134,7 +134,7 @@ function makeManufacturerMissions(accountId) {
       briefing: `${name}${subtitle} collects ${dataList} from your connected vehicle.${insuranceLine} Before you can opt out, you need to know what they have on you. This mission files the request; the answer comes later.`,
       steps: [
         { text: `Open ${name}'s privacy request form`, url: requestUrl },
-        { text: 'Choose the "Right to Know" or data access request' },
+        { text: 'Choose the request to see your data (the brand’s privacy request form names it)' },
         { text: 'Verify your identity with your VIN or account email, and submit' },
         { text: 'They have up to 45 days to respond (extendable to 90). The report lists the categories they collect and who they share them with' },
       ],
@@ -192,7 +192,7 @@ function makeManufacturerMissions(accountId) {
     briefing: `Time to cut the data pipeline. ${name}'s privacy portal lets you ask them to stop selling or sharing your personal information. That right comes from California's law and similar state laws. Under California's rules, a business has 15 business days to act on an opt-out.`,
     steps: [
       { text: `Open ${name}'s privacy request form`, url: acct.securityUrl },
-      { text: 'Select "Do Not Sell or Share My Personal Information"' },
+      { text: 'Choose the opt-out of selling or sharing your data (the brand’s privacy request form names it)' },
       { text: 'Enter your VIN and verify your identity' },
       { text: 'Submit the request — save your confirmation number' },
     ],

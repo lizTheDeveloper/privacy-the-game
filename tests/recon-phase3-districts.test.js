@@ -398,7 +398,8 @@ describe('The Grid', () => {
 
   it('camera access: real paths, who-has-access answers, the true Wyze history', () => {
     const m = byId('smart_camera-recon-access');
-    expect(stepText(m)).toContain('Control Center → User Permissions');
+    // Round 6 ruling: the exact Ring menu couldn't be confirmed, so it's worded generally.
+    expect(stepText(m)).toContain('Control Center, review shared users');
     expect(stepText(m)).toContain('Home settings');
     expect(values(m, 'camera_access')).toEqual(['only-me', 'removed-old', 'stranger', 'skip']);
     expect(m.debriefQs[0].legacy.id).toBe('finding');
@@ -681,5 +682,47 @@ describe('round 6: no debrief option or code fragment in any step', () => {
 
   it('Signal registration lock steps are real steps', () => {
     expect(stepText(byId('signal-fortify-reglock'))).toContain('Signal PIN');
+  });
+});
+
+describe('round 6 ruling: unsourced stats and absolutes stay removed', () => {
+  const all = (() => {
+    const out = [];
+    const walk = (o) => { if (typeof o === 'string') out.push(o); else if (o && typeof o === 'object') Object.values(o).forEach(walk); };
+    MISSIONS.filter((m) => !m.legacy).forEach(walk);
+    return out.join('\n');
+  })();
+  it.each([
+    '80% of bank customers', '98% of Instagram users', '$58 billion', '58 billion dollar', 'two dollars on the dark web',
+    'already loaded into automated attack scripts', 'already been tried against your bank', 'circulating on the dark web',
+    'most 2FA options of anyone', 'eliminate password risk entirely', 'one-tap approval', 'It’s the one brokerage',
+    'gets them a phone number and nothing else', 'exactly which locks were copied', 'whatever it clears stays as it is',
+    'Fidelity and Schwab support security keys', 'Chase, Bank of America, Schwab', 'saves 18 months', 'Free, takes five minutes',
+    'single most effective', 'leaked 147 million', '147 million SSNs on the market', 'Yours is almost certainly out there',
+    'they\'re registered', 'banned three location brokers', 'hedge funds', 'legal workaround',
+    'opted everyone in', 'licensed its entire archive', 'Alexa is always listening', 'false activations happen constantly',
+    'made by a nonprofit whose mission', 'Congress explicitly allowed', 'privacy@[company].com', 'it\'s there, just hidden',
+    'better at matching faces', 'These bypass your privacy settings', 'It\'s legal.', 'still on unless you turned it off',
+    'invalidate everything', 'If this password is old, it\'s compromised', 'most common way accounts get hijacked',
+    'bypasses 2FA entirely', 'on every dark-web dump list', 'dark-web dump lists for years', 'worth more than credit cards on the dark web',
+    'You\'re in the minority of taxpayers', 'usually work by changing the beneficiary', 'Venmo defaults all transactions to public',
+  ])('no mission says "%s"', (phrase) => {
+    expect(all).not.toContain(phrase);
+  });
+
+  it('Equifax is described as exposing about 147 million people’s SSNs', () => {
+    expect(all).toContain('about 147 million people');
+  });
+
+  it('LinkedIn AI training: most users, not in the EU, UK or Switzerland', () => {
+    expect(all).toContain('opted most users in to AI training in 2024 (not in the EU, UK or Switzerland)');
+  });
+});
+
+describe('round 6 ruling: Microsoft AI mission claims only what its steps do', () => {
+  it('its debrief says reviewed and cleared, not training disabled', () => {
+    const m = byId('ai_microsoft-optout');
+    expect(text(m)).not.toContain('AI training is now disabled');
+    expect(values(m, 'action')).toEqual(['opted-out', 'no-account', 'later']);
   });
 });

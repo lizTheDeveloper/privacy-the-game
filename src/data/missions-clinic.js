@@ -156,7 +156,7 @@ export const CLINIC_MISSIONS = [
     title: "Audit Period Tracker Privacy",
     briefing: "After the Dobbs decision overturned Roe v. Wade in 2022, period tracking apps became a legal liability. Prosecutors in states with abortion bans can subpoena app data to prove pregnancy and timing. Flo -- the most popular period tracker with 300 million downloads -- was caught sharing health data with Facebook for ad targeting in 2019 and settled with the FTC. The app now offers an 'Anonymous Mode' that disconnects your data from your identity. Clue, based in Germany, committed to never selling data and is bound by EU privacy law. Natural Cycles says it never sells or shares cycle or health data, but it does share identifiers (device, IP address, hashed email) with ad platforms. If you use a period tracker, you need to know what it does with your data.",
     steps: [
-      { text: "Flo: Open the app > Profile > Privacy Settings > enable Anonymous Mode. Review 'Data Processing' settings." },
+      { text: "Flo: in the app’s privacy settings, look for Anonymous Mode and review data processing settings." },
       { text: "Clue: Review their privacy policy -- they are GDPR-bound and have committed to never selling data", url: "https://helloclue.com/privacy" },
       { text: "Natural Cycles: it says it never sells or shares cycle or health data. It does share identifiers (device, IP, hashed email) with ad platforms. Check Settings → Privacy for tracking toggles" },
       { text: "Consider whether you need cloud sync at all -- some trackers can work fully offline" },
@@ -359,7 +359,7 @@ export const CLINIC_MISSIONS = [
     accountId: "health_insurance",
     phase: "recon",
     title: "Understand Wellness Program Data Use",
-    briefing: "If your employer offers health insurance discounts for wearing a Fitbit, logging meals, or completing 'health assessments,' your data is being used to influence premiums. Employer wellness programs are a $58 billion industry. The data flows from your fitness tracker to the wellness platform (Personify Health (formerly Virgin Pulse), Rally Health, Vitality) to the insurance company. Life insurance companies buy social media data and consumer purchase data to set premiums -- your Instagram posts and grocery loyalty card purchases can affect your rates. The Affordable Care Act prohibits charging more for pre-existing conditions, but wellness program 'incentives' create a legal workaround.",
+    briefing: "If your employer offers health insurance discounts for wearing a Fitbit, logging meals, or completing 'health assessments,' in outcome-based wellness programs your results can change what you pay. The data flows from your fitness tracker to the wellness platform (Personify Health (formerly Virgin Pulse), Rally Health, Vitality) to the insurance company. Life insurers can use outside data sources when pricing; what they use varies. The Affordable Care Act bars charging more for pre-existing conditions, and it sets limits on how big wellness-program incentives can be.",
     steps: [
       { text: "Check if your employer has a wellness program that connects to fitness trackers or health apps" },
       { text: "If so: review what data the wellness platform collects. Look for the privacy policy on the platform (Personify Health, Rally Health, Vitality, etc.)" },
@@ -368,7 +368,7 @@ export const CLINIC_MISSIONS = [
     ],
     debriefQs: HEALTH_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: `"Your employer is offering you a discount to wear a Fitbit. What they are really doing is building a dataset that influences your insurance premiums. Wellness programs are a 58 billion dollar industry. The fitness tracker is the sensor. The discount is the incentive. Your biometrics are the product."`,
+      briefing: `"Your employer is offering you a discount to wear a Fitbit. In outcome-based programs, what the tracker records can change what you pay. Know the trade before you take the discount."`,
       debrief: {
         "clean": `"No wellness program data sharing. Either your employer does not have one, or you kept your tracker disconnected."`,
         "some-sharing": `"Found the connection. The question is whether the discount is worth the data. Your call -- but now it is an informed call."`,

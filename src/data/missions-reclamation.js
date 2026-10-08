@@ -144,17 +144,17 @@ export const RECLAMATION_MISSIONS = [
     accountId: "credit_freeze",
     phase: "fortify",
     title: "Freeze Credit: Equifax",
-    briefing: "A credit freeze prevents anyone from opening new credit in your name -- even if they have your Social Security number. It's free, takes five minutes, and is the single most effective defense against identity theft. Equifax is the bureau that leaked 147 million SSNs in 2017. Freeze them first.",
+    briefing: "A credit freeze prevents anyone from opening new credit in your name -- even if they have your Social Security number. It's free, and it's one of the strongest defenses against new-account fraud. Equifax is the bureau whose 2017 breach exposed about 147 million people's SSNs. Freeze them first.",
     steps: [
       { text: "Go to the Equifax Security Freeze page", url: "https://www.equifax.com/personal/credit-report-services/credit-freeze/" },
       { text: "Click \"Place a freeze\" -- you'll need to create an Equifax account if you don't have one" },
       { text: "Enter your name, SSN, date of birth, and address to verify your identity" },
-      { text: "Once confirmed, Equifax gives you a PIN or confirmation number -- write it down immediately" },
-      { text: "Save the PIN in your password manager AND write it on paper stored with your backup codes" },
+      { text: "Once confirmed, you may get a PIN, or you'll manage the freeze through your account -- keep whichever you get" },
+      { text: "Save any PIN or login in your password manager, and keep a paper copy with your backup codes" },
     ],
     debriefQs: FREEZE_STATUS_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Equifax -- the bureau that leaked 147 million Social Security numbers in 2017 and then set up a breach-check website that was itself riddled with security problems. They've earned the right to be frozen first. Five minutes. Free. Blocks anyone from opening credit in your name through Equifax.\"",
+      briefing: "\"Equifax -- the bureau whose 2017 breach exposed about 147 million people's Social Security numbers and then set up a breach-check website that was itself riddled with security problems. They've earned the right to be frozen first. Free. Stops new credit in your name that checks Equifax.\"",
       debrief: {
         "already-frozen": "\"Already frozen. Good. One of three major bureaus locked.\"",
         "now-frozen": "\"Equifax frozen. Save that PIN -- you'll need it to temporarily unfreeze when you apply for a mortgage, credit card, or apartment. Unfreezing is also free and takes effect within an hour.\"",
@@ -169,13 +169,13 @@ export const RECLAMATION_MISSIONS = [
     accountId: "credit_freeze",
     phase: "fortify",
     title: "Freeze Credit: Experian",
-    briefing: "Experian is the second major credit bureau. They're notorious for burying the free freeze option behind upsells for paid credit monitoring. Stay focused: the freeze is free and legally required. Monitoring is their upsell -- it only tells you about fraud after it happens, while a freeze prevents it.",
+    briefing: "Experian is the second major credit bureau. Expect offers for paid products along the way. Stay focused: the freeze is free by law. Monitoring is their upsell -- it only tells you about fraud after it happens, while a freeze prevents it.",
     steps: [
       { text: "Go to the Experian Security Freeze Center", url: "https://www.experian.com/freeze/center.html" },
-      { text: "Click \"Add a Security Freeze\" -- ignore any prompts to sign up for CreditLock or monitoring" },
+      { text: "Click \"Add a Security Freeze\" -- you don't need any paid product for the freeze" },
       { text: "Create an Experian account or log in -- verify your identity with your SSN and personal info" },
       { text: "Confirm the freeze and save the PIN or confirmation they provide" },
-      { text: "If they redirect you to a paid product page, look for the small \"freeze\" link -- it's there, just hidden" },
+      { text: "If you land on a paid product page, look for the freeze option: the free freeze is there" },
     ],
     debriefQs: FREEZE_STATUS_DEBRIEF,
     scoutDialog: {
@@ -218,7 +218,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "credit_freeze",
     phase: "fortify",
     title: "Freeze the Hidden Bureaus: Innovis & ChexSystems",
-    briefing: "Most people freeze the big three and stop. But Innovis is a fourth credit bureau used by some lenders, and ChexSystems is one of the screening companies banks check when someone applies for an account. A ChexSystems freeze stops new applications at banks that check ChexSystems. Some banks use a different screening company (Early Warning Services), which offers no freeze, so this narrows the gap rather than closing it.",
+    briefing: "Most people freeze the big three and stop. But Innovis is a fourth credit bureau used by some lenders, and ChexSystems is one of the screening companies banks check when someone applies for an account. A ChexSystems freeze stops new applications at banks that check ChexSystems. Some banks use a different screening company, Early Warning Services; it may offer a freeze too, so call them to ask.",
     steps: [
       { text: "Go to Innovis Security Freeze", url: "https://www.innovis.com/personal/securityFreeze" },
       { text: "Fill out the freeze form -- same process as the big three (SSN, address, DOB)" },
@@ -682,7 +682,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "recon",
     title: "Intel Brief: Location Data Brokers",
-    briefing: "Location data brokers buy raw GPS coordinates from apps on your phone, then sell \"anonymized\" movement patterns. The data is almost never truly anonymous -- a daily path from one house to one workplace identifies exactly one person. This data has been used to track people visiting abortion clinics, mosques, protest sites, and immigration lawyers. X-Mode Social sold location data from Muslim prayer apps to US military contractors. Gravy Analytics was breached in January 2025, exposing millions of people's movements. Near Intelligence sold location data of Planned Parenthood visitors to anti-abortion groups.",
+    briefing: "Location data brokers buy raw GPS coordinates from apps on your phone, then sell \"anonymized\" movement patterns. The data is almost never truly anonymous -- a daily path from one house to one workplace can identify one person. This data has been used to track people visiting abortion clinics, mosques, protest sites, and immigration lawyers. X-Mode Social sold location data from Muslim prayer apps to US military contractors. Gravy Analytics was breached in January 2025, exposing millions of people's movements. Near Intelligence sold location data of Planned Parenthood visitors to anti-abortion groups.",
     steps: [
       { text: "Go to your phone's Location Services settings (iOS: Settings → Privacy & Security → Location Services)" },
       { text: "Count how many apps have \"Always\" access vs \"While Using\" vs \"Never\"" },
@@ -726,7 +726,7 @@ export const RECLAMATION_MISSIONS = [
     ],
     debriefQs: DEFENSE_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Every app set to 'Always' is broadcasting your coordinates to its servers around the clock. That data gets sold through the ad bidstream to anyone who buys it -- hedge funds, governments, anti-abortion groups, military contractors. Set everything to 'While Using' or 'Never.' Your flashlight does not need to know where you are.\"",
+      briefing: "\"An app set to 'Always' can send your location whenever it likes, and some of that data has been sold through the ad bidstream -- to investors, governments, anti-abortion groups and military contractors. Set everything to 'While Using' or 'Never.' Your flashlight does not need to know where you are.\"",
       debrief: {
         "done": "\"Location permissions locked down. You just cut off the primary data feed that location brokers rely on.\"",
         "already-done": "\"Already locked down. Good -- you're ahead of most people on the most sensitive category of data.\"",
@@ -740,7 +740,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "fortify",
     title: "Opt Out: Location Data Companies",
-    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data to hedge funds. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
+    briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
     steps: [
       { text: "Opt out of SafeGraph -- email privacy@safegraph.com citing your right to data deletion", url: "https://www.safegraph.com/privacy-policy" },
       { text: 'X-Mode Social (later Outlogic): a 2024 FTC order bars it from selling sensitive location data, and its opt-out page no longer works' },
@@ -749,7 +749,7 @@ export const RECLAMATION_MISSIONS = [
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"These companies buy your GPS data from apps, package it into movement profiles, and sell it. SafeGraph to hedge funds. X-Mode to the US military. Near Intelligence to anti-abortion groups. Most hide their opt-outs behind email addresses instead of web forms. They're betting you won't bother. Prove them wrong.\"",
+      briefing: "\"These companies buy your GPS data from apps, package it into movement profiles, and sell it. SafeGraph to businesses. X-Mode to US military contractors. Near Intelligence to anti-abortion groups. Most hide their opt-outs behind email addresses instead of web forms. They're betting you won't bother. Prove them wrong.\"",
       debrief: {
         "all-submitted": "\"Location broker opt-outs submitted. Email ones take longer -- follow up if you don't get confirmation within 30 days.\"",
         "some-submitted": "\"Partial progress. SafeGraph and Placer.ai are the ones with a working route today.\"",
@@ -763,7 +763,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "location_brokers",
     phase: "reclaim",
     title: "Legal Tools: DROP + GDPR + Complaints",
-    briefing: "For location brokers without opt-out pages -- or to catch ones you missed -- use the legal tools. California DROP covers Gravy Analytics (they're registered). GDPR erasure requests work for EU/UK data. And filing complaints creates the paper trail regulators use to build enforcement cases -- the FTC has banned three location brokers since 2024.",
+    briefing: "For location brokers without opt-out pages -- or to catch ones you missed -- use the legal tools. If you're in California, DROP reaches the brokers registered there. GDPR erasure requests work for EU/UK data. And filing complaints creates the paper trail regulators use to build enforcement cases -- the FTC has brought cases against several location brokers since 2024.",
     steps: [
       { text: "Submit through California DROP (covers Gravy Analytics and hundreds more)", url: "https://privacy.ca.gov/drop/" },
       { text: "Generate a GDPR erasure request if applicable (EU/UK)", url: "https://www.datarequests.org/generator/" },

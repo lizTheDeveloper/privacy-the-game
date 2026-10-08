@@ -23,7 +23,7 @@ export const FREEWAY_ACCOUNTS = {
     dataCollected: ['location', 'driving behavior', 'vehicle diagnostics'],
     insuranceProgram: 'Insure Connect',
     insuranceStatus: 'active',
-    insuranceStep: 'In the Toyota app: Account → Data Privacy Portal → your vehicle → Insure Connect → Manage Consent. Decline if you don’t want it on.',
+    insuranceStep: 'In the Toyota app, open the Data Privacy Portal and find Insure Connect for your vehicle. Decline it if you don’t want it on.',
   },
   car_honda: {
     name: 'Honda',

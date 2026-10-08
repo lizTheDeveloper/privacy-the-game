@@ -41,6 +41,20 @@ const AI_OPTOUT_DEBRIEF = [
 
 // Adobe's setting is content analysis, not AI training (Adobe's content
 // analysis FAQ). Same id and values as AI_OPTOUT_DEBRIEF; only the words differ.
+// Microsoft's steps review and clear dashboard data; they don't switch off
+// training. Same id and values as AI_OPTOUT_DEBRIEF; words only (round 6).
+const MICROSOFT_AI_DEBRIEF = [
+  {
+    id: 'action',
+    label: 'Did you review and clear your data?',
+    options: [
+      { value: 'opted-out', text: 'Yes, reviewed and cleared what I could', severity: 'safe' },
+      { value: 'no-account', text: "I don't use a Microsoft account", severity: 'safe' },
+      { value: 'later', text: "I'll come back to this", severity: 'skip' },
+    ],
+  },
+];
+
 const ADOBE_DEBRIEF = [
   {
     id: 'action',
@@ -102,7 +116,7 @@ export const FOUNDRY_MISSIONS = [
     briefing: "Since Meta doesn't offer a universal opt-out for US users, the best defense is reducing what's public. Make your Instagram private, restrict Facebook post visibility to Friends, and avoid putting personal details into Meta AI — Meta says it can use those conversations to train its models.",
     steps: [
       { text: 'Instagram: Settings → Account privacy → turn on “Private account”' },
-      { text: 'Facebook: Settings → Audience → change your default post audience to “Friends”' },
+      { text: 'Facebook: in your post settings, change who sees future posts to “Friends”' },
       { text: 'EU/UK: use the “right to object” form in Meta’s Privacy Center' },
       { text: 'Avoid putting personal details into Meta AI chats. Meta says it can use them to train its models' },
     ],
@@ -235,7 +249,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Clear Copilot conversation history' },
       { text: 'Check Bing/Edge settings for AI data sharing toggles' },
     ],
-    debriefQs: AI_OPTOUT_DEBRIEF,
+    debriefQs: MICROSOFT_AI_DEBRIEF,
     scoutDialog: {
       briefing: '"Microsoft weaves Copilot into everything — Word, Outlook, Edge, Bing. Check the privacy dashboard for the master controls."',
       debrief: {
@@ -255,7 +269,7 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_linkedin',
     phase: 'fortify',
     title: 'Disable LinkedIn AI Training',
-    briefing: "LinkedIn silently opted everyone in to AI training in 2024, before most people noticed. Your profile, posts, articles, and engagement data are used to train their generative AI. There's a toggle — but they buried it. Turning it off doesn't affect your visibility to recruiters.",
+    briefing: "LinkedIn opted most users in to AI training in 2024 (not in the EU, UK or Switzerland). Your profile, posts, articles, and engagement data are used to train their generative AI. There's a toggle. Turning it off doesn't affect your visibility to recruiters.",
     steps: [
       { text: 'Open LinkedIn Privacy Settings', url: 'https://www.linkedin.com/mypreferences/d/categories/privacy' },
       { text: 'Find "Data for Generative AI Improvement"' },
@@ -318,7 +332,7 @@ export const FOUNDRY_MISSIONS = [
     ],
     debriefQs: AI_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: '"Alexa is always listening. Let\'s see how much she\'s been remembering."',
+      briefing: '"Alexa listens for its wake word. Let\'s see how much she\'s been remembering."',
       debrief: {
         'no-sharing': '"Already opted out — good."',
         'was-on': '"Years of voice recordings stored. Time to clean house."',
@@ -414,7 +428,7 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_reddit',
     phase: 'fortify',
     title: 'Manage Reddit AI Usage',
-    briefing: "Reddit licensed its entire archive to Google and OpenAI for AI training. Individual opt-outs are limited — Reddit's terms of service grant them broad rights to public posts. But you can limit personalization, control visibility, and be aware of what's exposed.",
+    briefing: "Reddit licensed its data to AI companies; Google and OpenAI announced deals in 2024. Individual opt-outs are limited — Reddit's terms of service grant them broad rights to public posts. But you can limit personalization, control visibility, and be aware of what's exposed.",
     steps: [
       { text: 'Open Reddit Privacy Settings', url: 'https://www.reddit.com/settings/privacy' },
       { text: 'Disable all personalization toggles' },
