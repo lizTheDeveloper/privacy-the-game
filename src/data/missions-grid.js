@@ -373,12 +373,12 @@ export const GRID_MISSIONS = [
     accountId: "smart_network",
     phase: "reclaim",
     title: "Encrypt Your DNS Lookups",
-    briefing: "Every time your browser looks up a website, it sends a DNS query -- usually to your ISP, in plain text, so your ISP can see every site name you look up. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling your browsing history. Encrypted DNS (DNS over HTTPS or over TLS) hides those lookups from your ISP. It still sees which servers you connect to. Changing the DNS server numbers in your router is different: that changes who answers, not who can see.",
+    briefing: "Every time your browser looks up a website, it sends a DNS query -- usually to your ISP, in plain text, so your ISP can see every site name you look up. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling your browsing history. Encrypted DNS (DNS over HTTPS or over TLS) hides those lookups from your ISP. It still sees which servers you connect to. Changing the DNS server numbers in your router is different: that changes who answers, not who can see. Pick who answers on purpose: Quad9 is run by a Swiss not-for-profit foundation that says it never logs your IP address, and it blocks known malware and phishing sites. Cloudflare is a company.",
     steps: [
-      { text: 'Encrypted, phone: Android: Settings > Network > Private DNS > set to \'one.one.one.one\' (Cloudflare) or \'dns.quad9.net\' (Quad9). iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular' },
+      { text: 'Encrypted, phone: Android: Settings > Network > Private DNS > set to \'dns.quad9.net\' (Quad9, the not-for-profit) or \'one.one.one.one\' (Cloudflare). iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular' },
       { text: 'Encrypted, browser: Firefox: Settings > Privacy & Security > DNS over HTTPS > Increased or Max Protection. Chrome: Settings > Privacy and security > Security > Use secure DNS' },
-      { text: 'Plain, whole network: in your router settings, change the DNS servers to Cloudflare (1.1.1.1, 1.0.0.1) or Quad9 (9.9.9.9, 149.112.112.112). This changes who answers, not who can see: the lookups still travel unencrypted, so your ISP can still read them' },
-      { text: 'Verify it\'s working: visit one.one.one.one/help (Cloudflare). It says whether your lookups are encrypted. dnsleaktest.com shows which servers are answering' },
+      { text: 'Plain, whole network: in your router settings, change the DNS servers to Quad9 (9.9.9.9, 149.112.112.112) or Cloudflare (1.1.1.1, 1.0.0.1). This changes who answers, not who can see: the lookups still travel unencrypted, so your ISP can still read them' },
+      { text: 'Verify it\'s working: on Quad9, visit on.quad9.net, which says whether you\'re using Quad9. On Cloudflare, visit one.one.one.one/help, which says whether your lookups are encrypted. dnsleaktest.com shows which servers are answering' },
     ],
     debriefQs: NETWORK_DEBRIEF,
     scoutDialog: {
