@@ -607,3 +607,53 @@ describe('ruling: a 2FA tie takes the weaker method, locally and in build.sql', 
     expect(sql).toMatch(/pg_temp\.rc_method_rank\(method\) ASC, event_id DESC/);
   });
 });
+
+describe('breaker phase 3 round 5 rulings: unverifiable claims removed or worded generally', () => {
+  const steps = (id) => byId(id).steps.map((s) => s.text).join('\n');
+  it('Verizon Number Lock: the app KB path, plus the website', () => {
+    const vz = steps('sim_protection-fortify-pin');
+    expect(vz).toContain('My Verizon app → Me → Edit profile and settings → Security → Number Lock');
+    expect(vz).toContain('Account → Settings → Security on verizon.com');
+  });
+  it('AT&T: Wireless Account Lock in AT&T’s own words', () => {
+    expect(steps('sim_protection-fortify-pin')).toContain('blocks specific changes, including moving your number');
+  });
+  it.each(['apple_id', 'icloud'])('%s 2FA upgrade: security keys, never an authenticator app', (acct) => {
+    const m = byId(`${acct}-fortify-2fa-upgrade`);
+    expect(text(m)).not.toMatch(/authenticator/i);
+    expect(stepText(m)).toContain('Security Keys');
+    expect(m.debriefQs[0].options.map((o) => o.value)).toEqual(['passkey', 'later']);
+  });
+  it('banks: no named bank, only "if your bank offers"', () => {
+    const t = steps('sim_protection-reclaim-remove-sms');
+    expect(t).not.toMatch(/Chase|Bank of America/);
+    expect(t).toContain('if your bank offers an authenticator app or passkey');
+  });
+  it('Discord lockdown: no token-invalidation claim', () => {
+    expect(text(byId('discord-fortify-lockdown'))).not.toMatch(/invalidat|tokens killed|kills all existing tokens/);
+  });
+  it('Meta: no "sells"', () => {
+    expect(text(byId('facebook-reclaim-privacy'))).not.toMatch(/\bsells\b/);
+  });
+  it('Epsilon: 2011, not 2019', () => {
+    const t = text(byId('ad_trackers-reclaim-individual'));
+    expect(t).not.toContain('2019');
+    expect(t).toContain('2011');
+  });
+  it('iRobot: no motive claim', () => {
+    expect(text(byId('smart_appliances-fortify-maps'))).not.toMatch(/acquisition of iRobot was partly about/);
+  });
+  it('GPC: tells websites you visit; covered businesses must honor it', () => {
+    const t = text(byId('scam_defense-fortify-tools'));
+    expect(t).not.toMatch(/tells every website/);
+    expect(t).toContain('tells websites you visit');
+    expect(t).toContain("businesses covered by laws like California's must honor it");
+  });
+  it('border prep: Apple recovery worded per Apple’s options; Google step is clean text with its link', () => {
+    const m = byId('border_prep-fortify-recovery-path');
+    expect(stepText(m)).not.toMatch(/Apple: .*add the clean email as a notification\/recovery contact/);
+    expect(stepText(m)).toMatch(/recovery contact|recovery key/);
+    expect(m.steps[0].url).toBe('https://myaccount.google.com/security');
+    expect(m.steps[0].text).not.toMatch(/url:/);
+  });
+});

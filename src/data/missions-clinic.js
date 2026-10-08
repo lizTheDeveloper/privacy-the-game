@@ -237,7 +237,7 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: "Sign in to your 23andMe account" },
       { text: "Go to Settings → 23andMe Data → View, then scroll to Delete Data" },
-      { text: "Click 'Submit Request' -- this deletes your genetic results from their servers" },
+      { text: "Click 'Submit Request' -- 23andMe deletes your account and data, except what its lab must keep by law: your genetic information, date of birth and sex (lab regulations such as CLIA)" },
       { text: "Also: in Settings → Preferences, turn off biobanking so your physical saliva sample isn't kept. This is separate from data deletion." },
       { text: "Confirm the request in the email they send." },
     ],

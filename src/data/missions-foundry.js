@@ -39,6 +39,20 @@ const AI_OPTOUT_DEBRIEF = [
   },
 ];
 
+// Adobe's setting is content analysis, not AI training (Adobe's content
+// analysis FAQ). Same id and values as AI_OPTOUT_DEBRIEF; only the words differ.
+const ADOBE_DEBRIEF = [
+  {
+    id: 'action',
+    label: 'Did you turn off Content analysis?',
+    options: [
+      { value: 'opted-out', text: 'Yes, Content analysis is off', severity: 'safe' },
+      { value: 'no-account', text: "I don't use Adobe", severity: 'safe' },
+      { value: 'later', text: "I'll come back to this", severity: 'skip' },
+    ],
+  },
+];
+
 const HISTORY_DEBRIEF = [
   {
     id: 'action',
@@ -267,19 +281,19 @@ export const FOUNDRY_MISSIONS = [
     id: 'ai_adobe-optout',
     accountId: 'ai_adobe',
     phase: 'fortify',
-    title: 'Disable Adobe AI Training',
-    briefing: "Adobe's Content Analysis setting lets them analyze your creative work to train Firefly and other AI models. If you use Photoshop, Illustrator, or Lightroom with cloud storage, your art could be training data. Adobe reversed some policies after backlash, but the settings still need checking.",
+    title: 'Turn Off Adobe Content Analysis',
+    briefing: "Adobe's Content Analysis setting lets it analyze files you store in its cloud to improve its products. Adobe says it doesn't use your content to train generative AI models like Firefly (Adobe Stock submissions are the exception). If you'd rather it didn't analyze your work at all, turn the setting off.",
     steps: [
       { text: 'Open Adobe Account Privacy', url: 'https://account.adobe.com/privacy' },
       { text: 'Find "Content analysis" settings' },
-      { text: 'Disable content analysis for AI training' },
+      { text: 'Turn off Content analysis' },
       { text: 'Check Creative Cloud app settings for local analysis toggles' },
     ],
-    debriefQs: AI_OPTOUT_DEBRIEF,
+    debriefQs: ADOBE_DEBRIEF,
     scoutDialog: {
-      briefing: '"Your art, your photos, your designs — Adobe was analyzing them all. Let\'s shut that down."',
+      briefing: '"Your art, your photos, your designs: if you’d rather Adobe didn’t analyze them, it’s one switch."',
       debrief: {
-        'opted-out': '"Creative work secured. Your art trains you, not their models."',
+        'opted-out': '"Content analysis off. Your files are just your files."',
         'no-account': '"No Adobe account — your creative work is safe."',
         'later': '"Come back for this, especially if you do creative work."',
       },

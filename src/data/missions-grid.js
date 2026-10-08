@@ -219,19 +219,19 @@ export const GRID_MISSIONS = [
     accountId: "smart_camera",
     phase: "fortify",
     title: "Opt Out of Police Camera Partnerships",
-    briefing: "Ring has partnerships with over 2,000 police departments in the US. Through the Neighbors app and direct requests, law enforcement can request your doorbell footage without a warrant. In 2022, Ring admitted it gave footage to police without user consent in 11 cases it deemed 'emergencies.' You can opt out of police video requests entirely -- Ring added this setting after public pressure, but it's off by default.",
+    briefing: "Police can ask Ring users near an incident to share their footage through Ring's Community Requests. Sharing is up to you: you can decline any request, and you can turn off the emails about them in Control Center. Turning those off doesn't stop police from asking Ring directly with a warrant, or in what Ring calls an emergency: in 2022 Ring said it had given footage to police without the owner's consent 11 times that year under its emergency policy.",
     steps: [
-      { text: "Ring: Open the Ring app > Menu (hamburger icon) > Control Center" },
-      { text: "Scroll to 'Video Requests from Law Enforcement'" },
-      { text: "Toggle OFF to prevent police from requesting your footage" },
-      { text: "Also review: Control Center > Authorized Client List > remove any third-party services you don't recognize" },
-      { text: "Nest/Google: Police cannot directly request Nest footage, but check Google's Transparency Report to understand their policy on law enforcement requests" },
+      { text: 'Ring: open the Ring app → Menu → Control Center' },
+      { text: 'Find the public safety section (Community Requests). There you can turn off the emails Ring sends about police requests' },
+      { text: 'Know the rule that matters more: sharing is your choice. Each request asks you, and you can decline it' },
+      { text: 'Also review the devices and services listed in Control Center, and remove any you don’t recognize' },
+      { text: 'Nest/Google: Google publishes how it handles law enforcement requests in its Transparency Report' },
     ],
     debriefQs: DEVICE_ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Ring is partnered with over 2,000 police departments. They can request your doorbell footage. In 2022, Ring handed footage to police without asking the owner 11 times. The opt-out exists, but you have to find it and turn it on yourself. Amazon didn't exactly advertise it.\"",
+      briefing: "\"Police can ask you for your doorbell footage, and the answer is yours to give. In 2022 Ring handed footage over without asking the owner 11 times. Know where the requests show up, and decline what you don't want to share.\"",
       debrief: scoutAction(
-        "\"Police video requests disabled. Your doorbell camera now works for you, not for the neighborhood surveillance network.\"",
+        "\"You know where the requests come in, and that you can say no. Your camera works for you.\"",
         "\"No Ring camera? One fewer surveillance partnership to worry about.\""
       ),
     },
@@ -294,7 +294,7 @@ export const GRID_MISSIONS = [
     accountId: "smart_appliances",
     phase: "fortify",
     title: "Disable Map and Occupancy Sharing",
-    briefing: "Your robot vacuum has a detailed map of your home -- room dimensions, furniture placement, obstacles. Your smart thermostat knows your daily schedule: when you leave for work, when you come home, when you go to bed. This data is valuable for targeted advertising and home insurance risk assessment. Amazon's acquisition of iRobot was partly about getting floor plan data to improve product recommendations. You can limit what these devices share.",
+    briefing: "Your robot vacuum has a detailed map of your home -- room dimensions, furniture placement, obstacles. Your smart thermostat knows your daily schedule: when you leave for work, when you come home, when you go to bed. This data is valuable for targeted advertising and home insurance risk assessment. You can limit what these devices share.",
     steps: [
       { text: "iRobot/Roomba: iRobot app > Settings > Privacy > disable 'Share map data' and 'Send usage data'" },
       { text: "Roborock: App > Settings > Privacy > opt out of user experience improvement program" },
