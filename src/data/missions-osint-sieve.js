@@ -30,7 +30,7 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "An OSINT investigator starts with your photos. They reverse-image-search your profile picture to find every platform you're on. They zoom into backgrounds looking for house numbers, street signs, license plates, and reflections. They run your landscape photos through AI geolocation tools that can pinpoint a location from a single image. They check if your photos still have EXIF metadata with GPS coordinates baked in. Let's see what they'd find.",
     steps: [
       { text: "Reverse image search your main profile photo — drag it into Google Images and see where else it appears", url: "https://images.google.com/" },
-      { text: "Now try Yandex — it's better at matching faces across platforms", url: "https://yandex.com/images/" },
+      { text: "Now try Yandex — a different engine sometimes finds different matches", url: "https://yandex.com/images/" },
       { text: "Pick 5-10 of your most recent social media photos. Zoom in on the background of each one. Can you see: house numbers? Street signs? Store names? License plates? School names?" },
       { text: "Check reflections — mirrors, windows, sunglasses, car paint, phone screens. What do they reveal about your location or surroundings?" },
       { text: "If you've shared photos on blogs, forums, or messaging apps (not just social media), check if they still have EXIF data: upload one to an EXIF viewer", url: "https://exif.tools/" },
@@ -90,7 +90,7 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "You might lock down your own profile, but your connections leak information about you. An investigator maps your social graph — your followers, your tagged photos, your most frequent commenters — to identify your family members, your partner, your workplace, your friend group. They find your mom's unlocked Facebook, your partner's public Instagram, your colleague who tags the whole team at the office holiday party. Your privacy is only as strong as the weakest link in your social circle.",
     steps: [
       { text: "Check your followers/following list. On a public account, this reveals who you know. Can someone identify your family, partner, or coworkers from the list?" },
-      { text: "Look at tagged photos — not YOUR tags, but photos OTHER PEOPLE tagged you in. These bypass your privacy settings." },
+      { text: "Look at tagged photos — not YOUR tags, but photos OTHER PEOPLE tagged you in. Who can see them depends on the poster's settings, unless you review tags before they appear." },
       { text: "Check your most frequent commenters and people you interact with. These reveal your closest relationships." },
       { text: "Search for your name + 'family' or 'spouse' or 'partner' on Google. What comes up?" },
       { text: "Check if family members have public profiles that mention you or share your location (parents are the biggest leak)." },

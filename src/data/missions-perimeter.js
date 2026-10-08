@@ -125,7 +125,7 @@ export const PERIMETER_MISSIONS = [
     title: "Harden Your Computer",
     briefing: "Laptops get stolen from coffee shops, cars, and airports. Without full-disk encryption, a stolen laptop's hard drive can be read by plugging it into another computer -- no password needed. FileVault on Mac and BitLocker on Windows encrypt the entire disk behind your login password. If the laptop is stolen, the thief gets expensive hardware and zero data.",
     steps: [
-      { text: "Mac: System Settings → Privacy & Security → scroll to FileVault → click \"Turn On FileVault\" if it's not already on. Save the recovery key somewhere safe (not on the Mac)." },
+      { text: "Mac: System Settings → Privacy & Security → scroll to FileVault → click \"Turn On FileVault\" if it's not already on. (Macs with Apple silicon or a T2 chip encrypt their storage already; FileVault ties that to your login password.) Save the recovery key somewhere safe (not on the Mac)." },
       { text: "Windows Pro/Enterprise: Search \"BitLocker\" in Start → Turn on BitLocker for your main drive. Save the recovery key to your Microsoft account or print it." },
       { text: "Windows Home: Settings → Privacy & Security → Device encryption → Turn on. (If this option doesn't appear, your hardware may not support it -- search \"Why can't I encrypt my device\" in Windows Help.)" },
       { text: "Linux: If not already using LUKS, this requires reinstalling. For now, check: run `lsblk -f` in terminal and look for \"crypto_LUKS\" on your root partition." },
@@ -236,7 +236,7 @@ export const PERIMETER_MISSIONS = [
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"This is the keystone of your travel kit. Everything else in the border crossing sequence depends on this email existing and being clean. When you're through the border and on safe WiFi, this is how you get back into your real life. Keep it empty, keep it memorized, keep it off your phone until you need it. This is the same practice used by journalists, human rights workers, and lawyers who cross hostile borders routinely. It's legal. It's sensible. It's how professionals operate.\"",
+      briefing: "\"This is the keystone of your travel kit. Everything else in the border crossing sequence depends on this email existing and being clean. When you're through the border and on safe WiFi, this is how you get back into your real life. Keep it empty, keep it memorized, keep it off your phone until you need it. Journalists, human rights workers and lawyers who cross hostile borders use the same practice. Laws on device searches vary by country, so know the rules where you're going.\"",
       debrief: scoutAction(
         "\"Clean email established. That's the foundation. Next: we'll connect it to your real accounts as a backup recovery path, then prepare the travel device.\"",
         "\"Already have a clean recovery email. Smart -- you've done this drill before. Make sure it's still clean: no sent emails, no contacts, no connection to your real identity.\"",

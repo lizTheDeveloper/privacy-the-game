@@ -279,7 +279,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       briefing: '"Instagram usernames have resale value. A strong password plus an authenticator app is the difference between keeping your handle and finding it selling crypto."',
       debrief: {
         'reset-password': '"New password and 2FA active. Your carefully curated online persona is much harder to steal."',
-        'already-strong': `"Already locked down. You're ahead of about 98% of Instagram users."`,
+        'already-strong': `"Already locked down. Good."`,
         'partial': '"Password done -- good start. Come back for 2FA soon. Social accounts are SIM-swap targets."',
         'later': `"Your social identity is a target. Don't sit on this."`,
       },
@@ -294,7 +294,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Instagram defaults to sharing a lot: your activity status, who can message you, whether your account is public, and how much data feeds Meta's ad machine. Most of these are toggles that take thirty seconds each.`,
     steps: [
       { text: `Open Instagram → ☰ → Settings and privacy → "Account privacy" -- set to Private if you want only followers to see your posts` },
-      { text: `Under "How others can interact with you" → turn off "Activity Status" (stops showing when you're online)` },
+      { text: `In Instagram's settings, find Activity Status and turn it off (stops showing when you're online)` },
       { text: 'Go to "Messages and story replies" → set "Message controls" to restrict who can DM you' },
       { text: 'In Accounts Center, look for the setting about activity from other businesses and review it (it changes how Meta uses that activity, not whether businesses send it)' },
     ],
@@ -390,7 +390,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "twitter",
     phase: "reclaim",
     title: "Privacy Review: Twitter / X",
-    briefing: `Twitter lets people find you by email and phone number by default. That's how the 200-million-address scrape worked -- and it's still on unless you turned it off. The discoverability toggles are the most important settings here.`,
+    briefing: `X has settings for whether people who have your email address or phone number can find you. A lookup like that is how the 200-million-address scrape was built. Check those settings first.`,
     steps: [
       { text: 'Open Twitter Privacy', url: 'https://x.com/settings/audience_and_tagging' },
       { text: `Under "Discoverability and contacts" → turn OFF "Let people who have your email address find you" and same for phone` },
@@ -399,7 +399,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"Twitter lets people find you by phone number and email by default. That's exactly how the 200-million-address scrape worked. Turn those off."`,
+      briefing: `"Check whether people with your email or phone number can find you. A lookup like that is how the 200-million-address scrape was built."`,
       debrief: {
         "tightened": '"Discoverability settings tightened. Harder for scrapers to tie your account to your real identity."',
         "already-tight": '"Already locked down. You clearly learned from the scrape."',
@@ -417,7 +417,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Device Check: TikTok",
     briefing: "TikTok collects more data than most platforms -- keystroke patterns, clipboard contents, device identifiers, face and voice data from your videos. An unauthorized device gets access to all of it, plus your DMs and drafts.",
     steps: [
-      { text: 'In the TikTok app: Profile → ☰ → Settings and privacy → Security & permissions (on older versions: Security) → Manage devices' },
+      { text: 'In the TikTok app, open Settings and privacy, then its security section (Security & permissions on recent versions), then Manage devices' },
       { text: 'Review every device listed' },
       { text: 'Remove any device you don’t recognize or no longer use' },
     ],
@@ -439,7 +439,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: TikTok",
     briefing: "TikTok accounts are targets for both credential theft and content hijacking. An authenticator app is recommended over SMS -- social media accounts are prime SIM-swap targets.",
     steps: [
-      { text: "Open TikTok → Profile → ☰ → Settings and privacy → Security" },
+      { text: "Open TikTok → Settings and privacy → its security section" },
       { text: `Tap "Password" → open your password manager, generate a 20+ character random password, save it, paste into both fields` },
       { text: `Go back to Security → "2-Step Verification" → choose "Authenticator App"` },
       { text: "Open your authenticator app, scan the QR code, enter the 6-digit code to confirm" },
@@ -722,7 +722,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "discord",
     phase: "recon",
     title: "Token & App Audit: Discord",
-    briefing: "Discord token-stealing malware is an entire genre. A stolen token gives full account access without needing your password -- it bypasses 2FA entirely. The check is the apps you’ve authorized and any sessions Discord shows you, then a new password if anything looks wrong.",
+    briefing: "Discord token-stealing malware is an entire genre. A stolen token can act as you without your password, because it’s a session that has already signed in. The check is the apps you’ve authorized and any sessions Discord shows you, then a new password if anything looks wrong.",
     steps: [
       { text: 'Open Discord and click the cog (User Settings)', url: 'https://discord.com/channels/@me' },
       { text: 'Go to Authorized Apps → Deauthorize anything you don’t actively use' },
@@ -759,7 +759,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
         "reset-password": '"Password changed, 2FA active, backup codes saved. Your Discord is properly fortified."',
         "already-strong": '"Already locked down. Make sure those backup codes are still accessible."',
         "partial": '"Password changed -- good. Come back for 2FA: it’s the second lock."',
-        "later": `"Discord token theft is the most common way accounts get hijacked in gaming communities. Don't wait."`,
+        "later": `"Discord accounts get hijacked through stolen tokens and reused passwords. Don't wait."`,
       },
     },
     estimatedMinutes: 5,
@@ -816,7 +816,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "reddit",
     phase: "fortify",
     title: "Lockdown: Reddit",
-    briefing: "Reddit supports 2FA via authenticator apps. Given the 2018 breach, if your password is old, it's been on dark-web dump lists for years. A unique password protects your pseudonymous identity.",
+    briefing: "Reddit supports 2FA via authenticator apps. Reddit's 2018 breach took a 2007 backup, so a password from 2007 or earlier should go. A unique password protects your pseudonymous identity.",
     steps: [
       { text: 'Open Reddit Settings', url: 'https://www.reddit.com/settings/' },
       { text: `Under "Account" → "Change password" -- open your password manager, generate a 20+ character random password, save it, paste in` },
@@ -970,7 +970,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Every "Anyone with the link" share in Google Drive is a public URL to your file. Over years of collaboration, you've probably shared tax returns, contracts, or ID scans with links that are still active. If that link ends up in a search index or a Slack channel that gets scraped, the file is effectively public.`,
     steps: [
       { text: 'Open Google Drive', url: 'https://drive.google.com' },
-      { text: 'In Home, open the People filter and choose “Anyone with the link”. If you don’t see that option, search sharedwith:public' },
+      { text: 'Find files shared with “Anyone with the link”, using Drive’s search filters or the search sharedwith:public' },
       { text: 'For each sensitive file (ID scans, tax returns, contracts): right-click → Share → General access → Restricted' },
       { text: 'Check “Shared with me” for files others shared that you may have reshared' },
     ],
@@ -1052,12 +1052,12 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
-      briefing: '"Dropbox syncs to every linked device. An unknown device in this list already has copies of your files. Unlink first, then change the password to invalidate everything."',
+      briefing: '"Dropbox syncs to every linked device. An unknown device in this list already has copies of your files. Unlink first, then change the password."',
       debrief: {
         "reset-password": '"Devices audited, password changed, 2FA enabled. Your file archive is properly secured."',
         "already-strong": `"Already locked down. Good -- Dropbox's breach history makes this important."`,
         "partial": `"Password changed. Come back for 2FA -- it's the safety net for when passwords leak again."`,
-        "later": `"Dropbox had a major breach. If this password is old, it's compromised."`,
+        "later": `"Dropbox's 2012 breach took passwords, and Dropbox reset old ones in 2016. If yours is older than that, change it."`,
       },
     },
     estimatedMinutes: 8,
@@ -1198,8 +1198,8 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open Your Account → Login & security', url: 'https://www.amazon.com/your-account' },
       { text: `Click "Edit" next to Password → open your password manager, generate a random 20+ character password, save it, paste in` },
-      { text: `Click "Edit" next to "Two-Step Verification (2SV)" → click "Get Started"` },
-      { text: `Choose "Authenticator app" → scan the QR code → enter the 6-digit code to confirm` },
+      { text: `In Login & security, turn on two-step verification` },
+      { text: `Choose an authenticator app if offered, scan the QR code, and enter the code to confirm` },
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
@@ -1252,7 +1252,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PASSWORD_HEALTH_DEBRIEF,
     scoutDialog: {
-      briefing: `"Streaming accounts sell for two dollars on the dark web. The real risk isn't losing Netflix -- it's that the password you used for Netflix is the same one you used for your email. Your password manager tells you in thirty seconds."`,
+      briefing: `"The real risk isn't losing Netflix -- it's that the password you used for Netflix is the same one you used for your email. Your password manager tells you in thirty seconds."`,
       debrief: {
         'no-breaches': '"All unique. No reuse vectors from your streaming accounts."',
         '1-2-breaches': '"Found reused passwords and changed them. You just closed a cascade path."',
@@ -1345,7 +1345,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: "Change your password to a unique one -- open your password manager, generate 20+ characters, save, paste" },
       { text: 'Go to Uber Privacy Settings', url: 'https://account.uber.com/privacy' },
       { text: `Review "Data sharing" and "Advertising preferences" -- limit what you can` },
-      { text: `Consider downloading your data (Uber → Account → Privacy → "Download your data") to see what they have` },
+      { text: `Consider requesting a copy of your data from Uber’s privacy settings to see what they have` },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -1594,7 +1594,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: "Review your most recent 1-2 years of posts." },
       { text: "Check all tagged photos: Activity Log > Photos and videos > Photos and videos of you." },
       { text: "Review posts others shared on your timeline that you may not have noticed." },
-      { text: "Settings > Memories: control what Facebook resurfaces to you (and potentially shows friends)." },
+      { text: "In Facebook’s Memories settings, control what it resurfaces to you." },
       { text: "Final check: view your profile as a stranger (Profile > three dots > 'View As'). What do they see?" },
     ],
     debriefQs: [{ id: 'finding', label: 'How does the finished review feel?', options: [
@@ -1677,11 +1677,11 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'twitter',
     phase: 'reclaim',
     title: 'Memory Lane: X / Twitter Bulk Cleanup',
-    briefing: "After reviewing year by year, you might want a clean slate for old tweets while keeping your archive. Tools like Semiphemeral, TweetDelete, or Redact can auto-delete tweets older than a certain date. Your downloaded archive preserves everything. This is the 'keep the receipts, remove the live copies' approach.",
+    briefing: "After reviewing year by year, you might want a clean slate for old tweets while keeping your archive. Bulk-delete tools exist (Semiphemeral, TweetDelete, Redact and others), but some may no longer work after X's API changes. Your downloaded archive preserves everything. This is the 'keep the receipts, remove the live copies' approach.",
     steps: [
       { text: "Make sure you have your downloaded archive saved somewhere safe." },
       { text: "Decide your cutoff: do you want to keep tweets from the last year? Two years? All time?" },
-      { text: "Consider a tool like Semiphemeral or Redact to bulk-delete tweets before your cutoff date." },
+      { text: "If a bulk-delete tool still works with X, consider one for tweets before your cutoff date; otherwise delete by hand." },
       { text: "Review your media tab (Profile > Media) for photos and videos you've shared." },
       { text: "Final check: scroll your profile as a stranger would. How does it look?" },
     ],
