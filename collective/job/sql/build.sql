@@ -92,7 +92,8 @@ SELECT e.session_id, e.event_id, e.created_at AS at,
        max(d.string_value) FILTER (WHERE d.data_key = 'mission') AS mission,
        max(d.string_value) FILTER (WHERE d.data_key = 'finding') AS finding,
        max(d.string_value) FILTER (WHERE d.data_key = 'status')  AS status,
-       max(d.string_value) FILTER (WHERE d.data_key = 'method')  AS method
+       max(d.string_value) FILTER (WHERE d.data_key = 'method')  AS method,
+       max(d.string_value) FILTER (WHERE d.data_key = 'same_address') AS same_address
   FROM website_event e JOIN event_data d ON d.website_event_id = e.event_id
  WHERE e.website_id = :'website' AND e.event_name = 'mission-completed'
  GROUP BY e.event_id, e.session_id, e.created_at;
@@ -109,15 +110,18 @@ SELECT e.session_id, e.event_id, e.created_at AS at,
 -- always one address. A new "same address" filing sends no finding, so it is
 -- no check; an old save may hold both checks of a pair, and they count as one
 -- address per player (the later answer), under the first account's id when
--- the player checked it, else under the second's.
+-- the player checked it, else under the second's. The second account's own
+-- latest answer "different-address" (same_address, tracked since ruling
+-- 2026-10-07) makes it a separate address; "same" or missing is one address.
 CREATE OR REPLACE FUNCTION pg_temp.rc_pair(acct text) RETURNS text LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE acct WHEN 'google' THEN 'gmail' WHEN 'apple_id' THEN 'icloud' WHEN 'microsoft' THEN 'outlook' ELSE acct END
 $$;
 
 CREATE TEMP TABLE rc_checks_acct ON COMMIT DROP AS
-SELECT session_id, acct, finding, at, event_id
-  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id
-          FROM (SELECT session_id, event_id, at, finding,
+SELECT session_id, acct, finding, at, event_id,
+       CASE WHEN same_address = 'different-address' THEN acct ELSE pg_temp.rc_pair(acct) END AS addr
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id, same_address
+          FROM (SELECT session_id, event_id, at, finding, same_address,
                        left(mission, length(mission) - length('-recon-breach')) AS acct
                   FROM rc_mc WHERE mission LIKE '%-recon-breach') c
          WHERE acct IN ('gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft')
@@ -125,14 +129,16 @@ SELECT session_id, acct, finding, at, event_id
  WHERE finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
 
 CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
-SELECT DISTINCT ON (c.session_id, pg_temp.rc_pair(c.acct)) c.session_id,
-       CASE WHEN EXISTS (SELECT 1 FROM rc_checks_acct p WHERE p.session_id = c.session_id AND p.acct = pg_temp.rc_pair(c.acct))
-            THEN pg_temp.rc_pair(c.acct) ELSE c.acct END AS acct,
-       c.finding
+SELECT DISTINCT ON (c.session_id, c.addr) c.session_id,
+       CASE WHEN EXISTS (SELECT 1 FROM rc_checks_acct p WHERE p.session_id = c.session_id AND p.acct = c.addr)
+            THEN c.addr ELSE c.acct END AS acct,
+       c.finding,
+       (c.addr = c.acct AND pg_temp.rc_pair(c.acct) <> c.acct) AS separate
   FROM rc_checks_acct c
- ORDER BY c.session_id, pg_temp.rc_pair(c.acct), c.at DESC, c.event_id DESC;
+ ORDER BY c.session_id, c.addr, c.at DESC, c.event_id DESC;
 
--- Fixed by either account of a pair (one address, one password).
+-- Fixed by either account of a pair (one address, one password); a separate
+-- address only by its own account.
 CREATE OR REPLACE FUNCTION pg_temp.rc_members(acct text) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE pg_temp.rc_pair(acct) WHEN 'gmail' THEN ARRAY['gmail', 'google'] WHEN 'icloud' THEN ARRAY['icloud', 'apple_id']
               WHEN 'outlook' THEN ARRAY['outlook', 'microsoft'] ELSE ARRAY[acct] END
@@ -140,7 +146,7 @@ $$;
 
 CREATE TEMP TABLE rc_breached ON COMMIT DROP AS
 SELECT DISTINCT c.session_id, c.acct,
-       EXISTS (SELECT 1 FROM rc_mc f, unnest(pg_temp.rc_members(c.acct)) a
+       EXISTS (SELECT 1 FROM rc_mc f, unnest(CASE WHEN c.separate THEN ARRAY[c.acct] ELSE pg_temp.rc_members(c.acct) END) a
                 WHERE f.session_id = c.session_id AND f.status = 'completed'
                   AND f.mission IN (a || '-fortify-password', a || '-fortify-2fa')) AS fixed
   FROM rc_checks c WHERE c.finding IN ('1-2-breaches', '3plus-breaches');

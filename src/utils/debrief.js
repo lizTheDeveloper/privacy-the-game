@@ -151,6 +151,9 @@ export function missionEventData(mission, record) {
     status: record.status,
     password_exposed: record.password_exposed,
     method: record.method ? twoFactorMethod(record) : undefined,
+    // Recon X4 (ruling 2026-10-07): which address a Google / Apple ID /
+    // Microsoft check is, so build.sql counts a different address on its own.
+    same_address: record.same_address,
   };
   for (const k of Object.keys(data)) if (data[k] === undefined || data[k] === null) delete data[k];
   return data;

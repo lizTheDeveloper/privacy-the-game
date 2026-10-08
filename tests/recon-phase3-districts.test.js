@@ -11,7 +11,7 @@ const text = (m) => JSON.stringify(m);
 const stepText = (m) => m.steps.map((s) => s.text).join(' | ');
 const stepUrls = (m) => m.steps.map((s) => s.url).filter(Boolean);
 const values = (m, qid) => m.debriefQs.find((q) => q.id === qid).options.map((o) => o.value);
-const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method']);
+const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address']);
 
 // A new debrief question: every option files, and nothing new is tracked.
 function filesCleanly(m, qid) {

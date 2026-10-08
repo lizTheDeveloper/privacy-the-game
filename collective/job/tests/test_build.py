@@ -321,6 +321,54 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(city["breachRatePct"], 0)
         self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
 
+    # Ruling 2026-10-07: same_address is tracked. "different-address" on the
+    # second account is its own address; same or missing is one address.
+    def test_different_address_counts_as_its_own_address(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "finding": "3plus-breaches",
+                                           "status": "completed", "same_address": "different-address"})
+        doc = build()
+        city = doc["city"]
+        self.assertEqual(city["breachChecks"], 120)
+        self.assertEqual(city["breachRatePct"], 50)
+        self.assertEqual(sorted(a["id"] for a in city["byAddress"]), ["gmail", "google"])
+        self.assertEqual(city["fortified"]["breached"], 60)
+        self.assertEqual(pods_by_id(doc)["us-il-chicago"]["breachChecks"], 120)
+
+    def test_different_address_is_fixed_only_by_its_own_account(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "finding": "1-2-breaches",
+                                           "status": "completed", "same_address": "different-address"})
+        self.fix(sids[:30], "gmail", "password")    # the other address: not a fix
+        self.fix(sids[30:45], "google", "2fa")
+        city = build()["city"]
+        self.assertEqual(city["fortified"], {"pct": 25, "fixed": 15, "breached": 60})
+
+    def test_same_or_missing_same_address_is_one_address(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "1-2-breaches")
+        events(sids[:30], "mission-completed", {"mission": "google-recon-breach", "finding": "1-2-breaches",
+                                                "status": "completed", "same_address": "same-as-gmail"})
+        events(sids[30:], "mission-completed", {"mission": "google-recon-breach", "finding": "1-2-breaches",
+                                                "status": "completed"})
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual([a["id"] for a in city["byAddress"]], ["gmail"])
+
+    def test_refiled_from_different_to_same_is_one_address(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "no-breaches")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "finding": "3plus-breaches",
+                                           "status": "completed", "same_address": "different-address"},
+               at="now() - interval '1 hour'")
+        events(sids, "mission-completed", {"mission": "google-recon-breach", "status": "completed",
+                                           "same_address": "same-as-gmail"})
+        city = build()["city"]
+        self.assertEqual(city["breachChecks"], 60)
+        self.assertEqual(city["breachRatePct"], 0)
+
     def test_either_account_of_a_pair_fixes_the_address(self):
         sids = players(60)
         self.breach(sids, "gmail", "1-2-breaches")

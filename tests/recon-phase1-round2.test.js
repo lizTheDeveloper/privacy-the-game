@@ -98,7 +98,7 @@ describe('restore guard', () => {
 });
 
 // ── Ruling 3: every answered question is stored; tracking stays whitelisted ─
-const TRACKED = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'pod']);
+const TRACKED = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address', 'pod']);
 
 function firstAnswers(m) {
   const a = {};

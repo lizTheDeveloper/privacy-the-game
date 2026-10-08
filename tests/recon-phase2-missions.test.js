@@ -32,7 +32,7 @@ const REPLACED = {
   instagram: 'service', twitter: 'service', linkedin: 'service', dropbox: 'service',
   discord: 'password', reddit: 'password', amazon: 'activity', ebay: 'activity', uber: 'activity',
 };
-const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method']);
+const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address']);
 
 // Every account enabled, and a first answer for every shown question.
 function allOn() {

@@ -7,7 +7,7 @@ import { calcDistrictProgress } from './calc.js';
 import { notYetRun } from './ghost.js';
 
 const RESENT = new Set(['completed', 'skipped', 'not-needed']);
-const ANSWER_KEYS = ['finding', 'password_exposed', 'method'];
+const ANSWER_KEYS = ['finding', 'password_exposed', 'method', 'same_address'];
 
 // Never resend an answer that isn't a clean id (an old save's broken string).
 function cleanAnswers(data) {

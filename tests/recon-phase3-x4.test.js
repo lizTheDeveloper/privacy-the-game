@@ -26,7 +26,7 @@ const PAIRS = [
   ['apple_id', 'icloud', 'iCloud'],
   ['microsoft', 'outlook', 'Outlook'],
 ];
-const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method']);
+const SENT_KEYS = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address']);
 const s0 = createInitialState();
 const set = (state, id, rec) => updateMission(state, id, rec);
 
@@ -135,6 +135,27 @@ describe.each(PAIRS)('%s asks whether it is the same address as %s', (acct, part
     expect(calcFindings(s).breachesFound).toBe(1);
     expect(yourPart(s).found).toBe(1);
     expect(isBreachFound(`${acct}-recon-breach`, s.missions[`${acct}-recon-breach`])).toBe(false);
+  });
+
+  it('the same_address answer is tracked, live and on restore (ruling 2026-10-07)', () => {
+    for (const kind of ['breach', 'login']) {
+      const m = byId(`${acct}-recon-${kind}`);
+      const same = debriefRecord(m, { same_address: `same-as-${partner}` });
+      expect(missionEventData(m, same.record).same_address).toBe(`same-as-${partner}`);
+      const diff = debriefRecord(m, { same_address: 'different-address', finding: 'no-breaches' });
+      expect(missionEventData(m, diff.record).same_address).toBe('different-address');
+    }
+    const s = set(set(s0, `${acct}-recon-breach`, { status: 'completed', same_address: 'different-address', finding: 'no-breaches' }),
+      `${acct}-recon-login`, { status: 'completed', same_address: `same-as-${partner}` });
+    const ev = restoreEvents(s);
+    expect(ev.find((e) => e.data.mission === `${acct}-recon-breach`).data.same_address).toBe('different-address');
+    expect(ev.find((e) => e.data.mission === `${acct}-recon-login`).data.same_address).toBe(`same-as-${partner}`);
+    // An old save never answered it, and nothing is invented for it.
+    const old = set(s0, `${acct}-recon-breach`, { status: 'completed', finding: '3plus-breaches' });
+    expect(restoreEvents(old).find((e) => e.data.mission === `${acct}-recon-breach`).data.same_address).toBeUndefined();
+    // A malformed stored value is never resent.
+    const bad = set(s0, `${acct}-recon-breach`, { status: 'completed', same_address: "same', text: 'x" });
+    expect(restoreEvents(bad).find((e) => e.data.mission === `${acct}-recon-breach`).data.same_address).toBeUndefined();
   });
 
   it('restore resends "same" without a finding', () => {
