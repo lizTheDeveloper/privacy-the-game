@@ -160,11 +160,12 @@ SELECT DISTINCT ON (c.session_id, c.addr) c.session_id,
 
 -- Each session's latest filing of each mission (ruling 2026-10-08: the
 -- latest filing wins, as in the save; a reset refiled as skipped is no
--- longer done). On a same-instant tie, completed wins.
+-- longer done). On a same-instant tie, completed wins, also over an event
+-- with no status (NULL would otherwise sort first under DESC).
 CREATE TEMP TABLE rc_latest ON COMMIT DROP AS
 SELECT DISTINCT ON (session_id, mission) session_id, mission, status, method
   FROM rc_mc WHERE mission IS NOT NULL
- ORDER BY session_id, mission, at DESC, (status = 'completed') DESC, event_id DESC;
+ ORDER BY session_id, mission, at DESC, (coalesce(status, '') = 'completed') DESC, event_id DESC;
 
 -- What players did: one row per session and mission whose latest filing is
 -- completed. Mission ids checked against src/data/missions*.js.

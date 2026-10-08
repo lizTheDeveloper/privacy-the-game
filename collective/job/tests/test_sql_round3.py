@@ -1,5 +1,5 @@
-# Breaker phase 3 round 3's SQL cases, UNRUN (written, not executed). To run:
-# copy next to collective/job/tests/test_build.py and run on the CI VM.
+# Breaker phase 3 round 3's SQL cases, moved here from tests/breaker-phase3/
+# and run on the CI VM with test_build (unedited).
 #
 # Case 1 is a believed hole (low severity); case 2 pins the residual rule
 # against the new "latest filing" counts and is expected to pass.
