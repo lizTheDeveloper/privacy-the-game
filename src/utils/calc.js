@@ -139,13 +139,21 @@ export function districtBreachedAddresses(state, districtId) {
   return checks.filter((c) => c.breached).length;
 }
 
+// A mission whose debrief asks about a second sign-in step (reviewer I4): the
+// method question, or a two-factor / two-step question. An IRS IP PIN and
+// Signal's registration lock share the enabled-2fa value but aren't 2FA.
+export function isTwoFactorMission(mission) {
+  return Boolean(mission?.debriefQs?.some((q) => q.kind === 'two-factor' || /two-factor|two-step/i.test(q.label || '')));
+}
+
 export function calcFindings(state) {
   const entries = Object.entries(state.missions);
   const missions = entries.map(([, m]) => m).filter((m) => m.status === 'completed');
+  const byId = new Map(MISSIONS.map((m) => [m.id, m]));
   return {
     breachesFound: addressChecks(state).filter((c) => c.breached).length,
     passwordsReset: missions.filter((m) => m.action === 'reset-password').length,
-    twoFactorEnabled: missions.filter((m) => m.action === 'enabled-2fa').length,
+    twoFactorEnabled: entries.filter(([id, m]) => m.status === 'completed' && m.action === 'enabled-2fa' && isTwoFactorMission(byId.get(id))).length,
     optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
   };
 }

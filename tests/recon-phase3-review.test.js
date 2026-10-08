@@ -80,3 +80,22 @@ describe('I2/I3 sweep: freeze and IP PIN absolutes', () => {
     expect(t('govt_id_defense-fortify-irs-pin')).toContain('An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it');
   });
 });
+
+describe('I4: the 2FA ENABLED stat counts only two-factor missions', async () => {
+  const { calcFindings, isTwoFactorMission } = await import('../src/utils/calc.js');
+  it('an IP PIN and a Signal registration lock are not 2FA; real 2FA missions are', () => {
+    const s = { ...createInitialState(), missions: {
+      'irs-fortify-ip-pin': { status: 'completed', action: 'enabled-2fa' },
+      'govt_id_defense-fortify-irs-pin': { status: 'completed', action: 'enabled-2fa' },
+      'signal-fortify-reglock': { status: 'completed', action: 'enabled-2fa' },
+      'gmail-fortify-2fa': { status: 'completed', method: 'none', method_setup: 'authenticator', action: 'enabled-2fa' },
+      'telegram-fortify-twostep': { status: 'completed', action: 'enabled-2fa' },
+      'whatsapp-fortify-reglock': { status: 'completed', action: 'enabled-2fa' },
+    } };
+    expect(calcFindings(s).twoFactorEnabled).toBe(3);
+    const byId = (id) => MISSIONS.find((m) => m.id === id);
+    expect(isTwoFactorMission(byId('irs-fortify-ip-pin'))).toBe(false);
+    expect(isTwoFactorMission(byId('signal-fortify-reglock'))).toBe(false);
+    expect(isTwoFactorMission(byId('gmail-fortify-2fa'))).toBe(true);
+  });
+});
