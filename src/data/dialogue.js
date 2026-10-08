@@ -246,7 +246,7 @@ export const DISTRICT_DIALOGUE = {
     return: {
       short: `Back in The Capitol. The government accounts are ready for you.`,
       medium: `Welcome back. Your government accounts are exactly as important as they were last time. Let's keep securing them.`,
-      long: `You're back. Your IRS account is still claimed. Your SSA lock is still active. The government's website design is still terrible. Some things don't change.`,
+      long: `You're back. Whatever you claimed or locked down here is still yours. The government's website design is still terrible. Some things don't change.`,
       veryLong: `Hey. The Capitol held. Your government accounts are still secured. The remaining ones are still waiting. The IRS will still be there tomorrow — probably with the same website from 2011.`,
     },
     debrief: {

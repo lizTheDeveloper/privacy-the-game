@@ -51,7 +51,7 @@ export const PERIMETER_MISSIONS = [
     steps: [
       { text: 'T-Mobile: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
       { text: "AT&T: Open att.com/myatt → Profile → Sign-in info → set a Wireless Passcode. Then go to Account → Security → enable \"Extra Security\" (this requires the passcode for ALL account changes).", url: "https://www.att.com/acctmgmt/profile" },
-      { text: "Verizon: Open myverizon.com → Account → Security → set an Account PIN. Then enable \"Number Lock\" on the same page.", url: "https://secure.verizon.com/signin" },
+      { text: "Verizon: in the My Verizon app or on verizon.com, go to Account → Security → set an Account PIN. Then enable \"Number Lock\" on the same page.", url: "https://secure.verizon.com/signin" },
       { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
     ],
     debriefQs: ACTION_DEBRIEF,

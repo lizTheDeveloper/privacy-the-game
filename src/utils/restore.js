@@ -19,7 +19,11 @@ function cleanAnswers(data) {
 // The events the game would have sent, with the same keys, marked restored.
 export function restoreEvents(state) {
   const out = [];
-  for (const [id, m] of Object.entries(state?.missions || {})) {
+  // Oldest filing first (no completedAt, e.g. skipped: first), so the
+  // collective job's "latest filing wins" matches the save (ruling 2026-10-08).
+  const byTime = Object.entries(state?.missions || {})
+    .sort(([, a], [, b]) => String(a?.completedAt || '').localeCompare(String(b?.completedAt || '')));
+  for (const [id, m] of byTime) {
     if (!RESENT.has(m?.status)) continue;
     const mission = MISSIONS.find((x) => x.id === id);
     if (!mission) continue;

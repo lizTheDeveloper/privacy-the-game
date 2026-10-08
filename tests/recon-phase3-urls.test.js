@@ -33,20 +33,33 @@ describe('verified step URLs', () => {
     expect(unverified).toEqual([]);
   });
 
-  // Breaker phase 3: an address written in the step text is a link too.
-  // Exempt: placeholders the player fills in (their own Slack workspace).
-  const TEXT_EXEMPT = [/your-workspace\.slack\.com\/[a-z/]+/gi];
+  // Breaker phase 3 (rounds 1 and 2): an address written in the step text is
+  // a link too: any host with any TLD, with or without a path, and an IP
+  // address with a path. Exempt, because they aren't places to go: service
+  // names (login.gov, id.me), the player's own placeholder workspace, DNS
+  // server names and bare IPs typed into a settings box, and router
+  // addresses on the player's own network (an IP with no path).
+  const NOT_A_PLACE = new Set(['login.gov', 'id.me', 'dns.quad9.net', 'your-workspace.slack.com', 'cloudflare-dns.com',
+    // Setting names that look like hosts: LG's "Who.Where.What?" menu and a Firefox about:config pref.
+    'who.where.what', 'privacy.resistfingerprinting']);
+  const ADDRESS = /\b(?:\d{1,3}(?:\.\d{1,3}){3}|(?:[a-z0-9-]+\.)+[a-z]{2,24})\b(?:\/[^\s"'“”),;]*)?/gi;
   it('every address written inside step text is in the allowlist', () => {
     const known = Object.keys(fixture.urls).map((u) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').toLowerCase());
+    const hosts = known.map((k) => k.replace(/\/.*/, ''));
     const bad = [];
     for (const m of MISSIONS) {
       const lists = [m.steps || [], ...Object.values(m.stepsByManager || {}), ...Object.values(m.reportSteps || {})];
       for (const st of lists.flat()) {
-        let t = st.text || '';
-        for (const ex of TEXT_EXEMPT) t = t.replace(ex, '');
-        for (const hit of t.match(/\b(?:[a-z0-9-]+\.)+(?:com|org|gov|net|io|me)\/[a-z0-9\-_/.?=]+/gi) || []) {
-          const h = hit.replace(/[./]$/, '').toLowerCase();
-          if (!known.some((k) => k === h || k.endsWith(`.${h}`) || k.endsWith(`/${h}`))) bad.push(`${m.id}: ${hit}`);
+        for (const hit of (st.text || '').match(ADDRESS) || []) {
+          const h = hit.replace(/[.,;:]+$/, '').replace(/\/$/, '').toLowerCase();
+          const host = h.replace(/\/.*/, '');
+          if (NOT_A_PLACE.has(host) || [...NOT_A_PLACE].some((n) => host.endsWith(`.${n}`))) continue;
+          if (/^\d+(\.\d+){3}$/.test(host) && !h.includes('/')) continue;
+          // Not a web address: file names and the like.
+          if (/\.(js|json|png|jpg|jpeg|heic|pdf|zip|csv|txt|exe|app)$/.test(host)) continue;
+          const ok = known.some((k) => k === h || k.endsWith(`/${h}`) || k.endsWith(`.${h}`))
+            || (!h.includes('/') && hosts.some((kh) => kh === host || kh.endsWith(`.${host}`)));
+          if (!ok) bad.push(`${m.id}: ${hit}`);
         }
       }
     }

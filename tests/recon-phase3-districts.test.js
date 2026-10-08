@@ -521,3 +521,24 @@ describe('SSA record lock (breaker phase 3 sweep)', () => {
     expect(stepText(m)).toContain('1-800-772-1213');
   });
 });
+
+describe('breaker phase 3 round 2 rulings', () => {
+  it('restore sends missions oldest filing first, so build.sql’s "latest" matches the save', async () => {
+    const { restoreEvents } = await import('../src/utils/restore.js');
+    const { createInitialState } = await import('../src/state.js');
+    const s = { ...createInitialState(), missions: {
+      'google-recon-breach': { status: 'completed', finding: 'no-breaches', completedAt: '2026-10-05T10:00:00.000Z' },
+      'gmail-recon-breach': { status: 'completed', finding: '3plus-breaches', completedAt: '2026-10-01T10:00:00.000Z' },
+      'yahoo-recon-breach': { status: 'skipped', finding: 'skip' },
+      'outlook-recon-breach': { status: 'completed', finding: 'no-breaches', completedAt: '2026-10-03T10:00:00.000Z' },
+    } };
+    const order = restoreEvents(s).filter((e) => e.name === 'mission-completed').map((e) => e.data.mission);
+    expect(order).toEqual(['yahoo-recon-breach', 'gmail-recon-breach', 'outlook-recon-breach', 'google-recon-breach']);
+  });
+
+  it('the Capitol’s welcome-back line claims nothing the player may not have done', async () => {
+    const { DISTRICT_DIALOGUE } = await import('../src/data/dialogue.js');
+    const line = DISTRICT_DIALOGUE.capitol.return.long;
+    expect(line).not.toMatch(/SSA lock is still active|IRS account is still claimed/);
+  });
+});

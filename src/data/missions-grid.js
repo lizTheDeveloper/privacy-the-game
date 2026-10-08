@@ -380,7 +380,7 @@ export const GRID_MISSIONS = [
       { text: "Option B: Chrome: Settings > Privacy and Security > Use secure DNS > select Cloudflare or Google" },
       { text: "Option C (device-level): iOS: Settings > Wi-Fi > your network > Configure DNS > Manual > add 1.1.1.1" },
       { text: "Option C: Android: Settings > Network > Private DNS > set to 'one.one.one.one' (Cloudflare) or 'dns.quad9.net'" },
-      { text: "Verify it's working: visit 1.1.1.1/help (Cloudflare) or dnsleaktest.com" },
+      { text: "Verify it's working: visit one.one.one.one/help (Cloudflare) or dnsleaktest.com" },
     ],
     debriefQs: NETWORK_DEBRIEF,
     scoutDialog: {
