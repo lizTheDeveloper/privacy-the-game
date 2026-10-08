@@ -149,9 +149,9 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Digital Breadcrumbs',
-    briefing: "The trail you leave without thinking about it. Your Amazon wishlist is public by default — it shows your name and city. Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
+    briefing: "The trail you leave without thinking about it. An Amazon list you made public, or shared, can show your name and city (Amazon makes new lists private unless you choose otherwise). Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
     steps: [
-      { text: "Check your Amazon wishlist privacy: go to Your Lists, click the three dots, check sharing settings. Public? Semi-public? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
+      { text: "Check your Amazon lists: go to Your Lists and look at each list's privacy setting. Any you made public or shared? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
       { text: 'Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.', url: 'https://account.venmo.com/settings/privacy' },
       { text: 'If you use Strava or a fitness tracker: check your privacy controls and map visibility. Does a public route start or end at your home?', url: 'https://www.strava.com/settings/privacy' },
       { text: "Search your recent screenshots — any showing WiFi network names? An SSID can be looked up on WiGLE to find your physical location.", url: "https://wigle.net/" },
@@ -161,11 +161,11 @@ export const OSINT_SIEVE_MISSIONS = [
     ],
     debriefQs: OSINT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Your Amazon wishlist says your name is [name] and you live in [city]. Your Strava shows you run the same route every Tuesday, starting and ending at the same house. Your Venmo shows you split dinner with the same three people every Friday. You posted a screenshot with your WiFi name visible — I just looked it up and found your address. None of this was on social media. This is the ambient trail.\"",
+      briefing: "\"A public Amazon list can say your name is [name] and you live in [city]. Your Strava shows you run the same route every Tuesday, starting and ending at the same house. Your Venmo shows you split dinner with the same three people every Friday. You posted a screenshot with your WiFi name visible — I just looked it up and found your address. None of this was on social media. This is the ambient trail.\"",
       debrief: {
         'no-exposure': "\"Clean trail. No ambient data leaking your location or identity through side channels. That's thorough.\"",
         'some-exposure': "\"Found some breadcrumbs. Amazon and Venmo are quick fixes — just privacy toggles. Strava needs a privacy zone around your home. Screenshots with WiFi names need to be scrubbed before sharing.\"",
-        'significant-exposure': "\"Heavy trail. The ambient stuff is often worse than social media because you never think about it. Start with Amazon wishlist and Venmo — those are one-click fixes. Then Strava. Then audit your screenshots.\"",
+        'significant-exposure': "\"Heavy trail. The ambient stuff is often worse than social media because you never think about it. Start with any public Amazon list and Venmo — those are one-click fixes. Then Strava. Then audit your screenshots.\"",
         'skip': "\"The breadcrumbs check catches things no other mission covers. Worth the time.\"",
       },
     },
