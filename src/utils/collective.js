@@ -1,11 +1,10 @@
 import { getChosenPod } from './pod-pref.js';
-import { isEmailBreachCheck } from './calc.js';
+import { addressChecks } from './calc.js';
 
 // Relative to /reclaim-city/: served by rc-collective behind Traefik.
 export const COLLECTIVE_URL = 'api/collective.json';
 export const WHOAMI_URL = 'api/whoami';
 
-const BREACHED = new Set(['1-2-breaches', '3plus-breaches']);
 
 export function parseCollective(json) {
   if (!json || typeof json !== 'object') return null;
@@ -65,19 +64,11 @@ export function podBoard(collective) {
   });
 }
 
+// Email addresses only, counted like build.sql (calc.js addressChecks): one
+// per address, a "same" pair once, fixed by either account of the pair.
 export function yourPart(state) {
-  let found = 0;
-  let fixed = 0;
-  for (const [id, m] of Object.entries(state?.missions || {})) {
-    // Email addresses only (build.sql's allowlist): an old service "breach
-    // check" re-checked the same address.
-    if (!isEmailBreachCheck(id) || m?.status !== 'completed' || !BREACHED.has(m.finding)) continue;
-    found += 1;
-    const acct = id.slice(0, -'-recon-breach'.length);
-    const done = (mid) => state.missions[mid]?.status === 'completed';
-    if (done(`${acct}-fortify-password`) || done(`${acct}-fortify-2fa`)) fixed += 1;
-  }
-  return { found, fixed };
+  const breached = addressChecks(state).filter((c) => c.breached);
+  return { found: breached.length, fixed: breached.filter((c) => c.fixed).length };
 }
 
 export function fmt(n) {

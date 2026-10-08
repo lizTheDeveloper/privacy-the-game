@@ -54,6 +54,20 @@ const TWO_FA_DEBRIEF = [
   },
 ];
 
+// The IP PIN is a number on your return, not a sign-in factor (IRS, "Get an
+// Identity Protection PIN"). Same id and values as TWO_FA_DEBRIEF; words only.
+const IP_PIN_DEBRIEF = [
+  {
+    id: 'action',
+    label: 'Did you get your IP PIN?',
+    options: [
+      { value: 'enabled-2fa', text: 'Yes, I have my IP PIN', severity: 'safe' },
+      { value: 'already-enabled', text: 'I already had one', severity: 'safe' },
+      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+    ],
+  },
+];
+
 const ALERTS_DEBRIEF = [
   {
     id: 'action',
@@ -143,7 +157,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'primary_bank',
     phase: 'fortify',
     title: 'Secure Login: Primary Bank',
-    briefing: `If your bank password is the same as any other account -- any other account at all -- it's already been tried against your bank by automated scripts. Your password manager can generate a unique one. Let it do its job.`,
+    briefing: `If your bank password is the same as any other account's, automated scripts can try it against your bank whenever that other account leaks. Your password manager can generate a unique one. Let it do its job.`,
     steps: [
       { text: `Log into your bank's website or app` },
       { text: 'Go to Settings → Security → Change Password' },
@@ -177,8 +191,8 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `A bank without 2FA is a vault with just a combination lock. Turn on whatever they offer -- we'll take SMS over nothing.`,
       debrief: {
-        'enabled-2fa': '"2FA on the bank. Even a SIM swapper now needs your phone AND your password."',
-        'already-enabled': '"Already enabled. Ahead of 80% of bank customers."',
+        'enabled-2fa': '"2FA on the bank. A stolen password alone isn’t enough now. If your second step is text codes, the carrier lock in The Perimeter covers the SIM-swap side."',
+        'already-enabled': '"Already enabled. Good."',
         'later': '"Real money behind this door. Come back soon."',
       },
     },
@@ -355,19 +369,19 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'venmo',
     phase: 'fortify',
     title: 'Secure Login: Venmo',
-    briefing: `Venmo makes sending money frictionless -- tap, amount, send. That's great for you and catastrophic if someone else has your password. New password plus payment PIN in one visit.`,
+    briefing: `Venmo makes sending money frictionless -- tap, amount, send. That's great for you and catastrophic if someone else has your password. New password plus an app passcode in one visit.`,
     steps: [
       { text: 'Open Venmo Settings', url: 'https://account.venmo.com/settings/security' },
       { text: 'Change your password (generate in password manager)' },
-      { text: 'Enable "Security Lock" -- this requires PIN or biometrics for every payment' },
-      { text: 'Set a PIN that is NOT your phone unlock PIN or your bank PIN' },
+      { text: 'Settings → Preferences → Passcode & biometric unlock (Face ID & Passcode on iPhone): turn it on. Venmo asks for it when the app opens, and may ask again when you send money' },
+      { text: 'Set a passcode that is NOT your phone unlock PIN or your bank PIN' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: `"New password plus payment PIN. Even if someone gets your password, they still can't send your money without your face or your fingerprint."`,
+      briefing: `"New password plus an app passcode. Someone who gets your password still has to get past the passcode on your phone."`,
       debrief: {
-        "reset-password": `"Venmo locked: new password and payment PIN. Your frictionless payment app now has friction for attackers."`,
-        "already-strong": `"Already unique with payment PIN. Good instinct on a direct-to-bank app."`,
+        "reset-password": `"New password and an app passcode. Your frictionless payment app now has some friction for attackers."`,
+        "already-strong": `"Already unique, with a passcode. Good instinct on a direct-to-bank app."`,
         "later": `"This one connects to your bank. Don't sit on it."`,
       },
     },
@@ -378,16 +392,16 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'venmo',
     phase: 'reclaim',
     title: 'Privacy Lockdown: Venmo',
-    briefing: `Venmo's default transaction privacy is public. Every payment you make -- the amount, the recipient, the memo -- is visible to anyone. A BuzzFeed reporter tracked the President's Venmo transactions in 2021. Two taps fix this.`,
+    briefing: `Venmo payments set to Public can be seen by anyone: who paid whom, when, and the note. Check who can see your payments and your friends list. A BuzzFeed reporter found the President's Venmo account and friends in 2021.`,
     steps: [
       { text: 'Open Venmo Privacy Settings', url: 'https://account.venmo.com/settings/privacy' },
-      { text: 'Set "Default Privacy Setting" to Private' },
+      { text: 'In Venmo’s privacy settings, set who can see your payments to Private, and check your friends list' },
       { text: 'Set "Friends List" visibility to Private' },
       { text: 'Scroll through your past transactions -- change any public ones to private' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"Venmo defaults all transactions to public. Your rent, your dinner split, your therapist copay. A reporter found the President's Venmo in ten minutes. Fix this."`,
+      briefing: `"Public Venmo payments show who you pay and when. Your rent, your dinner split, your therapist copay. A reporter found the President's account. Fix this."`,
       debrief: {
         "tightened": `"Transactions set to private. Your financial life just disappeared from public view."`,
         "already-tight": `"Already private. You're one of the few Venmo users who found the setting."`,
@@ -427,8 +441,8 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Secure Login: Cash App",
     briefing: `Cash App uses magic-link login -- they send a code to your email or phone. That means whoever controls your email controls your Cash App. The password to secure here is your email's. While you're in the app, enable Security Lock.`,
     steps: [
-      { text: "Open Cash App → tap your profile icon → Security & Privacy" },
-      { text: `Enable "Security Lock" (requires PIN, Touch ID, or Face ID for every payment)` },
+      { text: "Open Cash App → tap your profile icon → Security" },
+      { text: `Turn on Security Lock and choose what it protects: opening Cash App, sending payments, or both` },
       { text: "Set a PIN that is NOT your phone unlock PIN" },
       { text: "Verify the email connected to Cash App is secured (unique password + 2FA from Chapter 1)" },
     ],
@@ -436,7 +450,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `"Cash App's magic link means your email IS your password. If you secured your email in Chapter 1, half the work is done. Security Lock finishes the job."`,
       debrief: {
-        "reset-password": '"Security Lock enabled. Every Cash App payment now requires your face or your fingerprint."',
+        "reset-password": '"Security Lock on. What you chose to protect now asks for your code first."',
         "already-strong": '"Already locked. You understand the magic-link chain of trust."',
         "later": `"If your email was secured in Chapter 1, you're halfway there. The Security Lock is the other half."`,
       },
@@ -472,7 +486,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "crypto_exchange",
     phase: "fortify",
     title: "Full Lockdown: Crypto Exchange",
-    briefing: "Crypto accounts deserve the strongest security you have. New password, authenticator app (NOT SMS -- SIM swapping specifically targets crypto holders), withdrawal address whitelisting, and check for rogue API keys. All in one visit.",
+    briefing: "Crypto accounts deserve the strongest security you have. New password, authenticator app (NOT SMS: a SIM swap can hand an attacker your text codes, and crypto accounts are a favorite target), withdrawal address whitelisting, and check for rogue API keys. All in one visit.",
     steps: [
       { text: "Log into your crypto exchange" },
       { text: "Change your password -- use your password manager, 20+ characters" },
@@ -482,7 +496,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"SIM swapping exists because of crypto. Attackers port your number, receive your SMS codes, drain your exchange. Authenticator app or hardware key. Never SMS on crypto."',
+      briefing: '"Crypto accounts are a favorite SIM-swap target. Attackers port your number, receive your SMS codes, drain your exchange. Authenticator app or hardware key. Never SMS on crypto."',
       debrief: {
         "reset-password": '"Crypto account locked down: new password, authenticator 2FA, whitelisted addresses. The vault within the Vault."',
         "already-strong": `"Already locked down. Make sure withdrawal whitelisting is on -- that's the kill switch even if everything else fails."`,
@@ -520,7 +534,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "investment_account",
     phase: "fortify",
     title: "Secure Login: Investment Account",
-    briefing: "New password and 2FA on the account that holds your retirement savings. Fidelity and Schwab support security keys. For an account measured in decades of savings, use the strongest option available.",
+    briefing: "New password and 2FA on the account that holds your retirement savings. If your brokerage offers a security key or authenticator app, use it: for an account measured in decades of savings, take the strongest option available.",
     steps: [
       { text: "Log into your brokerage account" },
       { text: "Go to Security Settings → Change Password" },
@@ -553,7 +567,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "ssa",
     phase: "recon",
     title: "Claim Your SSA Account",
-    briefing: "The most important thing about your my Social Security account is whether it exists. If you haven't created one, an identity thief can create one using your SSN -- and control your Social Security record. The 2017 Equifax breach put 147 million SSNs on the market. Yours is almost certainly out there. Claim it first.",
+    briefing: "The most important thing about your my Social Security account is whether it exists. If you haven't created one, an identity thief can create one using your SSN -- and control your Social Security record. The 2017 Equifax breach exposed about 147 million people's SSNs. Assume yours may be out there. Claim it first.",
     steps: [
       { text: 'Go to my Social Security', url: 'https://www.ssa.gov/myaccount/' },
       { text: `If you DON'T have an account: click "Create an Account" -- this prevents someone else from claiming your SSN` },
@@ -562,9 +576,9 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: ACCOUNT_CLAIMED_DEBRIEF,
     scoutDialog: {
-      briefing: `"The Equifax breach put 147 million SSNs on the market. Your SSN is not a secret anymore -- it's a shared key. The defense is claiming the account before someone else does."`,
+      briefing: `"The Equifax breach exposed about 147 million people's SSNs. Treat yours as not secret. The defense is claiming the account before someone else does."`,
       debrief: {
-        "claimed": '"Account claimed. You just prevented someone else from filing for Social Security benefits as you."',
+        "claimed": '"Account claimed. Nobody else can open a second online account with your SSN now. (Claims by phone or in person are a separate door.)"',
         "already-had": '"Already claimed. Verify the contact info is still yours -- address changes are how benefits get redirected."',
         "later": '"This is a race. If someone claims it first, the cleanup takes months. Prioritize this."',
       },
@@ -576,17 +590,17 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "ssa",
     phase: "fortify",
     title: "Secure & Lock: SSA Account",
-    briefing: "Your SSA account routes through Login.gov or ID.me. Whichever one you have, lock it down with a unique password and 2FA -- this same login protects your SSA, your IRS, your VA benefits, and any other federal service. Also consider SSA's Self Lock feature, which blocks E-Verify queries against your SSN.",
+    briefing: "Your SSA account routes through Login.gov or ID.me. Whichever one you have, lock it down with a unique password and 2FA -- the same login can open other government services that use that provider (IRS.gov uses ID.me, for example). Separately, E-Verify's Self Lock (in myE-Verify, run by USCIS, not SSA) can stop your SSN being used to confirm a new job.",
     steps: [
       { text: 'Log into my Social Security', url: 'https://www.ssa.gov/myaccount/' },
       { text: "Note whether your account uses Login.gov or ID.me" },
       { text: "Go to that provider's security settings and change the password (use password manager)" },
-      { text: "Enable 2FA -- authenticator app on Login.gov, SMS verification on ID.me" },
-      { text: `Back in SSA: consider enabling "Self Lock" to block E-Verify queries against your SSN` },
+      { text: "Turn on two-factor there -- an authenticator app if the provider offers one" },
+      { text: `Optional: in myE-Verify (USCIS), turn on Self Lock so your SSN can't be used to confirm a new job without you` },
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: `"Login.gov or ID.me is the skeleton key to federal services. Secure it once and you've locked down SSA, IRS, VA, and state unemployment. One action, multiple buildings."`,
+      briefing: `"Login.gov or ID.me is a key to more than one government door. Secure it once, and every service you open with it is harder to break into."`,
       debrief: {
         "reset-password": '"Federal identity provider secured. Every government service behind it is now harder to breach."',
         "already-strong": `"Already locked down. The Capitol's front gate was pre-fortified."`,
@@ -602,18 +616,18 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "irs",
     phase: "recon",
     title: "Claim Your IRS Account",
-    briefing: "Tax identity theft is a $5.7 billion annual industry. Someone files a return with your SSN before you do, claims a fat refund, and you spend 18 months proving you're you. Step one: claim your IRS online account before they do.",
+    briefing: "Tax identity theft works like this: someone files a return with your SSN before you do, claims a refund, and you can spend more than a year proving you're you. Your IRS online account is where you see what the IRS has on file in your name.",
     steps: [
-      { text: 'Go to IRS Online Account', url: 'https://www.irs.gov/payments/your-online-account' },
-      { text: "If you DON'T have an account: create one through ID.me -- this prevents someone else from claiming your tax identity" },
-      { text: "If you DO have an account: log in and check your tax return history" },
-      { text: `Look for any returns filed that you didn't file, or address/bank changes you didn't make` },
+      { text: 'Go to the IRS Online Account page', url: 'https://www.irs.gov/payments/online-account-for-individuals' },
+      { text: 'No account yet? Create one from the sign-in page. Have a photo ID ready: you’ll verify your identity' },
+      { text: 'Signed in? Check your tax records (returns, transcripts, W-2s and 1099s) and the address on file' },
+      { text: 'Look for any return you didn’t file, or address or bank changes you didn’t make' },
     ],
     debriefQs: ACCOUNT_CLAIMED_DEBRIEF,
     scoutDialog: {
       briefing: `"Tax identity theft: someone files your return, takes your refund, and you find out when the IRS rejects your real return months later. Claim the account. File first."`,
       debrief: {
-        "claimed": `"IRS account claimed. You just made it much harder for someone to file a tax return in your name."`,
+        "claimed": `"IRS account claimed. Now you can see what the IRS has on file, and a return you didn't file would show up there."`,
         "already-had": `"Already claimed. Check the return history -- phantom tax returns are the canary for tax identity theft."`,
         'later': `"This is time-sensitive if you haven't filed this year's return yet. Claim it."`,
       },
@@ -625,20 +639,20 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'irs',
     phase: 'fortify',
     title: 'Get an IRS Identity Protection PIN',
-    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. Without it, the return gets rejected -- even if the thief has your SSN, your name, and your address. It's effectively 2FA for your tax identity. Free, takes five minutes.`,
+    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it -- even if the thief has your SSN, your name, and your address.`,
     steps: [
       { text: 'Go to IRS Get an IP PIN', url: 'https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin' },
       { text: `Click "Get an IP PIN" and verify your identity through ID.me` },
       { text: "The IRS will issue you a 6-digit PIN -- write it down and store it with your tax documents" },
-      { text: "You'll get a new PIN each year in January by mail or through your IRS account" },
+      { text: "A new PIN is issued every year. Because you got yours online, get each new one online too (sign in in January): the IRS doesn't mail it to people who opted in online" },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: IP_PIN_DEBRIEF,
     scoutDialog: {
-      briefing: `"The IP PIN is the single most effective defense against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free. Five minutes."`,
+      briefing: `"The IP PIN is one of the strongest defenses against tax identity theft. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it. Free."`,
       debrief: {
-        "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. The $5.7 billion fraud industry just lost access to your refund."',
-        'already-enabled': `"Already have one. You're in the minority of taxpayers who've taken this step."`,
-        'later': '"Five minutes now saves 18 months of identity theft recovery later. Come back."',
+        "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it."',
+        'already-enabled': `"Already have one. Good."`,
+        'later': '"A few minutes now can save a long recovery later. Come back."',
       },
     },
     estimatedMinutes: 5,
@@ -648,21 +662,21 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'irs',
     phase: 'reclaim',
     title: 'Verify Tax Records: IRS',
-    briefing: 'Log into your IRS account and verify that your filing address, direct deposit bank account, and tax transcript are correct. The classic tax fraud move is changing the refund bank account -- your return gets filed, your refund goes to their bank.',
+    briefing: 'Log into your IRS account and check the address on file, your tax records and transcripts, and any notices. The classic tax fraud move is filing a return in your name to take the refund; a return or notice you don’t recognize is the warning sign.',
     steps: [
       { text: 'Log into your IRS account', url: 'https://www.irs.gov/payments/your-online-account' },
       { text: 'Check your address -- is it current?' },
-      { text: 'Check your bank account for direct deposit -- is it YOUR bank?' },
+      { text: 'Look at your recent returns and notices: anything filed or sent that you don’t recognize?' },
       { text: `View your tax transcript -- any filings you didn't make?` },
-      { text: 'Confirm your IP PIN is active for next tax season' },
+      { text: 'If you have an IP PIN, get this year’s (online, in January) before you file' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
       briefing: '"The classic move: change the refund bank account. Your return gets filed, your refund goes to their bank, and you find out when the IRS rejects your real return. Check the deposit info."',
       debrief: {
-        'tightened': '"Bank details verified, IP PIN confirmed. Your tax refund will go to your bank, not theirs."',
+        'tightened': '"Records checked. A return you didn’t file would show up here."',
         'already-tight': `"Already reviewed. The Capitol's treasury is secure."`,
-        "later": `"Check the direct deposit info at minimum. That's where the money goes."`,
+        "later": `"Check your returns and notices at minimum. That’s where a fake return shows."`,
       },
     },
     estimatedMinutes: 10,
@@ -674,18 +688,18 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'state_dmv',
     phase: 'recon',
     title: 'Claim Your DMV Account',
-    briefing: `Your driver's license number is in more databases than you think -- every landlord application, car rental, background check, and bar that scanned your ID made a copy. If your state has an online DMV portal, claim the account so no one can create one with your license number and change your address.`,
+    briefing: `Your driver's license number is in more databases than you think -- every landlord application, car rental, background check, and bar that scanned your ID made a copy. If your state's DMV has an online account, open it to check the address on your record. If it offers alerts about changes to your record, turn them on. Alerts are what catch a duplicate license or an address change.`,
     steps: [
       { text: 'Search "[your state] DMV online account" in your browser' },
       { text: `Create an account if you don't have one` },
       { text: 'If you do: log in and verify your address and license status' },
-      { text: `Check for duplicate license requests or address changes you didn't make` },
+      { text: `Check for duplicate license requests or address changes you didn't make, and turn on alerts if your state offers them` },
     ],
     debriefQs: ACCOUNT_CLAIMED_DEBRIEF,
     scoutDialog: {
       briefing: `"A duplicate license at someone else's address is a skeleton key for identity verification. Banks, police, and landlords all accept a driver's license as proof of identity."`,
       debrief: {
-        'claimed': '"DMV account claimed. One fewer way for someone to get a copy of your license at their address."',
+        'claimed': '"DMV account claimed. You can see the address on your record and catch a change you didn’t make."',
         'already-had': `"Already claimed. Verify the address -- that's the attack vector."`,
         "later": `"State DMV portals vary. Some don't exist. If yours does, claim it."`,
       },
@@ -758,7 +772,7 @@ export const VAULT_CAPITOL_MISSIONS = [
       debrief: {
         'reset-password': '"Healthcare portal secured. Your medical records have a real lock now."',
         'already-strong': `"Already strong. You're ahead of the healthcare IT curve."`,
-        'later': '"Healthcare records are worth more than credit cards on the dark web. Worth fixing."',
+        'later': '"Healthcare records are hard to take back once they’re out. Worth fixing."',
       },
     },
     estimatedMinutes: 5,
@@ -770,18 +784,17 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'student_loans',
     phase: 'recon',
     title: 'Claim Your StudentAid Account',
-    briefing: 'Your FSA ID can sign legal documents electronically -- including new federal loan applications. Nelnet, one of the largest servicers, had a breach in 2022 exposing 2.5 million borrowers" personal data. Claim your StudentAid.gov account and verify no one has filed for aid in your name.',
+    briefing: 'Your FSA ID can sign legal documents electronically -- including new federal loan applications. Nelnet, one of the largest servicers, had a breach in 2022 exposing 2.5 million borrowers’ personal data. Claim your StudentAid.gov account and verify no one has filed for aid in your name.',
     steps: [
-      { text: 'Go to StudentAid.gov', url: 'https://studentaid.gov/fsa-id/sign-in/landing' },
-      { text: "Create an account if you don't have one (it goes through Login.gov)" },
-      { text: `If you have one: log in and go to "My Aid" to review your loan history` },
-      { text: "Look for any loans you don't recognize -- they mean someone used your identity for federal aid" },
+      { text: 'No account yet? Create a StudentAid.gov account (your FSA ID)', url: 'https://studentaid.gov/fsa-id/create-account/launch' },
+      { text: 'Signed in? Open My Aid and review every loan and grant', url: 'https://studentaid.gov/my-aid/' },
+      { text: 'Look for any loans you don’t recognize -- they mean someone used your identity for federal aid' },
     ],
     debriefQs: ACCOUNT_CLAIMED_DEBRIEF,
     scoutDialog: {
       briefing: `"Your FSA ID signs legal documents. An attacker with your FSA ID could take out federal loans in your name. Claim the account, check 'My Aid' for ghost loans."`,
       debrief: {
-        'claimed': '"StudentAid account claimed. No one can apply for federal aid as you without being noticed."',
+        'claimed': '"StudentAid account claimed. Every loan and grant in your name is in front of you now."',
         'already-had': `"Already claimed. Check 'My Aid' for loans you don't recognize -- that's the canary."`,
         'later': `"The FSA ID signs legal documents. Don't leave this unclaimed."`,
       },
@@ -793,20 +806,20 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "student_loans",
     phase: "fortify",
     title: "Secure Login: Student Loans",
-    briefing: `StudentAid.gov goes through Login.gov -- if you already secured Login.gov for your SSA account, this might already be done. Check, and also secure your individual loan servicer's account separately.`,
+    briefing: `StudentAid.gov has its own login, the FSA ID. It isn't your SSA login, so securing one doesn't secure the other. Your loan servicer has a separate account again. Secure both.`,
     steps: [
-      { text: 'If you secured Login.gov for the SSA mission, verify 2FA is still active there' },
+      { text: "Sign in to StudentAid.gov with your FSA ID, change the password to a unique one from your password manager, and turn on any extra sign-in protection it offers" },
       { text: `Log into your loan servicer's website separately` },
-      { text: "Change that password too (different from Login.gov) using your password manager" },
+      { text: "Change that password too, to a different unique one from your password manager" },
       { text: "Check that your autopay bank account and contact info are correct" },
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: `"If you secured Login.gov for SSA, StudentAid.gov is already protected -- they share the same identity provider. But your individual loan servicer has its own login. Secure that too."`,
+      briefing: `"Two logins here: your FSA ID on StudentAid.gov and your loan servicer's own account. Neither one is your SSA login. Lock both."`,
       debrief: {
-        "reset-password": `"Student loan accounts secured across both portals. The Capitol's education wing is locked."`,
-        'already-strong': '"Already strong on both. The Login.gov chain is doing its job."',
-        'later': '"Check if Login.gov 2FA carried over. If it did, you just need the servicer password."',
+        "reset-password": `"FSA ID and servicer both on fresh passwords. The Capitol's education wing is locked."`,
+        'already-strong': '"Already strong on both. Good."',
+        'later': '"Two logins to do when you come back: the FSA ID and the servicer."',
       },
     },
     estimatedMinutes: 5,

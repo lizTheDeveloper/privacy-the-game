@@ -39,6 +39,21 @@ const LOGIN_DEBRIEF = [
   },
 ];
 
+// Apple shows signed-in devices, not a sign-in history (audit #6/#12). Same
+// values as LOGIN_DEBRIEF, so password-need.js and analytics are unchanged.
+const DEVICE_DEBRIEF = [
+  {
+    id: 'finding',
+    label: 'What did you find?',
+    options: [
+      { value: 'no-breaches', text: 'All my devices', severity: 'safe' },
+      { value: '1-2-breaches', text: 'A device I don’t recognize', severity: 'warn' },
+      { value: '3plus-breaches', text: 'A device I know isn’t mine', severity: 'crit' },
+      { value: 'skip', text: 'Couldn’t check right now', severity: 'skip' },
+    ],
+  },
+];
+
 const PASSWORD_DEBRIEF = [
   {
     id: 'action',
@@ -81,6 +96,52 @@ function scoutLogin(clean, suspicious, confirmed) {
   };
 }
 
+
+// Recon X4: Google/Gmail, Apple ID/iCloud and Microsoft/Outlook are usually
+// one address and one account. The second of each pair asks first; "same"
+// files with no finding (a new question id, so nothing counts twice) and its
+// evidence is the partner's. Old saves never answered it (addedLater).
+const PARTNER_NAMES = { gmail: 'Gmail', icloud: 'iCloud', outlook: 'Outlook' };
+
+function sameAddressQuestion(partner, prefill) {
+  const name = PARTNER_NAMES[partner];
+  return {
+    id: 'same_address',
+    addedLater: true,
+    ...(prefill ? { prefill: 'same-address' } : {}),
+    label: `Is this the same address as your ${name}?`,
+    hint: `The address you sign in with. If it’s your ${name} address, your ${name} check covers it.`,
+    options: [
+      { value: `same-as-${partner}`, text: `Yes — it’s my ${name} address` },
+      { value: 'different-address', text: 'No — it’s a different address' },
+      { value: 'skip', text: 'Couldn’t check right now', severity: 'skip' },
+    ],
+  };
+}
+
+const onlyIfDifferent = (q) => ({ ...q, showIf: { question: 'same_address', values: ['different-address'] } });
+
+function pairedBreachDebrief(partner) {
+  return [sameAddressQuestion(partner, false), onlyIfDifferent(BREACH_DEBRIEF[0]), PASSWORD_EXPOSED_QUESTION];
+}
+
+function pairedLoginDebrief(partner, debrief = LOGIN_DEBRIEF) {
+  return [sameAddressQuestion(partner, true), onlyIfDifferent(debrief[0])];
+}
+
+function sameAddressStep(partner, what) {
+  const name = PARTNER_NAMES[partner];
+  return { text: `Same address as your ${name}? Then your ${name} ${what} covers it. Skip the rest and say so in the debrief.` };
+}
+
+function sameAddressLines(partner, what) {
+  const name = PARTNER_NAMES[partner];
+  return {
+    [`same-as-${partner}`]: `"Same address, same ${what}. Your ${name} check covers it."`,
+    'different-address': '"A separate address, so it gets its own check."',
+  };
+}
+
 const CHAPTER_1_MISSIONS = [
   // ══════════════════════════════════════════════════════
   // GMAIL
@@ -90,7 +151,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'gmail',
     phase: 'recon',
     title: 'Breach Recon: Gmail',
-    briefing: 'Data brokers buy and sell leaked credentials by the million. If your Gmail password appeared in a breach, it’s already loaded into automated attack scripts hitting login pages around the clock. Gmail is the master key — password resets for most of your other accounts flow through it.',
+    briefing: 'Leaked credentials get bought, sold and fed into automated attacks that try them on login pages. If your Gmail password appeared in a breach, assume it can be tried against your account. Gmail is the master key — password resets for most of your other accounts flow through it.',
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Gmail address' },
@@ -116,7 +177,7 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Your Google account logs every sign-in: device, location, browser. An unrecognized login means someone else has been inside your account, reading your mail and resetting your other passwords.',
     steps: [
       { text: 'Open Google Security', url: 'https://myaccount.google.com/security' },
-      { text: 'Scroll to "Your devices" and "Recent security activity"' },
+      { text: 'Scroll to "Your devices" and "Recent security events"' },
       { text: 'Look for devices or locations you don’t recognize' },
     ],
     debriefQs: LOGIN_DEBRIEF,
@@ -183,7 +244,7 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Google collects a staggering amount of data by default: search history, location timeline, ad profile, app permissions. Most of it can be dialed back without losing functionality.',
     steps: [
       { text: 'Open Google Privacy Checkup', url: 'https://myaccount.google.com/privacycheckup' },
-      { text: 'Review each section: Web & App Activity, Location History, YouTube History' },
+      { text: 'Review each section: Web & App Activity, Timeline (formerly Location History), YouTube History' },
       { text: 'Pause or auto-delete what you don’t need' },
       { text: 'Review third-party app access and revoke anything unnecessary' },
     ],
@@ -345,14 +406,14 @@ const CHAPTER_1_MISSIONS = [
     optional: true,
     accountId: 'icloud',
     phase: 'recon',
-    title: 'Login History: iCloud',
-    briefing: 'Apple shows which devices are signed into your Apple ID. An unfamiliar device means someone else has access to your iCloud data — photos, backups, Find My, and potentially your physical location.',
+    title: 'Device Check: iCloud',
+    briefing: 'Apple shows the devices signed in to your Apple Account, not a sign-in history. An unfamiliar device on that list has access to your iCloud data: photos, backups, Find My, and possibly your location.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
-      { text: 'Scroll to "Devices" to see everything signed into your Apple ID' },
-      { text: 'Look for devices you don’t recognize' },
+      { text: 'Open your Apple Account and sign in (or on iPhone: Settings → your name, then scroll down)', url: 'https://account.apple.com' },
+      { text: 'Open Devices. Every device listed is signed in to your Apple Account' },
+      { text: 'Tap any device you don’t recognize → Remove from account' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: DEVICE_DEBRIEF,
     scoutDialog: {
       briefing: '"Apple shows every device signed into your account. If there’s a stranger on the list, they can see your photos and track your location."',
       debrief: scoutLogin(
@@ -370,7 +431,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: iCloud',
     briefing: 'Your Apple ID password is the key to your entire Apple ecosystem. A unique, strong password here protects your iPhone backups, photos, payment methods, and every app using Sign in with Apple.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
+      { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Go to "Sign-In and Security" and change your password' },
       { text: 'Choose a unique password not used anywhere else' },
     ],
@@ -392,7 +453,7 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: iCloud',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices. Without it, anyone with your password can access your entire iCloud account from any device.',
     steps: [
-      { text: 'Open Apple ID settings', url: 'https://www.icloud.com/settings/' },
+      { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Go to "Sign-In and Security"' },
       { text: 'Enable Two-Factor Authentication if not already on' },
     ],
@@ -440,19 +501,19 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'yahoo',
     phase: 'recon',
     title: 'Breach Recon: Yahoo Mail',
-    briefing: 'Yahoo suffered two of the largest data breaches in history — 3 billion accounts in 2013 and 500 million in 2014. If you’ve ever had a Yahoo account, your data was almost certainly exposed.',
+    briefing: 'Yahoo suffered two of the largest data breaches in history — 3 billion accounts in 2013 and 500 million in 2014. The 2013 breach covered every account Yahoo had then, so if you had a Yahoo account in 2013, it was in it.',
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Yahoo email address' },
-      { text: 'Note the breaches — Yahoo’s own breaches are likely listed' },
+      { text: 'Read the breach names. Have I Been Pwned doesn’t include Yahoo’s 2013–2014 breaches (3 billion accounts). If you had a Yahoo account then, assume that data is out there anyway' },
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
-      briefing: '"Yahoo had two of the biggest breaches ever. Three billion accounts. If you’ve ever used Yahoo, expect to find something."',
+      briefing: '"Yahoo’s biggest breaches aren’t even in Have I Been Pwned’s list. So a clean result here doesn’t clear Yahoo. Your password manager’s report is the real test."',
       debrief: scoutBreach(
-        '"Somehow clean. You might be the luckiest Yahoo user alive."',
-        '"Expected. Yahoo’s breaches were massive. Let’s make sure your current password is fresh."',
-        '"Multiple breaches — that’s par for Yahoo unfortunately. Fortify time."',
+        '"Clean on Have I Been Pwned, but Yahoo’s 2013 breach isn’t in there. If this password is from before 2014, change it."',
+        '"Found some exposure on this address. Let’s make sure your current password is fresh."',
+        '"Multiple breaches on this address. Fortify time."',
       ),
     },
     estimatedMinutes: 2,
@@ -485,7 +546,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'yahoo',
     phase: 'fortify',
     title: 'Password Reset: Yahoo',
-    briefing: 'If your Yahoo password predates their mega-breaches, it’s been circulating on the dark web for years. Even if you’ve changed it since, make sure it’s truly unique and not reused from another account.',
+    briefing: 'If your Yahoo password predates their 2013–2014 breaches, treat it as exposed. Even if you’ve changed it since, make sure it’s truly unique and not reused from another account.',
     steps: [
       { text: 'Open Yahoo Account Security', url: 'https://login.yahoo.com/account/security' },
       { text: 'Click "Change password"' },
@@ -493,7 +554,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Given Yahoo’s history, if this password is old, it’s been on every dark-web dump list for years."',
+      briefing: '"Given Yahoo’s history, if this password is old, treat it as exposed."',
       debrief: {
         'reset-password': '"Fresh password on Yahoo. No more coasting on leaked credentials."',
         'already-strong': '"Already updated. Good discipline."',
@@ -579,15 +640,15 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'protonmail',
     phase: 'recon',
     title: 'Login History: ProtonMail',
-    briefing: 'Proton logs authentication events. Checking your security log reveals any successful or failed login attempts from unfamiliar locations.',
+    briefing: 'Proton shows every signed-in session, and can keep a log of sign-ins. The log is off unless you turned it on, so the session list is where to look today.',
     steps: [
-      { text: 'Open Proton Account Security', url: 'https://account.proton.me/u/0/mail/security' },
-      { text: 'Review "Security logs" or "Session management"' },
-      { text: 'Look for unfamiliar IPs or locations' },
+      { text: 'Open your Proton account → Settings → All settings → Security and privacy', url: 'https://account.proton.me' },
+      { text: 'Under Session management, look for sessions you don’t recognize. Revoke any you don’t, or use Revoke all other sessions' },
+      { text: 'Under Security logs: if logging is off, turn it on. It only records sign-ins from now on, so nothing will show yet' },
     ],
     debriefQs: LOGIN_DEBRIEF,
     scoutDialog: {
-      briefing: '"Proton keeps detailed security logs. Let’s make sure nobody’s cracked the vault."',
+      briefing: '"Proton lists every open session. Let’s make sure they’re all yours."',
       debrief: scoutLogin(
         '"All recognized sessions. The vault is secure."',
         '"Unfamiliar session spotted. Revoke it and change your password."',
@@ -674,18 +735,19 @@ const CHAPTER_1_MISSIONS = [
     title: 'Breach Recon: Apple ID',
     briefing: 'Your Apple ID controls access to every Apple service — App Store purchases, iCloud, Find My, Apple Pay. While Apple itself hasn’t had a major breach, your Apple ID email may appear in breaches from other services.',
     steps: [
+      sameAddressStep('icloud', 'breach check'),
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Apple ID' },
       { text: 'Check for any breaches — cross-service credential reuse is the risk' },
     ],
-    debriefQs: BREACH_DEBRIEF,
+    debriefQs: pairedBreachDebrief('icloud'),
     scoutDialog: {
       briefing: '"Apple’s own security is strong, but if you used the same email elsewhere and it leaked, attackers try those credentials everywhere."',
-      debrief: scoutBreach(
+      debrief: { ...sameAddressLines('icloud', 'result'), ...scoutBreach(
         '"No exposure. The spire stands tall."',
         '"Some third-party exposure. Make sure your Apple password is unique."',
         '"Significant exposure. If your Apple ID password matches anything leaked, change it now."',
-      ),
+      ) },
     },
     estimatedMinutes: 2,
   },
@@ -694,21 +756,22 @@ const CHAPTER_1_MISSIONS = [
     optional: true,
     accountId: 'apple_id',
     phase: 'recon',
-    title: 'Login History: Apple ID',
-    briefing: 'Apple shows all devices currently signed into your Apple ID. Every device on this list has access to your iCloud data, photos, and Find My location. An unknown device is a serious red flag.',
+    title: 'Device Check: Apple ID',
+    briefing: 'Apple shows the devices signed in to your Apple Account, not a sign-in history. Every device on that list has access to your iCloud data, photos, and Find My location. An unknown device is a serious red flag.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
-      { text: 'Review the "Devices" section' },
-      { text: 'Remove any devices you don’t recognize or no longer own' },
+      sameAddressStep('icloud', 'login check'),
+      { text: 'Open your Apple Account and sign in (or on iPhone: Settings → your name, then scroll down)', url: 'https://account.apple.com' },
+      { text: 'Open Devices. Every device listed is signed in to your Apple Account' },
+      { text: 'Tap any device you don’t recognize → Remove from account' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: pairedLoginDebrief('icloud', DEVICE_DEBRIEF),
     scoutDialog: {
       briefing: '"Every device on this list can see your photos, track your location, and read your messages. Make sure they’re all yours."',
-      debrief: scoutLogin(
+      debrief: { ...sameAddressLines('icloud', 'sign-ins'), ...scoutLogin(
         '"All accounted for. Your Apple ecosystem is clean."',
         '"Unknown device found. Remove it and consider changing your password."',
         '"Unauthorized device confirmed. Remove, change password, enable 2FA — in that order."',
-      ),
+      ) },
     },
     estimatedMinutes: 5,
   },
@@ -719,7 +782,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Apple ID',
     briefing: 'Your Apple ID password guards the App Store, Apple Pay, iCloud Keychain, Find My, and Sign in with Apple. If this password is compromised, an attacker can lock you out of your own devices.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
+      { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Go to Sign-In and Security > Password' },
       { text: 'Set a new, unique password not used anywhere else' },
     ],
@@ -741,7 +804,7 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Apple ID',
     briefing: 'Apple’s two-factor authentication sends a verification code to your trusted devices when you sign in on a new device. It’s one of the most seamless 2FA implementations available.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
+      { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Go to Sign-In and Security' },
       { text: 'Enable Two-Factor Authentication (or confirm it’s already on)' },
     ],
@@ -764,7 +827,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Privacy Review: Apple ID',
     briefing: 'Review which apps use Sign in with Apple and what data they have access to. Also review app permissions on your devices — camera, microphone, contacts, and location access.',
     steps: [
-      { text: 'Open Apple ID management', url: 'https://www.icloud.com/settings/' },
+      { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Review "Sign in with Apple" — revoke access for apps you no longer use' },
       { text: 'On your device: Settings > Privacy & Security > review each category' },
     ],
@@ -790,18 +853,19 @@ const CHAPTER_1_MISSIONS = [
     title: 'Breach Recon: Google Account',
     briefing: 'Your Google Account is an identity provider — "Sign in with Google" connects it to dozens or hundreds of other services. A compromised Google password unlocks everything behind that SSO.',
     steps: [
+      sameAddressStep('gmail', 'breach check'),
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Google email address' },
       { text: 'Also check Google’s built-in Password Checkup', url: 'https://passwords.google.com/checkup' },
     ],
-    debriefQs: BREACH_DEBRIEF,
+    debriefQs: pairedBreachDebrief('gmail'),
     scoutDialog: {
       briefing: '"Google is an identity provider — Sign in with Google links it to everything. A breach here cascades."',
-      debrief: scoutBreach(
+      debrief: { ...sameAddressLines('gmail', 'result'), ...scoutBreach(
         '"No exposure on the Google account. The identity hub is intact."',
         '"Some exposure. With Google SSO linking so many services, lock this down."',
         '"Widespread exposure on your identity provider. This is priority one."',
-      ),
+      ) },
     },
     estimatedMinutes: 3,
   },
@@ -813,18 +877,20 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: Google Account',
     briefing: 'Google provides detailed security events including sign-ins, password changes, and third-party app access. Reviewing this reveals whether anyone else has been using your account as their own identity provider.',
     steps: [
-      { text: 'Open Google Security', url: 'https://myaccount.google.com/security' },
-      { text: 'Review "Your devices" and "Recent security activity"' },
-      { text: 'Check "Third-party apps with account access" for anything suspicious' },
+      sameAddressStep('gmail', 'login check'),
+      { text: 'Open Google Security (Security & sign-in)', url: 'https://myaccount.google.com/security' },
+      { text: 'Under Your devices, tap Manage all devices. Sign out of any you don’t recognize' },
+      { text: 'Under Recent security events, tap Review security events' },
+      { text: 'Open your connected apps and remove any you don’t use', url: 'https://myaccount.google.com/linkedapps' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: pairedLoginDebrief('gmail'),
     scoutDialog: {
       briefing: '"Google’s security dashboard is thorough. Check devices, recent activity, and third-party apps that have access."',
-      debrief: scoutLogin(
+      debrief: { ...sameAddressLines('gmail', 'sign-ins'), ...scoutLogin(
         '"Everything checks out. No unwanted guests."',
         '"Something’s off. Revoke suspicious access and change your password."',
         '"Unauthorized access to your identity provider. Fortify immediately."',
-      ),
+      ) },
     },
     estimatedMinutes: 5,
   },
@@ -864,7 +930,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Google offers the most 2FA options of anyone. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
+      briefing: '"Google offers a lot of 2FA options. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
       debrief: {
         'enabled-2fa': '"2FA on the identity hub. This single action protects everything behind Google SSO."',
         'already-enabled': '"Already protected. Make sure you have backup codes saved somewhere safe."',
@@ -879,10 +945,10 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'google',
     phase: 'reclaim',
     title: 'Privacy Review: Google Account',
-    briefing: 'Google’s Privacy Checkup walks through what data is collected and shared. Web & App Activity, Location History, YouTube History, and ad personalization can all be tightened without losing core functionality.',
+    briefing: 'Google’s Privacy Checkup walks through what data is collected and shared. Web & App Activity, Timeline (formerly Location History), YouTube History, and ad personalization can all be tightened without losing core functionality.',
     steps: [
       { text: 'Open Google Privacy Checkup', url: 'https://myaccount.google.com/privacycheckup' },
-      { text: 'Review Web & App Activity, Location History, YouTube History' },
+      { text: 'Review Web & App Activity, Timeline (formerly Location History), YouTube History' },
       { text: 'Set auto-delete timelines or pause collection' },
       { text: 'Review and limit ad personalization' },
     ],
@@ -908,18 +974,19 @@ const CHAPTER_1_MISSIONS = [
     title: 'Breach Recon: Microsoft Account',
     briefing: 'Your Microsoft Account is both a consumer identity (Xbox, Outlook, OneDrive) and an enterprise gateway (Office 365, Teams, Azure). A breach here opens doors on both sides of your digital life.',
     steps: [
+      sameAddressStep('outlook', 'breach check'),
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Microsoft account' },
-      { text: 'Note any breaches, especially from LinkedIn (owned by Microsoft)' },
+      { text: 'Note how many breaches (if any) this address appears in' },
     ],
-    debriefQs: BREACH_DEBRIEF,
+    debriefQs: pairedBreachDebrief('outlook'),
     scoutDialog: {
       briefing: '"Microsoft spans consumer and enterprise. Xbox, Outlook, OneDrive, Office, Teams — all behind one account."',
-      debrief: scoutBreach(
+      debrief: { ...sameAddressLines('outlook', 'result'), ...scoutBreach(
         '"Clean. The corporate tower is unbreached."',
         '"Some exposure. Make sure this password isn’t shared with your work accounts."',
         '"Multiple breaches on a Microsoft account is a wide blast radius. Lock it down."',
-      ),
+      ) },
     },
     estimatedMinutes: 2,
   },
@@ -931,18 +998,19 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: Microsoft Account',
     briefing: 'Microsoft’s recent activity page shows sign-ins with timestamps, locations, and device info. Unfamiliar activity here could mean someone has access to your Office documents, OneDrive files, and email.',
     steps: [
+      sameAddressStep('outlook', 'login check'),
       { text: 'Open Microsoft account activity', url: 'https://account.live.com/Activity' },
       { text: 'Review recent sign-in activity' },
       { text: 'Check for unfamiliar devices, locations, or failed attempts' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: pairedLoginDebrief('outlook'),
     scoutDialog: {
       briefing: '"Microsoft logs sign-ins in detail. Let’s see if the corporate tower has had any uninvited visitors."',
-      debrief: scoutLogin(
+      debrief: { ...sameAddressLines('outlook', 'sign-ins'), ...scoutLogin(
         '"All clear. No unauthorized access."',
         '"Suspicious login found. Time to change credentials."',
         '"Confirmed unauthorized access. Password change and 2FA are immediate priorities."',
-      ),
+      ) },
     },
     estimatedMinutes: 5,
   },
@@ -959,7 +1027,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Microsoft offers passwordless sign-in via their Authenticator app. Worth considering if you want to eliminate password risk entirely."',
+      briefing: '"Microsoft offers passwordless sign-in via their Authenticator app. Worth considering if you want to take the password out of the picture."',
       debrief: {
         'reset-password': '"New password on the Microsoft account. The tower is reinforced."',
         'already-strong': '"Already strong and unique. Solid."',
@@ -973,7 +1041,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'microsoft',
     phase: 'fortify',
     title: '2FA Setup: Microsoft Account',
-    briefing: 'Microsoft supports authenticator apps, security keys, phone verification, and passwordless sign-in. Their Authenticator app includes a one-tap approval flow that’s fast and secure.',
+    briefing: 'Microsoft supports authenticator apps, security keys, phone verification, and passwordless sign-in. With their Authenticator app you approve a sign-in on your phone (you may be asked to enter a number shown on screen).',
     steps: [
       { text: 'Open Microsoft security settings', url: 'https://account.live.com/proofs/manage' },
       { text: 'Enable "Two-step verification"' },
@@ -981,9 +1049,9 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Microsoft’s Authenticator has a nice one-tap approval. Set it up and you won’t even need to type codes."',
+      briefing: '"Microsoft’s Authenticator lets you approve sign-ins on your phone. You may be asked to match a number, but you won’t be typing codes."',
       debrief: {
-        'enabled-2fa': '"2FA active on Microsoft. One-tap approval is slick, right?"',
+        'enabled-2fa': '"2FA active on Microsoft. Approving on your phone beats typing codes."',
         'already-enabled': '"Already set up. Good."',
         'later': '"Quick to set up, big security payoff. Come back to this."',
       },
@@ -996,7 +1064,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'microsoft',
     phase: 'reclaim',
     title: 'Privacy Review: Microsoft Account',
-    briefing: 'Microsoft collects browsing history (via Edge), search data (via Bing), Cortana interactions, and diagnostic data from Windows. Their privacy dashboard lets you view and clear this data.',
+    briefing: 'Microsoft collects browsing history (via Edge), search data (via Bing), and diagnostic data from Windows. Their privacy dashboard lets you view and clear this data.',
     steps: [
       { text: 'Open Microsoft Privacy Dashboard', url: 'https://account.microsoft.com/privacy' },
       { text: 'Review and clear browsing, search, location, and voice data' },
@@ -1022,15 +1090,15 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'facebook',
     phase: 'recon',
     title: 'Breach Recon: Facebook',
-    briefing: 'Facebook has been involved in multiple data incidents, including a 2019 breach that exposed 533 million phone numbers. Your Facebook credentials may also be targeted because Facebook Login is used as SSO for many third-party apps.',
+    briefing: 'Facebook has been involved in multiple data incidents, including a 2021 dataset of 509 million phone numbers tied to names, scraped in 2019. Your Facebook credentials may also be targeted because Facebook Login is used as SSO for many third-party apps.',
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email or phone number associated with your Facebook account' },
-      { text: 'Note any breaches — the 2019 Facebook breach is a common hit' },
+      { text: 'Note any breaches. The big Facebook dataset was matched by phone number, so an email search rarely finds it' },
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
-      briefing: '"Facebook’s 2019 breach hit 533 million accounts. If you’ve been on Facebook more than a few years, expect to find something."',
+      briefing: '"Facebook’s big leak was phone numbers, scraped in 2019. An email search rarely finds it."',
       debrief: scoutBreach(
         '"Clean. Lucky, given Facebook’s track record."',
         '"Found some exposure. Facebook’s breach history makes this unsurprising."',
@@ -1047,9 +1115,9 @@ const CHAPTER_1_MISSIONS = [
     title: 'Login History: Facebook',
     briefing: 'Facebook tracks active sessions and login locations. An unrecognized session means someone else can post as you, message your contacts, and access any app using Facebook Login.',
     steps: [
-      { text: 'Open Facebook Security Settings', url: 'https://www.facebook.com/settings?tab=security' },
-      { text: 'Click "Where You’re Logged In"' },
-      { text: 'Review all active sessions and end any you don’t recognize' },
+      { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
+      { text: 'Tap Password and security → Where you’re logged in' },
+      { text: 'Review each session. Select any you don’t recognize → Log out' },
     ],
     debriefQs: LOGIN_DEBRIEF,
     scoutDialog: {
@@ -1112,21 +1180,21 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Privacy Review: Facebook',
-    briefing: 'Facebook collects and sells more data than almost any other platform. Their privacy settings are intentionally complex, but you can significantly reduce your exposure: limit ad tracking, restrict who sees your posts, and revoke app permissions.',
+    briefing: 'Facebook collects more data than almost any other platform; Meta says it uses that data to target ads and shares some of it with partners. Their privacy settings are intentionally complex, but you can significantly reduce your exposure: limit ad tracking, restrict who sees your posts, and revoke app permissions.',
     steps: [
       { text: 'Open Facebook Privacy Settings', url: 'https://www.facebook.com/settings?tab=privacy' },
       { text: 'Set "Who can see your future posts" to Friends' },
       { text: 'Review "Apps and Websites" and remove apps you don’t use' },
-      { text: 'Open Off-Facebook Activity', url: 'https://www.facebook.com/allyourbases/allactivity/?activity_history=true&category_key=YOURAPPSPOSTS' },
-      { text: 'Clear history and turn off future Off-Facebook Activity' },
+      { text: 'Open Accounts Center and look for the setting about activity from other businesses (Meta has renamed and changed this control over time)', url: 'https://accountscenter.facebook.com/' },
+      { text: 'Read what it controls now: it changes how Meta uses activity other businesses send it, not whether they send it' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: '"Facebook’s privacy settings are deliberately confusing. Off-Facebook Activity is the big one — it tracks you across the entire web."',
+      briefing: '"Facebook’s privacy settings are spread out. Activity other businesses send Meta is the part people forget."',
       debrief: {
-        'tightened': '"Off-Facebook Activity cleared. That’s a massive data pipeline you just shut off."',
+        'tightened': '"Settings tightened. Meta may still receive activity from other businesses, but you’ve limited what you control."',
         'already-tight': '"Already locked down. Impressive — most people never find those settings."',
-        'later': '"The Off-Facebook Activity setting alone is worth coming back for."',
+        'later': '"The settings about activity from other businesses are worth coming back for."',
       },
     },
     estimatedMinutes: 15,

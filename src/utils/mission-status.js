@@ -48,6 +48,10 @@ export function isMissionAvailable(state, mission) {
 // isMissionDoneIn on its replacement.
 export function isMissionInPlay(state, mission) {
   if (mission.legacy) return false;
+  // A mission for any of several accounts (the vehicle privacy report: any car).
+  if (mission.inPlayIfAny) {
+    return mission.inPlayIfAny.some((id) => state.accounts?.[id]?.enabled) && isMissionAvailable(state, mission);
+  }
   const accountOn = ACCOUNTS[mission.accountId] ? Boolean(state.accounts?.[mission.accountId]?.enabled) : true;
   return accountOn && isMissionAvailable(state, mission);
 }

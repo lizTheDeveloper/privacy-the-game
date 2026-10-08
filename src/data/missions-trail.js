@@ -39,6 +39,23 @@ function scoutTrail(completed, alreadyDone, na) {
   };
 }
 
+// Plaid connections (recon audit #92): the Plaid Portal shows them now, so
+// the answer is about them. A new question id; an old save's finding still
+// shows (question.legacy).
+const PLAID_DEBRIEF = [
+  {
+    id: "plaid_connections",
+    label: "What did the Plaid Portal show?",
+    legacy: AUDIT_DEBRIEF[0],
+    options: [
+      { value: "none", text: "No connections", severity: "safe" },
+      { value: "disconnected", text: "Found old connections and disconnected them", severity: "safe" },
+      { value: "many", text: "Lots of connections, including apps I forgot", severity: "warn" },
+      { value: "skip", text: "I'll come back to this", severity: "skip" },
+    ],
+  },
+];
+
 export const TRAIL_MISSIONS = [
 
   // ══════════════════════════════════════════════════════
@@ -98,7 +115,7 @@ export const TRAIL_MISSIONS = [
     title: "Audit Your Cloud Photo Location History",
     briefing: "Google Photos and Apple Photos both build a complete location map from your photo library. Every geotagged photo becomes a pin on a map that shows everywhere you've been, on what date, for years. This is a more detailed location history than most people realize they've created -- and it's accessible to anyone who gets into your cloud account.",
     steps: [
-      { text: "Google Photos: Open photos.google.com/map in a browser. This is your photo location history -- every place you've taken a photo, clustered by area. Zoom in on your home area and notice how many pins there are.", url: "https://photos.google.com/map" },
+      { text: 'Google Photos: search for your town or neighborhood. Every photo that comes up was tagged with a place. Notice how many are tagged at home.' },
       { text: "Apple Photos: Open the Photos app on Mac or iPhone > Albums > Places. This is the same thing -- a map of everywhere your photos were taken." },
       { text: "Consider: would you want someone who got into your Google or Apple account to see this map? This is why the Master Keys district comes first -- your email account protects this data." },
       { text: "Google Photos: Settings > Sharing > check that partner sharing and shared libraries aren't exposing location data to people you didn't intend.", url: "https://photos.google.com/settings" },
@@ -132,7 +149,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"The loyalty card is one of the most successful surveillance tools ever invented, and it doesn't even pretend to be something else. You knowingly trade a record of every purchase for a small discount. The difference between this and a data broker is that you opted in -- but you probably didn't opt in to your grocery purchase history being sold to your health insurance company to adjust your premiums. That part wasn't on the sign-up form.\"",
+      briefing: "\"The loyalty card is one of the most successful surveillance tools ever invented, and it doesn't even pretend to be something else. You knowingly trade a record of every purchase for a small discount. The difference between this and a data broker is that you opted in -- but you probably didn't read how far that purchase history can travel once it's shared with partners. That part wasn't on the sign-up form.\"",
       debrief: {
         "no-breaches": "\"Few loyalty cards. Less data flowing to brokers. That's a surprisingly strong privacy position in a world that puts a loyalty program on everything.\"",
         "1-2-breaches": "\"A handful of loyalty programs. Each one is a data feed. The next mission helps you turn off what you can.\"",
@@ -147,20 +164,20 @@ export const TRAIL_MISSIONS = [
     accountId: "loyalty_programs",
     phase: "fortify",
     title: "Opt Out of Loyalty Data Selling",
-    briefing: "Most loyalty programs have a privacy settings page where you can opt out of data sharing with third parties. The setting exists because of CCPA and state privacy laws -- they're legally required to let you opt out of data sale. But they bury it. This mission walks you through the major ones.",
+    briefing: "Most loyalty programs have a privacy settings page where you can opt out of data sharing with third parties. In states with privacy laws, covered businesses have to let you opt out of data sale, though the setting can be hard to find. This mission walks you through the major ones.",
     steps: [
-      { text: "CVS ExtraCare: Log into CVS.com > Account Settings > Privacy Preferences > opt out of 'sharing for marketing purposes' and 'sharing for analytics'", url: "https://www.cvs.com/account/compliance/do-not-sell" },
-      { text: "Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): Log into kroger.com > My Account > Communication Preferences. Also submit a data deletion request through their privacy portal.", url: "https://www.kroger.com/account/privacy-choices" },
-      { text: "Target Circle: Log into target.com > Account > Settings > Privacy. Opt out of targeted advertising and data sharing.", url: "https://www.target.com/circle/account" },
+      { text: "CVS ExtraCare: sign in at CVS.com and review its privacy choices to opt out of sharing for marketing", url: "https://www.cvs.com/account/compliance/do-not-sell" },
+      { text: 'Kroger (and subsidiaries -- Ralphs, Fred Meyer, Harris Teeter, etc.): in your kroger.com account, review communication preferences. For a data deletion request, use the rights section of its privacy policy.', url: 'https://www.kroger.com/i/privacy-policy' },
+      { text: 'Target Circle: sign in to target.com → Account and review its privacy and advertising settings.', url: 'https://www.target.com/account' },
       { text: "Starbucks: Open the Starbucks app > Account > Privacy Settings. Or visit starbucks.com privacy page.", url: "https://www.starbucks.com/terms/privacy-policy/" },
-      { text: "For any loyalty program not listed: search '[company name] do not sell my personal information' -- CCPA requires a page with this exact language." },
+      { text: "For any loyalty program not listed: look for a link called \"Do Not Sell or Share My Personal Information\", \"Your Privacy Choices\" or \"Your California Privacy Choices\" (California's rules allow any of those labels)." },
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
       briefing: "\"Every one of these companies has a 'Do Not Sell My Personal Information' page, because California law requires it. Most of them made it hard to find on purpose. The pattern is always the same: log in, find Privacy or Account Settings, look for the opt-out toggle. They're counting on you not looking. Today you look.\"",
       debrief: scoutTrail(
         "\"Opt-outs submitted. The data that's already been sold is gone, but the pipeline from new purchases is narrower now. They'll keep collecting -- they just can't resell it as freely.\"",
-        "\"Already opted out. You found the hidden settings page. That puts you in a very small minority.\"",
+        "\"Already opted out. You found the settings page.\"",
         "\"If you don't have these specific programs, search for the ones you do have. The 'do not sell' page exists for all of them.\"",
       ),
     },
@@ -174,7 +191,7 @@ export const TRAIL_MISSIONS = [
     briefing: "The most effective privacy move is the simplest: close accounts you don't use. Every dormant loyalty account is a database entry that can be breached, sold, or subpoenaed. If you haven't used a rewards program in a year, the points aren't worth the data exposure. Close it. The data already collected stays in their systems, but no new data flows in.",
     steps: [
       { text: "Go through your loyalty program list from the audit mission. For each one you haven't used in 6+ months, log in and look for 'Delete Account,' 'Close Account,' or 'Deactivate.'" },
-      { text: "If there's no obvious delete option: search '[company name] delete my account' or email their privacy team at privacy@[company].com with a CCPA deletion request." },
+      { text: "If there's no obvious delete option: search '[company name] delete my account', or send a deletion request to the privacy contact listed in their privacy policy." },
       { text: "Before deleting: redeem any points or rewards you've accumulated. They disappear with the account." },
       { text: "After deleting: unsubscribe from their emails and remove any physical cards from your wallet or phone." },
     ],
@@ -198,20 +215,22 @@ export const TRAIL_MISSIONS = [
     accountId: "payment_trail",
     phase: "recon",
     title: "Review Your Plaid Connections",
-    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, Mint, YNAB, or any budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. But Plaid was sued (and settled for $58 million) for collecting more transaction data than users authorized and sharing it with third parties. You can request your Plaid data and delete it.",
+    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, YNAB, or a budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. Plaid was sued for allegedly collecting more transaction data than users authorized, and settled for $58 million (announced in 2021 and approved in 2022). The Plaid Portal shows which apps you've connected, and lets you disconnect them.",
     steps: [
-      { text: "Go to Plaid's data protection request page", url: "https://plaid.com/legal/data-protection-request/" },
-      { text: "Submit a request to see what data Plaid has on you. Select 'Access my data' first to see what they have before deciding whether to delete." },
-      { text: "After reviewing: submit a deletion request if you no longer use the apps that connected through Plaid." },
-      { text: "For apps you still use: check if the app offers a direct bank connection (ACH) that bypasses Plaid. Some do, most don't advertise it." },
+      { text: 'Open the Plaid Portal and sign in with your phone number. It lists every app you’ve connected through Plaid', url: 'https://my.plaid.com' },
+      { text: 'Disconnect apps you no longer use' },
+      { text: 'To get a full copy of your data, use Plaid’s data request form. It takes a while', url: 'https://my.plaid.com/data-subject-request-form' },
     ],
-    debriefQs: AUDIT_DEBRIEF,
+    debriefQs: PLAID_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Plaid settled a class action for $58 million because they scraped more transaction data than users consented to. Every time you 'connected your bank account' to an app, Plaid logged in as you and downloaded your full transaction history -- not just the data the app needed. Your rent payments, your medical bills, your donations, your bar tabs. All of it in Plaid's database. You can ask to see it and ask to delete it. The form takes two minutes.\"",
+      briefing: "\"Plaid settled a class action for $58 million over claims it took more transaction data than users consented to. Plaid denies selling data, and the settlement found no wrongdoing. But a bank connection can pass along a lot of your transaction history, and old connections you forgot about may still be live. The Portal shows your connections in a couple of minutes.\"",
       debrief: {
+        "none": "\"No connections. Fewer copies of your bank history out there.\"",
+        "disconnected": "\"Old connections cut. The budgeting app you tried once doesn't need your bank anymore.\"",
+        "many": "\"Lots of connections. Disconnect the ones you don't use when you can.\"",
         "no-breaches": "\"No Plaid connections, or nothing concerning. That's unusual -- most people have at least one app that used Plaid without their knowledge.\"",
         "1-2-breaches": "\"Found some connections you forgot about. Common. The budgeting app you tried for a month in 2021 still has access to your transaction history through Plaid.\"",
-        "3plus-breaches": "\"Multiple Plaid connections. Each one has your full bank transaction history. Submitting the deletion request is the right move.\"",
+        "3plus-breaches": "\"Multiple Plaid connections. Disconnect the ones you don't use, and consider the data request.\"",
         "skip": "\"When you're ready. The data access request alone is worth doing -- seeing what Plaid has on you changes your relationship with 'connect your bank' buttons.\"",
       },
     },
@@ -222,19 +241,20 @@ export const TRAIL_MISSIONS = [
     accountId: "payment_trail",
     phase: "fortify",
     title: "Audit Buy Now, Pay Later Accounts",
-    briefing: "Affirm, Klarna, Afterpay, and Zip report to credit bureaus and share transaction data with marketing partners. Each one is a financial account you may have opened for a single purchase and forgotten about. Unlike credit cards, BNPL accounts are often opened at checkout with minimal friction -- which means you may have more than you realize, each reporting to different credit bureaus.",
+    briefing: "Buy-now-pay-later companies like Affirm, Klarna, Afterpay and Zip each keep a record of what you bought and how you paid. They differ on credit reporting: Afterpay says it doesn't report to US credit bureaus, and Klarna says it doesn't report Pay in 4; check each company's own terms for the rest. Each one is a financial account you may have opened for a single purchase and forgotten about, often at checkout with almost no friction.",
     steps: [
-      { text: "Search your email for 'Affirm,' 'Klarna,' 'Afterpay,' 'Zip,' 'Sezzle,' 'PayPal Pay Later.' Each result is a BNPL account that exists in your name." },
-      { text: "For each one found: log in and check for outstanding balances. Pay off and close any you don't actively use." },
-      { text: "Affirm: app or affirm.com > Account > scroll to 'Close Account'", url: "https://www.affirm.com/account" },
-      { text: "Klarna: app > Profile > Settings > 'Delete my Klarna data'", url: "https://app.klarna.com/settings" },
-      { text: "Afterpay: app > Account > Settings > 'Close Account'" },
+      { text: 'Search your email for \'Affirm,\' \'Klarna,\' \'Afterpay,\' \'Zip,\' \'Sezzle,\' \'PayPal Pay Later.\' Each result is a BNPL account that exists in your name.' },
+      { text: 'For each one found: log in and check for outstanding balances. Pay off and close any you don\'t actively use.' },
+      { text: 'Affirm: sign in and find the option to close your account (Affirm’s help pages say where)', url: 'https://www.affirm.com/account' },
+      { text: 'Klarna: sign in to manage your account and your data', url: 'https://app.klarna.com/settings' },
+      { text: 'Afterpay, Zip and the rest: find the close-account option in the app or on its help page' },
+      { text: 'If you want your data gone too, ask each company to delete it under its privacy policy' },
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Buy Now Pay Later is the financial product designed to feel like it isn't one. One click at checkout, and you've opened a credit account that reports to bureaus, shares your purchase data with marketing partners, and stays open indefinitely. Most people who've shopped online in the last three years have at least one BNPL account they forgot about. Each one is a financial record with your name on it, and each one feeds the data economy.\"",
+      briefing: "\"Buy Now Pay Later is the financial product designed to feel like it isn't one. One click at checkout, and you've opened an account that keeps your purchase history and stays open until you close it. Most people who've shopped online in the last three years have at least one BNPL account they forgot about. Each one is a financial record with your name on it, and each one feeds the data economy.\"",
       debrief: scoutTrail(
-        "\"BNPL accounts audited and cleaned up. Fewer open financial accounts, fewer data feeds, cleaner credit report.\"",
+        "\"BNPL accounts audited and cleaned up. Fewer open financial accounts, fewer copies of your purchase history.\"",
         "\"Already on top of your BNPL. That's financial hygiene most people never think about.\"",
         "\"If you've never used BNPL, you're in the clear. If you're not sure, the email search takes thirty seconds.\"",
       ),
@@ -248,15 +268,15 @@ export const TRAIL_MISSIONS = [
     title: "Review Credit Card Data Sharing",
     briefing: "Visa and Mastercard sell aggregated transaction data to marketers and analytics firms. Your card issuer (Chase, Citi, Amex, etc.) also has its own data-sharing agreements. The aggregated data is supposedly anonymized, but researchers have repeatedly shown that credit card transaction records can be de-anonymized with just a few data points -- the store, the date, and the amount are often enough to identify a specific person.",
     steps: [
-      { text: "Chase: Log into chase.com > Profile & Settings > Privacy Preferences > opt out of sharing for marketing", url: "https://www.chase.com/digital/data-privacy/manage-settings" },
-      { text: "Capital One: Log in > Settings > Privacy > 'Limit sharing of personal information'", url: "https://www.capitalone.com/privacy/" },
+      { text: 'Chase: sign in and review the privacy and marketing preferences in your profile settings to opt out of sharing for marketing' },
+      { text: "Capital One: sign in and review its privacy choices to limit sharing", url: "https://www.capitalone.com/privacy/" },
       { text: "American Express: Log in > Account Services > Privacy > opt out of 'sharing information with Amex business partners'", url: "https://global.americanexpress.com/privacy/opt-out" },
-      { text: "Bank of America: Log in > Profile & Settings > Privacy > 'Manage your ad choices'", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
+      { text: "Bank of America: sign in and review its privacy and ad choices", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
       { text: "For any card not listed: search '[your card issuer] privacy opt out' or call the number on the back of your card and ask for their privacy department." },
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Researchers at MIT showed that just four transaction data points -- four purchases -- are enough to uniquely identify a person in an 'anonymized' credit card dataset. The store, the date, and the amount. That's it. Visa and Mastercard sell this data because it's worth billions. Your card issuer has its own sharing agreements on top of that. The opt-outs don't stop the aggregation at the network level, but they limit what your specific issuer can sell about you.\"",
+      briefing: "\"Researchers at MIT showed that four purchases -- the store and the day -- were enough to pick out 90% of people in an 'anonymized' card dataset of 1.1 million. Card networks and issuers share transaction data under their privacy policies. Your card issuer has its own sharing agreements on top of that. The opt-outs don't stop the aggregation at the network level, but they limit what your specific issuer can sell about you.\"",
       debrief: scoutTrail(
         "\"Card data sharing dialed back. You can't stop Visa from aggregating, but your issuer's own sharing is now limited. Every opt-out narrows the data pipeline.\"",
         "\"Already opted out. You found the privacy settings your bank hoped you wouldn't look for.\"",
@@ -274,7 +294,7 @@ export const TRAIL_MISSIONS = [
     accountId: "browser_fingerprint",
     phase: "recon",
     title: "Test Your Browser Fingerprint",
-    briefing: "Cookies are yesterday's tracking. Browser fingerprinting is the technique that identifies you without storing anything on your device. Your browser's exact configuration -- screen resolution, installed fonts, WebGL renderer, timezone, language, plugins, canvas rendering -- creates a fingerprint that is unique among millions. EFF's research found that 83% of browsers have a unique fingerprint. Private browsing mode doesn't help, because the fingerprint is your browser's configuration, not its stored data.",
+    briefing: "Cookies are yesterday's tracking. Browser fingerprinting is the technique that identifies you without storing anything on your device. Your browser's exact configuration -- screen resolution, installed fonts, WebGL renderer, timezone, language, plugins, canvas rendering -- creates a fingerprint that is unique among millions. In EFF’s 2010 study, 83% of browsers were unique. Private browsing mode doesn't help, because the fingerprint is your browser's configuration, not its stored data.",
     steps: [
       { text: "Open EFF's Cover Your Tracks tool (formerly Panopticlick)", url: "https://coveryourtracks.eff.org/" },
       { text: "Click 'Test Your Browser' and wait for the results. It will tell you how unique your browser fingerprint is." },
@@ -308,7 +328,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Firefox is the answer here, and it's not close. Chrome is made by an advertising company -- Google's business model depends on tracking you. Firefox is made by a nonprofit whose mission is internet privacy. The 'resist fingerprinting' flag is the nuclear option: Firefox starts lying to websites about your configuration, making you look like every other Firefox user. The trade-off is that some websites may look slightly different (wrong timezone display, standardized fonts). It's a small price for disappearing from the fingerprinting system.\"",
+      briefing: "\"Firefox is the answer here, and it's not close. Chrome is made by an advertising company -- Google's business model depends on tracking you. Firefox is made by Mozilla, owned by a nonprofit foundation. The 'resist fingerprinting' flag is the nuclear option: Firefox starts lying to websites about your configuration, making you look like every other Firefox user. The trade-off is that some websites may look slightly different (wrong timezone display, standardized fonts). It's a small price for being harder to fingerprint.\"",
       debrief: scoutTrail(
         "\"Browser hardened. You're now significantly harder to fingerprint. Re-test with Cover Your Tracks to see the improvement -- most people go from 'unique' to 'not unique.'\"",
         "\"Already hardened. You're running a privacy-focused setup. The fingerprinters have to work much harder to track you, and most won't bother.\"",
@@ -321,21 +341,21 @@ export const TRAIL_MISSIONS = [
     id: "browser_fingerprint-reclaim-dns",
     accountId: "browser_fingerprint",
     phase: "reclaim",
-    title: "Switch to Encrypted DNS",
-    briefing: "Every time you visit a website, your browser asks a DNS server to translate the domain name (google.com) into an IP address. By default, this request goes to your ISP in plain text -- which means your ISP has a complete log of every website you've visited. In 2017, Congress voted to let ISPs sell this browsing data. Encrypted DNS (DNS over HTTPS or DNS over TLS) sends these requests through an encrypted channel to a privacy-focused DNS provider instead of your ISP.",
+    title: "Encrypt Your DNS Lookups",
+    briefing: "Every time you visit a website, your browser asks a DNS server to translate the domain name (google.com) into an IP address. By default, this request goes to your ISP in plain text -- which means your ISP has a complete log of every website you've visited. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling browsing history. Encrypted DNS (DNS over HTTPS or DNS over TLS) sends these requests through an encrypted channel to a DNS provider you chose. Your ISP still sees which servers you connect to. Typing different DNS server numbers into your settings is not the same thing: it changes who answers, not who can see.",
     steps: [
-      { text: "iPhone: Settings > Wi-Fi > tap the (i) next to your network > Configure DNS > Manual > add 1.1.1.1 and 1.0.0.1 (Cloudflare) or 9.9.9.9 and 149.112.112.112 (Quad9). Better: install the 1.1.1.1 app from Cloudflare which handles all connections including cellular.", url: "https://one.one.one.one/" },
-      { text: "Android: Settings > Network & Internet > Advanced > Private DNS > enter 'one.one.one.one' (Cloudflare) or 'dns.quad9.net' (Quad9)." },
-      { text: "Mac: System Settings > Network > [Your network] > Details > DNS > add 1.1.1.1 and 9.9.9.9. For system-wide encrypted DNS, install the Cloudflare WARP app." },
-      { text: "Windows: Settings > Network & Internet > your connection > DNS server assignment > Manual > enter 1.1.1.1 (Preferred) and 9.9.9.9 (Alternate). Enable 'DNS over HTTPS' in the dropdown." },
-      { text: "Firefox: Settings > Privacy & Security > scroll to bottom > DNS over HTTPS > select 'Max Protection' and choose Cloudflare or NextDNS.", url: "about:preferences#privacy" },
+      { text: 'iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular. Typing 1.1.1.1 and 1.0.0.1 (or Quad9’s 9.9.9.9 and 149.112.112.112) into Settings > Wi-Fi > (i) > Configure DNS changes who answers, not who can see: those lookups stay unencrypted', url: 'https://one.one.one.one/' },
+      { text: 'Android: Settings > Network & Internet > Advanced > Private DNS > enter \'one.one.one.one\' (Cloudflare) or \'dns.quad9.net\' (Quad9). This one is encrypted.' },
+      { text: 'Mac: the 1.1.1.1 app (Cloudflare WARP) encrypts lookups for the whole Mac. Adding 1.1.1.1 and 9.9.9.9 under System Settings > Network > Details > DNS changes who answers, not who can see.' },
+      { text: 'Windows 11: Settings > Network & Internet > your connection > DNS server assignment > Manual > enter 1.1.1.1 (Preferred) and 9.9.9.9 (Alternate), and set DNS over HTTPS to On. Without that setting (and on Windows 10) it\'s a plain change of who answers, not who can see.' },
+      { text: 'Firefox: Settings > Privacy & Security > scroll to bottom > DNS over HTTPS > select \'Max Protection\' and choose Cloudflare or NextDNS. Chrome: Settings > Privacy and security > Security > Use secure DNS.', url: 'about:preferences#privacy' },
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"In 2017, Congress voted to let ISPs sell your browsing data. Not 'might let' -- voted, passed, signed into law. Your ISP sees every domain you visit because DNS requests are sent in plain text by default. That's a complete list of every website you've loaded, timestamped, attached to your account. Encrypted DNS sends those requests through an encrypted tunnel to Cloudflare or Quad9 instead. Your ISP sees that you're making DNS requests, but not what you're looking up. It's the equivalent of putting your mail in an envelope instead of on a postcard.\"",
+      briefing: "\"In 2017, Congress repealed the rules that would have made ISPs ask before selling your browsing history. Your ISP sees every site name you look up because DNS requests are sent in plain text by default. That's a complete list of every website you've loaded, timestamped, attached to your account. Encrypted DNS puts those lookups in an envelope instead of on a postcard. Your ISP still sees which servers you connect to, so it's an envelope, not a disguise.\"",
       debrief: scoutTrail(
-        "\"Encrypted DNS active. Your ISP can no longer read your DNS queries -- your browsing history is no longer their product to sell. Fundamental infrastructure upgrade.\"",
-        "\"Already on encrypted DNS. You understood the ISP surveillance problem before most people knew it existed.\"",
+        "\"Done. Where you turned on encrypted DNS, your ISP can't read your lookups. It can still see which servers you connect to, so this is one layer of several.\"",
+        "\"Already encrypted. You were ahead of this one.\"",
         "\"If you can't change your DNS right now, the Firefox setting is the easiest -- it only applies to Firefox but it takes thirty seconds.\"",
       ),
     },

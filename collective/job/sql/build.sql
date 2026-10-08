@@ -92,7 +92,8 @@ SELECT e.session_id, e.event_id, e.created_at AS at,
        max(d.string_value) FILTER (WHERE d.data_key = 'mission') AS mission,
        max(d.string_value) FILTER (WHERE d.data_key = 'finding') AS finding,
        max(d.string_value) FILTER (WHERE d.data_key = 'status')  AS status,
-       max(d.string_value) FILTER (WHERE d.data_key = 'method')  AS method
+       max(d.string_value) FILTER (WHERE d.data_key = 'method')  AS method,
+       max(d.string_value) FILTER (WHERE d.data_key = 'same_address') AS same_address
   FROM website_event e JOIN event_data d ON d.website_event_id = e.event_id
  WHERE e.website_id = :'website' AND e.event_name = 'mission-completed'
  GROUP BY e.event_id, e.session_id, e.created_at;
@@ -105,20 +106,92 @@ SELECT e.session_id, e.event_id, e.created_at AS at,
 -- finding value (new or malformed) is excluded by value.
 -- One check per session and address: the latest filing wins (a restored or
 -- refiled check is the same check; a refile to "skip" is no check).
-CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
-SELECT session_id, acct, finding
-  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding
+-- Recon X4: Google/Gmail, Apple ID/iCloud and Microsoft/Outlook are nearly
+-- always one address. A new "same address" filing sends no finding, so it is
+-- no check; an old save may hold both checks of a pair, and they count as one
+-- address per player (the later answer), under the first account's id when
+-- the player checked it, else under the second's. The second account's own
+-- latest answer "different-address" (same_address, tracked since ruling
+-- 2026-10-07) makes it a separate address; "same" or missing is one address.
+-- Severity of a breach answer, to break a same-instant tie (as calc.js
+-- addressChecks does): never by event_id, which is a random uuid.
+CREATE OR REPLACE FUNCTION pg_temp.rc_sev(finding text) RETURNS int LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE finding WHEN '3plus-breaches' THEN 3 WHEN '1-2-breaches' THEN 2 WHEN 'no-breaches' THEN 1 ELSE 0 END
+$$;
+
+CREATE OR REPLACE FUNCTION pg_temp.rc_pair(acct text) RETURNS text LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE acct WHEN 'google' THEN 'gmail' WHEN 'apple_id' THEN 'icloud' WHEN 'microsoft' THEN 'outlook' ELSE acct END
+$$;
+
+-- Pairs the player split: the second account's latest answer is
+-- "different-address", whatever its finding. Both accounts are then separate
+-- addresses, each fixed only by its own reset or 2FA (symmetric).
+CREATE TEMP TABLE rc_split ON COMMIT DROP AS
+SELECT session_id, pg_temp.rc_pair(acct) AS pair
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, same_address
+          FROM (SELECT session_id, event_id, at, same_address,
+                       left(mission, length(mission) - length('-recon-breach')) AS acct
+                  FROM rc_mc WHERE mission IN ('google-recon-breach', 'apple_id-recon-breach', 'microsoft-recon-breach')) c
+         ORDER BY session_id, acct, at DESC, event_id DESC) latest
+ WHERE same_address = 'different-address';
+
+CREATE TEMP TABLE rc_checks_acct ON COMMIT DROP AS
+SELECT l.session_id, l.acct, l.finding, l.at, l.event_id,
+       EXISTS (SELECT 1 FROM rc_split x WHERE x.session_id = l.session_id AND x.pair = pg_temp.rc_pair(l.acct)) AS separate
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id
           FROM (SELECT session_id, event_id, at, finding,
                        left(mission, length(mission) - length('-recon-breach')) AS acct
                   FROM rc_mc WHERE mission LIKE '%-recon-breach') c
          WHERE acct IN ('gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft')
-         ORDER BY session_id, acct, at DESC, event_id DESC) latest
- WHERE finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
+         ORDER BY session_id, acct, at DESC, pg_temp.rc_sev(finding) DESC, event_id DESC) l
+ WHERE l.finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
+
+ALTER TABLE rc_checks_acct ADD COLUMN addr text;
+UPDATE rc_checks_acct SET addr = CASE WHEN separate THEN acct ELSE pg_temp.rc_pair(acct) END;
+
+CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
+SELECT DISTINCT ON (c.session_id, c.addr) c.session_id,
+       CASE WHEN EXISTS (SELECT 1 FROM rc_checks_acct p WHERE p.session_id = c.session_id AND p.acct = c.addr)
+            THEN c.addr ELSE c.acct END AS acct,
+       c.finding,
+       c.separate
+  FROM rc_checks_acct c
+ ORDER BY c.session_id, c.addr, c.at DESC, pg_temp.rc_sev(c.finding) DESC, c.event_id DESC;
+
+-- Each session's latest filing of each mission (ruling 2026-10-08: the
+-- latest filing wins, as in the save; a reset refiled as skipped is no
+-- longer done). On a same-instant tie, completed wins, also over an event
+-- with no status (NULL would otherwise sort first under DESC).
+-- 2FA method strength, weakest first (ruling 2026-10-08; src/utils/two-factor.js
+-- METHOD_STRENGTH): a same-instant tie of two completed 2FA filings resolves
+-- to the weaker method. Unknown or absent counts as weakest.
+CREATE OR REPLACE FUNCTION pg_temp.rc_method_rank(method text) RETURNS int LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE method WHEN 'passkey' THEN 3 WHEN 'authenticator' THEN 2 WHEN 'sms' THEN 1 WHEN 'email' THEN 1 ELSE 0 END
+$$;
+
+CREATE TEMP TABLE rc_latest ON COMMIT DROP AS
+SELECT DISTINCT ON (session_id, mission) session_id, mission, status, method
+  FROM rc_mc WHERE mission IS NOT NULL
+ ORDER BY session_id, mission, at DESC, (coalesce(status, '') = 'completed') DESC,
+          pg_temp.rc_method_rank(method) ASC, event_id DESC;
+
+-- What players did: one row per session and mission whose latest filing is
+-- completed. Mission ids checked against src/data/missions*.js.
+CREATE TEMP TABLE rc_done ON COMMIT DROP AS
+SELECT session_id, mission FROM rc_latest WHERE status = 'completed';
+
+-- Fixed by either account of a pair (one address, one password); a separate
+-- address only by its own account.
+CREATE OR REPLACE FUNCTION pg_temp.rc_members(acct text) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE pg_temp.rc_pair(acct) WHEN 'gmail' THEN ARRAY['gmail', 'google'] WHEN 'icloud' THEN ARRAY['icloud', 'apple_id']
+              WHEN 'outlook' THEN ARRAY['outlook', 'microsoft'] ELSE ARRAY[acct] END
+$$;
 
 CREATE TEMP TABLE rc_breached ON COMMIT DROP AS
 SELECT DISTINCT c.session_id, c.acct,
-       EXISTS (SELECT 1 FROM rc_mc f WHERE f.session_id = c.session_id AND f.status = 'completed'
-                 AND f.mission IN (c.acct || '-fortify-password', c.acct || '-fortify-2fa')) AS fixed
+       EXISTS (SELECT 1 FROM rc_done f, unnest(CASE WHEN c.separate THEN ARRAY[c.acct] ELSE pg_temp.rc_members(c.acct) END) a
+                WHERE f.session_id = c.session_id
+                  AND f.mission IN (a || '-fortify-password', a || '-fortify-2fa')) AS fixed
   FROM rc_checks c WHERE c.finding IN ('1-2-breaches', '3plus-breaches');
 
 CREATE TEMP TABLE rc_ghost ON COMMIT DROP AS
@@ -127,11 +200,8 @@ SELECT DISTINCT session_id FROM website_event WHERE website_id = :'website' AND 
 CREATE TEMP TABLE rc_districts ON COMMIT DROP AS
 SELECT session_id FROM website_event WHERE website_id = :'website' AND event_name = 'district-completed';
 
--- What players did, by kind: one row per session, mission and kind (a mission
--- sent twice by one session counts once). Mission ids checked against
--- src/data/missions*.js.
-CREATE TEMP TABLE rc_done ON COMMIT DROP AS
-SELECT DISTINCT session_id, mission FROM rc_mc WHERE status = 'completed' AND mission IS NOT NULL;
+-- What players did, by kind: one row per session, mission and kind, from
+-- rc_done (latest filing completed; a mission sent twice counts once).
 
 CREATE TEMP TABLE rc_kinds ON COMMIT DROP AS
 SELECT session_id, mission, 'passwords' AS kind FROM rc_done
@@ -158,7 +228,7 @@ UNION ALL
 -- mission answered that way, or an upgrade from text/email codes. Keyed by
 -- account, so 2FA plus an upgrade on one account counts once. ('not-needed'
 -- and every other status but completed never count, here or above.)
-SELECT DISTINCT session_id, regexp_replace(mission, '-fortify-2fa(-upgrade)?$', ''), 'passkeyOrApp' FROM rc_mc
+SELECT DISTINCT session_id, regexp_replace(mission, '-fortify-2fa(-upgrade)?$', ''), 'passkeyOrApp' FROM rc_latest
  WHERE status = 'completed'
    AND ((mission LIKE '%-fortify-2fa' AND method IN ('passkey', 'authenticator'))
         OR mission LIKE '%-fortify-2fa-upgrade')

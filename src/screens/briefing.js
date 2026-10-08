@@ -5,11 +5,10 @@ import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
 import { missionDistrict } from '../data/missions.js';
 import { missionSteps } from '../utils/debrief.js';
-import { isPasswordMission, passwordResetNeed, notNeededReasons, isPmFlagged, passwordReconNotes, reopenReasonLine, PM_MISSION_ID } from '../utils/password-need.js';
+import { isPasswordMission, passwordResetNeed, notNeededReasons, emailBreachRecord, isPmFlagged, passwordReconNotes, reopenReasonLine, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
-import { EMAIL_ACCOUNT_IDS } from '../utils/calc.js';
 
 function notFound(state) {
   return `
@@ -59,7 +58,7 @@ export function renderBriefing(state, missionId, opts = {}) {
     return `
     <div style="display: flex; gap: 14px; align-items: flex-start;">
       <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--cyan); width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">${num}</div>
-      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5;">${body}</div>
+      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}</div>
     </div>`;
   }).join('');
 
@@ -155,7 +154,7 @@ function reopenedLine(state, mission) {
 // Only an email address has a breach check that means anything here; any
 // other account's not-needed came from its own evidence (pw-clean).
 function noResetScoutLine(state, mission) {
-  const breach = EMAIL_ACCOUNT_IDS.has(mission.accountId) ? state.missions[`${mission.accountId}-recon-breach`] : null;
+  const breach = emailBreachRecord(state, mission.accountId);
   if (breach?.status === 'completed' && breach.finding === 'no-breaches') return PASSWORD_DIALOGUE.notNeeded;
   if (breach?.status === 'completed' && breach.finding) return PASSWORD_DIALOGUE.notNeededAfterLeak;
   return PASSWORD_DIALOGUE.notNeededPm;

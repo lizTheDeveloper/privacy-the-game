@@ -31,7 +31,7 @@ const BASE_ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/icloud.png',
     buildingDark: 'assets/buildings/icloud_dark.png',
-    securityUrl: 'https://www.icloud.com/settings/',
+    securityUrl: 'https://account.apple.com',
     riskLevel: 'high',
   },
   yahoo: {
@@ -55,7 +55,7 @@ const BASE_ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/apple_id.png',
     buildingDark: 'assets/buildings/apple_id_dark.png',
-    securityUrl: 'https://www.icloud.com/settings/',
+    securityUrl: 'https://account.apple.com',
     riskLevel: 'high',
   },
   google: {

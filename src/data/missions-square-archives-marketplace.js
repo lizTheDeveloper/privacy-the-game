@@ -79,6 +79,21 @@ const LOCKDOWN_DEBRIEF = [
   },
 ];
 
+// Each messenger's lock by its own name (Signal: registration lock PIN;
+// WhatsApp: two-step verification PIN; Telegram: two-step password). Same id
+// and values as REGISTRATION_LOCK_DEBRIEF; words only.
+function lockDebrief(label, yes) {
+  return [{
+    id: 'action',
+    label,
+    options: [
+      { value: 'enabled-2fa', text: yes, severity: 'safe' },
+      { value: 'already-enabled', text: 'It was already on', severity: 'safe' },
+      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+    ],
+  }];
+}
+
 const REGISTRATION_LOCK_DEBRIEF = [
   {
     id: "action",
@@ -112,6 +127,66 @@ const PASSWORD_HEALTH_DEBRIEF = [
       { value: "no-breaches", text: 'All unique -- no reuse', severity: 'safe' },
       { value: "1-2-breaches", text: 'Found reused passwords -- changed them', severity: 'warn' },
       { value: "3plus-breaches", text: 'Found reused passwords -- still need to change some', severity: 'crit' },
+      { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
+    ],
+  },
+];
+
+// The same values as LOGIN_DEBRIEF, worded for a device list (audit #35).
+const DEVICE_DEBRIEF = [
+  {
+    id: 'finding',
+    label: 'What did you find?',
+    options: [
+      { value: 'no-breaches', text: 'All my devices', severity: 'safe' },
+      { value: '1-2-breaches', text: 'A device I don’t recognize', severity: 'warn' },
+      { value: '3plus-breaches', text: 'Several I don’t recognize', severity: 'crit' },
+      { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
+    ],
+  },
+];
+
+// Discord's apps and sessions (audit #41). Same values as LOGIN_DEBRIEF.
+const TOKEN_DEBRIEF = [
+  {
+    id: 'finding',
+    label: 'What did you find?',
+    options: [
+      { value: 'no-breaches', text: 'Nothing suspicious', severity: 'safe' },
+      { value: '1-2-breaches', text: 'Found an app or session I don’t recognize', severity: 'warn' },
+      { value: '3plus-breaches', text: 'Confirmed someone else was in', severity: 'crit' },
+      { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
+    ],
+  },
+];
+
+// X's connected apps (audit #34): a new question id. A save from before it
+// answered the login-style finding, which still shows (question.legacy).
+const APPS_AUDIT_DEBRIEF = [
+  {
+    id: 'apps_audit',
+    label: 'What did you find in Apps and sessions?',
+    legacy: LOGIN_DEBRIEF[0],
+    options: [
+      { value: 'apps-clean', text: 'Nothing I don’t use', severity: 'safe' },
+      { value: 'apps-revoked', text: 'Revoked old apps', severity: 'safe' },
+      { value: 'apps-unknown', text: 'Found an app or session I don’t recognize', severity: 'warn' },
+      { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
+    ],
+  },
+];
+
+// Google Drive's link-sharing audit (audit #44): a new question id. A save
+// from before it answered the login-style finding, which still shows.
+const SHARES_AUDIT_DEBRIEF = [
+  {
+    id: 'shares_audit',
+    label: 'What did you find?',
+    legacy: LOGIN_DEBRIEF[0],
+    options: [
+      { value: 'shares-none', text: 'No open links on anything sensitive', severity: 'safe' },
+      { value: 'shares-restricted', text: 'Found some and restricted them', severity: 'safe' },
+      { value: 'shares-many', text: 'Lots of sensitive files were open', severity: 'warn' },
       { value: 'skip', text: `Couldn't check right now`, severity: 'skip' },
     ],
   },
@@ -151,7 +226,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Type the email address linked to your Instagram into the search box and press Enter' },
-      { text: 'Read the results -- look for "Instagram" or Instagram-adjacent services (like the 2019 Chtrbox scrape)' },
+      { text: 'Read the results -- look for the breach named "Instagram" (a January 2026 scrape, no passwords)' },
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -204,7 +279,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       briefing: '"Instagram usernames have resale value. A strong password plus an authenticator app is the difference between keeping your handle and finding it selling crypto."',
       debrief: {
         'reset-password': '"New password and 2FA active. Your carefully curated online persona is much harder to steal."',
-        'already-strong': `"Already locked down. You're ahead of about 98% of Instagram users."`,
+        'already-strong': `"Already locked down. Good."`,
         'partial': '"Password done -- good start. Come back for 2FA soon. Social accounts are SIM-swap targets."',
         'later': `"Your social identity is a target. Don't sit on this."`,
       },
@@ -219,9 +294,9 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Instagram defaults to sharing a lot: your activity status, who can message you, whether your account is public, and how much data feeds Meta's ad machine. Most of these are toggles that take thirty seconds each.`,
     steps: [
       { text: `Open Instagram → ☰ → Settings and privacy → "Account privacy" -- set to Private if you want only followers to see your posts` },
-      { text: `Under "How others can interact with you" → turn off "Activity Status" (stops showing when you're online)` },
+      { text: `In Instagram's settings, find Activity Status and turn it off (stops showing when you're online)` },
       { text: 'Go to "Messages and story replies" → set "Message controls" to restrict who can DM you' },
-      { text: 'Go to Accounts Center → "Your information and permissions" → "Your activity off Meta technologies" → disconnect tracking' },
+      { text: 'In Accounts Center, look for the setting about activity from other businesses and review it (it changes how Meta uses that activity, not whether businesses send it)' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -265,19 +340,24 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: 'Connected Apps Audit: Twitter / X',
     briefing: `Over the years you've probably authorized dozens of Twitter apps -- scheduling tools, analytics, games, "What Hogwarts house are you" quizzes. Each one still has access to your account unless you revoke it.`,
     steps: [
-      { text: 'Open Twitter Connected Apps', url: 'https://x.com/settings/connected_apps' },
+      { text: 'Open X → Settings and privacy → Security and account access → Apps and sessions → Connected apps', url: 'https://x.com/settings/connected_apps' },
       { text: 'Review every app in the list -- check what permissions each has (read, write, DMs)' },
-      { text: `Click "Revoke access" on anything you don't actively use or recognize` },
-      { text: `While you're there, check "Sessions" for any you don't recognize` },
+      { text: 'Revoke access on anything you don’t actively use or recognize' },
+      { text: 'Back in Apps and sessions, open Sessions and log out any you don’t recognize' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: APPS_AUDIT_DEBRIEF,
     scoutDialog: {
       briefing: '"Some of these connected apps are from 2014 and have write access to your account. That quiz about which sandwich you are still has permission to tweet as you."',
-      debrief: scoutLogin(
+      debrief: {
+        'apps-clean': '"Nothing you don’t use. Nobody else holds a key here."',
+        'apps-revoked': '"Old apps revoked. Dead integrations with write access are better gone."',
+        'apps-unknown': '"An app or session you don’t recognize. Revoke it, change your password, and check for posts you didn’t make."',
+        ...scoutLogin(
         '"All clean -- no suspicious apps or sessions."',
         '"Found some old apps. Revoking dead integrations is always the right call."',
         `"Yikes -- unauthorized app with write access. Revoke it, change your password, and check for any posts you didn't make."`,
       ),
+      },
     },
     estimatedMinutes: 5,
   },
@@ -310,7 +390,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "twitter",
     phase: "reclaim",
     title: "Privacy Review: Twitter / X",
-    briefing: `Twitter lets people find you by email and phone number by default. That's how the 2023 scrape worked -- and it's still on unless you turned it off. The discoverability toggles are the most important settings here.`,
+    briefing: `X has settings for whether people who have your email address or phone number can find you. A lookup like that is how the 200-million-address scrape was built. Check those settings first.`,
     steps: [
       { text: 'Open Twitter Privacy', url: 'https://x.com/settings/audience_and_tagging' },
       { text: `Under "Discoverability and contacts" → turn OFF "Let people who have your email address find you" and same for phone` },
@@ -319,7 +399,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"Twitter lets people find you by phone number and email by default. That's exactly how the 200-million-address scrape worked. Turn those off."`,
+      briefing: `"Check whether people with your email or phone number can find you. A lookup like that is how the 200-million-address scrape was built."`,
       debrief: {
         "tightened": '"Discoverability settings tightened. Harder for scrapers to tie your account to your real identity."',
         "already-tight": '"Already locked down. You clearly learned from the scrape."',
@@ -337,12 +417,11 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Device Check: TikTok",
     briefing: "TikTok collects more data than most platforms -- keystroke patterns, clipboard contents, device identifiers, face and voice data from your videos. An unauthorized device gets access to all of it, plus your DMs and drafts.",
     steps: [
-      { text: 'In TikTok app: Profile → ☰ → Settings and privacy → Security → Devices' },
-      { text: `Tap "Manage devices" -- review every device listed` },
-      { text: "Remove any device you don't recognize or no longer use" },
-      { text: `While you're here, check haveibeenpwned.com for the email/phone linked to TikTok`, url: `https://haveibeenpwned.com` },
+      { text: 'In the TikTok app, open Settings and privacy, then its security section (Security & permissions on recent versions), then Manage devices' },
+      { text: 'Review every device listed' },
+      { text: 'Remove any device you don’t recognize or no longer use' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: DEVICE_DEBRIEF,
     scoutDialog: {
       briefing: '"TikTok knows your face, your voice, your typing patterns, and your attention span. The device list tells you who else has access to that profile."',
       debrief: scoutLogin(
@@ -360,7 +439,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: TikTok",
     briefing: "TikTok accounts are targets for both credential theft and content hijacking. An authenticator app is recommended over SMS -- social media accounts are prime SIM-swap targets.",
     steps: [
-      { text: "Open TikTok → Profile → ☰ → Settings and privacy → Security" },
+      { text: "Open TikTok → Settings and privacy → its security section" },
       { text: `Tap "Password" → open your password manager, generate a 20+ character random password, save it, paste into both fields` },
       { text: `Go back to Security → "2-Step Verification" → choose "Authenticator App"` },
       { text: "Open your authenticator app, scan the QR code, enter the 6-digit code to confirm" },
@@ -435,7 +514,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open LinkedIn Settings', url: 'https://www.linkedin.com/psettings/sign-in-and-security' },
       { text: `Click "Where you're signed in"` },
       { text: "Review every session -- end any you don't recognize" },
-      { text: `Also check "Permitted services" for old app integrations and revoke unused ones` },
+      { text: 'Also open Data privacy → Other applications → Permitted services, and remove old app integrations you don’t use' },
     ],
     debriefQs: LOGIN_DEBRIEF,
     scoutDialog: {
@@ -453,7 +532,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "linkedin",
     phase: "fortify",
     title: "Lockdown: LinkedIn",
-    briefing: `Given LinkedIn's 2012 breach (unsalted SHA-1 hashes cracked in hours), any password from that era is long compromised. LinkedIn supports authenticator apps -- it's the primary defense against the spear-phishing that targets professional accounts.`,
+    briefing: `Given LinkedIn's 2012 breach (unsalted SHA-1 hashes, most cracked soon after), change any password from that era. LinkedIn supports authenticator apps: with one, a stolen password alone isn’t enough. A code phished from you still is, so check links too.`,
     steps: [
       { text: 'Open LinkedIn Sign-in & Security', url: 'https://www.linkedin.com/psettings/sign-in-and-security' },
       { text: 'Click "Change password" -- open your password manager, generate a 20+ character random password, save it, paste into both fields' },
@@ -466,7 +545,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       debrief: {
         "reset-password": `"Locked down. Recruiters can still spam you, but at least they'll be real recruiters."`,
         'already-strong': '"Already solid. Professional paranoia is a virtue."',
-        'partial': '"Password done. LinkedIn phishing is extremely effective -- 2FA blocks it."',
+        'partial': '"Password done. Add 2FA when you can: it stops a stolen password from being enough on its own."',
         'later': '"LinkedIn phishing is the most effective on the internet because people expect professional messages. Protect the account."',
       },
     },
@@ -477,7 +556,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'linkedin',
     phase: 'reclaim',
     title: 'Privacy Review: LinkedIn',
-    briefing: 'LinkedIn defaults your connections list to public and lets people find you by email and phone. These settings feed recruiter spam, data scrapers, and social engineering attacks. The privacy controls are buried but functional.',
+    briefing: 'LinkedIn lets your connections see your connections list by default, and lets people find you by email and phone. These settings feed recruiter spam, data scrapers, and social engineering attacks. The privacy controls are buried but functional.',
     steps: [
       { text: 'Open LinkedIn Visibility Settings', url: 'https://www.linkedin.com/psettings/privacy' },
       { text: 'Under "Visibility" → "Who can see your connections" → set to "Only you"' },
@@ -486,7 +565,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"LinkedIn shows your connections to everyone by default. That's your entire professional network, visible to anyone with an account. Fix that first."`,
+      briefing: `"By default your connections can browse your whole connections list. Decide who should see your network, then fix that first."`,
       debrief: {
         "tightened": `"Connections hidden, discoverability restricted. Your professional network is no longer a public directory."`,
         "already-tight": `"Already locked down. LinkedIn's privacy settings are deeply buried -- respect for finding them."`,
@@ -505,7 +584,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `WhatsApp Web and Desktop create linked sessions. If someone scanned your QR code when you weren't looking -- even for five seconds -- they've had a live mirror of every conversation since.`,
     steps: [
       { text: 'Open WhatsApp on your phone' },
-      { text: 'Tap "Settings" (gear icon) → "Linked Devices"' },
+      { text: 'iPhone: Settings → Linked Devices. Android: ⋮ (top right) → Linked devices' },
       { text: 'Review every linked device listed -- each one can see all your messages in real time' },
       { text: `Tap any device you don't recognize → "Log Out"` },
     ],
@@ -525,20 +604,20 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'whatsapp',
     phase: 'fortify',
     title: 'Registration Lock: WhatsApp',
-    briefing: `WhatsApp doesn't use passwords -- it uses your phone number. Without a registration lock PIN, anyone who SIM-swaps your phone number can steal your WhatsApp account in seconds. The PIN blocks this.`,
+    briefing: `WhatsApp doesn't use passwords -- it uses your phone number. Without a two-step verification PIN, anyone who SIM-swaps your phone number can register your WhatsApp account on their phone. The PIN makes them wait.`,
     steps: [
       { text: 'Open WhatsApp → Settings → Account → Two-Step Verification' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Tap Turn on, choose a 6-digit PIN and enter it twice' },
       { text: 'Add a recovery email address -- this lets you reset the PIN if you forget it' },
-      { text: 'Done -- this PIN is now required any time someone tries to register your number on a new device' },
+      { text: 'Done -- registering your number on a new phone now needs this PIN, or a 7-day wait from your account’s last use (WhatsApp’s rule when the PIN is unknown)' },
     ],
-    debriefQs: REGISTRATION_LOCK_DEBRIEF,
+    debriefQs: lockDebrief('Did you set a two-step verification PIN?', 'Yes, PIN is set'),
     scoutDialog: {
-      briefing: `"WhatsApp's "password" is a registration lock PIN. Without it, someone who steals your phone number steals your entire chat history. SIM-swap attacks make this real."`,
+      briefing: `"WhatsApp’s “password” is its two-step verification PIN. Without it, someone who steals your phone number can register your account on their phone. SIM-swap attacks make this real."`,
       debrief: {
-        "enabled-2fa": `"Registration PIN set. Your WhatsApp is now SIM-swap resistant."`,
+        "enabled-2fa": `"Registration PIN set. Someone with your number now needs the PIN, or has to wait a week."`,
         "already-enabled": `"Already had a PIN. Good -- most people skip this."`,
-        "later": `"This is how WhatsApp hijacking works: steal the number, register on a new phone. The PIN blocks that."`,
+        "later": `"This is how WhatsApp hijacking works: steal the number, register on a new phone. The PIN makes them wait a week."`,
       },
     },
     estimatedMinutes: 3,
@@ -574,10 +653,10 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'signal',
     phase: 'recon',
     title: 'Linked Devices: Signal',
-    briefing: 'Signal stores almost nothing server-side -- no message history, no contacts, no metadata. But Signal Desktop and iPad create linked sessions that see all new messages in real time. An unknown linked device defeats the whole point of using Signal.',
+    briefing: 'Signal keeps almost nothing server-side -- no message history, no contact lists. What it can hand over is when you registered and when you last connected. But Signal Desktop and iPad create linked sessions that see all new messages in real time. An unknown linked device defeats the whole point of using Signal.',
     steps: [
       { text: 'Open Signal on your phone' },
-      { text: 'Tap your profile icon → "Linked Devices"' },
+      { text: 'Android: tap your profile picture → Linked devices. iPhone: Settings → Linked devices' },
       { text: `Review every linked device -- remove any you don't use or recognize` },
     ],
     debriefQs: LOGIN_DEBRIEF,
@@ -600,7 +679,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open Signal → tap your profile icon → Settings → Account' },
       { text: 'Tap "Registration Lock" → toggle it ON' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Set or confirm your Signal PIN when asked: it’s what the lock checks' },
       { text: 'Signal will remind you of the PIN periodically to help you remember it' },
     ],
     debriefQs: REGISTRATION_LOCK_DEBRIEF,
@@ -643,20 +722,20 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "discord",
     phase: "recon",
     title: "Token & App Audit: Discord",
-    briefing: "Discord token-stealing malware is an entire genre. A stolen token gives full account access without needing your password -- it bypasses 2FA entirely. The fix is checking active sessions and authorized apps, then changing your password (which invalidates all tokens).",
+    briefing: "Discord token-stealing malware is an entire genre. A stolen token can act as you without your password, because it’s a session that has already signed in. The check is the apps you’ve authorized and any sessions Discord shows you, then a new password if anything looks wrong.",
     steps: [
-      { text: 'Open Discord Settings', url: 'https://discord.com/channels/@me' },
-      { text: `Click the gear icon → "Devices" → review all active sessions and remove unknowns` },
-      { text: `Go to "Authorized Apps" → review every app with access → click "Deauthorize" on anything you don't actively use` },
-      { text: "If you found anything suspicious, change your password immediately -- this kills all stolen tokens" },
+      { text: 'Open Discord and click the cog (User Settings)', url: 'https://discord.com/channels/@me' },
+      { text: 'Go to Authorized Apps → Deauthorize anything you don’t actively use' },
+      { text: 'If you see Devices in your settings, review the sessions there and log out any you don’t recognize. If you don’t have it, skip this' },
+      { text: 'Found anything suspicious? Change your password, and turn on two-factor if it’s off' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: TOKEN_DEBRIEF,
     scoutDialog: {
-      briefing: '"Discord token stealers are a whole genre of malware. A stolen token bypasses 2FA. The only fix is changing your password, which invalidates every token in existence for your account."',
+      briefing: '"Discord token stealers are a whole genre of malware. A stolen token gets in without your password or your 2FA code. Know what has access, and cut off what you don’t recognize."',
       debrief: scoutLogin(
         '"All clear. No stolen tokens detected."',
-        '"Found a suspicious session or app. Revoking it and changing your password kills the token."',
-        '"Unauthorized access. Password change immediately -- that invalidates every active token."',
+        '"Something you don’t recognize. Deauthorize it and change your password."',
+        '"Someone else was in. Change your password now, log out anything you don’t recognize, and turn on two-factor."',
       ),
     },
     estimatedMinutes: 5,
@@ -666,7 +745,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "discord",
     phase: "fortify",
     title: "Lockdown: Discord",
-    briefing: "Changing your Discord password invalidates all active tokens -- it's both a password reset and a session wipe. 2FA adds a second layer, and backup codes are critical because losing your authenticator without codes means losing the account.",
+    briefing: "A new, unique password and 2FA are the lockdown. Backup codes are critical because losing your authenticator without codes means losing the account.",
     steps: [
       { text: 'Open Discord Settings → "My Account"', url: 'https://discord.com/channels/@me' },
       { text: `Click "Change Password" -- open your password manager, generate a 20+ character random password, save it, paste it in` },
@@ -675,12 +754,12 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
-      briefing: '"New password kills all existing tokens. 2FA blocks future token theft from being enough on its own. Backup codes prevent you from locking yourself out. All three, in that order."',
+      briefing: '"New password, then 2FA, then backup codes so you can’t lock yourself out. All three, in that order."',
       debrief: {
-        "reset-password": '"Password changed (tokens killed), 2FA active, backup codes saved. Your Discord is properly fortified."',
+        "reset-password": '"Password changed, 2FA active, backup codes saved. Your Discord is properly fortified."',
         "already-strong": '"Already locked down. Make sure those backup codes are still accessible."',
-        "partial": '"Password changed -- good, tokens are killed. Come back for 2FA. Without it, a new token steal works again."',
-        "later": `"Discord token theft is the most common way accounts get hijacked in gaming communities. Don't wait."`,
+        "partial": '"Password changed -- good. Come back for 2FA: it’s the second lock."',
+        "later": `"Discord accounts get hijacked through stolen tokens and reused passwords. Don't wait."`,
       },
     },
     estimatedMinutes: 5,
@@ -737,7 +816,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "reddit",
     phase: "fortify",
     title: "Lockdown: Reddit",
-    briefing: "Reddit supports 2FA via authenticator apps. Given the 2018 breach, if your password is old, it's been on dark-web dump lists for years. A unique password protects your pseudonymous identity.",
+    briefing: "Reddit supports 2FA via authenticator apps. Reddit's 2018 breach took a 2007 backup, so a password from 2007 or earlier should go. A unique password protects your pseudonymous identity.",
     steps: [
       { text: 'Open Reddit Settings', url: 'https://www.reddit.com/settings/' },
       { text: `Under "Account" → "Change password" -- open your password manager, generate a 20+ character random password, save it, paste in` },
@@ -751,7 +830,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
         'reset-password': '"Locked down. Your Reddit identity is re-secured."',
         'already-strong': '"Already solid. Good discipline on a pseudonymous account."',
         'partial': '"Password done. 2FA is quick on Reddit -- come back."',
-        'later': '"If this password is from before 2018, it was in the breach. Come back."',
+        'later': '"Reddit’s 2018 breach took a 2007 backup. If your account and password date from 2007 or earlier, change it. Come back."',
       },
     },
     estimatedMinutes: 5,
@@ -812,15 +891,15 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Telegram relies on SMS codes by default. Anyone who can intercept your texts -- through SIM-swapping, SS7 attacks, or a compromised carrier employee -- can take over your account instantly. The two-step password blocks this. It's Telegram's single most important security setting.`,
     steps: [
       { text: 'Open Telegram → Settings → Privacy and Security → Two-Step Verification' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Set a password: a strong one from your password manager, different from everything else' },
       { text: `Add a recovery email address -- use one you've already secured` },
       { text: 'Check the confirmation email Telegram sends to verify the recovery address' },
     ],
-    debriefQs: REGISTRATION_LOCK_DEBRIEF,
+    debriefQs: lockDebrief('Did you set a two-step verification password?', 'Yes, password is set'),
     scoutDialog: {
       briefing: `"Telegram's two-step password is the single most important setting. Without it, anyone who intercepts one SMS code owns your entire account. SIM-swap attacks make this real, not theoretical."`,
       debrief: {
-        "enabled-2fa": `"Two-step password set. Telegram is now resistant to SMS interception and SIM-swap attacks."`,
+        "enabled-2fa": `"Two-step password set. An intercepted SMS code alone no longer gets someone in."`,
         "already-enabled": `"Already set. The right call for a phone-number-based messenger."`,
         "later": `"If you use Telegram for anything private, this is critical. SMS can be intercepted."`,
       },
@@ -891,18 +970,23 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Every "Anyone with the link" share in Google Drive is a public URL to your file. Over years of collaboration, you've probably shared tax returns, contracts, or ID scans with links that are still active. If that link ends up in a search index or a Slack channel that gets scraped, the file is effectively public.`,
     steps: [
       { text: 'Open Google Drive', url: 'https://drive.google.com' },
-      { text: `In the search bar, type "type:document" or "type:spreadsheet" and click the sharing icon to filter shared files` },
-      { text: `Look for files shared as "Anyone with the link" -- right-click → "Share" → change to "Restricted" for sensitive ones` },
-      { text: `Check "Shared with me" for files others shared that you may have reshared` },
+      { text: 'Find files shared with “Anyone with the link”, using Drive’s search filters or the search sharedwith:public' },
+      { text: 'For each sensitive file (ID scans, tax returns, contracts): right-click → Share → General access → Restricted' },
+      { text: 'Check “Shared with me” for files others shared that you may have reshared' },
     ],
-    debriefQs: LOGIN_DEBRIEF,
+    debriefQs: SHARES_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: `"Every 'Anyone with the link" share is a public URL. If that link leaked -- in a Slack channel, an email, a forum post -- your document is effectively a public web page."`,
-      debrief: scoutLogin(
-        '"No sensitive documents with open links. Clean file system."`',
-        '"Found some open shares. Restricting access on the sensitive ones is the right call."`',
-        '"Multiple sensitive docs with public links. Those are effectively public web pages. Lock them down."`',
-      ),
+      briefing: `"Every 'Anyone with the link' share is a public URL. If that link leaked -- in a Slack channel, an email, a forum post -- your document is effectively a public web page."`,
+      debrief: {
+        'shares-none': '"No sensitive documents with open links. Clean file system."',
+        'shares-restricted': '"Found some open shares and restricted them. That’s the right call."',
+        'shares-many': '"Lots of sensitive docs with open links. Those are effectively public web pages. Restrict them when you can."',
+        ...scoutLogin(
+          '"No sensitive documents with open links. Clean file system."',
+          '"Found some open shares. Restricting access on the sensitive ones is the right call."',
+          '"Multiple sensitive docs with public links. Those are effectively public web pages. Lock them down."',
+        ),
+      },
     },
     estimatedMinutes: 8,
   },
@@ -968,12 +1052,12 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
-      briefing: '"Dropbox syncs to every linked device. An unknown device in this list already has copies of your files. Unlink first, then change the password to invalidate everything."',
+      briefing: '"Dropbox syncs to every linked device. An unknown device in this list already has copies of your files. Unlink first, then change the password."',
       debrief: {
         "reset-password": '"Devices audited, password changed, 2FA enabled. Your file archive is properly secured."',
         "already-strong": `"Already locked down. Good -- Dropbox's breach history makes this important."`,
         "partial": `"Password changed. Come back for 2FA -- it's the safety net for when passwords leak again."`,
-        "later": `"Dropbox had a major breach. If this password is old, it's compromised."`,
+        "later": `"Dropbox's 2012 breach took passwords, and Dropbox reset old ones in 2016. If yours is older than that, change it."`,
       },
     },
     estimatedMinutes: 8,
@@ -1009,20 +1093,20 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'github',
     phase: 'recon',
     title: 'Security Log: GitHub',
-    briefing: 'GitHub provides a detailed security log showing authentication events, SSH key usage, and personal access token activity. An unfamiliar event means someone may have cloned your private repos -- silently downloading your code and any secrets in the commit history.',
+    briefing: 'GitHub’s security log shows sign-ins and changes to your account: new SSH keys, new tokens, new app grants. It doesn’t list each clone. An event you didn’t make can mean someone added a key or token that would let them clone your private repos, along with any secrets in the commit history.',
     steps: [
-      { text: 'Open GitHub Security Settings', url: 'https://github.com/settings/security' },
-      { text: 'Click "Security log" in the sidebar → review recent events' },
-      { text: 'Look for unfamiliar IP addresses, SSH key usage, or API token activity' },
-      { text: 'Under "Sessions" → review active sessions and sign out of any unknowns' },
+      { text: 'Open your security log. Review the last 90 days for sign-ins, new SSH keys, new tokens or OAuth grants you didn’t make', url: 'https://github.com/settings/security-log' },
+      { text: 'Open Sessions and revoke any you don’t recognize', url: 'https://github.com/settings/sessions' },
+      { text: 'Check your SSH keys and delete any you don’t recognize', url: 'https://github.com/settings/keys' },
+      { text: 'Check your personal access tokens and delete any you don’t recognize', url: 'https://github.com/settings/tokens' },
     ],
     debriefQs: LOGIN_DEBRIEF,
     scoutDialog: {
-      briefing: `"GitHub's security log shows every auth event. An unfamiliar SSH key usage or API call means someone may have cloned your private repos -- that's silent data exfiltration."`,
+      briefing: `"The security log shows keys and tokens being added, not each download. A key you didn't add is a door someone else can use."`,
       debrief: scoutLogin(
-        '"All recognized activity. Your repos are untouched."`',
-        '"Unfamiliar activity. Revoke the token or key and rotate your credentials."`',
-        '"Unauthorized access to GitHub. Assume private repos were cloned. Rotate ALL keys and tokens."`',
+        '"All recognized activity. Nothing in the log you didn’t do."',
+        '"Unfamiliar activity. Revoke the token or key and rotate your credentials."',
+        '"Unauthorized access to GitHub. Treat your private repos as copied. Rotate ALL keys and tokens."',
       ),
     },
     estimatedMinutes: 5,
@@ -1068,7 +1152,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     scoutDialog: {
       briefing: `"The most dangerous thing in a repo isn't the code -- it's the API key someone committed in 2021 and then deleted the file. The commit history still has it. GitHub's secret scanning catches the common patterns."`,
       debrief: {
-        "no-breaches": '"No exposed secrets detected. Clean repos."',
+        "no-breaches": '"No alerts. On a free plan, secret scanning covers public repos only, so check private ones by hand."',
         "1-2-breaches": '"Found and rotated secrets. Good catch -- those were live credentials in your commit history."',
         "3plus-breaches": `"Multiple exposed secrets. The ones you haven't rotated yet are still live. Prioritize cloud credentials and API keys."`,
         "skip": '"Worth doing when you have time. Old commits hide old secrets."',
@@ -1112,10 +1196,10 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Lockdown: Amazon",
     briefing: "Amazon stores payment methods and your home address. 2FA here prevents unauthorized purchases even if your password leaks from another service. One reused password + one breach = someone else's packages on your card.",
     steps: [
-      { text: 'Open Amazon Login & Security', url: 'https://www.amazon.com/gp/css/account/info/ref=ya_manage_login_and_security' },
+      { text: 'Open Your Account → Login & security', url: 'https://www.amazon.com/your-account' },
       { text: `Click "Edit" next to Password → open your password manager, generate a random 20+ character password, save it, paste in` },
-      { text: `Click "Edit" next to "Two-Step Verification (2SV)" → click "Get Started"` },
-      { text: `Choose "Authenticator app" → scan the QR code → enter the 6-digit code to confirm` },
+      { text: `In Login & security, turn on two-step verification` },
+      { text: `Choose an authenticator app if offered, scan the QR code, and enter the code to confirm` },
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
@@ -1168,7 +1252,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PASSWORD_HEALTH_DEBRIEF,
     scoutDialog: {
-      briefing: `"Streaming accounts sell for two dollars on the dark web. The real risk isn't losing Netflix -- it's that the password you used for Netflix is the same one you used for your email. Your password manager tells you in thirty seconds."`,
+      briefing: `"The real risk isn't losing Netflix -- it's that the password you used for Netflix is the same one you used for your email. Your password manager tells you in thirty seconds."`,
       debrief: {
         'no-breaches': '"All unique. No reuse vectors from your streaming accounts."',
         '1-2-breaches': '"Found reused passwords and changed them. You just closed a cascade path."',
@@ -1189,15 +1273,15 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email linked to your eBay account' },
-      { text: 'The 2014 eBay breach exposed names, addresses, phone numbers, and dates of birth -- not just passwords' },
+      { text: 'Have I Been Pwned doesn’t list the 2014 eBay breach. If you had eBay before 2014, treat that data as out there anyway' },
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
       briefing: `eBay lost 145 million records in 2014. Encrypted passwords, yes, but also names, physical addresses, phone numbers, and dates of birth. That's identity theft material, not just a password problem.`,
       debrief: scoutBreach(
         '"Clean. New account or genuinely unaffected."',
-        `"Expected for eBay. If that password hasn't changed since 2014, it's been cracked for a decade."`,
-        `"Multiple breaches including eBay's own. Your name, address, and phone were in that dump. A credit freeze helps."`,
+        `"Found some exposure on this address. If your eBay password hasn't changed since 2014, change it."`,
+        `"Multiple breaches on this address. eBay's own 2014 breach isn't even in that list. A credit freeze helps."`,
       ),
     },
     estimatedMinutes: 3,
@@ -1207,7 +1291,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "ebay",
     phase: "fortify",
     title: "Lockdown: eBay",
-    briefing: "eBay stores your payment methods and shipping address. A unique password and 2FA prevent someone from placing purchases or listing stolen goods under your name. Given the 2014 breach, any old password is definitely compromised.",
+    briefing: "eBay stores your payment methods and shipping address. A unique password and 2FA prevent someone from placing purchases or listing stolen goods under your name. If your password is from before eBay's 2014 breach, change it: that breach took encrypted passwords.",
     steps: [
       { text: 'Open eBay Account Security', url: 'https://www.ebay.com/myb/AccountSettings' },
       { text: `Under "Sign-in and Security" → "Password" → change it -- open your password manager, generate 20+ characters, save, paste` },
@@ -1237,15 +1321,15 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Uber account" },
-      { text: "Also check the phone number -- Uber's 2016 breach included phone numbers and driver's license numbers" },
+      { text: "Have I Been Pwned doesn't list Uber's 2016 breach, so a clean result here doesn't clear Uber" },
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
-      briefing: `"Uber got breached in 2016 and paid the hackers $100,000 to keep quiet about 57 million records. Names, email addresses, phone numbers, driver's license numbers. They didn't tell anyone for a year."`,
+      briefing: `"Uber got breached in 2016 and paid the hackers $100,000 to keep quiet about 57 million records. Names, email addresses and phone numbers; the license numbers were drivers'. They didn't tell anyone for a year."`,
       debrief: scoutBreach(
-        '"Clean. Either a new account or you dodged the cover-up breach."',
-        `"Found in a breach. Uber's 2016 incident exposed emails, phone numbers, and license numbers."`,
-        `"Multiple breaches. Your data was part of the breach Uber tried to pay off and pretend didn't happen."`,
+        '"Clean on this list. Uber’s 2016 breach isn’t in it, so that one stays an unknown."',
+        `"Found in a breach. Not Uber's own -- that one isn't in the list -- but the password question still matters."`,
+        `"Multiple breaches on this address. If your Uber password matches any of them, change it."`,
       ),
     },
     estimatedMinutes: 3,
@@ -1261,7 +1345,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: "Change your password to a unique one -- open your password manager, generate 20+ characters, save, paste" },
       { text: 'Go to Uber Privacy Settings', url: 'https://account.uber.com/privacy' },
       { text: `Review "Data sharing" and "Advertising preferences" -- limit what you can` },
-      { text: `Consider downloading your data (Uber → Account → Privacy → "Download your data") to see what they have` },
+      { text: `Consider requesting a copy of your data from Uber’s privacy settings to see what they have` },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -1291,7 +1375,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: "Open your profile. Scroll to your very earliest post. Note the year — that's your starting line." },
       { text: "Count your posts (it's in your profile header). This tells you how big the job is." },
-      { text: "Download your data now — it takes time to generate: Settings > Your activity > Download your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
+      { text: "Export your data now — it takes time to generate: Settings → Accounts Center → Your information and permissions → Export your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
       { text: "While that processes, look at your story archive: Profile > Menu > Archive. These were 'temporary' but Instagram kept them all." },
     ],
     debriefQs: [{ id: 'finding', label: 'How old is your account?', options: [
@@ -1414,7 +1498,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: "Check your account age: open About on your profile, look for 'Joined Facebook' date" },
       { text: "Open Activity Log — this is your master record", url: "https://www.facebook.com/allactivity" },
-      { text: "Download your data: Settings > Your information > Download your information", url: "https://www.facebook.com/your_information/" },
+      { text: 'Export your data: Settings & privacy → Settings → Accounts Center → Your information and permissions → Export your information', url: 'https://accountscenter.facebook.com/' },
       { text: "Check which apps still have access: Settings > Apps and websites. Revoke old ones now while you're here." },
     ],
     debriefQs: [{ id: 'finding', label: 'How long have you been on Facebook?', options: [
@@ -1510,7 +1594,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: "Review your most recent 1-2 years of posts." },
       { text: "Check all tagged photos: Activity Log > Photos and videos > Photos and videos of you." },
       { text: "Review posts others shared on your timeline that you may not have noticed." },
-      { text: "Settings > Memories: control what Facebook resurfaces to you (and potentially shows friends)." },
+      { text: "In Facebook’s Memories settings, control what it resurfaces to you." },
       { text: "Final check: view your profile as a stranger (Profile > three dots > 'View As'). What do they see?" },
     ],
     debriefQs: [{ id: 'finding', label: 'How does the finished review feel?', options: [
@@ -1562,12 +1646,12 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'twitter',
     phase: 'reclaim',
     title: 'Memory Lane: X / Twitter Year Review',
-    briefing: "Pick a year and go through your tweets from that period. Search 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31' to filter. Hot takes age badly. Reply-guy energy from 2016 reads different in 2026. And your likes are public too — check those. Do one year at a time.",
+    briefing: "Pick a year and go through your tweets from that period. Search 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31' to filter. Hot takes age badly. Reply-guy energy from 2016 reads different in 2026. Your likes are private now (X hid them from everyone else in June 2024), so those are just for you. Do one year at a time.",
     steps: [
       { text: "Search your tweets from one year: 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31'" },
       { text: "Read through them. Ask: would this tweet get me in trouble if it went viral today?" },
       { text: "Check quote tweets and replies — these have more context collapse risk than regular tweets." },
-      { text: "Review likes from this period: Profile > Likes. These are public on most accounts." },
+      { text: "Optional: review your likes from this period (Profile > Likes). Since June 2024 only you can see them." },
       { text: "Delete individual tweets you're not comfortable with, or note them for bulk deletion later." },
       { text: "One year done? Stop. Come back for the next one." },
     ],
@@ -1593,11 +1677,11 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'twitter',
     phase: 'reclaim',
     title: 'Memory Lane: X / Twitter Bulk Cleanup',
-    briefing: "After reviewing year by year, you might want a clean slate for old tweets while keeping your archive. Tools like Semiphemeral, TweetDelete, or Redact can auto-delete tweets older than a certain date. Your downloaded archive preserves everything. This is the 'keep the receipts, remove the live copies' approach.",
+    briefing: "After reviewing year by year, you might want a clean slate for old tweets while keeping your archive. Bulk-delete tools exist (Semiphemeral, TweetDelete, Redact and others), but some may no longer work after X's API changes. Your downloaded archive preserves everything. This is the 'keep the receipts, remove the live copies' approach.",
     steps: [
       { text: "Make sure you have your downloaded archive saved somewhere safe." },
       { text: "Decide your cutoff: do you want to keep tweets from the last year? Two years? All time?" },
-      { text: "Consider a tool like Semiphemeral or Redact to bulk-delete tweets before your cutoff date." },
+      { text: "If a bulk-delete tool still works with X, consider one for tweets before your cutoff date; otherwise delete by hand." },
       { text: "Review your media tab (Profile > Media) for photos and videos you've shared." },
       { text: "Final check: scroll your profile as a stranger would. How does it look?" },
     ],

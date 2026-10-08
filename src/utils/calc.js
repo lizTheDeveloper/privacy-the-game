@@ -9,13 +9,21 @@ export function isCoreMission(mission) {
   return mission.phase !== 'survey' && !mission.optional;
 }
 
+// A bonus weighs half. One that counts like core once done (countsWhenDone)
+// weighs half until it's done, then 1 (re-review 5).
+export function missionWeight(m, done) {
+  if (!m.optional) return 1;
+  return m.countsWhenDone && done ? 1 : OPTIONAL_WEIGHT;
+}
+
 function weightedScore(missions, isDone) {
   let total = 0;
   let done = 0;
   for (const m of missions) {
-    const weight = m.optional && !m.countsWhenDone ? OPTIONAL_WEIGHT : 1;
+    const d = isDone(m);
+    const weight = missionWeight(m, d);
     total += weight;
-    if (isDone(m)) done += weight;
+    if (d) done += weight;
   }
   return { total, done };
 }
@@ -66,6 +74,16 @@ export function calcDistrictProgress(state, districtId) {
 export const EMAIL_ACCOUNT_IDS = new Set(['gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft']);
 const BREACH_FINDINGS = new Set(['1-2-breaches', '3plus-breaches']);
 
+// Recon X4: the second account of each pair is usually the same address and
+// the same account as the first. Its checks ask "same address?" first
+// (same_address); "same" files without a finding, and its evidence is the
+// partner's.
+export const ADDRESS_PARTNER = { google: 'gmail', apple_id: 'icloud', microsoft: 'outlook' };
+
+export function isSameAddress(record) {
+  return typeof record?.same_address === 'string' && record.same_address.startsWith('same-as-');
+}
+
 export function isEmailBreachCheck(missionId) {
   return typeof missionId === 'string' && missionId.endsWith('-recon-breach')
     && EMAIL_ACCOUNT_IDS.has(missionId.slice(0, -'-recon-breach'.length));
@@ -80,24 +98,72 @@ export function isBreachFound(missionId, record) {
     && record?.status === 'completed' && BREACH_FINDINGS.has(record.finding);
 }
 
+// The player's email addresses, counted the way build.sql counts them: one
+// check per address. The two accounts of a pair (Gmail/Google, iCloud/Apple
+// ID, Outlook/Microsoft) are one address, with the later answer, and either
+// account's reset or 2FA fixes it, unless the second account says
+// "different-address": then each is its own address, fixed only by its own.
+// [{ acct, finding, breached, fixed }]
+const CHECK_FINDINGS = new Set(['no-breaches', ...BREACH_FINDINGS]);
+
+export function addressChecks(state) {
+  const rec = (a) => state?.missions?.[`${a}-recon-breach`];
+  const valid = (a) => (rec(a)?.status === 'completed' && CHECK_FINDINGS.has(rec(a).finding) ? rec(a) : null);
+  const fixedBy = (accts) => accts.some((a) => ['-fortify-password', '-fortify-2fa']
+    .some((sfx) => state?.missions?.[`${a}${sfx}`]?.status === 'completed'));
+  const out = [];
+  const push = (acct, r, accts) => out.push({ acct, finding: r.finding, breached: BREACH_FINDINGS.has(r.finding), fixed: fixedBy(accts) });
+  for (const a of EMAIL_ACCOUNT_IDS) {
+    if (ADDRESS_PARTNER[a]) continue; // counted with its partner below
+    const second = Object.keys(ADDRESS_PARTNER).find((k) => ADDRESS_PARTNER[k] === a);
+    const r1 = valid(a);
+    const r2 = second ? valid(second) : null;
+    if (!second || rec(second)?.same_address === 'different-address') {
+      if (r1) push(a, r1, [a]);
+      if (r2) push(second, r2, [second]);
+      continue;
+    }
+    if (!r1 && !r2) continue;
+    // The later answer, as build.sql; with no time to tell them apart (old
+    // saves), the more severe one.
+    const rank = { 'no-breaches': 0, '1-2-breaches': 1, '3plus-breaches': 2 };
+    const t1 = r1?.completedAt || '';
+    const t2 = r2?.completedAt || '';
+    const latest = !r1 ? r2 : !r2 ? r1
+      : t1 !== t2 ? (t2 > t1 ? r2 : r1)
+        : (rank[r2.finding] > rank[r1.finding] ? r2 : r1);
+    push(r1 ? a : second, latest, [a, second]);
+  }
+  return out;
+}
+
 // Email addresses found in a breach in this district, or null until an
 // address was checked (completed with a breach answer; only The Master Keys
-// has address checks).
+// has address checks). Counted like addressChecks.
 export function districtBreachedAddresses(state, districtId) {
-  const checks = getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)
-    && state.missions?.[m.id]?.status === 'completed'
-    && ['no-breaches', ...BREACH_FINDINGS].includes(state.missions[m.id].finding));
+  const here = new Set(getMissionsForDistrict(districtId).filter((m) => isEmailBreachCheck(m.id)).map((m) => m.accountId));
+  const checks = addressChecks(state).filter((c) => here.has(c.acct));
   if (checks.length === 0) return null;
-  return checks.filter((m) => isBreachFound(m.id, state.missions?.[m.id])).length;
+  return checks.filter((c) => c.breached).length;
+}
+
+// A mission whose debrief asks about a second sign-in step (reviewer I4): the
+// method question, or a two-factor / two-step / registration lock question.
+// The IRS IP PIN shares the enabled-2fa value but isn't 2FA.
+// Ruling (re-review 5): Signal's registration lock is a re-registration PIN
+// like WhatsApp's two-step PIN, so it counts too.
+export function isTwoFactorMission(mission) {
+  return Boolean(mission?.debriefQs?.some((q) => q.kind === 'two-factor' || /two-factor|two-step|registration lock/i.test(q.label || '')));
 }
 
 export function calcFindings(state) {
   const entries = Object.entries(state.missions);
   const missions = entries.map(([, m]) => m).filter((m) => m.status === 'completed');
+  const byId = new Map(MISSIONS.map((m) => [m.id, m]));
   return {
-    breachesFound: entries.filter(([id, m]) => isBreachFound(id, m)).length,
+    breachesFound: addressChecks(state).filter((c) => c.breached).length,
     passwordsReset: missions.filter((m) => m.action === 'reset-password').length,
-    twoFactorEnabled: missions.filter((m) => m.action === 'enabled-2fa').length,
+    twoFactorEnabled: entries.filter(([id, m]) => m.status === 'completed' && m.action === 'enabled-2fa' && isTwoFactorMission(byId.get(id))).length,
     optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
   };
 }

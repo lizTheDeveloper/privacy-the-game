@@ -40,6 +40,22 @@ const NETWORK_DEBRIEF = [
   },
 ];
 
+// Who can see your cameras (recon audit #81): a new question id; an old
+// save's finding still shows (question.legacy).
+const CAMERA_ACCESS_DEBRIEF = [
+  {
+    id: "camera_access",
+    label: "Who had access?",
+    legacy: DEVICE_AUDIT_DEBRIEF[0],
+    options: [
+      { value: "only-me", text: "Only me / my household", severity: "safe" },
+      { value: "removed-old", text: "Removed old shared users", severity: "safe" },
+      { value: "stranger", text: "Someone I didn't know had access", severity: "crit" },
+      { value: "skip", text: "Couldn't check right now", severity: "skip" },
+    ],
+  },
+];
+
 function scoutDevice(clean, some, major) {
   return {
     "no-issues": clean,
@@ -68,12 +84,12 @@ export const GRID_MISSIONS = [
     title: "Disable ACR on Your TV",
     briefing: "Your smart TV has a feature called Automatic Content Recognition. It takes a fingerprint of what's on screen several times per second and sends it to a server that identifies what you're watching -- live TV, streaming, Blu-ray, even video calls. Vizio paid $2.2 million to the FTC for doing this without telling anyone. Samsung, LG, Roku, and Fire TV all do it too, they just buried the consent in the terms of service. The good news: you can turn it off. The bad news: every manufacturer hides the setting somewhere different.",
     steps: [
-      { text: "Samsung: Settings > General & Privacy > Privacy Choices > Viewing Information Services > toggle OFF" },
-      { text: "LG: Settings > All Settings > General > System > Additional Settings > LivePlus > toggle OFF" },
+      { text: "Samsung: Settings → All Settings → General & Privacy → Terms & Privacy → untick Viewing Information Services" },
+      { text: "LG: Settings > All Settings > General > System > Additional Settings > LivePlus > toggle OFF. Also Settings → General → System → User Agreements → untick Viewing Information (and “Who.Where.What?” on 2022 and later sets)" },
       { text: "Roku/TCL: Settings > Privacy > Smart TV Experience > toggle OFF 'Use Information from TV Inputs'" },
       { text: "Fire TV/Insignia: Settings > Preferences > Privacy Settings > Device Usage Data > toggle OFF; also Collect App Usage Data > OFF" },
-      { text: "Vizio: System > Reset & Admin > Viewing Data > toggle OFF" },
-      { text: "Apple TV: Settings > General > Privacy & Security > Analytics > toggle OFF Share Apple TV Analytics" },
+      { text: "Vizio: System > Reset & Admin > Viewing Data > toggle OFF. Newer Vizio sets (Vizio is now owned by Walmart) may also have a separate setting for data shared with Walmart" },
+      { text: "Apple TV: Settings → General → Privacy & Security → Analytics & Improvements → turn off Share Apple TV Analytics" },
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -118,15 +134,15 @@ export const GRID_MISSIONS = [
     accountId: "voice_assistant",
     phase: "recon",
     title: "Review and Delete Voice Recordings",
-    briefing: "Every time you talk to Alexa, Google Assistant, or Siri, the recording is sent to a server, transcribed, and stored. In 2019, Bloomberg revealed that Amazon employs thousands of people worldwide to listen to Alexa recordings to 'improve the service.' Google and Apple had similar programs. The recordings include everything picked up by the microphone -- not just your command, but background conversations, TV audio, and anything else happening in the room. You can review what they have and delete it.",
+    briefing: "When you talk to Alexa or Google Assistant, the request is sent to a server, and the companies can keep recordings unless you change the settings. Apple says it doesn't keep Siri audio unless you opt in to Improve Siri & Dictation. In 2019, Bloomberg revealed that Amazon employs thousands of people worldwide to listen to Alexa recordings to 'improve the service.' Google and Apple had similar programs. The recordings include everything picked up by the microphone -- not just your command, but background conversations, TV audio, and anything else happening in the room. You can review what they have and delete it.",
     steps: [
       { text: "Alexa: Open the Alexa app > More > Settings > Alexa Privacy > Manage Your Alexa Data" },
       { text: "Alexa: Under 'Choose how long to save recordings,' select 'Don't save recordings'" },
-      { text: "Alexa: Tap 'Delete All Recordings' to clear history" },
+      { text: "Alexa: Under Help improve Alexa, turn off Use of voice recordings. Then delete the recordings in Review Voice History" },
       { text: "Google: Go to myactivity.google.com > Filter by 'Voice & Audio'" },
-      { text: "Google: Delete all voice recordings, then go to Activity Controls > Web & App Activity > turn off 'Include audio recordings'" },
-      { text: "Siri (iPhone/Mac): Settings > Siri & Search > Siri & Dictation History > Delete Siri & Dictation History" },
-      { text: "Siri: Settings > Privacy & Security > Analytics > toggle OFF 'Improve Siri & Dictation'" },
+      { text: "Google: Delete all voice recordings, then go to Activity Controls > Web & App Activity > untick 'Include voice and audio activity'" },
+      { text: "Siri (iPhone/Mac): Settings → Siri (on newer iPhones: Apple Intelligence & Siri) → Siri & Dictation History → Delete Siri & Dictation History" },
+      { text: "Siri: Settings → Privacy & Security → Analytics & Improvements → turn off Improve Siri & Dictation" },
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -144,14 +160,14 @@ export const GRID_MISSIONS = [
     accountId: "voice_assistant",
     phase: "fortify",
     title: "Lock Down Always-Listening Features",
-    briefing: "Voice assistants are always listening for their wake word. That means the microphone is always on, processing audio locally to detect 'Alexa' or 'Hey Google.' The companies say audio is only transmitted after the wake word, but false activations happen constantly -- your TV says something that sounds like 'Alexa' and suddenly it's recording. You can reduce the attack surface without unplugging the device.",
+    briefing: "Voice assistants are always listening for their wake word. That means the microphone is always on, processing audio locally to detect 'Alexa' or 'Hey Google.' The companies say audio is only transmitted after the wake word, but false activations happen -- your TV says something that sounds like 'Alexa' and suddenly it's recording. You can reduce the attack surface without unplugging the device.",
     steps: [
       { text: "Find the physical mute button on your device and learn where it is -- press it when you have sensitive conversations" },
       { text: "Alexa: Settings > Alexa Privacy > Manage Your Alexa Data > Enable 'Deletion by voice' so you can say 'Alexa, delete everything I said today'" },
       { text: "Alexa: Settings > Alexa Privacy > Manage Your Alexa Data > 'Choose how long to save recordings' > set to 3 months or 'Don't save'" },
-      { text: "Google: Google Home app > Settings > Privacy > Guest Mode (pauses saving activity)" },
+      { text: "Google: say “Hey Google, turn on Guest Mode” to pause saving activity on that speaker" },
       { text: "Google: myactivity.google.com > Activity Controls > set auto-delete to 3 months" },
-      { text: "HomePod: Use the Home app > Home Settings > Improve Siri > toggle OFF" },
+      { text: "HomePod: in the Home app’s HomePod settings, turn off sharing audio to improve Siri" },
       { text: "Consider moving voice assistants out of bedrooms and private spaces" },
     ],
     debriefQs: DEVICE_ACTION_DEBRIEF,
@@ -173,23 +189,28 @@ export const GRID_MISSIONS = [
     accountId: "smart_camera",
     phase: "recon",
     title: "Audit Camera Access and Sharing",
-    briefing: "Smart cameras -- Ring, Nest, Wyze, Arlo -- have user management features. Anyone with access to your camera account can watch the live feed, review recordings, and sometimes download footage. If you shared access with an ex-partner, a former roommate, or a contractor who installed the camera, they may still have access. Wyze had a data breach in 2019 that exposed 2.4 million customer records and didn't disclose it for two years.",
+    briefing: "Smart cameras -- Ring, Nest, Wyze, Arlo -- have user management features. Anyone with access to your camera account can watch the live feed, review recordings, and sometimes download footage. If you shared access with an ex-partner, a former roommate, or a contractor who installed the camera, they may still have access. Wyze exposed 2.4 million customers' data in 2019 and disclosed it within days. Its long silence was about something else: a camera vulnerability it left unpatched for about three years, reported in 2022.",
     steps: [
-      { text: "Ring: Open the Ring app > Devices > select each camera > Shared Users > remove anyone who shouldn't have access" },
-      { text: "Nest/Google: Google Home app > select camera > Settings > manage linked accounts and shared users" },
-      { text: "Wyze: Wyze app > Account > Sharing > review and remove old shared users" },
-      { text: "Arlo: Arlo app > Settings > Grant Access > review and remove" },
-      { text: "Check for any unfamiliar linked email addresses on the camera account itself" },
-      { text: "Change the camera account password if you haven't done so recently" },
+      { text: 'Ring: in the Ring app’s Control Center, review shared users and remove anyone who shouldn’t have access' },
+      { text: 'Nest/Google: Google Home app → your profile → Home settings → tap a person → Remove' },
+      { text: 'Wyze: in the Wyze app’s account settings, review sharing and remove old shared users' },
+      { text: 'Arlo: Arlo app → Settings → Account → Grant Access → review and remove' },
+      { text: 'Check for any unfamiliar linked email addresses on the camera account itself' },
+      { text: 'Change the camera account password if you haven’t done so recently' },
     ],
-    debriefQs: DEVICE_AUDIT_DEBRIEF,
+    debriefQs: CAMERA_ACCESS_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Your camera sees everything in its field of view, 24/7. Who else can see it? Former roommates, ex-partners, the contractor who installed it -- if they were ever shared access, they might still have it. Wyze left 2.4 million users exposed for two years and said nothing. Let's check who's watching your cameras.\"",
-      debrief: scoutDevice(
+      briefing: "\"Your camera sees everything in its field of view, 24/7. Who else can see it? Former roommates, ex-partners, the contractor who installed it -- if they were ever shared access, they might still have it. Let's check who's watching your cameras.\"",
+      debrief: {
+        "only-me": "\"Only your household. That's how it should be.\"",
+        "removed-old": "\"Old shared users removed. Good catch -- they could have kept watching.\"",
+        "stranger": "\"Someone you didn't know had access. That's a safety issue, not just privacy. Remove them, change the password, and turn on two-factor.\"",
+        ...scoutDevice(
         "\"Access is clean. Only you can see your feeds. That's how it should be.\"",
         "\"Found some old shared users. Good catch -- they could have been watching this whole time.\"",
         "\"Multiple unauthorized viewers on your cameras. That's not just a privacy issue, that's a safety issue. They're removed now.\""
       ),
+      },
     },
     estimatedMinutes: 8,
   },
@@ -198,19 +219,19 @@ export const GRID_MISSIONS = [
     accountId: "smart_camera",
     phase: "fortify",
     title: "Opt Out of Police Camera Partnerships",
-    briefing: "Ring has partnerships with over 2,000 police departments in the US. Through the Neighbors app and direct requests, law enforcement can request your doorbell footage without a warrant. In 2022, Ring admitted it gave footage to police without user consent in 11 cases it deemed 'emergencies.' You can opt out of police video requests entirely -- Ring added this setting after public pressure, but it's off by default.",
+    briefing: "Police can ask Ring users near an incident to share their footage through Ring's Community Requests. Sharing is up to you: you can decline any request, and you can turn off the emails about them in Control Center. Turning those off doesn't stop police from asking Ring directly with a warrant, or in what Ring calls an emergency: in 2022 Ring said it had given footage to police without the owner's consent 11 times that year under its emergency policy.",
     steps: [
-      { text: "Ring: Open the Ring app > Menu (hamburger icon) > Control Center" },
-      { text: "Scroll to 'Video Requests from Law Enforcement'" },
-      { text: "Toggle OFF to prevent police from requesting your footage" },
-      { text: "Also review: Control Center > Authorized Client List > remove any third-party services you don't recognize" },
-      { text: "Nest/Google: Police cannot directly request Nest footage, but check Google's Transparency Report to understand their policy on law enforcement requests" },
+      { text: 'Ring: open the Ring app → Menu → Control Center' },
+      { text: 'Find the public safety section (Community Requests). There you can turn off the emails Ring sends about police requests' },
+      { text: 'Know the rule that matters more: sharing is your choice. Each request asks you, and you can decline it' },
+      { text: 'Also review the devices and services listed in Control Center, and remove any you don’t recognize' },
+      { text: 'Nest/Google: Google publishes how it handles law enforcement requests in its Transparency Report' },
     ],
     debriefQs: DEVICE_ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Ring is partnered with over 2,000 police departments. They can request your doorbell footage. In 2022, Ring handed footage to police without asking the owner 11 times. The opt-out exists, but you have to find it and turn it on yourself. Amazon didn't exactly advertise it.\"",
+      briefing: "\"Police can ask you for your doorbell footage, and the answer is yours to give. In 2022 Ring handed footage over without asking the owner 11 times. Know where the requests show up, and decline what you don't want to share.\"",
       debrief: scoutAction(
-        "\"Police video requests disabled. Your doorbell camera now works for you, not for the neighborhood surveillance network.\"",
+        "\"You know where the requests come in, and that you can say no. Your camera works for you.\"",
         "\"No Ring camera? One fewer surveillance partnership to worry about.\""
       ),
     },
@@ -223,7 +244,7 @@ export const GRID_MISSIONS = [
     title: "Review Cloud Storage and Retention",
     briefing: "Most smart cameras upload footage to cloud storage by default. That means your private moments live on Amazon's, Google's, or Wyze's servers. Reducing the retention period limits how much history exists if the account is ever breached. For indoor cameras, consider whether cloud upload is necessary at all -- local storage (SD card) keeps footage on your property.",
     steps: [
-      { text: "Ring: Ring app > Devices > Video Settings > Video Storage Duration > set to the shortest period you're comfortable with" },
+      { text: "Ring: in each camera’s video settings, set the storage time to the shortest period you’re comfortable with" },
       { text: "Nest: Google Home app > Camera > Settings > review video history length" },
       { text: "Wyze: If your camera has an SD card slot, switch to local recording only (Wyze app > camera > Advanced Settings > Local Storage)" },
       { text: "For indoor cameras: consider disabling cloud upload entirely and using only local SD card storage" },
@@ -253,13 +274,13 @@ export const GRID_MISSIONS = [
       { text: "Check your Wi-Fi router's connected devices list (usually at 192.168.1.1 or in your router app)" },
       { text: "Write down every smart device you find -- many people discover devices they forgot about" },
       { text: "For each device, check: does it have an app? What permissions does that app have? When did you last update its firmware?" },
-      { text: "Robot vacuum (Roomba/iRobot): Open the iRobot app > Settings > Privacy > review map sharing settings" },
+      { text: "Robot vacuum: in its app’s privacy settings, review map sharing" },
       { text: "Smart thermostat (Nest/Ecobee): Check if 'Home/Away Assist' is sharing your occupancy patterns" },
       { text: "Baby monitors: Check if the feed is accessible via a web URL (some cheap monitors broadcast unencrypted)" },
     ],
     debriefQs: DEVICE_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Amazon bought iRobot -- the Roomba company -- for $1.7 billion. They already have your shopping history, your voice recordings, and your doorbell camera. Now they want the floor plan of your house. Let's find out what every connected device in your home is sending and to whom.\"",
+      briefing: "\"Amazon tried to buy iRobot, the Roomba company, for $1.7 billion. Regulators balked and the deal died in 2024. A robot vacuum maps your home, and that map is data. Let's find out what every connected device in your home is sending and to whom.\"",
       debrief: scoutDevice(
         "\"Everything accounted for and locked down. Your home network is cleaner than most corporate offices.\"",
         "\"Found some devices phoning home. That's normal -- the default is always maximum data collection. Now you know what's there.\"",
@@ -273,10 +294,10 @@ export const GRID_MISSIONS = [
     accountId: "smart_appliances",
     phase: "fortify",
     title: "Disable Map and Occupancy Sharing",
-    briefing: "Your robot vacuum has a detailed map of your home -- room dimensions, furniture placement, obstacles. Your smart thermostat knows your daily schedule: when you leave for work, when you come home, when you go to bed. This data is valuable for targeted advertising and home insurance risk assessment. Amazon's acquisition of iRobot was partly about getting floor plan data to improve product recommendations. You can limit what these devices share.",
+    briefing: "Your robot vacuum has a detailed map of your home -- room dimensions, furniture placement, obstacles. Your smart thermostat knows your daily schedule: when you leave for work, when you come home, when you go to bed. This data is valuable for targeted advertising and home insurance risk assessment. You can limit what these devices share.",
     steps: [
-      { text: "iRobot/Roomba: iRobot app > Settings > Privacy > disable 'Share map data' and 'Send usage data'" },
-      { text: "Roborock: App > Settings > Privacy > opt out of user experience improvement program" },
+      { text: "iRobot/Roomba: in the iRobot app’s privacy settings, turn off map and usage data sharing" },
+      { text: "Roborock: in the app’s privacy settings, opt out of the user experience improvement program" },
       { text: "Nest Thermostat: Google Home app > thermostat > Settings > disable 'Home/Away Assist' if you don't use it" },
       { text: "Ecobee: App > Settings > Privacy > review 'Community Energy Savings' and 'Eco+ Demand Response' participation" },
       { text: "Smart plugs/switches: check each app for usage analytics sharing and disable" },
@@ -342,7 +363,7 @@ export const GRID_MISSIONS = [
       debrief: {
         "completed": "\"IoT network isolated. Your smart devices are now in their own sandbox. A compromised camera can't pivot to your laptop. That's network security done right.\"",
         "partial": "\"Partially set up. Finish moving devices to the IoT network when you can -- every device on the main network is a potential bridge to your personal data.\"",
-        "later": "\"This is an advanced move, but it's the single most effective thing you can do for home network security. Come back to it.\"",
+        "later": "\"This is an advanced move, but it's one of the strongest things you can do for home network security. Come back to it.\"",
       },
     },
     estimatedMinutes: 15,
@@ -351,23 +372,21 @@ export const GRID_MISSIONS = [
     id: "smart_network-reclaim-dns",
     accountId: "smart_network",
     phase: "reclaim",
-    title: "Set Up Encrypted DNS",
-    briefing: "Every time your browser looks up a website, it sends a DNS query -- usually to your ISP, in plain text. Your ISP logs every domain you visit. In 2017, Congress repealed the FCC's broadband privacy rules, allowing ISPs to sell your browsing history to advertisers. Switching to encrypted DNS (DoH or DoT) with a privacy-respecting provider stops your ISP from seeing which sites you visit.",
+    title: "Encrypt Your DNS Lookups",
+    briefing: "Every time your browser looks up a website, it sends a DNS query -- usually to your ISP, in plain text, so your ISP can see every site name you look up. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling your browsing history. Encrypted DNS (DNS over HTTPS or over TLS) hides those lookups from your ISP. It still sees which servers you connect to. Changing the DNS server numbers in your router is different: that changes who answers, not who can see.",
     steps: [
-      { text: "Option A (router-level -- protects all devices): In your router settings, change DNS servers to Cloudflare (1.1.1.1, 1.0.0.1) or Quad9 (9.9.9.9, 149.112.112.112)" },
-      { text: "Option B (browser-level): Firefox: Settings > Privacy & Security > DNS over HTTPS > Enable > select Cloudflare or NextDNS" },
-      { text: "Option B: Chrome: Settings > Privacy and Security > Use secure DNS > select Cloudflare or Google" },
-      { text: "Option C (device-level): iOS: Settings > Wi-Fi > your network > Configure DNS > Manual > add 1.1.1.1" },
-      { text: "Option C: Android: Settings > Network > Private DNS > set to 'one.one.one.one' (Cloudflare) or 'dns.quad9.net'" },
-      { text: "Verify it's working: visit 1.1.1.1/help (Cloudflare) or dnsleaktest.com" },
+      { text: 'Encrypted, phone: Android: Settings > Network > Private DNS > set to \'one.one.one.one\' (Cloudflare) or \'dns.quad9.net\' (Quad9). iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular' },
+      { text: 'Encrypted, browser: Firefox: Settings > Privacy & Security > DNS over HTTPS > Increased or Max Protection. Chrome: Settings > Privacy and security > Security > Use secure DNS' },
+      { text: 'Plain, whole network: in your router settings, change the DNS servers to Cloudflare (1.1.1.1, 1.0.0.1) or Quad9 (9.9.9.9, 149.112.112.112). This changes who answers, not who can see: the lookups still travel unencrypted, so your ISP can still read them' },
+      { text: 'Verify it\'s working: visit one.one.one.one/help (Cloudflare). It says whether your lookups are encrypted. dnsleaktest.com shows which servers are answering' },
     ],
     debriefQs: NETWORK_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Your ISP sees every domain you visit. Congress explicitly allowed them to sell this data in 2017. Encrypted DNS is the fix -- your queries go through an encrypted tunnel to a privacy-respecting resolver instead of your ISP's logging servers. It takes five minutes and it's free.\"",
+      briefing: "\"Your ISP sees every domain you look up. In 2017 Congress repealed rules that would have required ISPs to get your permission to sell it. Encrypted DNS takes the lookups out of their view -- they go through an encrypted channel to a resolver you chose. They still see which servers you connect to. It takes five minutes and it's free.\"",
       debrief: {
-        "completed": "\"Encrypted DNS active. Your ISP can see that you're using the internet, but not where you're going. That's a fundamental privacy upgrade.\"",
+        "completed": "\"Done. Where you turned on encrypted DNS, your ISP can't read your lookups anymore. It can still see which servers you connect to, so this is one layer, not invisibility.\"",
         "partial": "\"Partially configured. Even protecting one device is better than none -- finish the rest when you can.\"",
-        "later": "\"This is one of the highest-value, lowest-effort privacy upgrades available. Five minutes to stop your ISP from logging your browsing. Come back soon.\"",
+        "later": "\"This is one of the highest-value, lowest-effort privacy upgrades available. Five minutes to take your lookups out of your ISP's view. Come back soon.\"",
       },
     },
     estimatedMinutes: 8,

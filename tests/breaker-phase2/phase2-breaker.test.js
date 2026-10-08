@@ -35,7 +35,7 @@ const byId = (id) => MISSIONS.find((m) => m.id === id);
 const NEW = MISSIONS.filter((m) => m.replaces);
 const LEGACY = MISSIONS.filter((m) => m.legacy);
 const MONEY = ['primary_bank', 'credit_card', 'paypal', 'venmo', 'cashapp', 'crypto_exchange', 'investment_account'];
-const SENT = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method']);
+const SENT = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address']);
 
 function allOn() {
   let s = createInitialState();

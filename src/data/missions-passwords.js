@@ -139,7 +139,7 @@ export const PASSWORD_MANAGER_MISSION = {
   // report seriously); players without one never see it.
   unlock: { type: 'password-manager' },
   title: 'Check your password manager’s security report',
-  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. Whatever it clears, we leave alone.',
+  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
   steps: PM_STEPS.other,
   stepsByManager: PM_STEPS,
   debriefQs: [
@@ -150,7 +150,7 @@ export const PASSWORD_MANAGER_MISSION = {
       min: 0,
       max: 9999,
       label: 'How many passwords did it flag?',
-      hint: 'Whatever it flags gets a new password; whatever it clears stays as it is.',
+      hint: 'Whatever it flags gets a new password. A clean result isn’t proof of anything, just no known problem.',
       options: [{ value: 'skip', text: 'Couldn’t check right now', severity: 'skip' }],
     },
     {
@@ -175,7 +175,7 @@ export const PASSWORD_MANAGER_MISSION = {
   scoutDialog: {
     briefing: '"Your password manager has been keeping notes. Let’s read them. Whatever it flags gets a new password — whatever it doesn’t, we leave alone."',
     debrief: {
-      flagged: '"Now we know exactly which locks were copied. Those resets are on the list — every other password can stay put."',
+      flagged: '"Now we know which passwords your manager knows are leaked or reused. Those resets are on the list."',
       'none-flagged': '"Nothing flagged. Your manager’s been keeping watch and the report is clean. That’s the kind of boring I like."',
       skip: '"No rush. The report will be there next time you open your manager."',
     },
@@ -265,8 +265,22 @@ function openSettingsStep(a) {
   return { text: `Open your ${a.name.toLowerCase()}’s security settings` };
 }
 
+// Apple Account takes security keys, not authenticator apps (Apple, "About
+// Security Keys for Apple Account": at least two keys; Settings → your name →
+// Sign-In & Security → Two-Factor Authentication → Security Keys).
+const APPLE_UPGRADE = {
+  briefing: 'Codes by text beat having no second step. But a SIM swap moves your phone number onto a scammer’s phone. For an Apple Account the upgrade is security keys: physical keys you hold, and Apple asks for at least two.',
+  steps: [
+    { text: 'On iPhone: Settings → your name → Sign-In & Security → Two-Factor Authentication → Security Keys → Add Security Keys (on a Mac: System Settings → your name → Sign-In & Security). You need at least two keys' },
+    { text: 'Keep your trusted devices signed in: with security keys on, they and the keys are how you sign in' },
+  ],
+  options: [{ value: 'passkey', text: 'Security keys', severity: 'safe' }],
+  lines: { passkey: '"Security keys. Nothing to intercept, nothing to phish."' },
+};
+
 function upgradeMission(acct) {
   const a = ACCOUNTS[acct];
+  const apple = acct === 'apple_id' || acct === 'icloud' ? APPLE_UPGRADE : null;
   return {
     id: `${acct}-fortify-2fa-upgrade`,
     accountId: acct,
@@ -274,8 +288,8 @@ function upgradeMission(acct) {
     optional: true,
     unlock: { type: '2fa-method', mission: `${acct}-fortify-2fa`, methods: ['sms', 'email'] },
     title: `Upgrade from text or email codes: ${a.name}`,
-    briefing: 'Codes by text or email beat having no second step. But they travel through systems other people can get into: a SIM swap moves your phone number onto a scammer’s phone, and a hijacked inbox hands over every emailed code. An authenticator app or a passkey keeps the second step on a device you hold.',
-    steps: [
+    briefing: apple ? apple.briefing : 'Codes by text or email beat having no second step. But they travel through systems other people can get into: a SIM swap moves your phone number onto a scammer’s phone, and a hijacked inbox hands over every emailed code. An authenticator app or a passkey keeps the second step on a device you hold.',
+    steps: apple ? apple.steps : [
       openSettingsStep(a),
       { text: 'Add an authenticator app or a passkey as a sign-in method' },
       { text: 'Then remove text messages as a sign-in method where the service allows it — keep the phone number for account recovery only if you want to' },
@@ -284,7 +298,7 @@ function upgradeMission(acct) {
       {
         id: 'method',
         label: 'What did you add?',
-        options: [
+        options: apple ? [...apple.options, SKIP_LATER] : [
           { value: 'authenticator', text: 'An authenticator app', severity: 'safe' },
           { value: 'passkey', text: 'A passkey or security key', severity: 'safe' },
           SKIP_LATER,
@@ -293,8 +307,8 @@ function upgradeMission(acct) {
     ],
     scoutDialog: {
       briefing: '"Codes were a good start. This is the finish."',
-      debrief: {
-        authenticator: '"Codes on your own device now. A SIM swap gets them a phone number and nothing else."',
+      debrief: apple ? { ...apple.lines, later: '"Fair enough. Your codes still count — the upgrade is here when you want it."' } : {
+        authenticator: '"Codes on your own device now. A SIM swap no longer gets them these codes."',
         passkey: '"A passkey. Nothing to intercept, nothing to phish. Lovely."',
         later: '"Fair enough. Your codes still count — the upgrade is here when you want it."',
       },

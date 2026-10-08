@@ -124,7 +124,7 @@ describe('restoreEvents value guard', () => {
   });
 
   it('a stored answer record with every question id resends only whitelisted keys', () => {
-    const allowed = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'restored']);
+    const allowed = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address', 'restored']);
     for (const m of MISSIONS) {
       const rec = { status: 'completed' };
       for (const q of m.debriefQs || []) rec[q.id] = q.options?.[0]?.value ?? 7;
@@ -240,7 +240,7 @@ describe('fileDebrief keeps answers', () => {
 // ── Tracking leak sweep ─────────────────────────────────────────────
 describe('stored answers never reach track()', () => {
   it('missionEventData of a fully answered record has only whitelisted keys', () => {
-    const allowed = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method']);
+    const allowed = new Set(['mission', 'district', 'finding', 'phase', 'status', 'password_exposed', 'method', 'same_address']);
     for (const m of MISSIONS) {
       const rec = { status: 'completed' };
       for (const q of m.debriefQs || []) rec[q.id] = q.options?.[0]?.value ?? 7;

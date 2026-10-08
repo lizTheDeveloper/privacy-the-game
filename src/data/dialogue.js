@@ -39,7 +39,7 @@ export const DISTRICT_DIALOGUE = {
     debrief: {
       clean: [
         `Clean. No breaches. Either you've been careful, lucky, or this is a very new account. Whatever it is, I'll take it. One building secured, zero drama. My favorite kind of mission.`,
-        `Nothing found. Your credentials aren't circulating in any known breach database, which is the digital equivalent of a clean bill of health. Let's keep it that way.`,
+        `Nothing found. Your address isn't in the breaches Have I Been Pwned knows about, which is as clean a result as that check gives. Let's keep it that way.`,
         `All clear. Somewhere in a data broker's spreadsheet, there's a gap where your password should be. Good.`,
       ],
       minor: [
@@ -49,7 +49,7 @@ export const DISTRICT_DIALOGUE = {
       ],
       major: [
         `Three or more breaches. That's a lot of exposure, but I want to be clear — this doesn't mean you did something wrong. It means you used the internet during a period when companies were spectacularly bad at securing their databases. Which is to say, you used the internet. The priority now is a strong, unique password and 2FA if you haven't already. We're turning this around.`,
-        `Significant breach exposure. Your credentials have been in multiple leaked databases, which means they've been bought, sold, and bundled more times than a streaming service original. The good news: changing your password invalidates every copy instantly. Let's do that.`,
+        `Significant breach exposure. Your credentials have been in multiple leaked databases, which means they've been bought, sold, and bundled more times than a streaming service original. The good news: a new password makes every leaked copy useless. Let's do that.`,
         `Three-plus breaches. Your email address has had quite the journey through the underground economy. None of that is your fault — the companies that lost this data are the ones who failed. But you're the one who gets to fix it, because that's how this works. Unfair, but here we are. Let's lock it down.`,
       ],
       passwordStrong: [
@@ -59,7 +59,7 @@ export const DISTRICT_DIALOGUE = {
       passwordReset: [
         `New password set. That's one door closed and re-keyed. Whatever was in the breach databases is now a password to nothing. It'll keep circulating in data broker lists, but it'll just bounce off your account like a wrong key in a lock. Exactly how it should work.`,
         `Password updated. The old one is officially retired — it can go live on a breach database farm upstate where it'll be very happy and never bother you again.`,
-        `Done. Your new password is already more secure than the old one by virtue of not being in a spreadsheet that's been downloaded forty thousand times. Progress.`,
+        `Done. Your new password is already more secure than the old one by virtue of not being in a spreadsheet that's been passed around for years. Progress.`,
       ],
       skip: [
         `Noted. This mission stays queued — it'll be here when you're ready. The city doesn't judge and neither do I. Some days you liberate five buildings. Some days you just do recon. Both count.`,
@@ -88,28 +88,28 @@ export const DISTRICT_DIALOGUE = {
         `25% through The Vault. You've started securing the accounts that hold your actual money. Most people never do this — they change their Netflix password and call it a day. You're doing the real work.`,
       ],
       50: [
-        `Halfway through The Vault. Your primary accounts are secured. Fun fact: Zelle fraud victims lost over $440 million in 2022, and banks initially refused to reimburse most of them. It took congressional hearings and public pressure to change that. What you're doing right now — unique passwords, 2FA, transaction alerts — is the defense the banks won't build for you.`,
+        `Halfway through The Vault. Your primary accounts are secured. Zelle scam victims were often refused reimbursement at first; congressional pressure changed some of that. What you're doing right now — unique passwords, 2FA, transaction alerts — is the defense the banks won't build for you.`,
         `50% liberated. The big ones are done. Every financial account you secure removes a line item from someone's dark-web shopping list. Keep going.`,
       ],
       75: [
-        `Three-quarters done. The Vault is almost fully secured. Here's something worth knowing: Venmo defaults all transactions to public. Your purchase history — who you pay, how much, how often — is visible to anyone who searches your name. If you haven't hit the Venmo privacy mission yet, it's coming.`,
+        `Three-quarters done. The Vault is almost fully secured. Here's something worth knowing: Venmo payments set to Public show who you pay and when to anyone who looks. If you haven't hit the Venmo privacy mission yet, it's coming.`,
         `75%. The Vault's defenses are looking solid. A few more accounts and your money is behind real walls instead of whatever "password123" was pretending to be.`,
       ],
       100: [
-        `The Vault is fully liberated. Every financial account — bank, credit card, payment apps, crypto, investments — secured with unique passwords, two-factor authentication, and transaction alerts. You made your money harder to steal than 99% of the population's. Not because you bought expensive security software. Because you showed up and did the work.`,
-        `District two: done. The Vault is yours. Banks spend billions on fraud prevention infrastructure and still let customers set "fluffy2019" as their only authentication factor. You just did more for your financial security in one sitting than their entire UX team has done in a decade.`,
+        `The Vault is fully liberated. Every financial account — bank, credit card, payment apps, crypto, investments — secured with unique passwords, two-factor authentication, and transaction alerts. You made your money a lot harder to steal. Not because you bought expensive security software. Because you showed up and did the work.`,
+        `District two: done. The Vault is yours. Banks spend a fortune on fraud prevention and still let customers set "fluffy2019" as their only authentication factor. You just did more for your financial security in one sitting than their entire UX team has done in a decade.`,
       ],
     },
     return: {
       short: `Back already. The Vault's ready for you. Where were we?`,
       medium: `Good to see you. Your financial accounts haven't gotten any less important while you were away. Progress is saved, next mission is queued. Let's keep the momentum — the breach economy doesn't take days off.`,
       long: `You're back. Everything you secured is still secured — those passwords are still unique, that 2FA is still active. The Vault remembers your work even if your calendar forgot the game existed.`,
-      veryLong: `Hey. It's been a while, but every financial account you locked down is still locked down. The breach databases got a few billion records larger since you were last here, but your secured accounts aren't part of the haul. The next mission is ready whenever you are.`,
+      veryLong: `Hey. It's been a while, but every financial account you locked down is still locked down. The breach lists have grown since you were last here, but the passwords you changed aren't the ones on them. The next mission is ready whenever you are.`,
     },
     debrief: {
       clean: [
-        `Clean. No breaches on this financial account. That's money in the bank — literally.`,
-        `No exposure found. Your financial credentials aren't circulating. Given what a breached bank login is worth on the dark web — about $40 for a checking account with a balance over $2,000 — that's a relief.`,
+        `Clean. That's money in the bank — literally.`,
+        `No exposure found on this check. Given what a bank login is worth to a thief, that's a relief.`,
         `All clear. Somewhere, a credential broker just lost a potential sale. Good.`,
       ],
       minor: [
@@ -120,7 +120,7 @@ export const DISTRICT_DIALOGUE = {
       major: [
         `Multiple breaches on a financial account. The credentials have been bundled, resold, and fed into automated login attempts. Change it, enable 2FA, and check your recent transactions.`,
         `Significant exposure. Your credentials have been on enough dark-web marketplaces to have their own frequent flyer miles. New unique password, 2FA, and scan your transaction history for anything you didn't authorize.`,
-        `Three or more breaches. A stolen bank login with a balance over $2,000 sells for about $40 on the dark web. Let's make their purchase worthless.`,
+        `Three or more breaches. Stolen bank logins get sold. Let's make that one worthless.`,
       ],
       skip: [
         `Noted. I'll keep this one queued. With financial accounts the urgency is higher than with social media. But showing up at all puts you ahead of most people.`,
@@ -129,8 +129,8 @@ export const DISTRICT_DIALOGUE = {
       ],
     },
     lore: {
-      sim_swapping: { title: 'SIM Swapping Economics', text: `The number one way people lose money to account takeover isn't a sophisticated hack. It's SIM swapping. Someone calls your carrier, convinces a customer service rep to transfer your phone number to their SIM card, and then they receive all your two-factor codes. Carrier employees have been caught accepting bribes of $100 to $500 per swap.` },
-      zelle_fraud: { title: 'Zelle Fraud Hearings', text: `Zelle fraud victims lost over $440 million in 2022. Banks initially refused to reimburse most of them, arguing the transfers were "authorized." Congressional hearings and public pressure forced policy changes. The lesson: payment apps prioritize speed over security, and the fraud protection you expect isn't always there.` },
+      sim_swapping: { title: 'SIM Swapping Economics', text: `One of the most direct ways to take over accounts isn't a sophisticated hack. It's SIM swapping. Someone calls your carrier, convinces a customer service rep to transfer your phone number to their SIM card, and then they receive your text-message codes. Carrier employees have been caught taking bribes to do it.` },
+      zelle_fraud: { title: 'Zelle Fraud Hearings', text: `Zelle scam victims were often refused reimbursement at first, because banks argued the transfers were "authorized." Congressional hearings and public pressure forced policy changes. The lesson: payment apps prioritize speed over security, and the fraud protection you expect isn't always there.` },
       cfpb: { title: 'CFPB 60-Day Rule', text: `Under the Electronic Fund Transfer Act, you have 60 days from your bank statement date to dispute unauthorized electronic transactions. After that window, the bank's liability shrinks. This means checking your statements regularly isn't paranoia — it's a legal deadline.` },
     },
     allies: [
@@ -160,7 +160,7 @@ export const DISTRICT_DIALOGUE = {
       skip: [`No rush. Social accounts aren't going anywhere. Come back when you're ready.`, `Queued. The Square is patient.`],
     },
     lore: {
-      cambridge_analytica: { title: 'Cambridge Analytica', text: `In 2018, Cambridge Analytica harvested 87 million Facebook profiles through a personality quiz. They used the data to build psychographic models that predicted and manipulated voting behavior. Facebook knew about the harvesting for two years before acting. The fine was $5 billion. Facebook made that back in three weeks of ad revenue.` },
+      cambridge_analytica: { title: 'Cambridge Analytica', text: `In 2018, Cambridge Analytica harvested 87 million Facebook profiles through a personality quiz. They used the data to build psychographic models that predicted and manipulated voting behavior. Facebook knew about the harvesting for two years before acting. The FTC fine was $5 billion, about a month of Facebook's revenue at the time.` },
       haugen: { title: 'Frances Haugen', text: `In 2021, a Facebook whistleblower named Frances Haugen revealed internal research showing Instagram's algorithm was promoting self-harm content to teenagers — and that the company knew. The documents showed Facebook repeatedly chose growth over safety when the two conflicted.` },
       linkedin_scrape: { title: 'LinkedIn Scrape (2021)', text: `700 million LinkedIn profiles were scraped and sold on a dark web forum in 2021. LinkedIn argued in court that public profiles aren't really private. The court largely agreed. The lesson: if your profile is public, assume it's been copied.` },
     },
@@ -172,7 +172,7 @@ export const DISTRICT_DIALOGUE = {
   },
 
   'archives': {
-    intro: `Welcome to The Archives. This is where the real you lives — not the curated version you post on social media, but the actual documents. Your tax returns. Your ID scans. Your employment contracts. Your code. Dropbox was breached in 2012 — 68 million credentials leaked — but they didn't tell anyone until 2016. Four years of silence while those passwords circulated. The CLOUD Act of 2018 gave US law enforcement the power to compel any American cloud provider to hand over data stored anywhere in the world. Your cloud is not a vault. It's a filing cabinet with a glass door. Let's put some locks on it.`,
+    intro: `Welcome to The Archives. This is where the real you lives — not the curated version you post on social media, but the actual documents. Your tax returns. Your ID scans. Your employment contracts. Your code. Dropbox was breached in 2012 — 68 million credentials — and the full extent only came out in 2016. The CLOUD Act of 2018 gave US law enforcement the power to compel any American cloud provider to hand over data stored anywhere in the world. Your cloud is not a vault. It's a filing cabinet with a glass door. Let's put some locks on it.`,
     progress: {
       25: [`Quarter of The Archives secured. The cloud storage accounts are locked down. Your documents are behind real passwords now.`, `25%. The files that matter most — tax returns, ID scans, contracts — are safer than they were an hour ago.`],
       50: [`Halfway through The Archives. Cloud storage is done. Now we audit work accounts and code repos.`, `50% liberated. Your filing cabinet has locks on it now.`],
@@ -235,8 +235,8 @@ export const DISTRICT_DIALOGUE = {
     intro: `Welcome to The Capitol. This is where your legal identity lives — Social Security, tax records, your driver's license number, healthcare data, student loans. Every other district was about protecting your digital life. This one is about protecting your identity in the eyes of the law. When someone files a tax return in your name and collects your refund, that's not a nuisance — that's a federal crime committed against you, and you're the one who spends six months on the phone with the IRS proving you exist. The defense here is different: it's not just about securing accounts, it's about claiming them before someone else does.`,
     introLore: `Some history you should know. In 2015, the Office of Personnel Management was breached. 22 million records stolen. Not just names and Social Security numbers. Full SF-86 security clearance forms: every address you've lived at, every foreign contact, every financial problem, your mental health history, your relatives. And fingerprints — 5.6 million fingerprints. You can change a password. You cannot change your fingerprints. The attackers were never caught. The data was never recovered.`,
     progress: {
-      25: [`Quarter of The Capitol secured. The most critical government accounts are claimed. Nobody else can register them now.`, `25%. You've claimed your government accounts before someone else could. That's the most important step in this district.`],
-      50: [`Halfway through The Capitol. Your government identity is getting locked down. The IRS IP PIN is the single most effective defense against tax identity theft.`, `50% liberated. Your legal identity is behind real walls now.`],
+      25: [`Quarter of The Capitol secured. The most critical government accounts are claimed before someone else could claim them online.`, `25%. You've claimed your government accounts before someone else could. That's the most important step in this district.`],
+      50: [`Halfway through The Capitol. Your government identity is getting locked down. The IRS IP PIN is one of the strongest defenses against tax identity theft.`, `50% liberated. Your legal identity is behind real walls now.`],
       75: [`Three-quarters done. Government accounts are frustrating to secure — the interfaces are terrible and the 2FA is sometimes SMS-only. But you're doing it anyway.`, `75%. Almost there. The remaining accounts are the ones that protect your legal identity at the state level.`],
       100: [
         `The Capitol is fully liberated. SSA claimed, IRS PIN set, healthcare portal secured, student loans locked down. Your legal identity is yours. The organizations fighting to make sure government agencies protect this data better: EPIC and the ACLU. These are allies in the same fight.`,
@@ -246,7 +246,7 @@ export const DISTRICT_DIALOGUE = {
     return: {
       short: `Back in The Capitol. The government accounts are ready for you.`,
       medium: `Welcome back. Your government accounts are exactly as important as they were last time. Let's keep securing them.`,
-      long: `You're back. Your IRS account is still claimed. Your SSA lock is still active. The government's website design is still terrible. Some things don't change.`,
+      long: `You're back. Whatever you claimed or locked down here is still yours. The government's website design is still terrible. Some things don't change.`,
       veryLong: `Hey. The Capitol held. Your government accounts are still secured. The remaining ones are still waiting. The IRS will still be there tomorrow — probably with the same website from 2011.`,
     },
     debrief: {
@@ -270,7 +270,7 @@ export const DISTRICT_DIALOGUE = {
   'perimeter': {
     intro: `Everything you've done so far — the passwords, the 2FA, the privacy settings — protects individual buildings. The Perimeter protects the city itself. These are the outer walls: the defenses that don't belong to any one account but shield all of them. SIM protection stops an attacker from hijacking your phone number. Device security means a stolen laptop gives the thief expensive hardware and zero data. Scam defense trains the one vulnerability no software can patch — you. And border crossing prep ensures that when you walk through customs, your entire digital life isn't handed over because someone asked you to unlock your phone. Every mission here applies to you. Let's fortify the walls.`,
     facilityIntros: {
-      sim_protection: `In 2023, the DOJ prosecuted a SIM swap ring that stole $400 million in cryptocurrency. The attack is simple: someone calls your carrier, convinces a customer service rep they're you, and transfers your phone number to their SIM card. Your phone goes dead. Their phone starts receiving your two-factor codes. The whole thing takes fifteen minutes. A carrier PIN and a port-out lock take five minutes to set up and make this attack dramatically harder.`,
+      sim_protection: `Federal prosecutors have charged SIM-swap rings with stealing millions in cryptocurrency. The attack is simple: someone calls your carrier, convinces a customer service rep they're you, and transfers your phone number to their SIM card. Your phone goes dead. Their phone starts receiving your two-factor codes. It can happen fast. A carrier PIN and a port-out lock are quick to set up and make this attack much harder.`,
       device_security: `In 2021, Apple sued NSO Group for deploying Pegasus spyware on iPhones — zero-click exploits that required no interaction from the target. Citizen Lab at the University of Toronto was the research group that exposed it. You probably aren't a target of state-sponsored spyware. But you are a target of the mundane version: a stolen phone, a laptop left on a bus. Full-disk encryption, a strong lock screen, and Find My are the basics.`,
       scam_defense: `The hard part about phishing isn't the obvious fakes. It's the real messages that look fake. Microsoft sends legitimate security alerts from accountprotection.microsoft.com — a domain that sounds made up. The training here shows you both kinds, and the skill you're building is the pause before the click.`,
       border_prep: `U.S. Customs and Border Protection claims the authority to search any electronic device at the border without a warrant. In 2024, CBP searched over 43,000 devices. Riley v. California explicitly does not apply at the border. The defense isn't legal — it's operational. You travel with a clean device. This is the same practice used by investigative journalists worldwide. It is legal, it is ethical, and it is the only reliable protection at a border.`,
@@ -308,21 +308,21 @@ export const DISTRICT_DIALOGUE = {
   },
 
   'reclamation': {
-    intro: `Welcome to The Reclamation. This is the endgame.\n\nYou've secured your accounts. You've hardened your devices. You've learned to spot the scams. Now you learn who's been selling your data this whole time — and you take it back.\n\nThe data broker industry is worth over $200 billion a year. That's not a typo. Two hundred billion dollars generated by buying and selling information about people — about you — without your meaningful consent. This district is different from the others. You're not securing an account or hardening a device. You're reaching into the machinery that profits from your existence and pulling yourself out, one broker at a time.`,
+    intro: `Welcome to The Reclamation. This is the endgame.\n\nYou've secured your accounts. You've hardened your devices. You've learned to spot the scams. Now you learn who's been selling your data this whole time — and you take it back.\n\nThe data broker industry is a big business: buying and selling information about people — about you — without your meaningful consent. This district is different from the others. You're not securing an account or hardening a device. You're reaching into the machinery that profits from your existence and pulling yourself out, one broker at a time.`,
     facilityIntros: {
-      credit_freeze: `A credit freeze is the single most effective identity theft prevention available to you. It's free, it takes five minutes per bureau, and it prevents anyone from opening credit in your name. Before the Economic Growth Act of 2018, credit freezes cost $5-10 per bureau. Consumer advocates fought for years to make them free. They won. Use what they won.`,
-      people_search: `Spokeo. Whitepages. BeenVerified. TruePeopleSearch. These are the retail layer of the surveillance economy. Type someone's name and get their address, phone number, email, relatives, and estimated income. Removing yourself is free, tedious, and impermanent — most will re-add you within 3-6 months. That's why the California DELETE Act matters: one request to the DROP platform covers 600+ registered brokers.`,
-      enterprise_data: `This is the wholesale layer. People-search sites are the storefronts. Enterprise aggregators are the warehouses behind them — and their customers are banks, insurers, employers, landlords, and law enforcement. LexisNexis has your CLUE report. Thomson Reuters CLEAR is the one investigators use. Equifax Workforce Solutions reports your paycheck every pay period.`,
-      ad_trackers: `People-search brokers sell your identity. Ad brokers sell your behavior — what you search, what you buy, what you click. Acxiom has profiles on 2.5 billion consumers worldwide. The good news: bulk opt-out tools exist. The NAI Consumer Opt-Out covers 100+ ad networks in one click.`,
+      credit_freeze: `A credit freeze is one of the strongest identity theft protections available to you. It's free, and it stops new credit in your name at each bureau you freeze. Before the Economic Growth Act of 2018, credit freezes cost $5-10 per bureau. Consumer advocates fought for years to make them free. They won. Use what they won.`,
+      people_search: `Spokeo. Whitepages. BeenVerified. TruePeopleSearch. These are the retail layer of the surveillance economy. Type someone's name and get their address, phone number, email, relatives, and estimated income. Removing yourself is free, tedious, and impermanent — most will re-add you within 3-6 months. That's why California's DELETE Act matters: for California residents, one DROP request reaches every broker registered in the state.`,
+      enterprise_data: `This is the wholesale layer. People-search sites are the storefronts. Enterprise aggregators are the warehouses behind them — and their customers are banks, insurers, employers, landlords, and law enforcement. LexisNexis has your CLUE report. Thomson Reuters CLEAR is one investigators use. The Work Number holds salary records from the employers that use it.`,
+      ad_trackers: `People-search brokers sell your identity. Ad brokers sell your behavior — what you search, what you buy, what you click. The good news: bulk opt-out tools exist. The NAI and DAA tools cover many ad networks in one session.`,
       location_brokers: `This is the layer that crosses the line from commercial surveillance into something darker. Every time an ad loads on your phone, your precise GPS coordinates are broadcast to hundreds of companies in a real-time auction that takes 100 milliseconds. Near Intelligence sold location data of people visiting Planned Parenthood to anti-abortion groups. X-Mode Social sold location data from Muslim prayer apps to US military contractors.`,
       govt_id_defense: `Your driver's license and Social Security number are sitting in databases at every service that ever asked you to "verify your identity." Unlike a password, you cannot change your face or your Social Security number. The defense is layering other verification on top: credit freezes, IRS PINs, SSA locks.`,
     },
     progress: {
-      25: [`Quarter of The Reclamation complete. Your credit is frozen. That's the foundation — nobody can open accounts in your name. Now we go after the brokers.`, `25% through the endgame. Credit bureaus locked down. Next: the people-search sites.`],
+      25: [`Quarter of The Reclamation complete. The first defenses are in. Next: the brokers.`, `25% through the endgame. Keep going: the credit freezes and the people-search sites are the next big wins.`],
       50: [`Halfway through The Reclamation. The retail layer is handled. Now we go deeper. Enterprise aggregators. The wholesale layer.`, `50%. You've filed more opt-outs than most people will in their lifetime. But the supply chain has layers, and the wholesale end is where the real data lives.`],
-      75: [`Three-quarters through. You've gone deeper into the surveillance economy than most people know exists. The last stretch is government ID defense.`, `75%. Credit frozen. Opted out of people-search sites. Filed requests with LexisNexis and Thomson Reuters. Blocked 100+ ad networks. The data they have on you right now is the most they'll ever have.`],
+      75: [`Three-quarters through. You've gone deeper into the surveillance economy than most people know exists. The last stretch is government ID defense.`, `75%. Three-quarters of The Reclamation done: freezes, opt-outs and requests filed. Every one makes the next copy of your data a little harder to sell.`],
       100: [
-        `The Reclamation is complete. The endgame is over. Your credit is frozen. Your name is being pulled from the people-search sites. The enterprise aggregators have your opt-out requests. Your phone isn't broadcasting your coordinates to the bidstream anymore. Look at the city. When you started, every district was dark. Now it's yours. Not because you deleted yourself from the internet — nobody can do that. But because you made a deliberate choice about what to share, with whom, and on what terms. That's what reclamation means. Not disappearing. Deciding.\n\nThe organizations fighting this fight — EFF, EPIC, Access Now, Fight for the Future, The Markup, Citizen Lab, Signal — they're still out there. Your opt-outs created paper trails. Their lawsuits turn those paper trails into enforcement. Consider supporting them.`,
+        `The Reclamation is complete. The endgame is over. Your freezes are in. Your opt-out requests are working through the people-search sites and the aggregators. Your phone shares less of your location than it did. Look at the city. When you started, every district was dark. Now it's yours. Not because you deleted yourself from the internet — nobody can do that. But because you made a deliberate choice about what to share, with whom, and on what terms. That's what reclamation means. Not disappearing. Deciding.\n\nThe organizations fighting this fight — EFF, EPIC, Access Now, Fight for the Future, The Markup, Citizen Lab, Signal — they're still out there. Your opt-outs created paper trails. Their lawsuits turn those paper trails into enforcement. Consider supporting them.`,
         `City liberated. Every district. Every building. Every wall.\n\nThe data brokers will re-add you from public records in three to six months. Set a calendar reminder. Come back. Opt out again. Each time you do, the paper trail gets longer, the enforcement case gets stronger, and the cost of ignoring you goes up. The resistance is winning. The laws are changing. The fines are real. And your city is lit.`,
       ],
     },
@@ -335,16 +335,16 @@ export const DISTRICT_DIALOGUE = {
     debrief: {
       optoutDone: [`Filed. One more broker that can't sell your data. They might re-add you in six months — and you'll opt out again, and the paper trail gets longer.`, `Done. That opt-out is now a data point. When the next enforcement case hits, your request is in the evidence pile.`, `Submitted. Another piece of the surveillance economy that no longer has your explicit permission.`],
       alreadyDone: [`Already filed. Someone's been through The Reclamation before. Confirmed and logged.`, `Already handled. Marking it secured.`],
-      freezeDone: [`Frozen. Nobody opens credit in your name now without you unfreezing it first. That's prevention, not monitoring.`, `Credit locked at that bureau. Before 2018, this cost money. Consumer advocates fought for years to make it free. You just used what they won.`],
-      idDefenseDone: [`Defense layered. You can't change your Social Security number or your face. But you can make them useless to anyone who steals a copy.`, `IRS PIN set. Nobody files a tax return in your name without a six-digit code that only you have.`],
+      freezeDone: [`Frozen. New credit that checks this bureau now needs you to lift the freeze first. That's prevention, not monitoring.`, `Credit locked at that bureau. Before 2018, this cost money. Consumer advocates fought for years to make it free. You just used what they won.`],
+      idDefenseDone: [`Defense layered. You can't change your Social Security number or your face. But you can make them useless to anyone who steals a copy.`, `IRS PIN set. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it.`],
       skip: [`Queued. The Reclamation is a campaign, not a sprint. Come back when you have a block of time.`, `No rush. The brokers have had your data for years. But don't leave it indefinitely.`],
     },
     lore: {
-      data_broker_economy: { title: 'The $200B Industry', text: `The data broker industry generates over $200 billion in annual revenue. Larger than the global music, video game, and newspaper industries combined. The product is you — the specific, identifiable, enriched version of you. You are not the customer. You are the inventory.` },
-      delete_act: { title: 'California DELETE Act', text: `In 2023, California passed the DELETE Act — the first law to create a single mechanism for opting out of all registered data brokers at once. The DROP platform processes one deletion request across 600+ registered brokers. $200/day fines per unfulfilled request. The CPPA has a dedicated enforcement strike force.` },
+      data_broker_economy: { title: 'The Broker Industry', text: `Data brokering is a big industry. The product is you — the specific, identifiable, enriched version of you. You are not the customer. You are the inventory.` },
+      delete_act: { title: 'California DELETE Act', text: `In 2023, California passed the DELETE Act — the first law to create a single mechanism for opting out of all registered data brokers at once. For California residents, the DROP platform sends one deletion request to every registered broker, and brokers that ignore it face fines.` },
       bidstream: { title: 'The Ad Bidstream', text: `Every time an ad loads on your phone, your precise GPS coordinates are broadcast to hundreds of companies in a real-time auction that takes 100 milliseconds. The winning bidder shows you an ad. Every other company that participated got your location data for free. This happens dozens of times per hour.` },
-      work_number: { title: 'The Work Number', text: `Equifax Workforce Solutions maintains employment and salary records for over 140 million Americans. Your employer reports your paycheck to them every pay period. Landlords and lenders buy this to verify your income. You did not consent to this.` },
-      legal_victories: { title: 'The Resistance Is Winning', text: `GDPR established the right to erasure. California CCPA/CPRA gave the right to delete and opt out. The DELETE Act covers 600+ brokers. The FTC banned location data brokers. Illinois BIPA led to a $650M Facebook settlement. Vermont requires broker registration. None of these happened automatically. Every one was fought for.` },
+      work_number: { title: 'The Work Number', text: `The Work Number, run by Equifax, holds employment and salary records from the employers that use it. Landlords and lenders check it to verify your income. You did not consent to this.` },
+      legal_victories: { title: 'The Resistance Is Winning', text: `GDPR established the right to erasure. California CCPA/CPRA gave the right to delete and opt out. The DELETE Act reaches every broker registered in California. The FTC has brought cases against location data brokers. Illinois BIPA led to a $650M Facebook settlement. Vermont requires broker registration. None of these happened automatically. Every one was fought for.` },
     },
     allies: [
       { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization. In every fight on this list.' },
@@ -385,7 +385,7 @@ export const PASSWORD_DIALOGUE = {
 // Task 14: what Scout says about the second step the player has.
 export const TWO_FA_DIALOGUE = {
   passkey: `A passkey. Nothing to type, nothing to phish, nothing riding along in a text message. That's the best lock they make, and it's on your door.`,
-  authenticator: `An authenticator app. The codes are made on your own device and never cross the phone network, so a SIM swap gets nobody anywhere. Lovely work.`,
+  authenticator: `An authenticator app. The codes are made on your own device and never cross the phone network, so a SIM swap doesn't get them. Lovely work.`,
   sms: `Text codes count — this account is much safer than with no second step, and I'm marking it done. Fair warning, though: a scammer who talks your carrier into moving your number to their SIM card — a SIM swap — gets your codes too. An authenticator app or a passkey closes that gap. There's a bonus mission for it whenever you're up for it.`,
   email: `Email codes count — I'm marking this one done. The catch: anyone who gets into that inbox gets the codes as well, so this account is only as safe as your email. An authenticator app or a passkey breaks that chain. Bonus mission's there when you want it.`,
 };
@@ -400,6 +400,7 @@ export const RESTORE_DIALOGUE = {
   failed: `We couldn't reach our analytics. Try again in a moment.`,
   progress: (n, total) => `Sending your city back… (${n} of ${total})`,
   done: `You're back in the city. Tomorrow's totals will include you again.`,
+  stopped: (sent, total) => `Some of your data didn't get through: ${sent} of ${total} reports arrived. Press RESTORE again and it will continue where it stopped.`,
   checking: `Checking whether tonight's run has happened…`,
   checkFailed: `We couldn't check whether tonight's run has happened.`,
 };

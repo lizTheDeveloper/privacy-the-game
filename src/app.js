@@ -1,4 +1,5 @@
 import { isAnalyticsOff, setAnalyticsOff, getOptedOutAt, setOptedOutAt, getOptedOutNonce, newNonce } from './utils/analytics-pref.js';
+import { sendRestore, clearConfirmed } from './utils/restore-send.js';
 import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
@@ -37,7 +38,6 @@ import { briefingScout } from './screens/briefing.js';
 import { shouldAskPermission, requestPermission, checkStreakReminder } from './utils/notifications.js';
 
 initErrorTracking();
-
 
 let state = ensureBurst(loadState());
 let started = hasSavedState();
@@ -309,7 +309,7 @@ async function reconnectAnalytics() {
 async function cancelGhost() {
   // The cancel carries the nonce sent with went-ghost-early: only that matches.
   const nonce = getGhostInfo()?.nonce;
-  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('ghost-cancelled', { nonce }));
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('ghost-cancelled', { nonce }, { timeoutMs: 1500 }));
   clearGhost();
   // From the finale, go where the ghost state (and any failure) is shown.
   const hash = parseRoute(location.hash).screen === 'ghost-done' ? '#/city-together' : location.hash;
@@ -321,14 +321,18 @@ async function cancelGhost() {
 // Sharing back on while an opt-out is still pending: tell tonight's run not to delete.
 async function cancelOptOut() {
   const nonce = getOptedOutNonce();
-  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled', { nonce }));
+  const sent = Boolean(nonce) && (await reconnectAnalytics()) && (await trackNow('opt-out-cancelled', { nonce }, { timeoutMs: 1500 }));
   if (sent) setOptedOutAt(null);
   else setNotice(GHOST_DIALOGUE.cancelFailed);
 }
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // Re-send this browser's saved game after tonight's run deleted it.
+// Which deletion a restore belongs to: its confirmed-event list is kept
+// only while these stay the same (re-review 1).
+function restoreStamp() {
+  return `optedOut:${getOptedOutAt() || ''}|ghost:${getGhostInfo()?.at || ''}`;
+}
+
 async function restoreData() {
   if (restoring) return;
   const kinds = deletedKinds({ ghostInfo: getGhostInfo(), optedOutAt: getOptedOutAt(), collective: collectiveData() });
@@ -342,14 +346,26 @@ async function restoreData() {
       setNotice(RESTORE_DIALOGUE.failed);
       return;
     }
-    for (const kind of kinds) track('data-restored', { kind });
-    const events = restoreEvents(state);
-    for (let i = 0; i < events.length; i += 10) {
-      for (const e of events.slice(i, i + 10)) track(e.name, e.data);
-      setNotice(RESTORE_DIALOGUE.progress(Math.min(i + 10, events.length), events.length));
-      renderCurrentRoute();
-      if (i + 10 < events.length) await sleep(500);
+    // Restore's own confirmed sender (reviewer I1): each event is posted and
+    // counted only when the analytics server answers ok, one at a time, oldest
+    // filing first, each request aborted after 15 s. The first failure stops
+    // the restore with the ghost and opt-out flags kept, so RESTORE stays on
+    // offer and a retry continues from the last confirmed event.
+    const events = [...kinds.map((kind) => ({ name: 'data-restored', data: { kind } })), ...restoreEvents(state)];
+    const result = await sendRestore(events, {
+      stamp: restoreStamp(),
+      onProgress: (n, total) => {
+        if (n % 10 === 0 || n === total) {
+          setNotice(RESTORE_DIALOGUE.progress(n, total));
+          renderCurrentRoute();
+        }
+      },
+    });
+    if (!result.ok) {
+      setNotice(RESTORE_DIALOGUE.stopped(result.sent, result.total));
+      return;
     }
+    clearConfirmed();
     clearGhost();
     setOptedOutAt(null);
     if (parseRoute(location.hash).screen === 'ghost-done') {

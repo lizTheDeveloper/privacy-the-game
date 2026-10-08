@@ -9,7 +9,7 @@ function tracker() {
   return u && typeof u.track === 'function' ? u : null;
 }
 
-function withPod(data) {
+export function withPod(data) {
   const pod = getChosenPod() || (isPodAuto() ? POD_AUTO : null);
   return pod ? { ...(data || {}), pod } : data;
 }
@@ -33,15 +33,18 @@ export function trackPageview(url, title) {
   if (u) u.track((props) => ({ ...props, url, title }));
 }
 
-// Send one event and wait for it (bounded). True if a send was attempted.
-export async function trackNow(name, data, { timeoutMs = 1500 } = {}) {
+// Send one event and wait for umami.track's promise (until it settles, or
+// timeoutMs when given). True if a send was attempted. Umami's tracker
+// swallows network errors, so this can't tell whether the event arrived: the
+// cancel paths pass a timeoutMs and accept that, and restore uses its own
+// confirmed sender (restore-send.js) instead.
+export async function trackNow(name, data, { timeoutMs = null } = {}) {
   const u = tracker();
   if (!u) return false;
   try {
-    await Promise.race([
-      Promise.resolve(u.track(name, withPod(data))),
-      new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-    ]);
+    const send = Promise.resolve(u.track(name, withPod(data)));
+    if (timeoutMs == null) await send;
+    else await Promise.race([send, new Promise((resolve) => setTimeout(resolve, timeoutMs))]);
   } catch {
     // Best effort.
   }

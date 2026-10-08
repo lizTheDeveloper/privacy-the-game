@@ -147,9 +147,10 @@ describe('fix 9 (Liz): the password manager report is core for players with a ma
 
   it('briefing says plainly that its flags decide the resets', () => {
     expect(renderBriefing(withPm, PM)).toContain(
-      'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. Whatever it clears, we leave alone.',
+      'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
     );
-    expect(renderDebrief(withPm, PM)).toContain('Whatever it flags gets a new password; whatever it clears stays as it is.');
+    // Ruling (round 6): a clean report isn't proof, so the debrief says so.
+    expect(renderDebrief(withPm, PM)).toContain('Whatever it flags gets a new password. A clean result isn’t proof of anything, just no known problem.');
   });
 
   it('counts toward integrity once in play', () => {

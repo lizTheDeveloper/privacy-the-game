@@ -30,7 +30,7 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "An OSINT investigator starts with your photos. They reverse-image-search your profile picture to find every platform you're on. They zoom into backgrounds looking for house numbers, street signs, license plates, and reflections. They run your landscape photos through AI geolocation tools that can pinpoint a location from a single image. They check if your photos still have EXIF metadata with GPS coordinates baked in. Let's see what they'd find.",
     steps: [
       { text: "Reverse image search your main profile photo — drag it into Google Images and see where else it appears", url: "https://images.google.com/" },
-      { text: "Now try Yandex — it's better at matching faces across platforms", url: "https://yandex.com/images/" },
+      { text: "Now try Yandex — a different engine sometimes finds different matches", url: "https://yandex.com/images/" },
       { text: "Pick 5-10 of your most recent social media photos. Zoom in on the background of each one. Can you see: house numbers? Street signs? Store names? License plates? School names?" },
       { text: "Check reflections — mirrors, windows, sunglasses, car paint, phone screens. What do they reveal about your location or surroundings?" },
       { text: "If you've shared photos on blogs, forums, or messaging apps (not just social media), check if they still have EXIF data: upload one to an EXIF viewer", url: "https://exif.tools/" },
@@ -90,7 +90,7 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "You might lock down your own profile, but your connections leak information about you. An investigator maps your social graph — your followers, your tagged photos, your most frequent commenters — to identify your family members, your partner, your workplace, your friend group. They find your mom's unlocked Facebook, your partner's public Instagram, your colleague who tags the whole team at the office holiday party. Your privacy is only as strong as the weakest link in your social circle.",
     steps: [
       { text: "Check your followers/following list. On a public account, this reveals who you know. Can someone identify your family, partner, or coworkers from the list?" },
-      { text: "Look at tagged photos — not YOUR tags, but photos OTHER PEOPLE tagged you in. These bypass your privacy settings." },
+      { text: "Look at tagged photos — not YOUR tags, but photos OTHER PEOPLE tagged you in. Who can see them depends on the poster's settings, unless you review tags before they appear." },
       { text: "Check your most frequent commenters and people you interact with. These reveal your closest relationships." },
       { text: "Search for your name + 'family' or 'spouse' or 'partner' on Google. What comes up?" },
       { text: "Check if family members have public profiles that mention you or share your location (parents are the biggest leak)." },
@@ -149,11 +149,11 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Digital Breadcrumbs',
-    briefing: "The trail you leave without thinking about it. Your Amazon wishlist is public by default — it shows your name and city. Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
+    briefing: "The trail you leave without thinking about it. An Amazon list you made public, or shared, can show your name and city (Amazon makes new lists private unless you choose otherwise). Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
     steps: [
-      { text: "Check your Amazon wishlist privacy: go to Your Lists, click the three dots, check sharing settings. Public? Semi-public? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
-      { text: "Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.", url: "https://venmo.com/account/settings/privacy" },
-      { text: "If you use Strava or a fitness tracker: check your heatmap. Does your running/cycling route reveal your home address?", url: "https://www.strava.com/athlete/heatmap" },
+      { text: "Check your Amazon lists: go to Your Lists and look at each list's privacy setting. Any you made public or shared? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
+      { text: 'Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.', url: 'https://account.venmo.com/settings/privacy' },
+      { text: 'If you use Strava or a fitness tracker: check your privacy controls and map visibility. Does a public route start or end at your home?', url: 'https://www.strava.com/settings/privacy' },
       { text: "Search your recent screenshots — any showing WiFi network names? An SSID can be looked up on WiGLE to find your physical location.", url: "https://wigle.net/" },
       { text: "Check unboxing or haul videos you've posted. Any delivery labels, packaging with your address, or mail visible in the background?" },
       { text: "Google your full name in quotes. Then try your name + city. Then your name + employer. What does a stranger find?" },
@@ -161,11 +161,11 @@ export const OSINT_SIEVE_MISSIONS = [
     ],
     debriefQs: OSINT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Your Amazon wishlist says your name is [name] and you live in [city]. Your Strava shows you run the same route every Tuesday, starting and ending at the same house. Your Venmo shows you split dinner with the same three people every Friday. You posted a screenshot with your WiFi name visible — I just looked it up and found your address. None of this was on social media. This is the ambient trail.\"",
+      briefing: "\"A public Amazon list can say your name is [name] and you live in [city]. Your Strava shows you run the same route every Tuesday, starting and ending at the same house. Your Venmo shows you split dinner with the same three people every Friday. You posted a screenshot with your WiFi name visible — I just looked it up and found your address. None of this was on social media. This is the ambient trail.\"",
       debrief: {
         'no-exposure': "\"Clean trail. No ambient data leaking your location or identity through side channels. That's thorough.\"",
         'some-exposure': "\"Found some breadcrumbs. Amazon and Venmo are quick fixes — just privacy toggles. Strava needs a privacy zone around your home. Screenshots with WiFi names need to be scrubbed before sharing.\"",
-        'significant-exposure': "\"Heavy trail. The ambient stuff is often worse than social media because you never think about it. Start with Amazon wishlist and Venmo — those are one-click fixes. Then Strava. Then audit your screenshots.\"",
+        'significant-exposure': "\"Heavy trail. The ambient stuff is often worse than social media because you never think about it. Start with any public Amazon list and Venmo — those are one-click fixes. Then Strava. Then audit your screenshots.\"",
         'skip': "\"The breadcrumbs check catches things no other mission covers. Worth the time.\"",
       },
     },
