@@ -79,6 +79,21 @@ const LOCKDOWN_DEBRIEF = [
   },
 ];
 
+// Each messenger's lock by its own name (Signal: registration lock PIN;
+// WhatsApp: two-step verification PIN; Telegram: two-step password). Same id
+// and values as REGISTRATION_LOCK_DEBRIEF; words only.
+function lockDebrief(label, yes) {
+  return [{
+    id: 'action',
+    label,
+    options: [
+      { value: 'enabled-2fa', text: yes, severity: 'safe' },
+      { value: 'already-enabled', text: 'It was already on', severity: 'safe' },
+      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+    ],
+  }];
+}
+
 const REGISTRATION_LOCK_DEBRIEF = [
   {
     id: "action",
@@ -281,7 +296,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: `Open Instagram → ☰ → Settings and privacy → "Account privacy" -- set to Private if you want only followers to see your posts` },
       { text: `Under "How others can interact with you" → turn off "Activity Status" (stops showing when you're online)` },
       { text: 'Go to "Messages and story replies" → set "Message controls" to restrict who can DM you' },
-      { text: 'Go to Accounts Center → "Your information and permissions" → "Your activity off Meta technologies" → disconnect tracking' },
+      { text: 'In Accounts Center, look for the setting about activity from other businesses and review it (it changes how Meta uses that activity, not whether businesses send it)' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -517,7 +532,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "linkedin",
     phase: "fortify",
     title: "Lockdown: LinkedIn",
-    briefing: `Given LinkedIn's 2012 breach (unsalted SHA-1 hashes cracked in hours), any password from that era is long compromised. LinkedIn supports authenticator apps -- it's the primary defense against the spear-phishing that targets professional accounts.`,
+    briefing: `Given LinkedIn's 2012 breach (unsalted SHA-1 hashes, most cracked soon after), change any password from that era. LinkedIn supports authenticator apps: with one, a stolen password alone isn’t enough. A code phished from you still is, so check links too.`,
     steps: [
       { text: 'Open LinkedIn Sign-in & Security', url: 'https://www.linkedin.com/psettings/sign-in-and-security' },
       { text: 'Click "Change password" -- open your password manager, generate a 20+ character random password, save it, paste into both fields' },
@@ -530,7 +545,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       debrief: {
         "reset-password": `"Locked down. Recruiters can still spam you, but at least they'll be real recruiters."`,
         'already-strong': '"Already solid. Professional paranoia is a virtue."',
-        'partial': '"Password done. LinkedIn phishing is extremely effective -- 2FA blocks it."',
+        'partial': '"Password done. Add 2FA when you can: it stops a stolen password from being enough on its own."',
         'later': '"LinkedIn phishing is the most effective on the internet because people expect professional messages. Protect the account."',
       },
     },
@@ -541,7 +556,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'linkedin',
     phase: 'reclaim',
     title: 'Privacy Review: LinkedIn',
-    briefing: 'LinkedIn defaults your connections list to public and lets people find you by email and phone. These settings feed recruiter spam, data scrapers, and social engineering attacks. The privacy controls are buried but functional.',
+    briefing: 'LinkedIn lets your connections see your connections list by default, and lets people find you by email and phone. These settings feed recruiter spam, data scrapers, and social engineering attacks. The privacy controls are buried but functional.',
     steps: [
       { text: 'Open LinkedIn Visibility Settings', url: 'https://www.linkedin.com/psettings/privacy' },
       { text: 'Under "Visibility" → "Who can see your connections" → set to "Only you"' },
@@ -550,7 +565,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"LinkedIn shows your connections to everyone by default. That's your entire professional network, visible to anyone with an account. Fix that first."`,
+      briefing: `"By default your connections can browse your whole connections list. Decide who should see your network, then fix that first."`,
       debrief: {
         "tightened": `"Connections hidden, discoverability restricted. Your professional network is no longer a public directory."`,
         "already-tight": `"Already locked down. LinkedIn's privacy settings are deeply buried -- respect for finding them."`,
@@ -596,9 +611,9 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Add a recovery email address -- this lets you reset the PIN if you forget it' },
       { text: 'Done -- registering your number on a new phone now needs this PIN, or a 7-day wait from your account’s last use (WhatsApp’s rule when the PIN is unknown)' },
     ],
-    debriefQs: REGISTRATION_LOCK_DEBRIEF,
+    debriefQs: lockDebrief('Did you set a two-step verification PIN?', 'Yes, PIN is set'),
     scoutDialog: {
-      briefing: `"WhatsApp's "password" is a registration lock PIN. Without it, someone who steals your phone number steals your entire chat history. SIM-swap attacks make this real."`,
+      briefing: `"WhatsApp’s “password” is its two-step verification PIN. Without it, someone who steals your phone number can register your account on their phone. SIM-swap attacks make this real."`,
       debrief: {
         "enabled-2fa": `"Registration PIN set. Someone with your number now needs the PIN, or has to wait a week."`,
         "already-enabled": `"Already had a PIN. Good -- most people skip this."`,
@@ -638,7 +653,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'signal',
     phase: 'recon',
     title: 'Linked Devices: Signal',
-    briefing: 'Signal stores almost nothing server-side -- no message history, no contacts, no metadata. But Signal Desktop and iPad create linked sessions that see all new messages in real time. An unknown linked device defeats the whole point of using Signal.',
+    briefing: 'Signal keeps almost nothing server-side -- no message history, no contact lists. What it can hand over is when you registered and when you last connected. But Signal Desktop and iPad create linked sessions that see all new messages in real time. An unknown linked device defeats the whole point of using Signal.',
     steps: [
       { text: 'Open Signal on your phone' },
       { text: 'Android: tap your profile picture → Linked devices. iPhone: Settings → Linked devices' },
@@ -664,7 +679,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: 'Open Signal → tap your profile icon → Settings → Account' },
       { text: 'Tap "Registration Lock" → toggle it ON' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Set or confirm your Signal PIN when asked: it’s what the lock checks' },
       { text: 'Signal will remind you of the PIN periodically to help you remember it' },
     ],
     debriefQs: REGISTRATION_LOCK_DEBRIEF,
@@ -815,7 +830,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
         'reset-password': '"Locked down. Your Reddit identity is re-secured."',
         'already-strong': '"Already solid. Good discipline on a pseudonymous account."',
         'partial': '"Password done. 2FA is quick on Reddit -- come back."',
-        'later': '"If this password is from before 2018, it was in the breach. Come back."',
+        'later': '"Reddit’s 2018 breach took a 2007 backup. If your account and password date from 2007 or earlier, change it. Come back."',
       },
     },
     estimatedMinutes: 5,
@@ -876,15 +891,15 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: `Telegram relies on SMS codes by default. Anyone who can intercept your texts -- through SIM-swapping, SS7 attacks, or a compromised carrier employee -- can take over your account instantly. The two-step password blocks this. It's Telegram's single most important security setting.`,
     steps: [
       { text: 'Open Telegram → Settings → Privacy and Security → Two-Step Verification' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Set a password: a strong one from your password manager, different from everything else' },
       { text: `Add a recovery email address -- use one you've already secured` },
       { text: 'Check the confirmation email Telegram sends to verify the recovery address' },
     ],
-    debriefQs: REGISTRATION_LOCK_DEBRIEF,
+    debriefQs: lockDebrief('Did you set a two-step verification password?', 'Yes, password is set'),
     scoutDialog: {
       briefing: `"Telegram's two-step password is the single most important setting. Without it, anyone who intercepts one SMS code owns your entire account. SIM-swap attacks make this real, not theoretical."`,
       debrief: {
-        "enabled-2fa": `"Two-step password set. Telegram is now resistant to SMS interception and SIM-swap attacks."`,
+        "enabled-2fa": `"Two-step password set. An intercepted SMS code alone no longer gets someone in."`,
         "already-enabled": `"Already set. The right call for a phone-number-based messenger."`,
         "later": `"If you use Telegram for anything private, this is critical. SMS can be intercepted."`,
       },
@@ -1137,7 +1152,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     scoutDialog: {
       briefing: `"The most dangerous thing in a repo isn't the code -- it's the API key someone committed in 2021 and then deleted the file. The commit history still has it. GitHub's secret scanning catches the common patterns."`,
       debrief: {
-        "no-breaches": '"No exposed secrets detected. Clean repos."',
+        "no-breaches": '"No alerts. On a free plan, secret scanning covers public repos only, so check private ones by hand."',
         "1-2-breaches": '"Found and rotated secrets. Good catch -- those were live credentials in your commit history."',
         "3plus-breaches": `"Multiple exposed secrets. The ones you haven't rotated yet are still live. Prioritize cloud credentials and API keys."`,
         "skip": '"Worth doing when you have time. Old commits hide old secrets."',

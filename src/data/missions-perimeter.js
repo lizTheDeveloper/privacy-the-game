@@ -47,7 +47,7 @@ export const PERIMETER_MISSIONS = [
     accountId: "sim_protection",
     phase: "fortify",
     title: "Lock Down Your Phone Number",
-    briefing: "SIM swapping is when an attacker calls your carrier, pretends to be you, and transfers your number to their SIM card. Your phone goes dead. Their phone starts receiving your texts -- including every SMS two-factor code. The whole attack takes fifteen minutes. Your defense is a carrier account PIN and a port-out lock. These are two settings, one phone call or website visit, and they block the most common way high-value accounts get stolen.",
+    briefing: "SIM swapping is when an attacker calls your carrier, pretends to be you, and transfers your number to their SIM card. Your phone goes dead. Their phone starts receiving your texts -- including every SMS two-factor code. The whole attack takes fifteen minutes. Your defense is a carrier account PIN and a port-out lock. These are two settings, one phone call or website visit, and they block the phone-call version of a SIM swap.",
     steps: [
       { text: 'T-Mobile: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
       { text: 'AT&T: in the myAT&T app, turn on Wireless Account Lock (tap the person icon → Wireless account lock, then swipe to lock). AT&T says it blocks specific changes, including moving your number to another carrier (unlock it yourself when you switch). Also set your account passcode (for calls and stores) and the extra security passcode, which is for signing in online.', url: 'https://www.att.com/support/article/wireless/000102016/' },
@@ -70,7 +70,7 @@ export const PERIMETER_MISSIONS = [
     accountId: "sim_protection",
     phase: "reclaim",
     title: "Remove SMS from High-Value Accounts",
-    briefing: "Even with a carrier PIN, SMS is the weakest two-factor method. The real fix is making your phone number irrelevant to account security. If your important accounts use an authenticator app instead of SMS codes, then even a successful SIM swap gives the attacker nothing but the ability to receive your spam calls.",
+    briefing: "Even with a carrier PIN, SMS is the weakest two-factor method. The real fix is making your phone number irrelevant to account security. If your important accounts use an authenticator app instead of SMS codes, a successful SIM swap no longer delivers their sign-in codes. Any account that still uses your number for codes or recovery stays exposed, so remove it there too.",
     steps: [
       { text: "Google: Open myaccount.google.com/signinoptions/two-step-verification → under \"How you sign in,\" remove your phone number as a verification method. Keep Google Authenticator or your security key.", url: "https://myaccount.google.com/signinoptions/two-step-verification" },
       { text: "Microsoft: Open account.live.com/proofs/manage → remove \"Text a code to my phone\" as a sign-in method. Keep the Microsoft Authenticator app.", url: "https://account.live.com/proofs/manage" },
@@ -80,7 +80,7 @@ export const PERIMETER_MISSIONS = [
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"The carrier PIN protects your number. This mission makes your number not matter. When your Google account uses an authenticator app instead of SMS, a SIM swap gives the attacker your phone number. Which lets them receive spam calls and pizza delivery confirmations. That's the whole prize. That's what we're going for.\"",
+      briefing: "\"The carrier PIN protects your number. This mission makes your number not matter. When your Google account uses an authenticator app instead of SMS, a SIM swap stops handing over its codes. Do that for every account that still texts you codes, and the swap gets them a lot less.\"",
       debrief: scoutAction(
         "\"SMS removed from your high-value accounts. Your phone number is no longer the weak link. That's a fundamental security upgrade most people never make.\"",
         "\"Already on authenticator apps everywhere. The SIM tower was half-liberated before we started.\"",
@@ -103,7 +103,7 @@ export const PERIMETER_MISSIONS = [
       { text: "Lock screen: iPhone → Settings → Face ID & Passcode → set a 6-digit (or alphanumeric) passcode. Android → Settings → Security → Screen Lock → set PIN (6+ digits) or password." },
       { text: "Auto-lock: iPhone → Settings → Display & Brightness → Auto-Lock → set to 1 minute. Android → Settings → Display → Screen timeout → 1 minute." },
       { text: "Notification previews: iPhone → Settings → Notifications → Show Previews → \"When Unlocked.\" Android → Settings → Notifications → Notifications on lock screen → \"Hide content.\"" },
-      { text: "Find My: iPhone → Settings → [Your Name] → Find My → Find My iPhone → turn on, enable \"Send Last Location.\" Android → Settings → Security → Find My Device → turn on." },
+      { text: "Find My: iPhone → Settings → [Your Name] → Find My → Find My iPhone → turn on, enable \"Send Last Location.\" Android → search Settings for Find Hub (formerly Find My Device) → turn it on." },
       { text: "Encryption: Modern iPhones and Androids encrypt by default when you have a lock screen. Confirm yours is on: iPhone -- if you have a passcode, it's encrypted. Android → Settings → Security → Encryption -- should say \"Encrypted.\"" },
       { text: "Test Find My: Open icloud.com/find (iPhone) or Google's Find Hub at google.com/android/find (Android) in a browser and confirm your device shows up." },
     ],
@@ -157,7 +157,7 @@ export const PERIMETER_MISSIONS = [
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Every 'Always' location permission is an app selling your daily commute, your doctor visits, and your Friday night habits to data brokers. The Gravy Analytics breach in January 2025 proved this -- millions of people's location data leaked because apps were quietly feeding it to an aggregator that got hacked. Set everything to 'While Using' and see which apps break. The ones that break without constant location access are the ones that were monetizing it.\"",
+      briefing: "\"An 'Always' location permission lets an app collect where you go all day, and some apps sell that data to brokers. The Gravy Analytics breach in January 2025 proved this -- millions of people's location data leaked because apps were quietly feeding it to an aggregator that got hacked. Set what you can to 'While Using'. Apps that need background location for what they do (maps, ride share, Find My) will tell you; for the rest, ask why they wanted it.\"",
       debrief: scoutAction(
         "\"Permissions cleaned. Fewer apps tracking your location, accessing your contacts, and listening through your microphone. Each revoked permission is a data pipeline shut off.\"",
         "\"Already minimal. You read the permission dialogs. There aren't many of you, and the data brokers hate every one of you.\"",
@@ -175,7 +175,7 @@ export const PERIMETER_MISSIONS = [
     accountId: "scam_defense",
     phase: "recon",
     title: "Train Your Phishing Eye",
-    briefing: "The difference between a real security alert and a phishing email is one detail: the domain after the @. Display names lie. \"Google Security\" can be anyone. The domain is the fingerprint. Real: @accounts.google.com. Fake: @google-security-alert.com. The hard ones aren't the obvious scams -- they're the real alerts from legitimate companies that LOOK like phishing. Microsoft's real alert domain is accountprotection.microsoft.com. PayPal phishing uses paypa1.com -- that's a digit 1, not a letter L.",
+    briefing: "The detail that catches the most phishing is the domain after the @. It isn’t proof (senders can be spoofed), but it’s the best two-second check. Display names lie. \"Google Security\" can be anyone. The domain is the fingerprint. Real: @accounts.google.com. Fake: @google-security-alert.com. The hard ones aren't the obvious scams -- they're the real alerts from legitimate companies that LOOK like phishing. Microsoft's real alert domain is accountprotection.microsoft.com. PayPal phishing uses paypa1.com -- that's a digit 1, not a letter L.",
     steps: [
       { text: "Open your email inbox right now. Find the most recent security-related email (password change confirmation, login alert, anything from a company about your account)." },
       { text: "Look at the FULL sender address -- not the display name, the actual email address. Click the sender name to expand it if needed. Check: does the domain after the @ match the company?" },
@@ -186,7 +186,7 @@ export const PERIMETER_MISSIONS = [
     scoutDialog: {
       briefing: "\"Let's train your eye. The biggest tell in a phishing email isn't bad grammar or threats -- it's the domain. Every company sends from specific domains. Google uses accounts.google.com. Your bank uses their actual domain. Phishers use domains that look close but aren't: google-security.com, chase-verify.com, paypa1.com. One wrong character is all it takes. Once you train yourself to check the domain before anything else, you catch 90% of phishing on sight.\"",
       debrief: {
-        "no-breaches": "\"Good eye. The domain check becomes automatic with practice -- two seconds, every email, and you're phishing-resistant for life.\"",
+        "no-breaches": "\"Good eye. The domain check becomes a habit with practice -- two seconds, every email. It won’t catch everything, but it catches a lot.\"",
         "1-2-breaches": "\"The tricky ones are the real emails that look fake. Microsoft's actual domain -- accountprotection.microsoft.com -- sounds made up. But it's real. The skill is checking, not guessing.\"",
         "skip": "\"This one's worth coming back to. Phishing is the #1 way accounts get compromised -- not because the emails are sophisticated, but because people don't check the one detail that gives it away.\"",
       },
