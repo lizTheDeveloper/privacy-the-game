@@ -727,3 +727,30 @@ describe('round 6 ruling: Microsoft AI mission claims only what its steps do', (
     expect(values(m, 'action')).toEqual(['opted-out', 'no-account', 'later']);
   });
 });
+
+describe('re-review 2/3: IP PIN and freeze lines say exactly what they do, in missions and in dialogue', async () => {
+  const { DISTRICT_DIALOGUE } = await import('../src/data/dialogue.js');
+  const { readFileSync } = await import('node:fs');
+  const DIALOGUE = readFileSync(new URL('../src/data/dialogue.js', import.meta.url), 'utf8');
+  const EXACT = 'An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it';
+  it('the IRS IP PIN Scout lines (Capitol and Reclamation) and idDefenseDone say exactly that', () => {
+    expect(byId('irs-fortify-ip-pin').scoutDialog.briefing).toContain(EXACT);
+    expect(byId('govt_id_defense-fortify-irs-pin').scoutDialog.briefing).toContain(EXACT);
+    expect(DISTRICT_DIALOGUE.reclamation.debrief.idDefenseDone.join(' ')).toContain(EXACT);
+  });
+  it('Reclamation at 25% claims no freeze, and freezeDone claims no absolute', () => {
+    const p25 = DISTRICT_DIALOGUE.reclamation.progress[25].join(' ');
+    expect(p25).not.toMatch(/credit is frozen|nobody can open|locked down/i);
+    expect(DISTRICT_DIALOGUE.reclamation.debrief.freezeDone.join(' ')).not.toMatch(/Nobody opens credit/);
+  });
+  it.each([
+    'nobody can open accounts', 'Nobody opens credit', 'Nobody files a tax return', "they can't file a return without",
+    'nobody files a return in your name', 'Nobody else can register them', 'number one way', 'invalidates every copy instantly',
+    'forty thousand times', '99% of the population', '$440 million', '$40', '$200 billion', '$200B', '600+', '$200/day',
+    'strike force', '140 million Americans', 'reports your paycheck', '2.5 billion consumers', 'FTC banned location data brokers',
+    'Venmo defaults all transactions to public', 'gets nobody anywhere', 'In 2023, the DOJ prosecuted', 'a few billion records',
+    "isn't broadcasting your coordinates", 'any known breach database', 'three weeks of ad revenue', "didn't tell anyone until 2016",
+  ])('dialogue.js never says "%s"', (phrase) => {
+    expect(DIALOGUE).not.toContain(phrase);
+  });
+});

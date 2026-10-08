@@ -825,7 +825,7 @@ export const RECLAMATION_MISSIONS = [
     ],
     debriefQs: DEFENSE_DEBRIEF,
     scoutDialog: {
-      briefing: "\"After the Equifax breach, assume someone has your SSN. One use of a stolen Social Security number is a fraudulent tax return -- file before you do, claim your refund, disappear. The IRS IP PIN blocks that. Six digits, generated annually, and nobody files a return in your name without it. It's free.\"",
+      briefing: "\"After the Equifax breach, assume someone has your SSN. One use of a stolen Social Security number is a fraudulent tax return -- file before you do, claim your refund, disappear. The IRS IP PIN blocks that. Six digits, issued every year. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it. It's free.\"",
       debrief: {
         "done": "\"IRS PIN set. A return filed with your SSN now needs that code, or it's rejected or held for verification.\"",
         "already-done": "\"Already set up. You refresh it each year, right?\"",

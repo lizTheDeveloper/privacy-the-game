@@ -648,7 +648,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: IP_PIN_DEBRIEF,
     scoutDialog: {
-      briefing: `"The IP PIN is one of the strongest defenses against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free."`,
+      briefing: `"The IP PIN is one of the strongest defenses against tax identity theft. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it. Free."`,
       debrief: {
         "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it."',
         'already-enabled': `"Already have one. Good."`,
