@@ -117,23 +117,38 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_pair(acct text) RETURNS text LANGUAGE sql 
   SELECT CASE acct WHEN 'google' THEN 'gmail' WHEN 'apple_id' THEN 'icloud' WHEN 'microsoft' THEN 'outlook' ELSE acct END
 $$;
 
+-- Pairs the player split: the second account's latest answer is
+-- "different-address", whatever its finding. Both accounts are then separate
+-- addresses, each fixed only by its own reset or 2FA (symmetric).
+CREATE TEMP TABLE rc_split ON COMMIT DROP AS
+SELECT session_id, pg_temp.rc_pair(acct) AS pair
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, same_address
+          FROM (SELECT session_id, event_id, at, same_address,
+                       left(mission, length(mission) - length('-recon-breach')) AS acct
+                  FROM rc_mc WHERE mission IN ('google-recon-breach', 'apple_id-recon-breach', 'microsoft-recon-breach')) c
+         ORDER BY session_id, acct, at DESC, event_id DESC) latest
+ WHERE same_address = 'different-address';
+
 CREATE TEMP TABLE rc_checks_acct ON COMMIT DROP AS
-SELECT session_id, acct, finding, at, event_id,
-       CASE WHEN same_address = 'different-address' THEN acct ELSE pg_temp.rc_pair(acct) END AS addr
-  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id, same_address
-          FROM (SELECT session_id, event_id, at, finding, same_address,
+SELECT l.session_id, l.acct, l.finding, l.at, l.event_id,
+       EXISTS (SELECT 1 FROM rc_split x WHERE x.session_id = l.session_id AND x.pair = pg_temp.rc_pair(l.acct)) AS separate
+  FROM (SELECT DISTINCT ON (session_id, acct) session_id, acct, finding, at, event_id
+          FROM (SELECT session_id, event_id, at, finding,
                        left(mission, length(mission) - length('-recon-breach')) AS acct
                   FROM rc_mc WHERE mission LIKE '%-recon-breach') c
          WHERE acct IN ('gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft')
-         ORDER BY session_id, acct, at DESC, event_id DESC) latest
- WHERE finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
+         ORDER BY session_id, acct, at DESC, event_id DESC) l
+ WHERE l.finding IN ('no-breaches', '1-2-breaches', '3plus-breaches');
+
+ALTER TABLE rc_checks_acct ADD COLUMN addr text;
+UPDATE rc_checks_acct SET addr = CASE WHEN separate THEN acct ELSE pg_temp.rc_pair(acct) END;
 
 CREATE TEMP TABLE rc_checks ON COMMIT DROP AS
 SELECT DISTINCT ON (c.session_id, c.addr) c.session_id,
        CASE WHEN EXISTS (SELECT 1 FROM rc_checks_acct p WHERE p.session_id = c.session_id AND p.acct = c.addr)
             THEN c.addr ELSE c.acct END AS acct,
        c.finding,
-       (c.addr = c.acct AND pg_temp.rc_pair(c.acct) <> c.acct) AS separate
+       c.separate
   FROM rc_checks_acct c
  ORDER BY c.session_id, c.addr, c.at DESC, c.event_id DESC;
 
