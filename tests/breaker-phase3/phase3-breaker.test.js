@@ -313,12 +313,14 @@ describe('P4 car privacy report', () => {
     expect(html).not.toContain('Vehicle Privacy Report');
   });
 
-  it.each(CARS)('%s alone puts the report in play, in the district list and in the progress count', (car) => {
+  // Ruling (Phase 3 reviewer C1): the report is a bonus that counts once
+  // done, so it adds to the bonus count, not the core total.
+  it.each(CARS)('%s alone puts the report in play, in the district list and in the bonus count', (car) => {
     const s = only([car]);
     expect(isMissionInPlay(s, m)).toBe(true);
     expect(renderDistrict(s, 'freeway', 'recon')).toContain('Vehicle Privacy Report');
-    const before = calcDistrictProgress(only([]), 'freeway').total;
-    expect(calcDistrictProgress(s, 'freeway').total).toBeGreaterThan(before);
+    const none = calcDistrictProgress(only([]), 'freeway');
+    expect(calcDistrictProgress(s, 'freeway').bonusTotal).toBeGreaterThan(none.bonusTotal);
   });
 
   it('a data broker account is not a car', () => {

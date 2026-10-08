@@ -340,6 +340,11 @@ const GENERAL_MISSIONS = [
     id: 'car_general-recon-vin',
     district: 'freeway',
     inPlayIfAny: MANUFACTURER_IDS,
+    // A bonus that counts like core once done (reviewer C1): it was core on
+    // the GM account only, so making it core for every car would drop old
+    // non-GM saves below 100% (and the city out of complete).
+    optional: true,
+    countsWhenDone: true,
     phase: 'recon',
     title: 'Vehicle Privacy Report',
     briefing: 'Before diving into individual manufacturers, get a bird\'s-eye view of what your car collects. Privacy4Cars offers a free VIN-based report with a Vehicle Privacy Label: what this vehicle collects, shares and sells.',
