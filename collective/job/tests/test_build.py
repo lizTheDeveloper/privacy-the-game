@@ -369,6 +369,26 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(city["breachChecks"], 60)
         self.assertEqual(city["breachRatePct"], 0)
 
+    # Ruling 2026-10-08: the latest filing of a mission wins for "fixed" (and
+    # every rc_done figure), as in the save.
+    def test_a_reset_refiled_as_skipped_is_not_a_fix(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "1-2-breaches")
+        events(sids, "mission-completed", {"mission": "gmail-fortify-password", "status": "completed"},
+               at="now() - interval '1 hour'")
+        events(sids[:30], "mission-completed", {"mission": "gmail-fortify-password", "status": "skipped"})
+        city = build()["city"]
+        self.assertEqual(city["fortified"], {"pct": 50, "fixed": 30, "breached": 60})
+
+    def test_a_skipped_reset_later_completed_is_a_fix(self):
+        sids = players(60)
+        self.breach(sids, "gmail", "1-2-breaches")
+        events(sids, "mission-completed", {"mission": "gmail-fortify-password", "status": "skipped"},
+               at="now() - interval '1 hour'")
+        events(sids, "mission-completed", {"mission": "gmail-fortify-password", "status": "completed"})
+        city = build()["city"]
+        self.assertEqual(city["fortified"]["fixed"], 60)
+
     def test_either_account_of_a_pair_fixes_the_address(self):
         sids = players(60)
         self.breach(sids, "gmail", "1-2-breaches")

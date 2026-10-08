@@ -1,4 +1,5 @@
-# Breaker round 2, unrun SQL cases (copy next to test_build.py to run).
+# Breaker phase 3 round 2's SQL cases, moved here from tests/breaker-phase3/
+# and run on the CI VM with test_build (unedited).
 #
 # Hole: an unsplit pair where both accounts' latest checks carry the SAME
 # created_at (a restore resends a whole save in one burst; Umami stamps
