@@ -590,3 +590,20 @@ describe('ruling: DNS missions say only what is true', () => {
     expect(m.debriefQs[0].id).toBe('action');
   });
 });
+
+describe('ruling: a 2FA tie takes the weaker method, locally and in build.sql', () => {
+  it('the local order and the SQL rank agree', async () => {
+    const { METHOD_STRENGTH, weakerMethod } = await import('../src/utils/two-factor.js');
+    const { readFileSync } = await import('node:fs');
+    const sql = readFileSync(new URL('../collective/job/sql/build.sql', import.meta.url), 'utf8');
+    const rank = sql.match(/rc_method_rank\(method text\)[\s\S]*?SELECT CASE method (.*?) ELSE 0 END/)[1];
+    for (const [m, n] of Object.entries(METHOD_STRENGTH)) {
+      if (m === 'none') expect(rank).not.toContain(`'none'`);
+      else expect(rank).toContain(`WHEN '${m}' THEN ${n}`);
+    }
+    expect(weakerMethod('passkey', 'sms')).toBe('sms');
+    expect(weakerMethod('authenticator', 'passkey')).toBe('authenticator');
+    expect(weakerMethod('email', 'none')).toBe('none');
+    expect(sql).toMatch(/pg_temp\.rc_method_rank\(method\) ASC, event_id DESC/);
+  });
+});

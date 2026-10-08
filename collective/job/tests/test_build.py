@@ -625,6 +625,20 @@ class HonestPasswordsTest(unittest.TestCase):
         self.assertNotIn("passwords", doc["city"])
         self.assertEqual(doc["city"]["actions"], 0)
 
+    # Ruling 2026-10-08: two completed 2FA filings of one mission at the same
+    # instant with different methods resolve to the weaker method
+    # (none < sms/email < authenticator < passkey), as locally.
+    def test_same_instant_2fa_tie_takes_the_weaker_method(self):
+        sids = players(60)
+        at = "timestamptz '2026-10-01 12:00:00+00'"
+        events(sids, "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "passkey"}, at=at)
+        events(sids, "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "sms"}, at=at)
+        events(sids, "mission-completed", {"mission": "yahoo-fortify-2fa", "status": "completed", "method": "authenticator"}, at=at)
+        events(sids, "mission-completed", {"mission": "yahoo-fortify-2fa", "status": "completed", "method": "passkey"}, at=at)
+        city = build()["city"]
+        self.assertEqual(city["passkeyOrApp"], 60)   # yahoo (authenticator) only; gmail resolves to sms
+        self.assertEqual(city["twoFactor"], 120)     # both missions still done
+
     def test_passkey_or_app_counts_accounts_city_only(self):
         sids = players(60)
         events(sids[:30], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "passkey"})
