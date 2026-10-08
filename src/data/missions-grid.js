@@ -134,7 +134,7 @@ export const GRID_MISSIONS = [
     accountId: "voice_assistant",
     phase: "recon",
     title: "Review and Delete Voice Recordings",
-    briefing: "Every time you talk to Alexa, Google Assistant, or Siri, the recording is sent to a server, transcribed, and stored. In 2019, Bloomberg revealed that Amazon employs thousands of people worldwide to listen to Alexa recordings to 'improve the service.' Google and Apple had similar programs. The recordings include everything picked up by the microphone -- not just your command, but background conversations, TV audio, and anything else happening in the room. You can review what they have and delete it.",
+    briefing: "When you talk to Alexa or Google Assistant, the request is sent to a server, and the companies can keep recordings unless you change the settings. Apple says it doesn't keep Siri audio unless you opt in to Improve Siri & Dictation. In 2019, Bloomberg revealed that Amazon employs thousands of people worldwide to listen to Alexa recordings to 'improve the service.' Google and Apple had similar programs. The recordings include everything picked up by the microphone -- not just your command, but background conversations, TV audio, and anything else happening in the room. You can review what they have and delete it.",
     steps: [
       { text: "Alexa: Open the Alexa app > More > Settings > Alexa Privacy > Manage Your Alexa Data" },
       { text: "Alexa: Under 'Choose how long to save recordings,' select 'Don't save recordings'" },
@@ -165,7 +165,7 @@ export const GRID_MISSIONS = [
       { text: "Find the physical mute button on your device and learn where it is -- press it when you have sensitive conversations" },
       { text: "Alexa: Settings > Alexa Privacy > Manage Your Alexa Data > Enable 'Deletion by voice' so you can say 'Alexa, delete everything I said today'" },
       { text: "Alexa: Settings > Alexa Privacy > Manage Your Alexa Data > 'Choose how long to save recordings' > set to 3 months or 'Don't save'" },
-      { text: "Google: Google Home app > Settings > Privacy > Guest Mode (pauses saving activity)" },
+      { text: "Google: say “Hey Google, turn on Guest Mode” to pause saving activity on that speaker" },
       { text: "Google: myactivity.google.com > Activity Controls > set auto-delete to 3 months" },
       { text: "HomePod: Use the Home app > Home Settings > Improve Siri > toggle OFF" },
       { text: "Consider moving voice assistants out of bedrooms and private spaces" },

@@ -657,3 +657,29 @@ describe('breaker phase 3 round 5 rulings: unverifiable claims removed or worded
     expect(m.steps[0].text).not.toMatch(/url:/);
   });
 });
+
+describe('round 6: no debrief option or code fragment in any step', () => {
+  it('no step is an option object, and no step text holds a severity or value fragment', () => {
+    const bad = [];
+    for (const m of MISSIONS) {
+      const groups = [m.steps || [], ...Object.values(m.stepsByManager || {}), ...Object.values(m.reportSteps || {})];
+      for (const s of groups.flat()) {
+        if ('value' in s || 'severity' in s) bad.push(`${m.id}: option object`);
+        if (/['"`],\s*severity:|\bvalue:\s*['"`]|['"`],\s*url:/.test(s.text || '')) bad.push(`${m.id}: ${s.text.slice(0, 40)}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('Telegram two-step is a password set under Privacy and Security (Telegram FAQ)', () => {
+    const m = byId('telegram-fortify-twostep');
+    expect(stepText(m)).toContain('Settings → Privacy and Security → Two-Step Verification');
+    expect(stepText(m)).toContain('Set a password');
+    expect(m.debriefQs[0].label).toBe('Did you set a two-step verification password?');
+    expect(values(m, 'action')).toEqual(['enabled-2fa', 'already-enabled', 'later']);
+  });
+
+  it('Signal registration lock steps are real steps', () => {
+    expect(stepText(byId('signal-fortify-reglock'))).toContain('Signal PIN');
+  });
+});

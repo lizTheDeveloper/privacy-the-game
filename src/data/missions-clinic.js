@@ -163,7 +163,7 @@ export const CLINIC_MISSIONS = [
     ],
     debriefQs: HEALTH_AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: `"After Dobbs, period tracker data became evidence. Prosecutors can subpoena it. Flo got caught sharing with Facebook. If you track your cycle on your phone, you need to know exactly where that data goes. This is not hypothetical -- it is happening now."`,
+      briefing: `"After Dobbs, prosecutors can subpoena app data, period trackers included. The cases so far have used texts, search history and chats. Flo got caught sharing with Facebook. If you track your cycle on your phone, you need to know exactly where that data goes. It's worth knowing before you need to."`,
       debrief: {
         "clean": `"Your period tracker is clean. Keep watching -- policies change with acquisitions."`,
         "some-sharing": `"Good -- you found and stopped the sharing. In some states, that data could be subpoenaed."`,
@@ -332,7 +332,7 @@ export const CLINIC_MISSIONS = [
     accountId: "telehealth",
     phase: "fortify",
     title: "Review Prescription Data Sharing",
-    briefing: "GoodRx -- the prescription discount app used by millions -- shared users' prescription data with Meta and Google for advertising. The FTC fined them $1.5 million and banned them from sharing health data for ads. Your GoodRx search for antidepressants, HIV medication, or fertility drugs was transmitted to advertising platforms. This is not covered by HIPAA because GoodRx is not a 'covered entity' -- it is a tech company, not a healthcare provider. The HIPAA gap means most health apps operate in a regulatory vacuum.",
+    briefing: "GoodRx -- the prescription discount app used by millions -- shared users' prescription data with Meta and Google for advertising. The FTC fined them $1.5 million and banned them from sharing health data for ads. Your GoodRx search for antidepressants, HIV medication, or fertility drugs was transmitted to advertising platforms. This is not covered by HIPAA because GoodRx is not a 'covered entity' -- it is a tech company, not a healthcare provider. HIPAA doesn't cover most health apps; the FTC's Health Breach Notification Rule does cover some, and GoodRx was its first case.",
     steps: [
       { text: "GoodRx: sign in and look for its privacy settings to opt out of data sharing" },
       { text: "Check other pharmacy/prescription apps: Amazon Pharmacy, Cost Plus Drugs, PillPack -- review their privacy settings" },

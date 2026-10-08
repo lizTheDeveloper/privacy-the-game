@@ -282,7 +282,7 @@ export const RECLAMATION_MISSIONS = [
       debrief: {
         "not-found": "\"Rare. Either you've been through this before, or you've lived an unusually private life. Let's check the deeper layers too.\"",
         "found-some": "\"Some exposure. That's typical. The opt-out process is tedious but each broker has a web form. We'll work through them in small batches.\"",
-        "found-all": "\"Everywhere. Also typical, unfortunately. The good news: every broker is legally required to process your opt-out. The bad news: there are a lot of them. Let's start.\"",
+        "found-all": "\"Everywhere. Also typical, unfortunately. The good news: most brokers take opt-outs, and in states with privacy laws many have to. The bad news: there are a lot of them. Let's start.\"",
         "skip": "\"This one's worth seeing. Knowing what's out there is the first step to taking it back.\"",
       },
     },
@@ -293,7 +293,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "people_search",
     phase: "fortify",
     title: "The Big Purge: Web Form Brokers",
-    briefing: "These five brokers all have simple web form opt-outs: search for your listing, paste the URL or enter your email, click remove. Each one takes 2-3 minutes. Most removals process within 24-72 hours.",
+    briefing: "These three brokers all have simple web form opt-outs: search for your listing, paste the URL or enter your email, click remove. Each one takes 2-3 minutes. Most removals process within 24-72 hours.",
     steps: [
       { text: "Spokeo: Go to their opt-out page, search for your listing, paste the URL, enter your email, click \"Remove this listing\"", url: "https://www.spokeo.com/optout" },
       { text: "Whitepages: Go to suppression requests, search your name, find your listing, request removal", url: "https://www.whitepages.com/suppression-requests" },
@@ -496,7 +496,7 @@ export const RECLAMATION_MISSIONS = [
     ],
     debriefQs: DEFENSE_DEBRIEF,
     scoutDialog: {
-      briefing: "\"LexisNexis has your insurance claims history, address history, and sometimes criminal records. Every landlord background check, every insurance quote -- they pull from LexisNexis. This is one of the two most important enterprise opt-outs you can do.\"",
+      briefing: "\"LexisNexis has your insurance claims history, address history, and sometimes criminal records. Many landlord background checks and insurance quotes pull from LexisNexis. This is one of the two most important enterprise opt-outs you can do.\"",
       debrief: {
         "done": "\"LexisNexis opt-out submitted. This takes weeks to process -- they're not in a hurry. But they're legally required to comply.\"",
         "already-done": "\"Already opted out. Good -- this is one most people never think to do.\"",
@@ -510,7 +510,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "enterprise_data",
     phase: "fortify",
     title: "Opt Out: Thomson Reuters CLEAR",
-    briefing: "Thomson Reuters CLEAR is the primary tool used by investigators and law enforcement for skip tracing and background checks. Thomson Reuters settled a California class action over CLEAR for $27.5 million in 2023. Its privacy page lets only some people ask for deletion: public officials, people at risk of harm, and identity theft victims.",
+    briefing: "Thomson Reuters CLEAR is the primary tool used by investigators and law enforcement for skip tracing and background checks. Thomson Reuters settled a California class action over CLEAR for $27.5 million. Its privacy page lets only some people ask for deletion: public officials, people at risk of harm, and identity theft victims.",
     steps: [
       { text: 'Open Thomson Reuters’ privacy page for CLEAR records and see whether you qualify for deletion (public officials, people at risk of harm, identity theft victims)', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
       { text: "If you qualify, fill in the privacy request" },
@@ -532,7 +532,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "enterprise_data",
     phase: "fortify",
     title: "Opt Out: CoreLogic & TransUnion TLO",
-    briefing: "CoreLogic owns the property records database behind every landlord background check -- your rental history, ownership records, and tenant screening data. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
+    briefing: "CoreLogic (now Cotality) holds property records used in many background and tenant checks -- ownership records, and in some cases rental history. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
     steps: [
       { text: 'CoreLogic (now Cotality): submit a consumer privacy request through its privacy policy' },
       { text: "Submit a TransUnion consumer privacy request (TLO is included)", url: "https://www.transunion.com/consumer-privacy" },
@@ -540,7 +540,7 @@ export const RECLAMATION_MISSIONS = [
     ],
     debriefQs: OPTOUT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"CoreLogic knows every property you've ever rented or owned. Every landlord background check flows through them. TransUnion TLO is their skip-tracing product -- it's a separate database from your credit file. Freezing your credit at TransUnion does NOT freeze TLO. You have to opt out separately. Most people don't know this.\"",
+      briefing: "\"CoreLogic holds property records on homes you've owned, and its data feeds many tenant and background checks. TransUnion TLO is their skip-tracing product -- it's a separate database from your credit file. Freezing your credit at TransUnion does NOT freeze TLO. You have to opt out separately. Most people don't know this.\"",
       debrief: {
         "all-submitted": "\"Property and skip-tracing databases -- both processing your removal. Two more layers of the supply chain severed.\"",
         "some-submitted": "\"One down. Come back for the other -- both matter if you've ever rented.\"",
@@ -613,7 +613,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Visit the NAI opt-out page -- select and opt out of member ad networks", url: "https://thenai.org/how-to-opt-out/" },
       { text: "Run the DAA WebChoices opt-out", url: "https://optout.aboutads.info/" },
-      { text: "Disable your advertising ID -- iOS: Settings → Privacy → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID" },
+      { text: "Disable your advertising ID -- iOS: Settings → Privacy & Security → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID" },
       { text: "Install or switch to a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -684,7 +684,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Intel Brief: Location Data Brokers",
     briefing: "Location data brokers buy raw GPS coordinates from apps on your phone, then sell \"anonymized\" movement patterns. The data is almost never truly anonymous -- a daily path from one house to one workplace identifies exactly one person. This data has been used to track people visiting abortion clinics, mosques, protest sites, and immigration lawyers. X-Mode Social sold location data from Muslim prayer apps to US military contractors. Gravy Analytics was breached in January 2025, exposing millions of people's movements. Near Intelligence sold location data of Planned Parenthood visitors to anti-abortion groups.",
     steps: [
-      { text: "Go to your phone's Location Services settings (iOS: Settings → Privacy → Location Services)" },
+      { text: "Go to your phone's Location Services settings (iOS: Settings → Privacy & Security → Location Services)" },
       { text: "Count how many apps have \"Always\" access vs \"While Using\" vs \"Never\"" },
       { text: "Look for apps that have no reason to know your location -- games, calculators, flashlights, social media" },
       { text: "Note: every app with location permission is a potential feed into the location data pipeline" },
@@ -719,7 +719,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Lock Down Phone Location Permissions",
     briefing: "The most effective defense against location data brokers is restricting which apps can see your GPS. Set everything to \"While Using\" or \"Never\" except navigation apps. Apps set to \"Always\" broadcast your coordinates around the clock -- that data enters the ad bidstream and can be bought by anyone.",
     steps: [
-      { text: "Open Settings → Privacy → Location Services on your phone" },
+      { text: "Open Settings → Privacy & Security → Location Services on your phone" },
       { text: "Review every app. Set most to \"While Using\" or \"Never\"" },
       { text: "Only maps and ride-sharing should be \"While Using.\" Nothing should be \"Always\" unless you have a specific reason" },
       { text: "Deny location entirely to games, calculators, flashlights, shopping apps, and social media" },
@@ -819,17 +819,17 @@ export const RECLAMATION_MISSIONS = [
     briefing: "An IRS IP PIN is a six-digit number that prevents anyone from filing a tax return in your name -- even with your Social Security number. Without it, someone with your SSN can file a fraudulent return, claim your refund, and leave you untangling the mess for months. Free. Ten minutes. A new PIN is generated each year.",
     steps: [
       { text: "Go to the IRS IP PIN request tool", url: "https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin" },
-      { text: "Click \"Get an IP PIN\" and verify your identity -- you'll need last year's tax return info" },
+      { text: "Click \"Get an IP PIN\" and verify your identity (through ID.me: your SSN or ITIN and a photo ID)" },
       { text: "The IRS generates a six-digit PIN for the current tax year" },
       { text: "Save the PIN with your tax documents -- you'll need it when filing your return" },
     ],
     debriefQs: DEFENSE_DEBRIEF,
     scoutDialog: {
-      briefing: "\"After the Equifax breach, assume someone has your SSN. The most common use of a stolen Social Security number is fraudulent tax returns -- file before you do, claim your refund, disappear. The IRS IP PIN blocks that. Six digits, generated annually, and nobody files a return in your name without it. Free. Ten minutes. No reason not to.\"",
+      briefing: "\"After the Equifax breach, assume someone has your SSN. One use of a stolen Social Security number is a fraudulent tax return -- file before you do, claim your refund, disappear. The IRS IP PIN blocks that. Six digits, generated annually, and nobody files a return in your name without it. It's free.\"",
       debrief: {
         "done": "\"IRS PIN set. Nobody is filing a tax return in your name without that code.\"",
         "already-done": "\"Already set up. You refresh it each year, right?\"",
-        "skip": "\"High priority if tax season is approaching. Fraudulent returns are the most common SSN exploit.\"",
+        "skip": "\"High priority if tax season is approaching. A fake return is one of the ways a stolen SSN gets used.\"",
       },
     },
     estimatedMinutes: 10,

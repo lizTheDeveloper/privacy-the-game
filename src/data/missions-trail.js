@@ -149,7 +149,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: AUDIT_DEBRIEF,
     scoutDialog: {
-      briefing: "\"The loyalty card is one of the most successful surveillance tools ever invented, and it doesn't even pretend to be something else. You knowingly trade a record of every purchase for a small discount. The difference between this and a data broker is that you opted in -- but you probably didn't opt in to your grocery purchase history being sold to your health insurance company to adjust your premiums. That part wasn't on the sign-up form.\"",
+      briefing: "\"The loyalty card is one of the most successful surveillance tools ever invented, and it doesn't even pretend to be something else. You knowingly trade a record of every purchase for a small discount. The difference between this and a data broker is that you opted in -- but you probably didn't read how far that purchase history can travel once it's shared with partners. That part wasn't on the sign-up form.\"",
       debrief: {
         "no-breaches": "\"Few loyalty cards. Less data flowing to brokers. That's a surprisingly strong privacy position in a world that puts a loyalty program on everything.\"",
         "1-2-breaches": "\"A handful of loyalty programs. Each one is a data feed. The next mission helps you turn off what you can.\"",
@@ -215,7 +215,7 @@ export const TRAIL_MISSIONS = [
     accountId: "payment_trail",
     phase: "recon",
     title: "Review Your Plaid Connections",
-    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, Mint, YNAB, or any budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. Plaid was sued for allegedly collecting more transaction data than users authorized, and settled for $58 million (announced in 2021 and approved in 2022). The Plaid Portal shows which apps you've connected, and lets you disconnect them.",
+    briefing: "If you've ever connected a bank account to an app -- Venmo, Robinhood, Coinbase, YNAB, or a budgeting tool -- you probably used Plaid. Plaid is the middleman that logs into your bank on your behalf. Plaid was sued for allegedly collecting more transaction data than users authorized, and settled for $58 million (announced in 2021 and approved in 2022). The Plaid Portal shows which apps you've connected, and lets you disconnect them.",
     steps: [
       { text: 'Open the Plaid Portal and sign in with your phone number. It lists every app you’ve connected through Plaid', url: 'https://my.plaid.com' },
       { text: 'Disconnect apps you no longer use' },
@@ -223,14 +223,14 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: PLAID_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Plaid settled a class action for $58 million over claims it took more transaction data than users consented to. Every time you 'connected your bank account' to an app, Plaid logged in as you and downloaded your full transaction history -- not just the data the app needed. Your rent payments, your medical bills, your donations, your bar tabs. All of it in Plaid's database. The Portal shows your connections in a couple of minutes.\"",
+      briefing: "\"Plaid settled a class action for $58 million over claims it took more transaction data than users consented to. Plaid denies selling data, and the settlement found no wrongdoing. But a bank connection can pass along a lot of your transaction history, and old connections you forgot about may still be live. The Portal shows your connections in a couple of minutes.\"",
       debrief: {
         "none": "\"No connections. Fewer copies of your bank history out there.\"",
         "disconnected": "\"Old connections cut. The budgeting app you tried once doesn't need your bank anymore.\"",
         "many": "\"Lots of connections. Disconnect the ones you don't use when you can.\"",
         "no-breaches": "\"No Plaid connections, or nothing concerning. That's unusual -- most people have at least one app that used Plaid without their knowledge.\"",
         "1-2-breaches": "\"Found some connections you forgot about. Common. The budgeting app you tried for a month in 2021 still has access to your transaction history through Plaid.\"",
-        "3plus-breaches": "\"Multiple Plaid connections. Each one has your full bank transaction history. Submitting the deletion request is the right move.\"",
+        "3plus-breaches": "\"Multiple Plaid connections. Disconnect the ones you don't use, and consider the data request.\"",
         "skip": "\"When you're ready. The data access request alone is worth doing -- seeing what Plaid has on you changes your relationship with 'connect your bank' buttons.\"",
       },
     },
@@ -276,7 +276,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Researchers at MIT showed that just four transaction data points -- four purchases -- are enough to uniquely identify a person in an 'anonymized' credit card dataset. The store, the date, and the amount. That's it. Visa and Mastercard sell this data because it's worth billions. Your card issuer has its own sharing agreements on top of that. The opt-outs don't stop the aggregation at the network level, but they limit what your specific issuer can sell about you.\"",
+      briefing: "\"Researchers at MIT showed that four purchases -- the store and the day -- were enough to pick out 90% of people in an 'anonymized' card dataset of 1.1 million. Card networks and issuers share transaction data under their privacy policies. Your card issuer has its own sharing agreements on top of that. The opt-outs don't stop the aggregation at the network level, but they limit what your specific issuer can sell about you.\"",
       debrief: scoutTrail(
         "\"Card data sharing dialed back. You can't stop Visa from aggregating, but your issuer's own sharing is now limited. Every opt-out narrows the data pipeline.\"",
         "\"Already opted out. You found the privacy settings your bank hoped you wouldn't look for.\"",
