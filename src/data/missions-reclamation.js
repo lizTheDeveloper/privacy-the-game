@@ -32,7 +32,7 @@ const FREEZE_EXTRAS_DEBRIEF = [
 const PINS_STORED_DEBRIEF = [
   {
     id: "pins_stored",
-    label: "Are your freeze PINs stored safely?",
+    label: "Are your freeze logins and any PINs stored safely?",
     options: [
       { value: "stored-both", text: "Yes -- in password manager AND printed", severity: "safe" },
       { value: "stored-digital", text: "In my password manager only", severity: "warn" },
@@ -144,7 +144,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "credit_freeze",
     phase: "fortify",
     title: "Freeze Credit: Equifax",
-    briefing: "A credit freeze prevents anyone from opening new credit in your name -- even if they have your Social Security number. It's free, and it's one of the strongest defenses against new-account fraud. Equifax is the bureau whose 2017 breach exposed about 147 million people's SSNs. Freeze them first.",
+    briefing: "A credit freeze stops new credit in your name at that bureau -- even for someone who has your Social Security number. It's free, and it's one of the strongest defenses against new-account fraud. Equifax is the bureau whose 2017 breach exposed about 147 million people's SSNs. Freeze them first.",
     steps: [
       { text: "Go to the Equifax Security Freeze page", url: "https://www.equifax.com/personal/credit-report-services/credit-freeze/" },
       { text: "Click \"Place a freeze\" -- you'll need to create an Equifax account if you don't have one" },
@@ -157,7 +157,7 @@ export const RECLAMATION_MISSIONS = [
       briefing: "\"Equifax -- the bureau whose 2017 breach exposed about 147 million people's Social Security numbers and then set up a breach-check website that was itself riddled with security problems. They've earned the right to be frozen first. Free. Stops new credit in your name that checks Equifax.\"",
       debrief: {
         "already-frozen": "\"Already frozen. Good. One of three major bureaus locked.\"",
-        "now-frozen": "\"Equifax frozen. Save that PIN -- you'll need it to temporarily unfreeze when you apply for a mortgage, credit card, or apartment. Unfreezing is also free and takes effect within an hour.\"",
+        "now-frozen": "\"Equifax frozen. You'll lift it with your account login (or a PIN, if you were given one) when you apply for a mortgage, credit card, or apartment. Lifting it is free too.\"",
         "no-account-yet": "\"The account creation process is the longest part. Come back when you have ten minutes and your SSN handy.\"",
         "skip": "\"Don't sit on this one. A credit freeze is the single biggest bang-for-your-time security action you can take.\"",
       },
@@ -174,7 +174,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Go to the Experian Security Freeze Center", url: "https://www.experian.com/freeze/center.html" },
       { text: "Click \"Add a Security Freeze\" -- you don't need any paid product for the freeze" },
       { text: "Create an Experian account or log in -- verify your identity with your SSN and personal info" },
-      { text: "Confirm the freeze and save the PIN or confirmation they provide" },
+      { text: "Confirm the freeze, and keep your account login (and any PIN they give you)" },
       { text: "If you land on a paid product page, look for the freeze option: the free freeze is there" },
     ],
     debriefQs: FREEZE_STATUS_DEBRIEF,
@@ -194,19 +194,19 @@ export const RECLAMATION_MISSIONS = [
     accountId: "credit_freeze",
     phase: "fortify",
     title: "Freeze Credit: TransUnion",
-    briefing: "TransUnion is the third major bureau. With all three frozen, no one can open new credit in your name through any standard channel. This is the triple lock -- the most effective single defense against financial identity theft.",
+    briefing: "TransUnion is the third major bureau. With all three frozen, lenders that check these bureaus can't open new credit in your name. Some lenders use Innovis and other bureaus, which the next mission covers.",
     steps: [
       { text: "Go to the TransUnion Credit Freeze page", url: "https://www.transunion.com/credit-freeze" },
       { text: "Click \"Add a freeze\" and create a TransUnion account or log in" },
       { text: "Verify your identity with your SSN and personal details" },
-      { text: "Confirm the freeze -- save the PIN with your other bureau PINs" },
+      { text: "Confirm the freeze -- keep your account login (and any PIN) with the others" },
     ],
     debriefQs: FREEZE_STATUS_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Last of the big three. After this, anyone who tries to open credit in your name hits a wall at every bureau. They can't even check your credit score without your PIN. The triple lock is the gold standard.\"",
+      briefing: "\"Last of the big three. After this, an application that checks Equifax, Experian or TransUnion stops at the freeze. Innovis is next.\"",
       debrief: {
         "already-frozen": "\"All three major bureaus frozen. The triple lock is in place.\"",
-        "now-frozen": "\"Triple lock achieved. Equifax, Experian, TransUnion -- all frozen. Nobody is opening credit in your name without your PINs.\"",
+        "now-frozen": "\"Equifax, Experian, TransUnion -- all frozen. New credit that checks them now needs you to lift the freeze first.\"",
         "no-account-yet": "\"Almost there. Come back and finish this one -- two out of three is like locking two of three doors.\"",
         "skip": "\"You're close. This is the last of the big three.\"",
       },
@@ -224,7 +224,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Fill out the freeze form -- same process as the big three (SSN, address, DOB)" },
       { text: 'Then go to ChexSystems Security Freeze', url: 'https://www.chexsystems.com/security-freeze/information' },
       { text: "Fill out their freeze request -- it stops new account applications at banks that check ChexSystems" },
-      { text: "Save both PINs with your other freeze PINs" },
+      { text: "Keep both logins (and any PINs) with your other freeze logins" },
     ],
     debriefQs: FREEZE_EXTRAS_DEBRIEF,
     scoutDialog: {
@@ -241,21 +241,21 @@ export const RECLAMATION_MISSIONS = [
     id: "credit_freeze-reclaim-pins",
     accountId: "credit_freeze",
     phase: "reclaim",
-    title: "Secure Your Freeze PINs",
-    briefing: "You now have up to five freeze PINs. Losing a PIN means calling bureau phone trees and going through identity verification to get a replacement -- which can take weeks. Store them in two places: your password manager (for quick access) and a printed sheet (for if you lose access to your password manager).",
+    title: "Store Your Freeze Logins and PINs",
+    briefing: "Most bureaus now manage a freeze through an online account, and some still give a PIN. Losing access means calling the bureau and verifying your identity to get back in. Store your freeze logins and any PINs in two places: your password manager (for quick access) and a printed sheet (for if you lose access to your password manager).",
     steps: [
-      { text: "Gather all freeze PINs: Equifax, Experian, TransUnion, Innovis, ChexSystems" },
-      { text: "Create an entry in your password manager for each bureau with the PIN and login info" },
-      { text: "Print a sheet with all five PINs and store it with your backup codes (not on your phone or computer)" },
-      { text: "Test: can you find each PIN from both your password manager and the printed sheet?" },
+      { text: "Gather your freeze logins and any PINs: Equifax, Experian, TransUnion, Innovis, ChexSystems" },
+      { text: "Create an entry in your password manager for each bureau with its login and any PIN" },
+      { text: "Print a sheet with each bureau's login name and any PIN, and store it with your backup codes (not on your phone or computer)" },
+      { text: "Test: can you find each bureau's login (and PIN, if any) from both your password manager and the printed sheet?" },
     ],
     debriefQs: PINS_STORED_DEBRIEF,
     scoutDialog: {
-      briefing: "\"A freeze PIN is the key to your credit lock. Lose it and you're on hold with bureau phone systems for days while someone named 'AI Virtual Assistant' asks you to describe your issue. Print them. Store them. Don't trust a single device.\"",
+      briefing: "\"Your freeze login (or PIN) is the key to your credit lock. Lose it and you're on hold with bureau phone systems while someone named 'AI Virtual Assistant' asks you to describe your issue. Print them. Store them. Don't trust a single device.\"",
       debrief: {
-        "stored-both": "\"PINs secured in two places. The Credit Bureau Freeze building is fully liberated -- locked down and the keys are safe.\"",
-        "stored-digital": "\"Good start, but a single point of failure. Print a backup. If you lose access to your password manager, you lose access to your credit freeze PINs.\"",
-        "skip": "\"Don't skip this. A freeze without recoverable PINs is a different kind of locked out.\"",
+        "stored-both": "\"Freeze logins secured in two places. The Credit Bureau Freeze building is fully liberated -- locked down and the keys are safe.\"",
+        "stored-digital": "\"Good start, but a single point of failure. Print a backup. If you lose access to your password manager, you lose access to your freeze logins.\"",
+        "skip": "\"Don't skip this. A freeze you can't lift is a different kind of locked out.\"",
       },
     },
     estimatedMinutes: 5,
@@ -803,7 +803,7 @@ export const RECLAMATION_MISSIONS = [
     scoutDialog: {
       briefing: "\"The list is longer than you think. Every time someone asked for a photo of your ID, that photo went into a database. And the ID verification services -- ID.me, Jumio, Onfido -- are the companies that other companies hire to check your license. A single breach at one of them exposes millions of government IDs at once. You cannot un-breach a driver's license. The defense is layering other protections on top.\"",
       debrief: {
-        "few": "\"Limited exposure. Still worth setting up the layered defenses -- IRS PIN and SSA lock are free and block the most common identity theft vectors.\"",
+        "few": "\"Limited exposure. Still worth setting up the layered defenses -- IRS PIN and SSA lock are free and close common identity theft routes.\"",
         "moderate": "\"More than expected. Each service with your ID is a potential breach surface. Let's layer defenses.\"",
         "many": "\"Widely distributed. The defense isn't retrieval -- it's layering: credit freeze (done), IRS PIN, SSA lock, fraud alerts. These make a stolen ID much harder to exploit.\"",
         "skip": "\"Think about this when you have time. The list is longer than most people expect.\"",
@@ -816,7 +816,7 @@ export const RECLAMATION_MISSIONS = [
     accountId: "govt_id_defense",
     phase: "fortify",
     title: "Get an IRS Identity Protection PIN",
-    briefing: "An IRS IP PIN is a six-digit number that prevents anyone from filing a tax return in your name -- even with your Social Security number. Without it, someone with your SSN can file a fraudulent return, claim your refund, and leave you untangling the mess for months. Free. Ten minutes. A new PIN is generated each year.",
+    briefing: "An IRS IP PIN is a six-digit number that has to be on any return filed with your SSN. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it. Without one, someone with your SSN can file a fraudulent return and claim your refund. It's free, and a new PIN is issued each year.",
     steps: [
       { text: "Go to the IRS IP PIN request tool", url: "https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin" },
       { text: "Click \"Get an IP PIN\" and verify your identity (through ID.me: your SSN or ITIN and a photo ID)" },
@@ -827,7 +827,7 @@ export const RECLAMATION_MISSIONS = [
     scoutDialog: {
       briefing: "\"After the Equifax breach, assume someone has your SSN. One use of a stolen Social Security number is a fraudulent tax return -- file before you do, claim your refund, disappear. The IRS IP PIN blocks that. Six digits, generated annually, and nobody files a return in your name without it. It's free.\"",
       debrief: {
-        "done": "\"IRS PIN set. Nobody is filing a tax return in your name without that code.\"",
+        "done": "\"IRS PIN set. A return filed with your SSN now needs that code, or it's rejected or held for verification.\"",
         "already-done": "\"Already set up. You refresh it each year, right?\"",
         "skip": "\"High priority if tax season is approaching. A fake return is one of the ways a stolen SSN gets used.\"",
       },
@@ -873,7 +873,7 @@ export const RECLAMATION_MISSIONS = [
     scoutDialog: {
       briefing: "\"Credit reports are the definitive record of accounts opened in your name. If someone used your identity, it shows up here -- credit cards, loans, phone contracts. AnnualCreditReport.com is the only official site -- ignore any others. If you find something, IdentityTheft.gov generates an official FTC report and a step-by-step recovery plan.\"",
       debrief: {
-        "all-clean": "\"Government ID Defense: liberated. Credit frozen, IRS PIN set, SSA locked, credit reports verified clean. You've layered every defense available against identity theft. Your face and license number can't be changed -- but you've made them much harder to exploit.\"",
+        "all-clean": "\"Government ID Defense: liberated. Credit frozen, IRS PIN set, SSA locked, credit reports verified clean. You've layered the main defenses against identity theft. Your face and license number can't be changed -- but you've made them much harder to exploit.\"",
         "found-something": "\"Found something. Don't panic -- go to IdentityTheft.gov. It generates an official FTC report and walks you through recovery step by step.\"",
         "found-fraud": "\"Multiple fraudulent accounts. Serious but recoverable. IdentityTheft.gov gives you an official report and a personalized plan. With credit frozen and IRS PIN set, the bleeding is stopped -- now we clean up.\"",
         "skip": "\"Pulling credit reports is the final verification. Come back when you have twenty minutes.\"",

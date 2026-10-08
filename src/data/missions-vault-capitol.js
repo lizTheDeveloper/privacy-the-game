@@ -639,7 +639,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'irs',
     phase: 'fortify',
     title: 'Get an IRS Identity Protection PIN',
-    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. Without it, the return gets rejected -- even if the thief has your SSN, your name, and your address. `,
+    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it -- even if the thief has your SSN, your name, and your address.`,
     steps: [
       { text: 'Go to IRS Get an IP PIN', url: 'https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin' },
       { text: `Click "Get an IP PIN" and verify your identity through ID.me` },
@@ -650,7 +650,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `"The IP PIN is one of the strongest defenses against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free."`,
       debrief: {
-        "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. A return filed with your SSN and without that PIN gets rejected."',
+        "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it."',
         'already-enabled': `"Already have one. Good."`,
         'later': '"A few minutes now can save a long recovery later. Come back."',
       },

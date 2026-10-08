@@ -42,3 +42,41 @@ describe('C1: the vehicle privacy report never lowers an old save', () => {
     expect(calcDistrictProgress(later, 'freeway').percent).toBe(100);
   });
 });
+
+describe('I2: freezes are managed with your account login; PINs only where a bureau still issues them', () => {
+  const ids = ['credit_freeze-fortify-equifax', 'credit_freeze-fortify-experian', 'credit_freeze-fortify-transunion', 'credit_freeze-fortify-extras', 'credit_freeze-reclaim-pins'];
+  const t = (id) => JSON.stringify(MISSIONS.find((m) => m.id === id));
+  it.each(ids)('%s: no PIN claim without "or your account login"', (id) => {
+    const s = t(id);
+    for (const bad of ['Save that PIN', 'save the PIN with your other bureau PINs', 'without your PINs', 'without your PIN', 'Save both PINs', 'up to five freeze PINs', 'Gather all freeze PINs', 'all five PINs', 'A freeze PIN is the key']) {
+      expect(s, bad).not.toContain(bad);
+    }
+  });
+  it('TransUnion: no "no one can open new credit" absolute', () => {
+    expect(t('credit_freeze-fortify-transunion')).not.toMatch(/no one can open new credit|Nobody is opening credit|hits a wall at every bureau/);
+    expect(t('credit_freeze-fortify-transunion')).toContain('Innovis');
+  });
+  it('the storage mission stores freeze logins and any PINs; its debrief values are unchanged', () => {
+    const m = MISSIONS.find((x) => x.id === 'credit_freeze-reclaim-pins');
+    expect(m.title).toBe('Store Your Freeze Logins and PINs');
+    expect(m.debriefQs[0].options.map((o) => o.value)).toEqual(['stored-both', 'stored-digital', 'skip']);
+    expect(m.debriefQs[0].label).toBe('Are your freeze logins and any PINs stored safely?');
+  });
+});
+
+describe('I3: what a missing IP PIN does', () => {
+  const m = () => JSON.stringify(MISSIONS.find((x) => x.id === 'irs-fortify-ip-pin'));
+  it('e-filed returns are rejected; paper returns are delayed for verification', () => {
+    expect(m()).toContain('An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it');
+    expect(m()).not.toMatch(/the return gets rejected -- even|gets rejected\./);
+  });
+});
+
+describe('I2/I3 sweep: freeze and IP PIN absolutes', () => {
+  const t = (id) => JSON.stringify(MISSIONS.find((m) => m.id === id));
+  it('no freeze or IP PIN line promises that nobody can open credit or file', () => {
+    expect(t('credit_freeze-fortify-equifax')).not.toContain('prevents anyone from opening new credit');
+    expect(t('govt_id_defense-fortify-irs-pin')).not.toMatch(/prevents anyone from filing|Nobody is filing a tax return/);
+    expect(t('govt_id_defense-fortify-irs-pin')).toContain('An e-filed return without the right IP PIN is rejected; a paper return is delayed while the IRS verifies it');
+  });
+});
