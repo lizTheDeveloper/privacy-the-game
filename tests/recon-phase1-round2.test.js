@@ -34,14 +34,16 @@ afterEach(() => { vi.restoreAllMocks(); delete globalThis.umami; });
 
 // ── Ruling 1: migrate old saves on load ────────────────────────────
 describe('old saves with a broken answer are repaired on load', () => {
-  it('a broken skip/later answer becomes its clean id, filed as skipped, with no completedAt', () => {
+  // Ruling (Phase 3 re-review 4): a filed record keeps its status, so no old
+  // save loses its finished city; only the broken value is cleaned.
+  it('a broken skip/later answer becomes its clean id and keeps its filed status', () => {
     const storage = memStorage();
     saveState(oldSave(), storage);
     const s = loadState(storage);
-    expect(s.missions['scam_defense-recon-phishing-eye']).toMatchObject({ status: 'skipped', finding: 'skip' });
-    expect(s.missions['scam_defense-recon-phishing-eye'].completedAt).toBeUndefined();
-    expect(s.missions['sim_protection-fortify-pin']).toMatchObject({ status: 'skipped', action: 'later' });
-    expect(s.missions['sim_protection-fortify-pin'].completedAt).toBeUndefined();
+    expect(s.missions['scam_defense-recon-phishing-eye']).toMatchObject({ finding: 'skip' });
+    expect(s.missions['scam_defense-recon-phishing-eye'].status).toBe(oldSave().missions['scam_defense-recon-phishing-eye'].status);
+    expect(s.missions['sim_protection-fortify-pin']).toMatchObject({ action: 'later' });
+    expect(s.missions['sim_protection-fortify-pin'].status).toBe(oldSave().missions['sim_protection-fortify-pin'].status);
   });
 
   it('a broken answer that was not a skip keeps its status and completedAt', () => {

@@ -109,3 +109,24 @@ describe('round 7 and lows', () => {
     }
   });
 });
+
+describe('re-review 4 (ruling): no old save loses its finished city', async () => {
+  const { migrateBrokenAnswers } = await import('../src/utils/migrate-answers.js');
+  it('a pre-4.7.1 save at 100% with a broken "later" answer stays at 100%; only the value is cleaned', () => {
+    let s = only(['scam_defense']);
+    const done = {};
+    for (const m of getMissionsForDistrict('perimeter')) {
+      if (!isMissionInPlay(s, m) || !isCoreMission(m)) continue;
+      done[m.id] = { status: 'completed', completedAt: '2026-09-01T10:00:00.000Z', action: 'done' };
+    }
+    const broken = Object.keys(done).find((id) => MISSIONS.find((m) => m.id === id).debriefQs.some((q) => q.id === 'action' && q.options.some((o) => o.value === 'later')));
+    expect(broken).toBeTruthy();
+    done[broken] = { status: 'completed', completedAt: '2026-09-01T10:00:00.000Z', action: "later', text: 'I'll come back to this', severity: 'skip" };
+    s = { ...s, missions: done };
+    expect(calcDistrictProgress(s, 'perimeter').percent).toBe(100);
+    const m = migrateBrokenAnswers(s);
+    expect(m.missions[broken]).toMatchObject({ status: 'completed', action: 'later', completedAt: '2026-09-01T10:00:00.000Z' });
+    expect(calcDistrictProgress(m, 'perimeter').percent).toBe(100);
+    expect(isCityComplete(m)).toBe(true);
+  });
+});

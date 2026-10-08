@@ -267,7 +267,7 @@ describe('P3 new question ids: file, reopen, restore, old saves', () => {
     expect(bad).toEqual([]);
   });
 
-  it('the broken-answer migration still finds a replaced question’s old answer and files the skip as skipped', () => {
+  it('the broken-answer migration still finds a replaced question’s old answer and keeps the filed status', () => {
     const bad = [];
     for (const m of live) {
       for (const q of m.debriefQs.filter((x) => x.legacy)) {
@@ -277,7 +277,8 @@ describe('P3 new question ids: file, reopen, restore, old saves', () => {
         const st = { missions: { [m.id]: { status: 'completed', [q.legacy.id]: broken } } };
         const out = migrateBrokenAnswers(st).missions[m.id];
         if (out[q.legacy.id] !== skipOpt.value) bad.push(`${m.id}: not cleaned`);
-        if (out.status !== 'skipped') bad.push(`${m.id}: skip not recognised`);
+        // Ruling (Phase 3 re-review 4): the filed status is kept.
+        if (out.status !== 'completed') bad.push(`${m.id}: filed status not kept`);
       }
     }
     expect(bad).toEqual([]);
