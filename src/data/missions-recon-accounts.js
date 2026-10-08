@@ -261,7 +261,7 @@ export const RECON_ACCOUNT_MISSIONS = [
       pmStep('your brokerage'),
       { text: 'Open your brokerage’s own security page and look at recent logins or devices. Schwab: Profile → Security Settings → Previous Login. Robinhood: Security and privacy → Devices. Vanguard app: Profile → Login & security / Device management. Fidelity: Security Center.' },
       { text: 'Check beneficiaries, linked bank accounts and the mailing address.' },
-      { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021, emails only).' },
+      { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021). Robinhood said that breach exposed email addresses, and names for some customers.' },
     ],
     debriefQs: [
       pwQuestion('brokerage'),

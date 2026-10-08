@@ -611,10 +611,11 @@ describe('ruling: a 2FA tie takes the weaker method, locally and in build.sql', 
 
 describe('breaker phase 3 round 5 rulings: unverifiable claims removed or worded generally', () => {
   const steps = (id) => byId(id).steps.map((s) => s.text).join('\n');
-  it('Verizon Number Lock: the app KB path, plus the website', () => {
+  it('Verizon Number Lock: the app KB path only', () => {
     const vz = steps('sim_protection-fortify-pin');
     expect(vz).toContain('My Verizon app → Me → Edit profile and settings → Security → Number Lock');
-    expect(vz).toContain('Account → Settings → Security on verizon.com');
+    // Reviewer L2: the website path had no source, so it's gone.
+    expect(vz).not.toContain('on verizon.com, turned on');
   });
   it('AT&T: Wireless Account Lock in AT&T’s own words', () => {
     expect(steps('sim_protection-fortify-pin')).toContain('blocks specific changes, including moving your number');

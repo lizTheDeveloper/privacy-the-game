@@ -73,6 +73,26 @@ describe('verified step URLs', () => {
     expect(bad).toEqual([]);
   });
 
+  // Reviewer L1: a hostname the player types into a settings box (Private
+  // DNS) must be in dns.hostnames with a DNS-over-TLS check; a website host
+  // that happens to match doesn't count.
+  it('every hostname typed into settings is a checked Private DNS name that accepts DNS-over-TLS', () => {
+    const typed = [];
+    for (const m of MISSIONS) {
+      for (const st of (m.steps || [])) {
+        for (const hit of (st.text || '').matchAll(/(?:enter|set to) '([^']+)'(?: \([^)]*\))?(?: or '([^']+)')?/g)) {
+          for (const name of [hit[1], hit[2]].filter(Boolean)) if (/\./.test(name)) typed.push(name.toLowerCase());
+        }
+      }
+    }
+    expect(typed.length).toBeGreaterThan(0);
+    for (const name of typed) {
+      expect(Object.hasOwn(DNS.hostnames, name), name).toBe(true);
+      expect(Object.hasOwn(DNS.dot, name), `${name} DoT`).toBe(true);
+    }
+    expect(DNS.dotChecked).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
   it('every typed DNS name and server IP was checked, with the date', () => {
     expect(DNS.checked).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(Object.keys(DNS.hostnames).sort()).toEqual(['dns.quad9.net', 'one.one.one.one']);

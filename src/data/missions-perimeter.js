@@ -51,7 +51,7 @@ export const PERIMETER_MISSIONS = [
     steps: [
       { text: 'T-Mobile: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
       { text: 'AT&T: in the myAT&T app, turn on Wireless Account Lock (tap the person icon → Wireless account lock, then swipe to lock). AT&T says it blocks specific changes, including moving your number to another carrier (unlock it yourself when you switch). Also set your account passcode (for calls and stores) and the extra security passcode, which is for signing in online.', url: 'https://www.att.com/support/article/wireless/000102016/' },
-      { text: 'Verizon: set a 4-digit Account PIN at vzw.com/PIN (or in the My Verizon app). Number Lock is a separate switch: My Verizon app → Me → Edit profile and settings → Security → Number Lock, or Account → Settings → Security on verizon.com, turned on for each line.', url: 'https://www.verizon.com/support/knowledge-base-309293/' },
+      { text: 'Verizon: set a 4-digit Account PIN at vzw.com/PIN (or in the My Verizon app). Number Lock is a separate switch: My Verizon app → Me → Edit profile and settings → Security → Number Lock, turned on for each line.', url: 'https://www.verizon.com/support/knowledge-base-309293/' },
       { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
     ],
     debriefQs: ACTION_DEBRIEF,

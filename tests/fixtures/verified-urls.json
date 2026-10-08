@@ -201,6 +201,11 @@
     "routerDefaults": {
       "192.168.1.1": "a common default router address on the player’s own network, not a public place",
       "192.168.0.1": "a common default router address on the player’s own network, not a public place"
+    },
+    "dotChecked": "2026-10-08",
+    "dot": {
+      "one.one.one.one": "accepts DNS-over-TLS on port 853: openssl s_client -connect one.one.one.one:853 -servername one.one.one.one -verify_hostname one.one.one.one → Verify return code 0 (cert CN cloudflare-dns.com, name matches)",
+      "dns.quad9.net": "accepts DNS-over-TLS on port 853: openssl s_client -connect dns.quad9.net:853 -servername dns.quad9.net -verify_hostname dns.quad9.net → Verify return code 0 (cert CN dns.quad9.net)"
     }
   }
 }

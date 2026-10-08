@@ -99,3 +99,13 @@ describe('I4: the 2FA ENABLED stat counts only two-factor missions', async () =>
     expect(isTwoFactorMission(byId('gmail-fortify-2fa'))).toBe(true);
   });
 });
+
+describe('round 7 and lows', () => {
+  const t = (id) => JSON.stringify(MISSIONS.find((m) => m.id === id));
+  it('CLEAR deletion limits are worded generally', () => {
+    for (const id of ['enterprise_data-recon-supply-chain', 'enterprise_data-fortify-thomson']) {
+      expect(t(id)).not.toMatch(/public officials/);
+      expect(t(id)).toMatch(/may limit who can get records deleted|may limit who gets records deleted/);
+    }
+  });
+});

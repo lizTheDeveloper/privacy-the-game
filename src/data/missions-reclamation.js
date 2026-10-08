@@ -465,7 +465,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: 'Request your LexisNexis Consumer Disclosure Report. It arrives by mail or download and shows what they hold', url: 'https://consumer.risk.lexisnexis.com/request' },
       { text: 'Request your employment data report from The Work Number (Equifax). The same site offers a data freeze', url: 'https://employees.theworknumber.com/employment-data-report' },
-      { text: 'Read Thomson Reuters CLEAR’s privacy page. Deletion there is only for public officials, people at risk of harm, and identity theft victims', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
+      { text: 'Read Thomson Reuters CLEAR’s privacy page. Thomson Reuters may limit who can get records deleted; you can still submit a request', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
       { text: 'Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement' },
     ],
     debriefQs: REPORT_REQUESTS_DEBRIEF,
@@ -510,15 +510,15 @@ export const RECLAMATION_MISSIONS = [
     accountId: "enterprise_data",
     phase: "fortify",
     title: "Opt Out: Thomson Reuters CLEAR",
-    briefing: "Thomson Reuters CLEAR is the primary tool used by investigators and law enforcement for skip tracing and background checks. Thomson Reuters settled a California class action over CLEAR for $27.5 million. Its privacy page lets only some people ask for deletion: public officials, people at risk of harm, and identity theft victims.",
+    briefing: "Thomson Reuters CLEAR is a tool investigators and law enforcement use for skip tracing and background checks. Thomson Reuters settled a California class action over CLEAR for $27.5 million. Thomson Reuters may limit who can get records deleted. Submit the request anyway.",
     steps: [
-      { text: 'Open Thomson Reuters’ privacy page for CLEAR records and see whether you qualify for deletion (public officials, people at risk of harm, identity theft victims)', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
-      { text: "If you qualify, fill in the privacy request" },
+      { text: 'Open Thomson Reuters’ privacy page for CLEAR records', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
+      { text: "Fill in the privacy request, even if you’re not sure it applies to you" },
       { text: "Submit the form -- they may follow up with identity verification" },
     ],
     debriefQs: DEFENSE_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Thomson Reuters CLEAR is what law enforcement and private investigators actually use to find people. Deletion there is only for some people. If you're one of them, it's worth the form.\"",
+      briefing: "\"Thomson Reuters CLEAR is one of the tools law enforcement and private investigators use to find people. They may limit who gets records deleted. Send the request anyway.\"",
       debrief: {
         "done": "\"CLEAR request submitted. They may follow up to verify who you are.\"",
         "already-done": "\"Already submitted. You're thorough.\"",
