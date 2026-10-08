@@ -1180,7 +1180,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'facebook',
     phase: 'reclaim',
     title: 'Privacy Review: Facebook',
-    briefing: 'Facebook collects and sells more data than almost any other platform. Their privacy settings are intentionally complex, but you can significantly reduce your exposure: limit ad tracking, restrict who sees your posts, and revoke app permissions.',
+    briefing: 'Facebook collects more data than almost any other platform; Meta says it uses that data to target ads and shares some of it with partners. Their privacy settings are intentionally complex, but you can significantly reduce your exposure: limit ad tracking, restrict who sees your posts, and revoke app permissions.',
     steps: [
       { text: 'Open Facebook Privacy Settings', url: 'https://www.facebook.com/settings?tab=privacy' },
       { text: 'Set "Who can see your future posts" to Friends' },

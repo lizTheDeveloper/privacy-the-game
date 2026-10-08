@@ -589,20 +589,20 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'whatsapp',
     phase: 'fortify',
     title: 'Registration Lock: WhatsApp',
-    briefing: `WhatsApp doesn't use passwords -- it uses your phone number. Without a registration lock PIN, anyone who SIM-swaps your phone number can steal your WhatsApp account in seconds. The PIN blocks this.`,
+    briefing: `WhatsApp doesn't use passwords -- it uses your phone number. Without a two-step verification PIN, anyone who SIM-swaps your phone number can register your WhatsApp account on their phone. The PIN makes them wait.`,
     steps: [
       { text: 'Open WhatsApp → Settings → Account → Two-Step Verification' },
-      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+      { text: 'Tap Turn on, choose a 6-digit PIN and enter it twice' },
       { text: 'Add a recovery email address -- this lets you reset the PIN if you forget it' },
-      { text: 'Done -- this PIN is now required any time someone tries to register your number on a new device' },
+      { text: 'Done -- registering your number on a new phone now needs this PIN, or a 7-day wait from your account’s last use (WhatsApp’s rule when the PIN is unknown)' },
     ],
     debriefQs: REGISTRATION_LOCK_DEBRIEF,
     scoutDialog: {
       briefing: `"WhatsApp's "password" is a registration lock PIN. Without it, someone who steals your phone number steals your entire chat history. SIM-swap attacks make this real."`,
       debrief: {
-        "enabled-2fa": `"Registration PIN set. Your WhatsApp is now SIM-swap resistant."`,
+        "enabled-2fa": `"Registration PIN set. Someone with your number now needs the PIN, or has to wait a week."`,
         "already-enabled": `"Already had a PIN. Good -- most people skip this."`,
-        "later": `"This is how WhatsApp hijacking works: steal the number, register on a new phone. The PIN blocks that."`,
+        "later": `"This is how WhatsApp hijacking works: steal the number, register on a new phone. The PIN makes them wait a week."`,
       },
     },
     estimatedMinutes: 3,
@@ -730,7 +730,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "discord",
     phase: "fortify",
     title: "Lockdown: Discord",
-    briefing: "Changing your Discord password invalidates all active tokens -- it's both a password reset and a session wipe. 2FA adds a second layer, and backup codes are critical because losing your authenticator without codes means losing the account.",
+    briefing: "A new, unique password and 2FA are the lockdown. Backup codes are critical because losing your authenticator without codes means losing the account.",
     steps: [
       { text: 'Open Discord Settings → "My Account"', url: 'https://discord.com/channels/@me' },
       { text: `Click "Change Password" -- open your password manager, generate a 20+ character random password, save it, paste it in` },
@@ -739,11 +739,11 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     ],
     debriefQs: LOCKDOWN_DEBRIEF,
     scoutDialog: {
-      briefing: '"New password kills all existing tokens. 2FA blocks future token theft from being enough on its own. Backup codes prevent you from locking yourself out. All three, in that order."',
+      briefing: '"New password, then 2FA, then backup codes so you can’t lock yourself out. All three, in that order."',
       debrief: {
-        "reset-password": '"Password changed (tokens killed), 2FA active, backup codes saved. Your Discord is properly fortified."',
+        "reset-password": '"Password changed, 2FA active, backup codes saved. Your Discord is properly fortified."',
         "already-strong": '"Already locked down. Make sure those backup codes are still accessible."',
-        "partial": '"Password changed -- good, tokens are killed. Come back for 2FA. Without it, a new token steal works again."',
+        "partial": '"Password changed -- good. Come back for 2FA: it’s the second lock."',
         "later": `"Discord token theft is the most common way accounts get hijacked in gaming communities. Don't wait."`,
       },
     },
@@ -1276,7 +1276,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "ebay",
     phase: "fortify",
     title: "Lockdown: eBay",
-    briefing: "eBay stores your payment methods and shipping address. A unique password and 2FA prevent someone from placing purchases or listing stolen goods under your name. Given the 2014 breach, any old password is definitely compromised.",
+    briefing: "eBay stores your payment methods and shipping address. A unique password and 2FA prevent someone from placing purchases or listing stolen goods under your name. If your password is from before eBay's 2014 breach, change it: that breach took encrypted passwords.",
     steps: [
       { text: 'Open eBay Account Security', url: 'https://www.ebay.com/myb/AccountSettings' },
       { text: `Under "Sign-in and Security" → "Password" → change it -- open your password manager, generate 20+ characters, save, paste` },
@@ -1360,7 +1360,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: "Open your profile. Scroll to your very earliest post. Note the year — that's your starting line." },
       { text: "Count your posts (it's in your profile header). This tells you how big the job is." },
-      { text: "Download your data now — it takes time to generate: Settings > Your activity > Download your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
+      { text: "Export your data now — it takes time to generate: Settings → Accounts Center → Your information and permissions → Export your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
       { text: "While that processes, look at your story archive: Profile > Menu > Archive. These were 'temporary' but Instagram kept them all." },
     ],
     debriefQs: [{ id: 'finding', label: 'How old is your account?', options: [
@@ -1483,7 +1483,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     steps: [
       { text: "Check your account age: open About on your profile, look for 'Joined Facebook' date" },
       { text: "Open Activity Log — this is your master record", url: "https://www.facebook.com/allactivity" },
-      { text: "Download your data: Settings > Your information > Download your information", url: "https://www.facebook.com/your_information/" },
+      { text: 'Export your data: Settings & privacy → Settings → Accounts Center → Your information and permissions → Export your information', url: 'https://accountscenter.facebook.com/' },
       { text: "Check which apps still have access: Settings > Apps and websites. Revoke old ones now while you're here." },
     ],
     debriefQs: [{ id: 'finding', label: 'How long have you been on Facebook?', options: [
@@ -1631,12 +1631,12 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: 'twitter',
     phase: 'reclaim',
     title: 'Memory Lane: X / Twitter Year Review',
-    briefing: "Pick a year and go through your tweets from that period. Search 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31' to filter. Hot takes age badly. Reply-guy energy from 2016 reads different in 2026. And your likes are public too — check those. Do one year at a time.",
+    briefing: "Pick a year and go through your tweets from that period. Search 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31' to filter. Hot takes age badly. Reply-guy energy from 2016 reads different in 2026. Your likes are private now (X hid them from everyone else in June 2024), so those are just for you. Do one year at a time.",
     steps: [
       { text: "Search your tweets from one year: 'from:yourhandle since:YYYY-01-01 until:YYYY-12-31'" },
       { text: "Read through them. Ask: would this tweet get me in trouble if it went viral today?" },
       { text: "Check quote tweets and replies — these have more context collapse risk than regular tweets." },
-      { text: "Review likes from this period: Profile > Likes. These are public on most accounts." },
+      { text: "Optional: review your likes from this period (Profile > Likes). Since June 2024 only you can see them." },
       { text: "Delete individual tweets you're not comfortable with, or note them for bulk deletion later." },
       { text: "One year done? Stop. Come back for the next one." },
     ],
