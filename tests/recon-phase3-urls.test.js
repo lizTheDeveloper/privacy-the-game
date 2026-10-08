@@ -39,9 +39,12 @@ describe('verified step URLs', () => {
   // names (login.gov, id.me), the player's own placeholder workspace, DNS
   // server names and bare IPs typed into a settings box, and router
   // addresses on the player's own network (an IP with no path).
-  const NOT_A_PLACE = new Set(['login.gov', 'id.me', 'dns.quad9.net', 'your-workspace.slack.com', 'cloudflare-dns.com',
+  const NOT_A_PLACE = new Set(['login.gov', 'id.me', 'your-workspace.slack.com',
     // Setting names that look like hosts: LG's "Who.Where.What?" menu and a Firefox about:config pref.
     'who.where.what', 'privacy.resistfingerprinting']);
+  // Typed into settings, not visited: each one checked to resolve or answer
+  // (breaker phase 3 round 3: a wrong Private DNS name kills a phone's internet).
+  const DNS = fixture.dns;
   const ADDRESS = /\b(?:\d{1,3}(?:\.\d{1,3}){3}|(?:[a-z0-9-]+\.)+[a-z]{2,24})\b(?:\/[^\s"'“”),;]*)?/gi;
   it('every address written inside step text is in the allowlist', () => {
     const known = Object.keys(fixture.urls).map((u) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').toLowerCase());
@@ -53,8 +56,12 @@ describe('verified step URLs', () => {
         for (const hit of (st.text || '').match(ADDRESS) || []) {
           const h = hit.replace(/[.,;:]+$/, '').replace(/\/$/, '').toLowerCase();
           const host = h.replace(/\/.*/, '');
-          if (NOT_A_PLACE.has(host) || [...NOT_A_PLACE].some((n) => host.endsWith(`.${n}`))) continue;
-          if (/^\d+(\.\d+){3}$/.test(host) && !h.includes('/')) continue;
+          if (NOT_A_PLACE.has(host)) continue;
+          if (!h.includes('/') && Object.hasOwn(DNS.hostnames, host)) continue;
+          if (/^\d+(\.\d+){3}$/.test(host) && !h.includes('/')) {
+            if (!Object.hasOwn(DNS.resolvers, host) && !Object.hasOwn(DNS.routerDefaults, host)) bad.push(`${m.id}: ${hit} (an IP nobody checked)`);
+            continue;
+          }
           // Not a web address: file names and the like.
           if (/\.(js|json|png|jpg|jpeg|heic|pdf|zip|csv|txt|exe|app)$/.test(host)) continue;
           const ok = known.some((k) => k === h || k.endsWith(`/${h}`) || k.endsWith(`.${h}`))
@@ -64,6 +71,15 @@ describe('verified step URLs', () => {
       }
     }
     expect(bad).toEqual([]);
+  });
+
+  it('every typed DNS name and server IP was checked, with the date', () => {
+    expect(DNS.checked).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(Object.keys(DNS.hostnames).sort()).toEqual(['dns.quad9.net', 'one.one.one.one']);
+    // The name Cloudflare doesn't publish (it doesn't resolve) is never typed.
+    const all = MISSIONS.flatMap((m) => (m.steps || []).map((st) => st.text)).join(' ');
+    expect(all).not.toMatch(/one\.dot\.one/);
+    for (const name of all.match(/\b[a-z0-9.-]+\.cloudflare-dns\.com\b/gi) || []) expect(Object.hasOwn(DNS.hostnames, name.toLowerCase()), name).toBe(true);
   });
 
   it('no step uses a link the audit or the live check found dead or wrong', () => {

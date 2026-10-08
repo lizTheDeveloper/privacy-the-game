@@ -344,7 +344,7 @@ export const TRAIL_MISSIONS = [
     briefing: "Every time you visit a website, your browser asks a DNS server to translate the domain name (google.com) into an IP address. By default, this request goes to your ISP in plain text -- which means your ISP has a complete log of every website you've visited. In 2017, Congress voted to let ISPs sell this browsing data. Encrypted DNS (DNS over HTTPS or DNS over TLS) sends these requests through an encrypted channel to a privacy-focused DNS provider instead of your ISP.",
     steps: [
       { text: "iPhone: Settings > Wi-Fi > tap the (i) next to your network > Configure DNS > Manual > add 1.1.1.1 and 1.0.0.1 (Cloudflare) or 9.9.9.9 and 149.112.112.112 (Quad9). Better: install the 1.1.1.1 app from Cloudflare which handles all connections including cellular.", url: "https://one.one.one.one/" },
-      { text: "Android: Settings > Network & Internet > Advanced > Private DNS > enter 'one.dot.one.dot.one.dot.one.cloudflare-dns.com' (Cloudflare) or 'dns.quad9.net' (Quad9)." },
+      { text: "Android: Settings > Network & Internet > Advanced > Private DNS > enter 'one.one.one.one' (Cloudflare) or 'dns.quad9.net' (Quad9)." },
       { text: "Mac: System Settings > Network > [Your network] > Details > DNS > add 1.1.1.1 and 9.9.9.9. For system-wide encrypted DNS, install the Cloudflare WARP app." },
       { text: "Windows: Settings > Network & Internet > your connection > DNS server assignment > Manual > enter 1.1.1.1 (Preferred) and 9.9.9.9 (Alternate). Enable 'DNS over HTTPS' in the dropdown." },
       { text: "Firefox: Settings > Privacy & Security > scroll to bottom > DNS over HTTPS > select 'Max Protection' and choose Cloudflare or NextDNS.", url: "about:preferences#privacy" },

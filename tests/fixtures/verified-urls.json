@@ -180,5 +180,23 @@
     "https://x.com/settings/privacy_and_safety": "curl 200 (redirects to https://x.com/i/jf/onboarding/web)",
     "https://x.com/settings/your_twitter_data/account": "curl 200",
     "https://yandex.com/images/": "curl 200"
+  },
+  "dns": {
+    "checked": "2026-10-08",
+    "how": "dig +short against two public resolvers (1.1.1.1 and 9.9.9.9)",
+    "hostnames": {
+      "one.one.one.one": "resolves to 1.1.1.1, 1.0.0.1 (Cloudflare; Android Private DNS)",
+      "dns.quad9.net": "resolves to 9.9.9.9, 149.112.112.112 (Quad9; Android Private DNS)"
+    },
+    "resolvers": {
+      "1.1.1.1": "answers DNS queries (Cloudflare)",
+      "1.0.0.1": "answers DNS queries (Cloudflare)",
+      "9.9.9.9": "answers DNS queries (Quad9)",
+      "149.112.112.112": "answers DNS queries (Quad9)"
+    },
+    "routerDefaults": {
+      "192.168.1.1": "a common default router address on the player’s own network, not a public place",
+      "192.168.0.1": "a common default router address on the player’s own network, not a public place"
+    }
   }
 }
