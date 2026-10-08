@@ -542,3 +542,29 @@ describe('breaker phase 3 round 2 rulings', () => {
     expect(line).not.toMatch(/SSA lock is still active|IRS account is still claimed/);
   });
 });
+
+describe('breaker phase 3 round 4: carriers and Health Connect', () => {
+  const steps = (id) => byId(id).steps.map((s) => s.text);
+  it('AT&T: the extra security passcode is for signing in online; Wireless Account Lock locks the number', () => {
+    const att = steps('sim_protection-fortify-pin').filter((t) => /^AT&T/.test(t)).join(' ');
+    expect(att).toContain('Wireless Account Lock');
+    expect(att).toMatch(/signing in online/);
+    expect(att).not.toMatch(/ALL account changes/);
+    expect(stepUrls(byId('sim_protection-fortify-pin'))).toContain('https://www.att.com/support/article/wireless/000102016/');
+  });
+
+  it('Verizon: a 4-digit Account PIN at vzw.com/PIN; Number Lock is its own switch', () => {
+    const vz = steps('sim_protection-fortify-pin').filter((t) => /^Verizon/.test(t)).join(' ');
+    expect(vz).toMatch(/4-digit Account PIN/);
+    expect(vz).toContain('vzw.com/PIN');
+    expect(vz).toContain('Edit profile and settings');
+    expect(vz).not.toMatch(/same page/);
+  });
+
+  it('Android health permissions live in Health Connect; no claim that every app reads everything', () => {
+    const m = byId('health-insurance-data-permissions');
+    expect(stepText(m)).toContain('Health Connect');
+    expect(stepText(m)).not.toContain('Google Fit');
+    expect(m.briefing).not.toMatch(/can read data contributed by every other app/);
+  });
+});

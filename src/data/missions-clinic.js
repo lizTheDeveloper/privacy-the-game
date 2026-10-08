@@ -383,16 +383,16 @@ export const CLINIC_MISSIONS = [
     accountId: "health_insurance",
     phase: "fortify",
     title: "Review Health Data Permissions",
-    briefing: "Apple Health and Google Fit act as central hubs that dozens of apps connect to. Every app you have ever granted Health access can read data contributed by every other app. That means a calorie counter can read your heart rate data. A sleep tracker can read your reproductive health data. Review every app connected to your health data hub and revoke access from anything that does not need it. Be especially careful with apps that request write AND read access -- read access to your entire health profile is the real prize.",
+    briefing: "Apple Health and Android's Health Connect are hubs that many apps connect to. An app you let read a kind of health data can read it whatever app wrote it. So a calorie counter you allowed to read heart rate gets your watch's heart rate too. Review every app connected to your health data hub and revoke access from anything that does not need it. Be especially careful with apps that request write AND read access -- read access to your entire health profile is the real prize.",
     steps: [
-      { text: "iPhone: Settings > Privacy & Security > Health > review every app. Remove any you no longer use." },
-      { text: "Android: Settings > Apps > Google Fit > review connected apps and permissions", url: "https://myaccount.google.com/permissions" },
+      { text: "iPhone: Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → review every app. Remove any you no longer use." },
+      { text: 'Android: open Health Connect (Android 14 and later: Settings → Security and privacy → Privacy controls → Health Connect, or search Settings for it; Android 13 and earlier: the Health Connect app) → App permissions → review each app', url: 'https://support.google.com/android/answer/12201230' },
       { text: "For each app: ask 'does this app need access to ALL my health data, or just the data it creates?'" },
       { text: "Revoke access from apps you tried once and forgot. Each one is an open pipeline." },
     ],
     debriefQs: HEALTH_ACTION_DEBRIEF,
     scoutDialog: {
-      briefing: `"Apple Health is a hub. Every app connected to it can potentially read data from every other app. That means the meditation app you tried once in 2021 might still have access to your heart rate, your sleep data, and your reproductive health tracking. Let's review every connection."`,
+      briefing: `"Apple Health is a hub. Any app you once let read your heart rate, sleep or cycle data can still read it, from every source, until you take that away. The meditation app you tried once in 2021 might still be on the list. Let's review every connection."`,
       debrief: scoutHealth(
         `"Health data permissions locked down. Your biometric hub is no longer an all-you-can-read buffet."`,
         `"Already tight. You have been managing your health permissions."`,
