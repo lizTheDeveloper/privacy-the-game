@@ -139,7 +139,7 @@ export const PASSWORD_MANAGER_MISSION = {
   // report seriously); players without one never see it.
   unlock: { type: 'password-manager' },
   title: 'Check your password manager’s security report',
-  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. Whatever it clears, we leave alone.',
+  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
   steps: PM_STEPS.other,
   stepsByManager: PM_STEPS,
   debriefQs: [
@@ -150,7 +150,7 @@ export const PASSWORD_MANAGER_MISSION = {
       min: 0,
       max: 9999,
       label: 'How many passwords did it flag?',
-      hint: 'Whatever it flags gets a new password; whatever it clears stays as it is.',
+      hint: 'Whatever it flags gets a new password. A clean result isn’t proof of anything, just no known problem.',
       options: [{ value: 'skip', text: 'Couldn’t check right now', severity: 'skip' }],
     },
     {
@@ -175,7 +175,7 @@ export const PASSWORD_MANAGER_MISSION = {
   scoutDialog: {
     briefing: '"Your password manager has been keeping notes. Let’s read them. Whatever it flags gets a new password — whatever it doesn’t, we leave alone."',
     debrief: {
-      flagged: '"Now we know exactly which locks were copied. Those resets are on the list — every other password can stay put."',
+      flagged: '"Now we know which passwords your manager knows are leaked or reused. Those resets are on the list."',
       'none-flagged': '"Nothing flagged. Your manager’s been keeping watch and the report is clean. That’s the kind of boring I like."',
       skip: '"No rush. The report will be there next time you open your manager."',
     },
@@ -308,7 +308,7 @@ function upgradeMission(acct) {
     scoutDialog: {
       briefing: '"Codes were a good start. This is the finish."',
       debrief: apple ? { ...apple.lines, later: '"Fair enough. Your codes still count — the upgrade is here when you want it."' } : {
-        authenticator: '"Codes on your own device now. A SIM swap gets them a phone number and nothing else."',
+        authenticator: '"Codes on your own device now. A SIM swap no longer gets them these codes."',
         passkey: '"A passkey. Nothing to intercept, nothing to phish. Lovely."',
         later: '"Fair enough. Your codes still count — the upgrade is here when you want it."',
       },

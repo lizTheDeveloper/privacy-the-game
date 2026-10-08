@@ -157,7 +157,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'primary_bank',
     phase: 'fortify',
     title: 'Secure Login: Primary Bank',
-    briefing: `If your bank password is the same as any other account -- any other account at all -- it's already been tried against your bank by automated scripts. Your password manager can generate a unique one. Let it do its job.`,
+    briefing: `If your bank password is the same as any other account's, automated scripts can try it against your bank whenever that other account leaks. Your password manager can generate a unique one. Let it do its job.`,
     steps: [
       { text: `Log into your bank's website or app` },
       { text: 'Go to Settings → Security → Change Password' },
@@ -392,16 +392,16 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'venmo',
     phase: 'reclaim',
     title: 'Privacy Lockdown: Venmo',
-    briefing: `Venmo payments set to Public can be seen by anyone: who paid whom, when, and the note. Check who can see your payments and your friends list. A BuzzFeed reporter tracked the President's Venmo transactions in 2021. Two taps fix this.`,
+    briefing: `Venmo payments set to Public can be seen by anyone: who paid whom, when, and the note. Check who can see your payments and your friends list. A BuzzFeed reporter found the President's Venmo account and friends in 2021.`,
     steps: [
       { text: 'Open Venmo Privacy Settings', url: 'https://account.venmo.com/settings/privacy' },
-      { text: 'Set "Default Privacy Setting" to Private' },
+      { text: 'In Venmo’s privacy settings, set who can see your payments to Private, and check your friends list' },
       { text: 'Set "Friends List" visibility to Private' },
       { text: 'Scroll through your past transactions -- change any public ones to private' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
-      briefing: `"Venmo defaults all transactions to public. Your rent, your dinner split, your therapist copay. A reporter found the President's Venmo in ten minutes. Fix this."`,
+      briefing: `"Public Venmo payments show who you pay and when. Your rent, your dinner split, your therapist copay. A reporter found the President's account. Fix this."`,
       debrief: {
         "tightened": `"Transactions set to private. Your financial life just disappeared from public view."`,
         "already-tight": `"Already private. You're one of the few Venmo users who found the setting."`,
@@ -534,7 +534,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "investment_account",
     phase: "fortify",
     title: "Secure Login: Investment Account",
-    briefing: "New password and 2FA on the account that holds your retirement savings. Fidelity and Schwab support security keys. For an account measured in decades of savings, use the strongest option available.",
+    briefing: "New password and 2FA on the account that holds your retirement savings. If your brokerage offers a security key or authenticator app, use it: for an account measured in decades of savings, take the strongest option available.",
     steps: [
       { text: "Log into your brokerage account" },
       { text: "Go to Security Settings → Change Password" },
@@ -567,7 +567,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "ssa",
     phase: "recon",
     title: "Claim Your SSA Account",
-    briefing: "The most important thing about your my Social Security account is whether it exists. If you haven't created one, an identity thief can create one using your SSN -- and control your Social Security record. The 2017 Equifax breach put 147 million SSNs on the market. Yours is almost certainly out there. Claim it first.",
+    briefing: "The most important thing about your my Social Security account is whether it exists. If you haven't created one, an identity thief can create one using your SSN -- and control your Social Security record. The 2017 Equifax breach exposed about 147 million people's SSNs. Assume yours may be out there. Claim it first.",
     steps: [
       { text: 'Go to my Social Security', url: 'https://www.ssa.gov/myaccount/' },
       { text: `If you DON'T have an account: click "Create an Account" -- this prevents someone else from claiming your SSN` },
@@ -576,7 +576,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: ACCOUNT_CLAIMED_DEBRIEF,
     scoutDialog: {
-      briefing: `"The Equifax breach put 147 million SSNs on the market. Your SSN is not a secret anymore -- it's a shared key. The defense is claiming the account before someone else does."`,
+      briefing: `"The Equifax breach exposed about 147 million people's SSNs. Treat yours as not secret. The defense is claiming the account before someone else does."`,
       debrief: {
         "claimed": '"Account claimed. Nobody else can open a second online account with your SSN now. (Claims by phone or in person are a separate door.)"',
         "already-had": '"Already claimed. Verify the contact info is still yours -- address changes are how benefits get redirected."',
@@ -639,7 +639,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'irs',
     phase: 'fortify',
     title: 'Get an IRS Identity Protection PIN',
-    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. Without it, the return gets rejected -- even if the thief has your SSN, your name, and your address. It's effectively 2FA for your tax identity. Free, takes five minutes.`,
+    briefing: `The IRS Identity Protection PIN is a six-digit number that must be included on any tax return filed with your SSN. Without it, the return gets rejected -- even if the thief has your SSN, your name, and your address. `,
     steps: [
       { text: 'Go to IRS Get an IP PIN', url: 'https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin' },
       { text: `Click "Get an IP PIN" and verify your identity through ID.me` },
@@ -648,11 +648,11 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: IP_PIN_DEBRIEF,
     scoutDialog: {
-      briefing: `"The IP PIN is the single most effective defense against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free. Five minutes."`,
+      briefing: `"The IP PIN is one of the strongest defenses against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free."`,
       debrief: {
         "enabled-2fa": '"IP PIN obtained. Your tax return now requires a secret only you know. A return filed with your SSN and without that PIN gets rejected."',
-        'already-enabled': `"Already have one. You're in the minority of taxpayers who've taken this step."`,
-        'later': '"Five minutes now saves 18 months of identity theft recovery later. Come back."',
+        'already-enabled': `"Already have one. Good."`,
+        'later': '"A few minutes now can save a long recovery later. Come back."',
       },
     },
     estimatedMinutes: 5,
@@ -668,7 +668,7 @@ export const VAULT_CAPITOL_MISSIONS = [
       { text: 'Check your address -- is it current?' },
       { text: 'Look at your recent returns and notices: anything filed or sent that you don’t recognize?' },
       { text: `View your tax transcript -- any filings you didn't make?` },
-      { text: 'Confirm your IP PIN is active for next tax season' },
+      { text: 'If you have an IP PIN, get this year’s (online, in January) before you file' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -772,7 +772,7 @@ export const VAULT_CAPITOL_MISSIONS = [
       debrief: {
         'reset-password': '"Healthcare portal secured. Your medical records have a real lock now."',
         'already-strong': `"Already strong. You're ahead of the healthcare IT curve."`,
-        'later': '"Healthcare records are worth more than credit cards on the dark web. Worth fixing."',
+        'later': '"Healthcare records are hard to take back once they’re out. Worth fixing."',
       },
     },
     estimatedMinutes: 5,

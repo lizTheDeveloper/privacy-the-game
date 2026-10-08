@@ -151,7 +151,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'gmail',
     phase: 'recon',
     title: 'Breach Recon: Gmail',
-    briefing: 'Data brokers buy and sell leaked credentials by the million. If your Gmail password appeared in a breach, it’s already loaded into automated attack scripts hitting login pages around the clock. Gmail is the master key — password resets for most of your other accounts flow through it.',
+    briefing: 'Leaked credentials get bought, sold and fed into automated attacks that try them on login pages. If your Gmail password appeared in a breach, assume it can be tried against your account. Gmail is the master key — password resets for most of your other accounts flow through it.',
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Gmail address' },
@@ -244,7 +244,7 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Google collects a staggering amount of data by default: search history, location timeline, ad profile, app permissions. Most of it can be dialed back without losing functionality.',
     steps: [
       { text: 'Open Google Privacy Checkup', url: 'https://myaccount.google.com/privacycheckup' },
-      { text: 'Review each section: Web & App Activity, Location History, YouTube History' },
+      { text: 'Review each section: Web & App Activity, Timeline (formerly Location History), YouTube History' },
       { text: 'Pause or auto-delete what you don’t need' },
       { text: 'Review third-party app access and revoke anything unnecessary' },
     ],
@@ -546,7 +546,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'yahoo',
     phase: 'fortify',
     title: 'Password Reset: Yahoo',
-    briefing: 'If your Yahoo password predates their mega-breaches, it’s been circulating on the dark web for years. Even if you’ve changed it since, make sure it’s truly unique and not reused from another account.',
+    briefing: 'If your Yahoo password predates their 2013–2014 breaches, treat it as exposed. Even if you’ve changed it since, make sure it’s truly unique and not reused from another account.',
     steps: [
       { text: 'Open Yahoo Account Security', url: 'https://login.yahoo.com/account/security' },
       { text: 'Click "Change password"' },
@@ -554,7 +554,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Given Yahoo’s history, if this password is old, it’s been on every dark-web dump list for years."',
+      briefing: '"Given Yahoo’s history, if this password is old, treat it as exposed."',
       debrief: {
         'reset-password': '"Fresh password on Yahoo. No more coasting on leaked credentials."',
         'already-strong': '"Already updated. Good discipline."',
@@ -930,7 +930,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Google offers the most 2FA options of anyone. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
+      briefing: '"Google offers a lot of 2FA options. Security key is best, authenticator app is great, phone prompt is fine. Pick what you’ll actually use."',
       debrief: {
         'enabled-2fa': '"2FA on the identity hub. This single action protects everything behind Google SSO."',
         'already-enabled': '"Already protected. Make sure you have backup codes saved somewhere safe."',
@@ -945,10 +945,10 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'google',
     phase: 'reclaim',
     title: 'Privacy Review: Google Account',
-    briefing: 'Google’s Privacy Checkup walks through what data is collected and shared. Web & App Activity, Location History, YouTube History, and ad personalization can all be tightened without losing core functionality.',
+    briefing: 'Google’s Privacy Checkup walks through what data is collected and shared. Web & App Activity, Timeline (formerly Location History), YouTube History, and ad personalization can all be tightened without losing core functionality.',
     steps: [
       { text: 'Open Google Privacy Checkup', url: 'https://myaccount.google.com/privacycheckup' },
-      { text: 'Review Web & App Activity, Location History, YouTube History' },
+      { text: 'Review Web & App Activity, Timeline (formerly Location History), YouTube History' },
       { text: 'Set auto-delete timelines or pause collection' },
       { text: 'Review and limit ad personalization' },
     ],
@@ -1027,7 +1027,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Microsoft offers passwordless sign-in via their Authenticator app. Worth considering if you want to eliminate password risk entirely."',
+      briefing: '"Microsoft offers passwordless sign-in via their Authenticator app. Worth considering if you want to take the password out of the picture."',
       debrief: {
         'reset-password': '"New password on the Microsoft account. The tower is reinforced."',
         'already-strong': '"Already strong and unique. Solid."',
@@ -1041,7 +1041,7 @@ const CHAPTER_1_MISSIONS = [
     accountId: 'microsoft',
     phase: 'fortify',
     title: '2FA Setup: Microsoft Account',
-    briefing: 'Microsoft supports authenticator apps, security keys, phone verification, and passwordless sign-in. Their Authenticator app includes a one-tap approval flow that’s fast and secure.',
+    briefing: 'Microsoft supports authenticator apps, security keys, phone verification, and passwordless sign-in. With their Authenticator app you approve a sign-in on your phone (you may be asked to enter a number shown on screen).',
     steps: [
       { text: 'Open Microsoft security settings', url: 'https://account.live.com/proofs/manage' },
       { text: 'Enable "Two-step verification"' },
@@ -1049,9 +1049,9 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
-      briefing: '"Microsoft’s Authenticator has a nice one-tap approval. Set it up and you won’t even need to type codes."',
+      briefing: '"Microsoft’s Authenticator lets you approve sign-ins on your phone. You may be asked to match a number, but you won’t be typing codes."',
       debrief: {
-        'enabled-2fa': '"2FA active on Microsoft. One-tap approval is slick, right?"',
+        'enabled-2fa': '"2FA active on Microsoft. Approving on your phone beats typing codes."',
         'already-enabled': '"Already set up. Good."',
         'later': '"Quick to set up, big security payoff. Come back to this."',
       },
