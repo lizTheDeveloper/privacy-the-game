@@ -54,6 +54,20 @@ const TWO_FA_DEBRIEF = [
   },
 ];
 
+// The IP PIN is a number on your return, not a sign-in factor (IRS, "Get an
+// Identity Protection PIN"). Same id and values as TWO_FA_DEBRIEF; words only.
+const IP_PIN_DEBRIEF = [
+  {
+    id: 'action',
+    label: 'Did you get your IP PIN?',
+    options: [
+      { value: 'enabled-2fa', text: 'Yes, I have my IP PIN', severity: 'safe' },
+      { value: 'already-enabled', text: 'I already had one', severity: 'safe' },
+      { value: 'later', text: `I'll come back to this`, severity: 'skip' },
+    ],
+  },
+];
+
 const ALERTS_DEBRIEF = [
   {
     id: 'action',
@@ -177,8 +191,8 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `A bank without 2FA is a vault with just a combination lock. Turn on whatever they offer -- we'll take SMS over nothing.`,
       debrief: {
-        'enabled-2fa': '"2FA on the bank. Even a SIM swapper now needs your phone AND your password."',
-        'already-enabled': '"Already enabled. Ahead of 80% of bank customers."',
+        'enabled-2fa': '"2FA on the bank. A stolen password alone isn’t enough now. If your second step is text codes, the carrier lock in The Perimeter covers the SIM-swap side."',
+        'already-enabled': '"Already enabled. Good."',
         'later': '"Real money behind this door. Come back soon."',
       },
     },
@@ -378,7 +392,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'venmo',
     phase: 'reclaim',
     title: 'Privacy Lockdown: Venmo',
-    briefing: `Venmo's default transaction privacy is public. Every payment you make -- the amount, the recipient, the memo -- is visible to anyone. A BuzzFeed reporter tracked the President's Venmo transactions in 2021. Two taps fix this.`,
+    briefing: `Venmo payments set to Public can be seen by anyone: who paid whom, when, and the note. Check who can see your payments and your friends list. A BuzzFeed reporter tracked the President's Venmo transactions in 2021. Two taps fix this.`,
     steps: [
       { text: 'Open Venmo Privacy Settings', url: 'https://account.venmo.com/settings/privacy' },
       { text: 'Set "Default Privacy Setting" to Private' },
@@ -427,8 +441,8 @@ export const VAULT_CAPITOL_MISSIONS = [
     title: "Secure Login: Cash App",
     briefing: `Cash App uses magic-link login -- they send a code to your email or phone. That means whoever controls your email controls your Cash App. The password to secure here is your email's. While you're in the app, enable Security Lock.`,
     steps: [
-      { text: "Open Cash App → tap your profile icon → Security & Privacy" },
-      { text: `Enable "Security Lock" (requires PIN, Touch ID, or Face ID for every payment)` },
+      { text: "Open Cash App → tap your profile icon → Security" },
+      { text: `Turn on Security Lock and choose what it protects: opening Cash App, sending payments, or both` },
       { text: "Set a PIN that is NOT your phone unlock PIN" },
       { text: "Verify the email connected to Cash App is secured (unique password + 2FA from Chapter 1)" },
     ],
@@ -436,7 +450,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `"Cash App's magic link means your email IS your password. If you secured your email in Chapter 1, half the work is done. Security Lock finishes the job."`,
       debrief: {
-        "reset-password": '"Security Lock enabled. Every Cash App payment now requires your face or your fingerprint."',
+        "reset-password": '"Security Lock on. What you chose to protect now asks for your code first."',
         "already-strong": '"Already locked. You understand the magic-link chain of trust."',
         "later": `"If your email was secured in Chapter 1, you're halfway there. The Security Lock is the other half."`,
       },
@@ -472,7 +486,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: "crypto_exchange",
     phase: "fortify",
     title: "Full Lockdown: Crypto Exchange",
-    briefing: "Crypto accounts deserve the strongest security you have. New password, authenticator app (NOT SMS -- SIM swapping specifically targets crypto holders), withdrawal address whitelisting, and check for rogue API keys. All in one visit.",
+    briefing: "Crypto accounts deserve the strongest security you have. New password, authenticator app (NOT SMS: a SIM swap can hand an attacker your text codes, and crypto accounts are a favorite target), withdrawal address whitelisting, and check for rogue API keys. All in one visit.",
     steps: [
       { text: "Log into your crypto exchange" },
       { text: "Change your password -- use your password manager, 20+ characters" },
@@ -482,7 +496,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"SIM swapping exists because of crypto. Attackers port your number, receive your SMS codes, drain your exchange. Authenticator app or hardware key. Never SMS on crypto."',
+      briefing: '"Crypto accounts are a favorite SIM-swap target. Attackers port your number, receive your SMS codes, drain your exchange. Authenticator app or hardware key. Never SMS on crypto."',
       debrief: {
         "reset-password": '"Crypto account locked down: new password, authenticator 2FA, whitelisted addresses. The vault within the Vault."',
         "already-strong": `"Already locked down. Make sure withdrawal whitelisting is on -- that's the kill switch even if everything else fails."`,
@@ -564,7 +578,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: `"The Equifax breach put 147 million SSNs on the market. Your SSN is not a secret anymore -- it's a shared key. The defense is claiming the account before someone else does."`,
       debrief: {
-        "claimed": '"Account claimed. You just prevented someone else from filing for Social Security benefits as you."',
+        "claimed": '"Account claimed. Nobody else can open a second online account with your SSN now. (Claims by phone or in person are a separate door.)"',
         "already-had": '"Already claimed. Verify the contact info is still yours -- address changes are how benefits get redirected."',
         "later": '"This is a race. If someone claims it first, the cleanup takes months. Prioritize this."',
       },
@@ -632,7 +646,7 @@ export const VAULT_CAPITOL_MISSIONS = [
       { text: "The IRS will issue you a 6-digit PIN -- write it down and store it with your tax documents" },
       { text: "A new PIN is issued every year. Because you got yours online, get each new one online too (sign in in January): the IRS doesn't mail it to people who opted in online" },
     ],
-    debriefQs: TWO_FA_DEBRIEF,
+    debriefQs: IP_PIN_DEBRIEF,
     scoutDialog: {
       briefing: `"The IP PIN is the single most effective defense against tax identity theft. Even if someone has your SSN, they can't file a return without this number. Free. Five minutes."`,
       debrief: {
@@ -648,11 +662,11 @@ export const VAULT_CAPITOL_MISSIONS = [
     accountId: 'irs',
     phase: 'reclaim',
     title: 'Verify Tax Records: IRS',
-    briefing: 'Log into your IRS account and verify that your filing address, direct deposit bank account, and tax transcript are correct. The classic tax fraud move is changing the refund bank account -- your return gets filed, your refund goes to their bank.',
+    briefing: 'Log into your IRS account and check the address on file, your tax records and transcripts, and any notices. The classic tax fraud move is filing a return in your name to take the refund; a return or notice you don’t recognize is the warning sign.',
     steps: [
       { text: 'Log into your IRS account', url: 'https://www.irs.gov/payments/your-online-account' },
       { text: 'Check your address -- is it current?' },
-      { text: 'Check your bank account for direct deposit -- is it YOUR bank?' },
+      { text: 'Look at your recent returns and notices: anything filed or sent that you don’t recognize?' },
       { text: `View your tax transcript -- any filings you didn't make?` },
       { text: 'Confirm your IP PIN is active for next tax season' },
     ],
@@ -660,9 +674,9 @@ export const VAULT_CAPITOL_MISSIONS = [
     scoutDialog: {
       briefing: '"The classic move: change the refund bank account. Your return gets filed, your refund goes to their bank, and you find out when the IRS rejects your real return. Check the deposit info."',
       debrief: {
-        'tightened': '"Bank details verified, IP PIN confirmed. Your tax refund will go to your bank, not theirs."',
+        'tightened': '"Records checked. A return you didn’t file would show up here."',
         'already-tight': `"Already reviewed. The Capitol's treasury is secure."`,
-        "later": `"Check the direct deposit info at minimum. That's where the money goes."`,
+        "later": `"Check your returns and notices at minimum. That’s where a fake return shows."`,
       },
     },
     estimatedMinutes: 10,
