@@ -568,3 +568,25 @@ describe('breaker phase 3 round 4: carriers and Health Connect', () => {
     expect(m.briefing).not.toMatch(/can read data contributed by every other app/);
   });
 });
+
+describe('ruling: DNS missions say only what is true', () => {
+  const ids = ['smart_network-reclaim-dns', 'browser_fingerprint-reclaim-dns'];
+  it.each(ids)('%s: title and copy don’t promise encryption for a plain resolver change', (id) => {
+    const m = byId(id);
+    const t = text(m);
+    expect(m.title).not.toMatch(/^(Set Up|Switch to) Encrypted DNS$/);
+    expect(t).not.toMatch(/not where you're going|can no longer read your DNS queries|stops your ISP from seeing which sites/);
+    expect(t).toMatch(/changes who answers, not who can see/);
+    // Where encryption really comes from.
+    expect(t).toContain('Private DNS');
+    expect(t).toMatch(/1\.1\.1\.1 app/);
+    expect(t).toMatch(/secure DNS|DNS over HTTPS/);
+    // The ISP still sees the servers you connect to.
+    expect(t).toMatch(/which servers you connect to/);
+  });
+
+  it.each(ids)('%s: the mission ids and debrief values are unchanged', (id) => {
+    const m = byId(id);
+    expect(m.debriefQs[0].id).toBe('action');
+  });
+});
