@@ -83,7 +83,9 @@ describe('I2/I3 sweep: freeze and IP PIN absolutes', () => {
 
 describe('I4: the 2FA ENABLED stat counts only two-factor missions', async () => {
   const { calcFindings, isTwoFactorMission } = await import('../src/utils/calc.js');
-  it('an IP PIN and a Signal registration lock are not 2FA; real 2FA missions are', () => {
+  // Ruling (re-review 5): Signal's registration lock is a re-registration PIN
+  // like WhatsApp's two-step PIN, so both count. The IRS IP PIN doesn't.
+  it('an IP PIN is not 2FA; real 2FA missions and both messenger re-registration PINs are', () => {
     const s = { ...createInitialState(), missions: {
       'irs-fortify-ip-pin': { status: 'completed', action: 'enabled-2fa' },
       'govt_id_defense-fortify-irs-pin': { status: 'completed', action: 'enabled-2fa' },
@@ -92,10 +94,10 @@ describe('I4: the 2FA ENABLED stat counts only two-factor missions', async () =>
       'telegram-fortify-twostep': { status: 'completed', action: 'enabled-2fa' },
       'whatsapp-fortify-reglock': { status: 'completed', action: 'enabled-2fa' },
     } };
-    expect(calcFindings(s).twoFactorEnabled).toBe(3);
+    expect(calcFindings(s).twoFactorEnabled).toBe(4);
     const byId = (id) => MISSIONS.find((m) => m.id === id);
     expect(isTwoFactorMission(byId('irs-fortify-ip-pin'))).toBe(false);
-    expect(isTwoFactorMission(byId('signal-fortify-reglock'))).toBe(false);
+    expect(isTwoFactorMission(byId('signal-fortify-reglock'))).toBe(true);
     expect(isTwoFactorMission(byId('gmail-fortify-2fa'))).toBe(true);
   });
 });
@@ -128,5 +130,16 @@ describe('re-review 4 (ruling): no old save loses its finished city', async () =
     expect(m.missions[broken]).toMatchObject({ status: 'completed', action: 'later', completedAt: '2026-09-01T10:00:00.000Z' });
     expect(calcDistrictProgress(m, 'perimeter').percent).toBe(100);
     expect(isCityComplete(m)).toBe(true);
+  });
+});
+
+describe('re-review 5: a countsWhenDone bonus weighs 0.5 until done', async () => {
+  const { missionWeight } = await import('../src/utils/calc.js');
+  it('core 1; bonus 0.5; countsWhenDone 0.5 until done, then 1', () => {
+    const vin = MISSIONS.find((x) => x.id === 'car_general-recon-vin');
+    expect(missionWeight({ optional: false }, false)).toBe(1);
+    expect(missionWeight({ optional: true }, true)).toBe(0.5);
+    expect(missionWeight(vin, false)).toBe(0.5);
+    expect(missionWeight(vin, true)).toBe(1);
   });
 });

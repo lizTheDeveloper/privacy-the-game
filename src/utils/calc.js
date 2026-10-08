@@ -9,13 +9,21 @@ export function isCoreMission(mission) {
   return mission.phase !== 'survey' && !mission.optional;
 }
 
+// A bonus weighs half. One that counts like core once done (countsWhenDone)
+// weighs half until it's done, then 1 (re-review 5).
+export function missionWeight(m, done) {
+  if (!m.optional) return 1;
+  return m.countsWhenDone && done ? 1 : OPTIONAL_WEIGHT;
+}
+
 function weightedScore(missions, isDone) {
   let total = 0;
   let done = 0;
   for (const m of missions) {
-    const weight = m.optional && !m.countsWhenDone ? OPTIONAL_WEIGHT : 1;
+    const d = isDone(m);
+    const weight = missionWeight(m, d);
     total += weight;
-    if (isDone(m)) done += weight;
+    if (d) done += weight;
   }
   return { total, done };
 }
@@ -140,10 +148,12 @@ export function districtBreachedAddresses(state, districtId) {
 }
 
 // A mission whose debrief asks about a second sign-in step (reviewer I4): the
-// method question, or a two-factor / two-step question. An IRS IP PIN and
-// Signal's registration lock share the enabled-2fa value but aren't 2FA.
+// method question, or a two-factor / two-step / registration lock question.
+// The IRS IP PIN shares the enabled-2fa value but isn't 2FA.
+// Ruling (re-review 5): Signal's registration lock is a re-registration PIN
+// like WhatsApp's two-step PIN, so it counts too.
 export function isTwoFactorMission(mission) {
-  return Boolean(mission?.debriefQs?.some((q) => q.kind === 'two-factor' || /two-factor|two-step/i.test(q.label || '')));
+  return Boolean(mission?.debriefQs?.some((q) => q.kind === 'two-factor' || /two-factor|two-step|registration lock/i.test(q.label || '')));
 }
 
 export function calcFindings(state) {

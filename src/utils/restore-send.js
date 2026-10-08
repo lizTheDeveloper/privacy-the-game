@@ -46,8 +46,11 @@ export function umamiPayload(name, data, env = globalThis) {
 }
 
 // One event, confirmed: true only when the server answered ok. Never sends
-// while sharing is off. Each request is aborted after timeoutMs, so an
-// abandoned request can't land later and reorder the rest.
+// while sharing is off. Each request is aborted after timeoutMs. The abort is
+// client-side only: a request the server already stored but answered late
+// counts as failed here, so a retry can resend it and that event is counted
+// again in actions. Restore stops at the first failure, so that's at most one
+// event per failed attempt.
 export async function sendConfirmed(name, data, { fetchImpl = globalThis.fetch, timeoutMs = SEND_TIMEOUT_MS, env = globalThis } = {}) {
   if (isAnalyticsOff() || umamiDisabled() || typeof fetchImpl !== 'function') return false;
   const controller = new AbortController();
