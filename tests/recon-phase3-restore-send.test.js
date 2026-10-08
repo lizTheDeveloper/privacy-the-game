@@ -138,3 +138,32 @@ describe('the app’s restore path', () => {
     delete globalThis.umami;
   });
 });
+
+describe('the confirmed list belongs to one deletion (re-review 1)', () => {
+  it('a partial restore, then a new opt-out, then a restore re-sends everything', async () => {
+    const sent = [];
+    const failOn = 'm:google-recon-breach';
+    let fail = true;
+    const send = async (name, data) => {
+      const k = eventKey({ name, data });
+      if (fail && k === failOn) return false;
+      sent.push(k);
+      return true;
+    };
+    const first = await sendRestore(EVENTS, { send, stamp: 'optedOut:2026-10-01|ghost:' });
+    expect(first.ok).toBe(false);
+    expect(loadConfirmed('optedOut:2026-10-01|ghost:')).toEqual(['r:opted-out', 'm:gmail-recon-breach']);
+    // The player turned sharing back on, then off again: a new deletion.
+    fail = false;
+    sent.length = 0;
+    expect(loadConfirmed('optedOut:2026-10-05|ghost:')).toEqual([]);
+    const second = await sendRestore(EVENTS, { send, stamp: 'optedOut:2026-10-05|ghost:' });
+    expect(second).toEqual({ ok: true, sent: 4, total: 4 });
+    expect(sent).toEqual(['r:opted-out', 'm:gmail-recon-breach', 'm:google-recon-breach', 'd:master-keys']);
+  });
+
+  it('the app binds the list to the opt-out and ghost timestamps', () => {
+    expect(restoreFn).toMatch(/stamp: restoreStamp\(\)/);
+    expect(APP).toMatch(/function restoreStamp\(\) \{[\s\S]*getOptedOutAt\(\)[\s\S]*getGhostInfo\(\)/);
+  });
+});

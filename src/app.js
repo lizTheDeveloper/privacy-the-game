@@ -327,6 +327,12 @@ async function cancelOptOut() {
 }
 
 // Re-send this browser's saved game after tonight's run deleted it.
+// Which deletion a restore belongs to: its confirmed-event list is kept
+// only while these stay the same (re-review 1).
+function restoreStamp() {
+  return `optedOut:${getOptedOutAt() || ''}|ghost:${getGhostInfo()?.at || ''}`;
+}
+
 async function restoreData() {
   if (restoring) return;
   const kinds = deletedKinds({ ghostInfo: getGhostInfo(), optedOutAt: getOptedOutAt(), collective: collectiveData() });
@@ -347,6 +353,7 @@ async function restoreData() {
     // offer and a retry continues from the last confirmed event.
     const events = [...kinds.map((kind) => ({ name: 'data-restored', data: { kind } })), ...restoreEvents(state)];
     const result = await sendRestore(events, {
+      stamp: restoreStamp(),
       onProgress: (n, total) => {
         if (n % 10 === 0 || n === total) {
           setNotice(RESTORE_DIALOGUE.progress(n, total));

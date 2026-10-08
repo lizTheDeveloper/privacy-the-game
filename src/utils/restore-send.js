@@ -75,18 +75,22 @@ export function eventKey(e) {
   return `${e.name}:${JSON.stringify(e.data || {})}`;
 }
 
-export function loadConfirmed() {
+// The confirmed list belongs to one deletion: `stamp` names it (the opt-out
+// and ghost timestamps). A new deletion has a new stamp, so its restore starts
+// from nothing; the old list is dropped (re-review 1).
+export function loadConfirmed(stamp = '') {
   try {
-    const v = JSON.parse(globalThis.localStorage?.getItem(RESTORE_PROGRESS_KEY) || '[]');
-    return Array.isArray(v) ? v : [];
+    const v = JSON.parse(globalThis.localStorage?.getItem(RESTORE_PROGRESS_KEY) || 'null');
+    if (Array.isArray(v)) return stamp === '' ? v : [];
+    return v && v.stamp === stamp && Array.isArray(v.keys) ? v.keys : [];
   } catch {
     return [];
   }
 }
 
-function saveConfirmed(keys) {
+function saveConfirmed(keys, stamp = '') {
   try {
-    globalThis.localStorage?.setItem(RESTORE_PROGRESS_KEY, JSON.stringify(keys));
+    globalThis.localStorage?.setItem(RESTORE_PROGRESS_KEY, JSON.stringify({ stamp, keys }));
   } catch {
     // Storage blocked: a retry may resend; nothing else to do.
   }
@@ -102,15 +106,15 @@ export function clearConfirmed() {
 
 // Send what isn't confirmed yet, in order, one at a time; stop at the first
 // failure. Returns { ok, sent, total }: ok only when every event is confirmed.
-export async function sendRestore(events, { send = sendConfirmed, onProgress = () => {} } = {}) {
-  const confirmed = loadConfirmed();
+export async function sendRestore(events, { send = sendConfirmed, onProgress = () => {}, stamp = '' } = {}) {
+  const confirmed = loadConfirmed(stamp);
   const done = new Set(confirmed);
   const todo = events.filter((e) => !done.has(eventKey(e)));
   for (let i = 0; i < todo.length; i += 1) {
     const ok = await send(todo[i].name, todo[i].data);
     if (!ok) return { ok: false, sent: events.length - todo.length + i, total: events.length };
     confirmed.push(eventKey(todo[i]));
-    saveConfirmed(confirmed);
+    saveConfirmed(confirmed, stamp);
     onProgress(events.length - todo.length + i + 1, events.length);
   }
   return { ok: true, sent: events.length, total: events.length };
