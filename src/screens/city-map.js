@@ -641,6 +641,8 @@ const STYLE = `
     .city-btn--magenta:hover { background: rgba(255,45,155,0.2); box-shadow: inset 0 0 14px rgba(255,45,155,0.25); transform: translateY(-1px); }
     .city-btn--cyan { color: var(--cyan); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
     .city-btn--cyan:hover { background: rgba(0,229,255,0.2); box-shadow: inset 0 0 14px rgba(0,229,255,0.25); transform: translateY(-1px); }
+    .city-btn--lime { color: var(--lime); border-color: rgba(198,255,0,0.4); background: rgba(198,255,0,0.08); text-shadow: 0 0 8px rgba(198,255,0,0.5); }
+    .city-btn--lime:hover { background: rgba(198,255,0,0.2); box-shadow: inset 0 0 14px rgba(198,255,0,0.25); transform: translateY(-1px); }
 
     /* ---------- isometric city ---------- */
     .city-skyline { position: absolute; inset: 0; z-index: 2; }
@@ -753,7 +755,7 @@ const STYLE = `
     @media (max-width: 768px) {
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
-      .city-actions { position: relative; top: auto; right: auto; justify-content: flex-end; padding: 8px 14px 0; }
+      .city-actions { position: relative; top: auto; right: auto; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
       .city-readout { position: relative; top: auto; left: auto; padding: 8px 14px 0; flex-wrap: wrap; row-gap: 4px; }
       .city-skyline { position: relative; height: 420px; margin-top: -60px; }
       .city-iso { top: ${ORIGIN_TOP - 40}px; transform: scale(0.8); }
@@ -823,6 +825,7 @@ export function renderCityMap(state, { collective, whoami, arrival } = {}) {
   <div class="city-actions">
     <a href="#/quickquest" class="city-btn city-btn--magenta">⚡ QUICK QUEST</a>
     <a href="#/stats" class="city-btn city-btn--cyan">STATS</a>
+    <a href="#/reclamation/map" class="city-btn city-btn--lime">↑ LOOK UP</a>
     <a href="#/city-together" class="city-btn city-btn--cyan">WHOLE CITY</a>
   </div>
   <div class="city-skyline">
