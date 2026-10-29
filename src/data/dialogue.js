@@ -435,8 +435,8 @@ export const SKY_LADDER_DIALOGUE = {
   quizGuessOff: "You've turned sharing off, so we haven't looked. Tap to guess from your internet connection, or just pick.",
   firstRung: 'Start with the big ones. Each of these covers a whole patch of sky at once.',
   dropElsewhere: "DROP only works for people who live in California. I'm showing you anyway, so you can see what one good law does.",
-  firstCut: "You've cut a line. They're still up there buying, but that broker can't sell them you any more.",
-  satellites: "They're up there buying. You can't stop them buying, but you can stop the brokers selling them you.",
+  firstCut: "You've opted out of a broker they buy from. Brokers often keep selling to government even after an opt-out, but it's one less file out there with your name on it.",
+  satellites: "They're up there buying. You can't opt out of them, only out of the brokers they buy from, and many brokers keep selling to government anyway. Still: every file you pull is one less to sell.",
 };
 
 export const BROKER_MAP_DIALOGUE = {

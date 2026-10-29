@@ -37,6 +37,14 @@ describe('government satellites', () => {
     expect(noWay).toEqual(['anomaly-six', ...Array(4).fill('thomson-reuters-special-services')]);
   });
 
+  it('a broker with no known way out still cuts its line if the player lights it (Big Check)', () => {
+    const lines = satelliteLines(map, light({ bigCheck: { 'anomaly-six': T } }));
+    expect(lines['us-socom']).toMatchObject({ cut: 1, cuttable: 1 });
+    expect(satDimmed(lines['us-socom'])).toBe(true);
+    const ice = lines['us-ice'].lines.find((l) => l.broker.id === 'thomson-reuters-special-services');
+    expect(ice).toMatchObject({ way: false, cut: false });
+  });
+
   it('a lit broker cuts its line', () => {
     const lines = satelliteLines(map, light({ bigCheck: { 'clearview-ai': T } }));
     expect(lines['us-army'].lines.find((l) => l.broker.id === 'clearview-ai').cut).toBe(true);
@@ -52,7 +60,7 @@ describe('government satellites', () => {
     expect(Object.values(lines).reduce((t, s) => t + s.cut, 0)).toBe(0);
   });
 
-  it('SOCOM never dims; a satellite with every cuttable line cut does', () => {
+  it('SOCOM never dims on its own; a satellite with every cuttable line cut does', () => {
     const lines = satelliteLines(map, light({}));
     expect(lines['us-socom'].cuttable).toBe(0);
     expect(satDimmed(lines['us-socom'])).toBe(false);

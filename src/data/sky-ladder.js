@@ -71,7 +71,8 @@ export const LADDER_COPY = Object.freeze({
   gpc: Object.freeze({
     label: 'Global Privacy Control',
     count: 'every website, this browser',
-    may: "Companies don't have to honor this where you live, but many do.",
+    may: "Companies don't have to honor this in {state}, but many do.",
+    unknown: 'Some states make companies honor this. Tell the map where you live to see whether yours does.',
     body: 'One browser setting that tells every site you visit: do not sell or share my data. It stops future selling; it deletes nothing.',
   }),
   daa: Object.freeze({

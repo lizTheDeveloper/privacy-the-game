@@ -42,7 +42,9 @@ export function ladder(map, state, lighting, checklists = BROKER_CHECKLISTS) {
   const gpc = {
     id: 'gpc', kind: 'gpc', label: LADDER_COPY.gpc.label, mission: GPC_MISSION, starIds: [], count: null,
     status: gpcDone ? 'done' : 'todo',
-    text: Object.hasOwn(GPC_STATES, home ?? '') ? GPC_STATES[home].line : LADDER_COPY.gpc.may,
+    // The law line only for a state that has one; "doesn't have to" only for a known state that hasn't.
+    text: Object.hasOwn(GPC_STATES, home ?? '') ? GPC_STATES[home].line
+      : stateName ? fill(LADDER_COPY.gpc.may, { state: stateName }) : LADDER_COPY.gpc.unknown,
     doneOn: gpcDone && typeof gpcRec.completedAt === 'string' ? gpcRec.completedAt.slice(0, 10) : null,
   };
 

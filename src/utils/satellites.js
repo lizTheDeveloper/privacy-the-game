@@ -28,7 +28,8 @@ export function satelliteBand(size = 1000, u = 1) {
 const hasWayOut = (b) => Boolean(b) && !isBuyer(b) && ((b.optOut && b.optOut.method !== 'none') || Boolean(b.registries?.CA));
 
 // { [satId]: { lines: [{ broker, way, cut, link }], cut, cuttable, total } }. A line is cut only by
-// a lit or re-check-due star; a browser-only halo or a DROP preview never cuts one.
+// a lit or re-check-due star; a browser-only halo or a DROP preview never cuts one. A star the player
+// lit anyway (a Big Check tick: they found a way we didn't record) cuts its line and counts as cuttable.
 export function satelliteLines(map, lighting) {
   const byId = new Map((Array.isArray(map?.brokers) ? map.brokers : []).map((b) => [b.id, b]));
   const out = {};
@@ -39,11 +40,11 @@ export function satelliteLines(map, lighting) {
     if (!b) continue;
     const way = hasWayOut(b);
     const st = lighting?.stars?.[b.id]?.state;
-    const cut = way && (st === 'lit' || st === 'amber');
+    const cut = st === 'lit' || st === 'amber';
     const sat = out[l.from];
     sat.lines.push({ broker: b, way, cut, link: l });
     sat.total += 1;
-    if (way) sat.cuttable += 1;
+    if (way || cut) sat.cuttable += 1;
     if (cut) sat.cut += 1;
   }
   return out;

@@ -48,7 +48,7 @@ describe('the ladder on the sky', () => {
     const tx = rungsFor(setHome({}, 'US-CO'))[1];
     expect(rungCard(tx, { home: 'US-CO' })).toContain('href="https://coag.gov/resources/colorado-privacy-act/"');
     const al = rungsFor(setHome({}, 'US-AL'))[1];
-    expect(rungCard(al, { home: 'US-AL' })).toContain("don't have to honor this where you live");
+    expect(rungCard(al, { home: 'US-AL' })).toContain("don't have to honor this in Alabama");
     expect(rungCard(al, { home: 'US-AL' })).toContain('href="#/mission/scam_defense-fortify-tools/briefing"');
   });
 

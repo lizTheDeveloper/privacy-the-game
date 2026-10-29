@@ -14,6 +14,7 @@ export function satelliteCard(map, layout, lighting, index, { scoutLine = null }
   const info = satelliteLines(map, lighting)[sat.id];
   const starIndex = new Map((Array.isArray(layout?.stars) ? layout.stars : []).map((s, i) => [s?.[0], i]));
   const noWay = info.total - info.cuttable;
+  // (cuttable counts lines with a way out plus any the player lit anyway.)
   const tally = info.cuttable === 0
     ? `${info.total} ${info.total === 1 ? 'line' : 'lines'}, and no known way out of ${info.total === 1 ? 'it' : 'any'}`
     : `${info.cut} of ${info.cuttable} ${info.cuttable === 1 ? 'line' : 'lines'} cut${noWay ? ` · ${noWay} with no known way out` : ''}`;

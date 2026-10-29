@@ -406,13 +406,19 @@ function tapSky(svg, clientX, clientY) {
   const ctm = svg.getScreenCTM?.();
   if (!data || !ctm || !ctm.a) return;
   const p = new DOMPoint(clientX, clientY).matrixTransform(ctm.inverse());
-  // A satellite first (they hang above the field), then the nearest drawn star.
-  const sat = satelliteAt(p.x, p.y, (HIT_PX + 2) / ctm.a, 1 / ctm.a);
+  // Whichever is nearer, a satellite or a drawn star (the band sits just above the field's top stars).
+  const reach = (HIT_PX + 2) / ctm.a;
+  const sat = satelliteAt(p.x, p.y, reach, 1 / ctm.a);
+  const id = nearestStarId(skyLayout(data.layout), p.x, p.y, reach);
   if (sat !== null) {
-    openSat(sat, '.map-stage');
-    return;
+    const s = satelliteBand(1000, 1 / ctm.a)[sat];
+    const st = id ? data.layout.stars.find((x) => x?.[0] === id) : null;
+    const satD = (s.x - p.x) ** 2 + (s.y + 4 / ctm.a - p.y) ** 2;
+    if (!st || satD < (st[1] - p.x) ** 2 + (st[2] - p.y) ** 2) {
+      openSat(sat, '.map-stage');
+      return;
+    }
   }
-  const id = nearestStarId(skyLayout(data.layout), p.x, p.y, (HIT_PX + 2) / ctm.a);
   if (id) {
     openCard(id, selectedId ? cardReturn : '.map-stage');
     return;
@@ -784,6 +790,11 @@ function quizAction(action, el) {
   }
   if (action === 'change-home') {
     editingResidency = true;
+    // The quiz is drawn in the side panel, where an open card would hide it: close the card.
+    selectedId = null;
+    selectedSat = null;
+    cardScout = null;
+    cardReturn = null;
     // The quiz moves to the top of the ladder: on a phone, pull the sheet up to show it.
     ladderOpen = true;
     selectedRung = null;

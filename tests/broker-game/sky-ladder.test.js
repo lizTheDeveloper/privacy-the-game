@@ -69,7 +69,11 @@ describe('the sky ladder', () => {
     expect(byId(rungs(setHome({}, 'US-TX')), 'gpc').text).toMatch(/already handle these signals for other states/);
     expect(must).not.toContain('US-MD');
     const not = ['US-AL', 'US-MS', 'US-WY'].find((s) => !must.includes(s));
-    expect(byId(rungs(setHome({}, not)), 'gpc').text).toMatch(/don't have to honor/);
+    expect(byId(rungs(setHome({}, not)), 'gpc').text).toMatch(/don't have to honor this in /);
+    // Not knowing where the player lives, the game says nothing about their law.
+    for (const s of [{}, setHome({}, 'unsaid'), setHome({}, 'outside-us'), { caResident: 'no' }]) {
+      expect(byId(rungs(s), 'gpc').text).toMatch(/Tell the map where you live/);
+    }
   });
 
   it('every rung id is unique', () => {

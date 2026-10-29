@@ -46,6 +46,12 @@ describe('the location quiz', () => {
     expect(homeLabel('bogus')).toBe(null);
   });
 
+  it('CHANGE closes an open card, so the quiz has somewhere to show', () => {
+    const app = readFileSync('src/app.js', 'utf8');
+    const block = app.slice(app.indexOf("if (action === 'change-home') {"), app.indexOf("if (action === 'change-home') {") + 500);
+    expect(block).toMatch(/selectedId = null;\n {4}selectedSat = null;/);
+  });
+
   it('the guess fetch is gated on sharing and ghost', () => {
     const app = readFileSync('src/app.js', 'utf8');
     expect(app).toMatch(/route\.screen === 'broker-map' && whoamiView\.status === 'idle' && homeOf\(state\) === null && guessAllowed\(\)\) loadWhoami\(\);/);
