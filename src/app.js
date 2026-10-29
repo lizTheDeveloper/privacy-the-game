@@ -730,6 +730,9 @@ function quizAction(action, el) {
   }
   if (action === 'change-home') {
     editingResidency = true;
+    // The quiz moves to the top of the ladder: on a phone, pull the sheet up to show it.
+    ladderOpen = true;
+    selectedRung = null;
     renderCurrentRoute();
     app.querySelector('.residency-select')?.focus();
     return;
@@ -757,6 +760,8 @@ function ladderAction(action, el, data) {
     cardReturn = `[data-action="select-rung"][data-rung="${index}"]`;
     view = fitView(data.layout, rungs[index].starIds, mapStage ? mapStage.h / mapStage.w : 1);
     renderCurrentRoute();
+    // On a phone the sheet covers the bottom of the screen: bring the sky up so the preview shows.
+    if (isPhone()) app.querySelector('.map-stage')?.scrollIntoView({ block: 'start' });
     app.querySelector('.sky-rung-card')?.focus({ preventScroll: true });
   } else if (action === 'close-rung') {
     const back = cardReturn;

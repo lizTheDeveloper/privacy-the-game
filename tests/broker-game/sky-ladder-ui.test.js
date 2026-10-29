@@ -117,3 +117,17 @@ describe('constellation highlight', () => {
     expect(svg.match(/ is-hl"/g)).toHaveLength(2);
   });
 });
+
+describe('where the quiz sits', () => {
+  it('unanswered: at the top of the ladder, and the phone bar asks; answered: below the sky with CHANGE', () => {
+    const h = draw(createInitialState());
+    const side = h.slice(h.indexOf('<section class="sky-ladder'));
+    expect(side.indexOf('WHERE DO YOU LIVE?')).toBeLessThan(side.indexOf('BIGGEST FIRST'));
+    expect(side).toMatch(/class="sky-ladder-bar"[^>]*>.*WHERE DO YOU LIVE\?/s);
+    const done = draw(setHome(createInitialState(), 'US-TX'));
+    const ladderPart = done.slice(done.indexOf('<section class="sky-ladder'), done.indexOf('</section>'));
+    expect(ladderPart).not.toContain('class="residency"');
+    expect(done).toContain('NOT IN TEXAS? CHANGE');
+    expect(draw(setHome(createInitialState(), 'US-TX'), { editingResidency: true }).match(/class="residency"/g)).toHaveLength(1);
+  });
+});

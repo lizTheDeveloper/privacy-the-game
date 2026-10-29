@@ -60,16 +60,17 @@ export function rungCard(r, { home = null } = {}) {
 }
 
 // rungs: ladder(). selected: the open rung's index or null. open: the phone sheet is pulled up.
-export function ladderPanel(rungs, { selected = null, open = false, home = null } = {}) {
+// top: the location quiz, shown above the list until it's answered (it decides what the rungs say).
+export function ladderPanel(rungs, { selected = null, open = false, home = null, top = '' } = {}) {
   const next = nextRung(rungs);
   const nextIndex = next ? rungs.indexOf(next) : -1;
   const sel = Number.isInteger(selected) && rungs[selected] ? rungs[selected] : null;
-  const barText = sel ? sel.label : next ? `NEXT: ${next.label}` : 'ALL DONE';
+  const barText = sel ? sel.label : top ? 'WHERE DO YOU LIVE?' : next ? `NEXT: ${next.label}` : 'ALL DONE';
   const bar = `<button type="button" class="sky-ladder-bar" data-action="ladder-toggle" aria-expanded="${open || sel ? 'true' : 'false'}">`
     + `<span class="sky-ladder-grab" aria-hidden="true"></span><span>${esc(barText)}</span></button>`;
   const body = sel
     ? `<div class="sky-rung-card" role="region" aria-labelledby="sky-rung-title" tabindex="-1">${rungCard(sel, { home })}</div>`
-    : `<div class="label">BIGGEST FIRST</div><ol class="sky-rungs">${rungs.map((r, i) => rungRow(r, i, i === nextIndex)).join('')}</ol>`;
+    : `${top}<div class="label">BIGGEST FIRST</div><ol class="sky-rungs">${rungs.map((r, i) => rungRow(r, i, i === nextIndex)).join('')}</ol>`;
   return `<section class="sky-ladder${open || sel ? ' is-open' : ''}" aria-label="Opt-outs, biggest first">${bar}<div class="sky-ladder-body">${body}</div></section>`;
 }
 
@@ -90,6 +91,11 @@ export const LADDER_CSS = `
 .sky-rung-card h2{margin:0;font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:1px}
 .sky-rung-card p{margin:6px 0}
 .sky-rung-card a{color:var(--cyan)}
+.sky-rung-card .star-card-go a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--cyan);border-radius:6px;text-decoration:none}
+.sky-rung-card .star-card-note{font-size:12px;color:rgba(237,239,243,0.75)}
+.sky-rung-card .star-card-state{color:var(--lime)}
+.sky-rung-card .star-card-list{margin:0;padding-left:18px}
+.sky-rung-card .star-card-close{min-height:44px;margin-top:12px;padding:0 18px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);background:transparent;border:1px solid rgba(0,229,255,0.4);border-radius:6px;cursor:pointer}
 .sky-rung-did{min-height:44px;margin-top:10px;padding:0 18px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--lime);border:0;border-radius:6px;cursor:pointer}
 @media (min-width:900px){.sky-ladder{position:sticky;top:12px;max-height:calc(100svh - 40px);overflow-y:auto}}
 @media (max-width:899.98px){
@@ -98,5 +104,6 @@ export const LADDER_CSS = `
 .sky-ladder-bar{position:sticky;top:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(100% + 28px);min-height:52px;margin:0 -14px 6px;padding:6px 14px 8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--lime);background:rgba(17,21,31,0.99);border:0;cursor:pointer}
 .sky-ladder-grab{width:44px;height:5px;border-radius:3px;background:rgba(237,239,243,0.35)}
 .sky-ladder:not(.is-open) .sky-ladder-body{display:none}
+.sky-ladder:has(.sky-rung-card){max-height:46svh}
 .sky-ladder:not(.is-open){padding-bottom:env(safe-area-inset-bottom)}
 }`;

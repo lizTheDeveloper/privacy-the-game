@@ -194,6 +194,11 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   const ratio = stage?.w > 0 && stage?.h > 0 ? stage.h / stage.w : 1;
   const v = view ?? initialView(map, layout, lighting, ratio);
   const rungs = ladder(map, state, lighting);
+  // Until the player says where they live (or while they change it), the quiz sits at the top of
+  // the ladder; after, the answer and its CHANGE sit below the sky.
+  const home = homeOf(state);
+  const asking = home === null || editingResidency;
+  const quizHtml = locationQuiz({ ...quiz, home, editing: editingResidency });
   const open = Number.isInteger(rung) && rungs[rung] && !selectedId ? rungs[rung] : null;
   const shimmer = rungs.find((r) => r.kind === 'gpc')?.status === 'done' || open?.kind === 'gpc';
   const svg = constellationSvg({ map, layout, lighting, selectedId, newlyLit, view: v, px: stage?.w ?? null, controls: controlsFor(stage), highlight: open ? open.starIds : null, shimmer });
@@ -202,7 +207,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   // The side column (desktop) or bottom sheet (phone) holds the star card or the ladder, never both.
   const card = selected
     ? starCard(map, lighting, selectedId, state, { scoutLine: cardScoutLine })
-    : ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state) });
+    : ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state), top: asking ? quizHtml : '' });
   const height = stage?.h > 0 ? ` style="height:${Math.round(stage.h)}px"` : '';
   // Scout's line (the first visit's, else this visit's one-time line) floats over the top of the
   // sky (dismissable), so the map keeps the phone's height; it leaves the zoom buttons' corner clear.
@@ -224,7 +229,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
     + `</div>${card}</div>`
     + `<details class="map-key" data-open-desktop><summary>KEY</summary><ul class="map-legend">${LEGEND.filter(([, , needs]) => needs !== 'sweeps' || hasSweepMembers(map)).map(([icon, label]) => `<li>${icon}${label}</li>`).join('')}</ul></details>`
     + nudgeBlock(lighting.pending)
-    + locationQuiz({ ...quiz, home: homeOf(state), editing: editingResidency })
+    + (asking ? '' : quizHtml)
     + dropBlock(lighting.drop, state.caResident)
     + leftBlock(whatsLeft(map, lighting));
 }
