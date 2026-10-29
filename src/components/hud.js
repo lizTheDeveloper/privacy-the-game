@@ -1,5 +1,6 @@
 import { calcIntegrity, calcExposure } from '../utils/calc.js';
 import { isCabinetMode } from '../utils/cabinet.js';
+import { bugButtonHtml } from './bug-reporter.js';
 
 // Link home to the studio. The utm tags let the studio site count visits from the game.
 export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=';
@@ -33,6 +34,7 @@ export function renderHud(state) {
         <span class="stat-value" style="color: var(--amber); text-shadow: 0 0 8px rgba(255,159,0,0.3);">${streak}d</span>
         <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
       </div>
+      ${bugButtonHtml()}
       ${supportBlock}
     </div>
   </div>`;

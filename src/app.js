@@ -39,6 +39,7 @@ import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
 import { STUDIO_URL } from './components/hud.js';
 import { mountClassAd } from './components/class-ad.js';
+import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
 import { renderStats } from './screens/stats.js';
@@ -203,6 +204,7 @@ function renderWelcome() {
     <div data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</div>
     <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 16px; letter-spacing: 1px;">NO ACCOUNT NEEDED &middot; YOUR DATA STAYS IN YOUR BROWSER</div>
     <a href="${STUDIO_URL}welcome" target="_blank" rel="noopener" data-studio-link="welcome" style="font-family: var(--font-mono); font-size: 10px; color: rgba(198,255,0,0.6); margin-top: 40px; letter-spacing: 2px; text-decoration: none;">A MULTIVERSE GAMES GAME &middot; MORE FREE GAMES&nbsp;&#8599;</a>
+    <button type="button" data-bug-report style="font-family: var(--font-mono); font-size: 10px; color: rgba(255,45,155,0.75); margin-top: 16px; letter-spacing: 2px; background: none; border: 0; min-height: 44px; padding: 8px 12px; cursor: pointer;">🐞 REPORT A BUG</button>
   </div>`;
 }
 
@@ -1418,6 +1420,7 @@ document.fonts?.addEventListener?.('loadingdone', () => {
 
 initRouter(render);
 mountClassAd();
+mountBugReporter();
 checkStreakReminder(state);
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).
 announceReady();
