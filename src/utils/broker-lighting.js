@@ -10,11 +10,12 @@
 
 import { BROKER_CHECKLISTS, LEGACY_ALL_ANSWERS, FREEZE_RINGS } from '../data/broker-checklists.js';
 import { dayOf } from './broker-state.js';
+import { PRESCREEN } from '../data/sky-ladder.js';
 
 export const RECHECK_DAYS = 90;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const VIA_ORDER = ['checklist', 'legacy', 'drop', 'big-check'];
+const VIA_ORDER = ['checklist', 'legacy', 'drop', 'prescreen', 'big-check'];
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const own = (obj, key) => isObj(obj) && Object.hasOwn(obj, key);
@@ -109,6 +110,8 @@ export function brokerLighting(map, state, today, checklists = BROKER_CHECKLISTS
   if (dropDay !== null) drop = resident === 'yes' ? 'lit' : resident === 'no' || resident === 'unsaid' ? 'not-resident' : 'ask';
   if (drop === 'lit') for (const b of brokers) if (b.registries?.CA) hit(b.id, dropDay, 'drop');
 
+  if (dayValue(state?.prescreen) !== null) for (const id of PRESCREEN.brokers) hit(id, state.prescreen, 'prescreen');
+
   if (isObj(state?.bigCheck)) {
     for (const [id, day] of Object.entries(state.bigCheck)) if (dayValue(day) !== null) hit(id, day, 'big-check');
   }
@@ -122,7 +125,11 @@ export function brokerLighting(map, state, today, checklists = BROKER_CHECKLISTS
     else {
       const via = VIA_ORDER.filter((v) => h.via.has(v));
       const age = todayValue === null ? null : Math.round((todayValue - dayValue(h.litOn)) / DAY_MS);
-      const amber = kinds(b).includes('people-search') && !h.via.has('drop') && age !== null && age >= RECHECK_DAYS;
+      // OptOutPrescreen's online opt-out lasts five years; a star lit by nothing else goes amber then.
+      const prescreenOnly = h.via.size === 1 && h.via.has('prescreen');
+      const amber = age !== null && (prescreenOnly
+        ? age >= PRESCREEN.days
+        : kinds(b).includes('people-search') && !h.via.has('drop') && age >= RECHECK_DAYS);
       stars[b.id] = { state: amber ? 'amber' : 'lit', litOn: h.litOn, via };
     }
   }

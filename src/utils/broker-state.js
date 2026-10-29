@@ -4,8 +4,13 @@
 // Must not import state.js (state.js imports this for loadState).
 
 import { checklistFor, LEGACY_ALL_ANSWERS } from '../data/broker-checklists.js';
+import { STATE_NAME } from '../data/sky-ladder.js';
 
 export const RESIDENCY = ['yes', 'no', 'unsaid'];
+
+// Where the player lives (the sky's location quiz): a US state code, 'outside-us' or 'unsaid'.
+// Kept in step with caResident, which the lighting reads for DROP.
+const validHome = (v) => v === 'outside-us' || v === 'unsaid' || (typeof v === 'string' && Object.hasOwn(STATE_NAME, v));
 
 // Scout's one-time lines on the field map (broker-scout.js): brokerMap.scout[key] is 1 once shown,
 // 0 while pending (its trigger fired on a visit that showed another line; ruling T3-b).
@@ -62,6 +67,8 @@ export function cleanBrokerState(state) {
     else if (JSON.stringify(c) !== JSON.stringify(state.brokerFiled)) { next.brokerFiled = c; changed = true; }
   }
   if ('caResident' in state && !RESIDENCY.includes(state.caResident)) drop('caResident');
+  if ('home' in state && !validHome(state.home)) drop('home');
+  if ('prescreen' in state && !realDay(state.prescreen)) drop('prescreen');
   if ('bigCheck' in state) {
     if (!isObj(state.bigCheck)) drop('bigCheck');
     else {
@@ -164,6 +171,35 @@ export function setResidency(state, value) {
   const next = { ...state };
   if (RESIDENCY.includes(value)) next.caResident = value;
   else delete next.caResident;
+  return next;
+}
+
+export function setHome(state, value) {
+  const next = { ...state };
+  if (validHome(value)) {
+    next.home = value;
+    next.caResident = value === 'US-CA' ? 'yes' : value === 'unsaid' ? 'unsaid' : 'no';
+  } else {
+    delete next.home;
+    delete next.caResident;
+  }
+  return next;
+}
+
+// The player's answer, or what an older save's California answer says. An old "not in California"
+// says nothing about which state, so it reads as unanswered (the quiz asks again; DROP stays off).
+export function homeOf(state) {
+  if (validHome(state?.home)) return state.home;
+  if (state?.caResident === 'yes') return 'US-CA';
+  if (state?.caResident === 'unsaid') return 'unsaid';
+  return null;
+}
+
+// The day the player did OptOutPrescreen, or null to clear it.
+export function setPrescreen(state, day) {
+  const next = { ...state };
+  if (realDay(day)) next.prescreen = day;
+  else delete next.prescreen;
   return next;
 }
 
