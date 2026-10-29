@@ -30,7 +30,8 @@ import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-dat
 import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle } from './utils/interior-state.js';
 import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
-import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setResidency, setBigCheck } from './utils/broker-state.js';
+import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf } from './utils/broker-state.js';
+import { guessFromWhoami } from './components/location-quiz.js';
 import { mapScoutLine, mapScoutTriggers, cardScoutLine, bigCheckScoutLine } from './utils/broker-scout.js';
 import { brokerLighting } from './utils/broker-lighting.js';
 import { litIds, initialView, withRatio, zoomViewBox, zoomView, zoomAnchor, nearestStarId, VIEW_BOUNDS } from './utils/broker-view.js';
@@ -136,6 +137,11 @@ function loadCollective() {
   });
 }
 
+// Looking the player up without asking: never once they've turned sharing off or gone ghost.
+function guessAllowed() {
+  return !isAnalyticsOff() && !hasGoneGhost();
+}
+
 function loadWhoami() {
   if (whoamiView.status === 'loading') return;
   whoamiView = { status: 'loading' };
@@ -172,6 +178,7 @@ const screens = {
     return renderBrokerMap(state, {
       status: brokerDataStatus(), data, selectedId, view, newlyLit, stage: mapStage,
       firstVisit: mapFirstVisit && !mapScoutDismissed, editingResidency, listOpen: mapListOpen,
+      quiz: { guess: guessFromWhoami(whoamiView), guessAllowed: guessAllowed(), guessStatus: whoamiView.status },
       scoutLine: mapScoutDismissed ? null : mapScout?.line ?? null,
       cardScoutLine: cardScout && cardScout.id === selectedId ? cardScout.line : null,
     });
@@ -221,6 +228,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   // Your City needs the published file's date to tell a pending deletion from one that went through.
   if ((getGhostInfo()?.early || getOptedOutAt()) && shouldAutoLoad(route.screen, collectiveView.status, ['stats'])) loadCollective();
   if (route.screen === 'ghost' && whoamiView.status === 'idle') loadWhoami();
+  // The sky's quiz starts from a guess, only for players who haven't turned sharing off or gone ghost.
+  if (route.screen === 'broker-map' && whoamiView.status === 'idle' && homeOf(state) === null && guessAllowed()) loadWhoami();
   // A screen visit is what a pageview counts: arriving, not a re-draw.
   if (tracksPageview(cause)) startScreenVisit(route);
   try {
@@ -624,15 +633,8 @@ function mapAction(action, el) {
     mapListOpen = !mapListOpen;
     renderCurrentRoute();
     app.querySelector('[data-action="map-list"]')?.focus();
-  } else if (action === 'set-residency') {
-    setState(setResidency(state, el.dataset.value));
-    editingResidency = false;
-    renderCurrentRoute();
-    app.querySelector('[data-action="change-residency"]')?.focus();
-  } else if (action === 'change-residency') {
-    editingResidency = true;
-    renderCurrentRoute();
-    app.querySelector('[data-action="set-residency"]')?.focus();
+  } else if (QUIZ_ACTIONS.has(action)) {
+    quizAction(action, el);
   }
 }
 
@@ -702,7 +704,35 @@ function applyBigCheckFilter(input) {
   if (empty) empty.hidden = any;
 }
 
-const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', 'set-residency', 'change-residency']);
+// The location quiz: saved in the game only (setHome). No track(), nothing in the URL.
+const QUIZ_ACTIONS = new Set(['quiz-yes', 'quiz-pick', 'quiz-outside', 'quiz-unsaid', 'quiz-guess', 'change-home']);
+function quizAction(action, el) {
+  let value = null;
+  if (action === 'quiz-yes') value = el.dataset.value;
+  else if (action === 'quiz-pick') value = el.closest('.residency')?.querySelector('.residency-select')?.value || null;
+  else if (action === 'quiz-outside') value = 'outside-us';
+  else if (action === 'quiz-unsaid') value = 'unsaid';
+  if (action === 'quiz-guess') {
+    loadWhoami();
+    return;
+  }
+  if (action === 'change-home') {
+    editingResidency = true;
+    renderCurrentRoute();
+    app.querySelector('.residency-select')?.focus();
+    return;
+  }
+  if (!value) {
+    app.querySelector('.residency-select')?.focus();
+    return;
+  }
+  setState(setHome(state, value));
+  editingResidency = false;
+  renderCurrentRoute();
+  app.querySelector('[data-action="change-home"]')?.focus();
+}
+
+const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', ...QUIZ_ACTIONS]);
 
 function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
   render(parseRoute(location.hash), cause);

@@ -11,6 +11,8 @@ import { starCard, TICK_CSS } from '../components/star-card.js';
 import { BROKER_MAP_DIALOGUE } from '../data/dialogue.js';
 import { MISSIONS } from '../data/missions.js';
 import { localDay } from '../state.js';
+import { locationQuiz, QUIZ_CSS } from '../components/location-quiz.js';
+import { homeOf } from '../utils/broker-state.js';
 
 const BACK = '<a class="back-link" href="#/district/reclamation">← THE RECLAMATION</a>';
 const BIG_CHECK_HASH = '#/reclamation/big-check';
@@ -82,6 +84,7 @@ const STYLE = `<style>
 .map-big-check{display:inline-flex;align-items:center;min-height:44px;margin-top:14px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--cyan);text-decoration:none}
 .map-big-check:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 ${TICK_CSS}
+${QUIZ_CSS}
 </style>`;
 
 const swatch = (inner) => `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">${inner}</svg>`;
@@ -108,21 +111,11 @@ export const controlsFor = (stage) => (stage?.w > 0 && stage.w + GUTTER < NARROW
 // The legend's "browser only" row describes stars the sweeps light; with no sweep members, none do.
 export const hasSweepMembers = (map) => Object.values(map?.sweeps ?? {}).some((s) => Array.isArray(s?.members) && s.members.length > 0);
 
-const RESIDENCY_LABEL = { yes: 'Yes', no: 'No', unsaid: 'Rather not say' };
-
-function residencyBlock(state, editing) {
-  const answer = RESIDENCY_LABEL[state.caResident];
-  const inner = answer && !editing
-    ? `<div>California resident: ${answer}</div><button type="button" class="btn-secondary residency-btn residency-change" data-action="change-residency" style="margin-top: 8px;">CHANGE</button>`
-    : `<div>Do you live in California?</div><div class="residency-buttons">${Object.entries(RESIDENCY_LABEL).map(([v, label]) => `<button type="button" class="btn-secondary residency-btn" data-action="set-residency" data-value="${v}">${label}</button>`).join('')}</div>`;
-  return `<div class="residency"><div class="map-panel">${inner}</div></div>`;
-}
-
 function dropBlock(drop, resident) {
   const text = {
     lit: 'DROP: filed. It lights the brokers registered in California.',
     'not-resident': esc(resident === 'unsaid' ? BROKER_MAP_DIALOGUE.dropUnsaid : BROKER_MAP_DIALOGUE.dropNotResident),
-    ask: 'DROP: filed. Tell the map whether you live in California to light it.',
+    ask: 'DROP: filed. Tell the map where you live to light it.',
   }[drop] ?? `DROP: not filed yet. <a href="#/mission/${DROP_MISSION}/briefing">File it</a>`;
   return `<div class="map-panel map-drop">${text}</div>`;
 }
@@ -184,14 +177,15 @@ export function brokerDataStatusBlock(status) {
 export function renderBrokerMap(state, {
   status = 'idle', data = null, today = localDay(), selectedId = null, view = null, newlyLit = new Set(),
   stage = null, firstVisit = false, scoutLine = null, cardScoutLine = null, editingResidency = false, listOpen = false,
+  quiz = {},
 } = {}) {
   const body = status === 'ready' && data
-    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen })
+    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz })
     : brokerDataStatusBlock(status);
   return `${renderHud(state)}${STYLE}<div class="screen broker-map">${BACK}${body}</div>`;
 }
 
-function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen }) {
+function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz }) {
   const lighting = brokerLighting(map, state, today);
   const ratio = stage?.w > 0 && stage?.h > 0 ? stage.h / stage.w : 1;
   const v = view ?? initialView(map, layout, lighting, ratio);
@@ -220,7 +214,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
     + `</div>${card}</div>`
     + `<details class="map-key" data-open-desktop><summary>KEY</summary><ul class="map-legend">${LEGEND.filter(([, , needs]) => needs !== 'sweeps' || hasSweepMembers(map)).map(([icon, label]) => `<li>${icon}${label}</li>`).join('')}</ul></details>`
     + nudgeBlock(lighting.pending)
-    + residencyBlock(state, editingResidency)
+    + locationQuiz({ ...quiz, home: homeOf(state), editing: editingResidency })
     + dropBlock(lighting.drop, state.caResident)
     + leftBlock(whatsLeft(map, lighting));
 }
