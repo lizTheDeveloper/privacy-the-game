@@ -7,12 +7,18 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 
 export const FORMAT_VERSION = 1;
 const SIZE = 1000;
-const C = SIZE / 2;
-const RIM = 470; // buyers
-const INNER = 330; // linked non-buyers
+// Liz (2026-10-29): "make the stars not be a circle". The sky is a wide field with ragged edges, not a
+// disc: it fills the map's width, from just under the top to above the satellites' band at the bottom.
+export const SKY = Object.freeze({ left: 24, right: 976, top: 56, bottom: 820 });
+const CX = SIZE / 2;
+export const CY = (SKY.top + SKY.bottom) / 2;
+const BUYER_ROW_Y = 26; // non-government buyers: a row along the top edge
+const GOV_ROW_Y = 900; // government buyers: drawn as satellites at the bottom (src/utils/satellites.js)
+// Linked brokers and hubs stay inside these boxes (half-widths, half-heights about the field's centre).
+export const INNER_BOX = Object.freeze({ hx: 400, hy: 300 });
+const HUB_BOX = Object.freeze({ hx: 340, hy: 250 });
 // Liz (2026-10-24): "the stars are a ring instead of like... constellations". The unlinked crowd is cut
 // into small constellations of one kind each, scattered over the whole sky between the hubs.
-const SKY_R = 440; // constellation centres and stars stay inside this radius (buyers sit at RIM)
 const ASTERISM_MAX = 13; // stars per constellation, at most
 const ASTERISM_MIN = 4; // and at least (a kind with fewer stars is one smaller constellation)
 const CLUSTERS = 11; // regions the constellations gather in, with dark sky between
@@ -40,7 +46,6 @@ const HUB_REPULSION = 2; // extra push between hubs closer than HUB_GAP + HUB_MA
 const HUB_MARGIN = 20;
 const NEBULA_SPRING = 1; // spring from a non-hub to its anchor
 const NEBULA_DIST = 60; // rest length of that spring
-const HUB_LIMIT = 230; // hubs stay inside this radius so their nebula fits inside INNER
 const GRAVITY = 0.25; // pull of each non-hub toward the centre, per unit distance
 const CROWD_SEED = SEED + 1;
 // The constellation each kind is named for on the map (the Big Check's group names).
@@ -66,10 +71,17 @@ export function mulberry32(seed) {
 
 export const starRadius = (reach, known) => 2 + 2.2 * Math.log2(reach) + (known ? 1 : 0);
 
-function clamp(p, max) {
-  const dx = p.x - C, dy = p.y - C;
-  const d = Math.hypot(dx, dy);
-  if (d > max) { p.x = C + (dx / d) * max; p.y = C + (dy / d) * max; }
+function clamp(p, box) {
+  p.x = Math.min(CX + box.hx, Math.max(CX - box.hx, p.x));
+  p.y = Math.min(CY + box.hy, Math.max(CY - box.hy, p.y));
+}
+
+// The field's ragged edge: each side is pulled in by a slow, deterministic wave (0–60 units), so the
+// sky ends unevenly, like a real one seen between rooftops, never as a circle or a clean rectangle.
+const wave = (t, a, b, c) => 30 + 16 * Math.sin(t * a + 1.3) + 10 * Math.sin(t * b + 4.1) + 4 * Math.sin(t * c);
+export function inSky(x, y) {
+  return x >= SKY.left + wave(y / SIZE, 7.1, 13.3, 29) && x <= SKY.right - wave(y / SIZE, 5.3, 11.9, 31)
+    && y >= SKY.top + wave(x / SIZE, 6.2, 15.1, 27) && y <= SKY.bottom - wave(x / SIZE, 8.4, 12.7, 23);
 }
 
 export function computeLayout(map, sizeKnown) {
@@ -78,12 +90,14 @@ export function computeLayout(map, sizeKnown) {
   const linkedIds = new Set(map.links.flatMap((l) => [l.from, l.to]));
   const pos = new Map();
 
-  // Buyers on the rim, evenly spaced in id order from -90deg.
+  // Buyers, no longer a ring round the sky: the government ones in a row at the bottom (the game draws
+  // them as satellites there), the rest in a row along the top. Evenly spaced, in id order.
   const buyers = brokers.filter(isBuyer);
-  buyers.forEach((b, i) => {
-    const a = -Math.PI / 2 + (2 * Math.PI * i) / buyers.length;
-    pos.set(b.id, { x: C + RIM * Math.cos(a), y: C + RIM * Math.sin(a) });
-  });
+  const gov = buyers.filter((b) => b.id.startsWith('us-'));
+  const others = buyers.filter((b) => !b.id.startsWith('us-'));
+  const row = (list, y) => list.forEach((b, i) => pos.set(b.id, { x: SIZE * (0.06 + (0.88 * (i + 0.5)) / list.length), y }));
+  row(gov, GOV_ROW_Y);
+  row(others, BUYER_ROW_Y);
 
   const unlinked = brokers.filter((b) => !isBuyer(b) && !linkedIds.has(b.id));
 
@@ -91,9 +105,7 @@ export function computeLayout(map, sizeKnown) {
   const movers = brokers.filter((b) => !isBuyer(b) && linkedIds.has(b.id));
   const rand = mulberry32(SEED);
   for (const b of movers) {
-    const a = 2 * Math.PI * rand();
-    const r = INNER * Math.sqrt(rand());
-    pos.set(b.id, { x: C + r * Math.cos(a), y: C + r * Math.sin(a) });
+    pos.set(b.id, { x: CX + (rand() * 2 - 1) * INNER_BOX.hx, y: CY + (rand() * 2 - 1) * INNER_BOX.hy });
   }
   const moving = new Set(movers.map((b) => b.id));
   const buyerIds = new Set(buyers.map((b) => b.id));
@@ -125,7 +137,7 @@ export function computeLayout(map, sizeKnown) {
   }
   const anchorPoint = (id) => {
     const ids = anchorsOf.get(id);
-    if (!ids.length) return { x: C, y: C };
+    if (!ids.length) return { x: CX, y: CY };
     let x = 0, y = 0;
     for (const a of ids) { x += pos.get(a).x; y += pos.get(a).y; }
     return { x: x / ids.length, y: y / ids.length };
@@ -133,7 +145,7 @@ export function computeLayout(map, sizeKnown) {
 
   const n = movers.length;
   if (n > 0) {
-    const k = Math.sqrt((Math.PI * INNER * INNER) / n);
+    const k = Math.sqrt((4 * INNER_BOX.hx * INNER_BOX.hy) / n);
     const k2 = k * k;
     for (let it = 0; it < ITERATIONS; it++) {
       const t = ITERATIONS === 1 ? T_END : T_START + ((T_END - T_START) * it) / (ITERATIONS - 1);
@@ -168,14 +180,14 @@ export function computeLayout(map, sizeKnown) {
         const p = pos.get(b.id);
         if (b.hub) {
           // Hubs: gentle gravity toward the centre keeps them off the edge.
-          add(b.id, C - p.x, C - p.y, HUB_GRAVITY);
+          add(b.id, CX - p.x, CY - p.y, HUB_GRAVITY);
         } else {
           // Nebula spring: settle NEBULA_DIST from the anchor (hub(s) linked to, else linked neighbours).
           const a = anchorPoint(b.id);
           const dx = a.x - p.x, dy = a.y - p.y;
           const d = Math.hypot(dx, dy);
           if (d > 0.01) add(b.id, dx / d, dy / d, NEBULA_SPRING * (d - NEBULA_DIST));
-          add(b.id, C - p.x, C - p.y, GRAVITY);
+          add(b.id, CX - p.x, CY - p.y, GRAVITY);
         }
       }
       for (const b of movers) {
@@ -185,7 +197,7 @@ export function computeLayout(map, sizeKnown) {
           const step = Math.min(len, t);
           p.x += (dv.x / len) * step; p.y += (dv.y / len) * step;
         }
-        clamp(p, b.hub ? HUB_LIMIT : INNER);
+        clamp(p, b.hub ? HUB_BOX : INNER_BOX);
       }
     }
 
@@ -204,7 +216,7 @@ export function computeLayout(map, sizeKnown) {
           const push = (HUB_GAP - d) / 2 + 0.05;
           p.x -= (dx / d) * push; p.y -= (dy / d) * push;
           q.x += (dx / d) * push; q.y += (dy / d) * push;
-          clamp(p, HUB_LIMIT); clamp(q, HUB_LIMIT);
+          clamp(p, HUB_BOX); clamp(q, HUB_BOX);
           moved = true;
         }
       }
@@ -217,7 +229,7 @@ export function computeLayout(map, sizeKnown) {
       for (const h of hubAnchors) { sx += pos.get(h).x - before.get(h).x; sy += pos.get(h).y - before.get(h).y; }
       const p = pos.get(id);
       p.x += sx / hubAnchors.length; p.y += sy / hubAnchors.length;
-      clamp(p, INNER);
+      clamp(p, INNER_BOX);
     }
   }
 
@@ -277,7 +289,7 @@ function placeConstellations(unlinked, pos, movers, rand) {
   if (!chunks.length) return { figures: [], names: [] };
 
   const fixed = movers.map((b) => ({ ...pos.get(b.id), hub: b.hub === true }));
-  const open = (x, y, clear = 1) => Math.hypot(x - C, y - C) <= SKY_R
+  const open = (x, y, clear = 1) => inSky(x, y)
     && fixed.every((f) => Math.hypot(f.x - x, f.y - y) >= (f.hub ? CLEAR_OF_HUB : CLEAR_OF_LINKED) * clear);
 
   // Centres gather in a few regions with dark sky between, as stars do: region seeds spread over the
@@ -285,10 +297,10 @@ function placeConstellations(unlinked, pos, movers, rand) {
   const gauss = () => Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
   const seeds = [];
   for (let tries = 0; tries < 20000 && seeds.length < CLUSTERS; tries++) {
-    const x = C + (rand() * 2 - 1) * SKY_R, y = C + (rand() * 2 - 1) * SKY_R;
-    if (open(x, y, 1.6) && seeds.every((q) => Math.hypot(q.x - x, q.y - y) >= SKY_R * 0.42)) seeds.push({ x, y });
+    const x = SKY.left + rand() * (SKY.right - SKY.left), y = SKY.top + rand() * (SKY.bottom - SKY.top);
+    if (open(x, y, 1.6) && seeds.every((q) => Math.hypot(q.x - x, q.y - y) >= 190)) seeds.push({ x, y });
   }
-  if (!seeds.length) seeds.push({ x: C, y: C });
+  if (!seeds.length) seeds.push({ x: CX, y: CY });
   let gap = CENTRE_GAP;
   let centres = [];
   while (centres.length < chunks.length && gap > 10) {
@@ -316,7 +328,7 @@ function placeConstellations(unlinked, pos, movers, rand) {
   const figures = [];
   const named = new Map();
   chunks.forEach((chunk, ci) => {
-    const centre = order[ci] ?? { x: C, y: C };
+    const centre = order[ci] ?? { x: CX, y: CY };
     const m = chunk.members.length;
     const pts = [];
     const ok = (x, y) => open(x, y) && placed.every((q) => Math.hypot(q.x - x, q.y - y) >= STAR_GAP);
@@ -368,7 +380,7 @@ function placeConstellations(unlinked, pos, movers, rand) {
     if (!pts) continue;
     const first = pts.slice(0, Math.min(pts.length, ASTERISM_MAX));
     // Kept in from the sky's edge so a long name isn't cut off.
-    const x = Math.min(C + SKY_R - 70, Math.max(C - SKY_R + 70, first.reduce((s, p) => s + p.x, 0) / first.length));
+    const x = Math.min(SKY.right - 80, Math.max(SKY.left + 80, first.reduce((s, p) => s + p.x, 0) / first.length));
     const y = Math.min(...first.map((p) => p.y)) - 14;
     names.push([KIND_NAMES[k], x, y]);
   }

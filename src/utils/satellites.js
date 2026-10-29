@@ -12,15 +12,16 @@ export const SATELLITES = Object.freeze([
 
 export const SATELLITE_IDS = new Set(SATELLITES.map((s) => s.id));
 
-// The band above the field (map y < 0). The view's top bound (VIEW_BOUNDS.top) reaches it.
-export const SAT_BAND = Object.freeze({ top: -170, y: -80 });
+// The band along the bottom of the map, under the stars and over the city (Liz 2026-10-29: "put them
+// at the bottom"). The field ends above it (research/data-brokers/build/layout.js SKY.bottom).
+export const SAT_BAND = Object.freeze({ y: 900 });
 
-// Where each satellite hangs: evenly across the left 80% of the map (the zoom buttons sit over the
-// top-right corner), in two staggered rows. u: map units per CSS px, so the rows stay apart on screen.
+// Where each satellite hangs: evenly across the map in two staggered rows. u: map units per CSS px,
+// so the rows stay apart on screen at any zoom.
 export function satelliteBand(size = 1000, u = 1) {
   const n = SATELLITES.length;
   const k = Number.isFinite(u) && u > 0 ? u : 1;
-  return SATELLITES.map((s, i) => ({ ...s, index: i, x: size * (0.04 + (0.78 * i) / (n - 1)), y: SAT_BAND.y + (i % 2 ? 15 : -15) * k }));
+  return SATELLITES.map((s, i) => ({ ...s, index: i, x: size * (0.05 + (0.9 * i) / (n - 1)), y: SAT_BAND.y + (i % 2 ? 15 : -15) * k }));
 }
 
 // A broker with no opt-out on file and no California registration can't be filed with by anyone,

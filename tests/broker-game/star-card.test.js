@@ -101,7 +101,7 @@ describe('gesture math', () => {
   it('a pan is clamped to the view bounds', () => {
     expect(panView(view, rect, 5000, 0, VIEW_BOUNDS).x).toBe(0);
     expect(panView(view, rect, -5000, 0, VIEW_BOUNDS).x).toBe(700);
-    expect(panView(view, rect, 0, 5000, VIEW_BOUNDS).y).toBe(-470); // the satellites' band (top -170), then half a screen of sky above it
+    expect(panView(view, rect, 0, 5000, VIEW_BOUNDS).y).toBe(-300); // half a screen of sky above
   });
   it('a pinch zooms by the spread ratio about the fingers\' midpoint', () => {
     const before = [{ x: 116, y: 400 }, { x: 216, y: 400 }];

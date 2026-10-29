@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { computeLayout, KIND_NAMES } from '../../research/data-brokers/build/layout.js';
+import { computeLayout, KIND_NAMES, inSky, SKY, INNER_BOX, CY } from '../../research/data-brokers/build/layout.js';
 
 const root = join(import.meta.dirname, '../..');
 const map = JSON.parse(readFileSync(join(root, 'src/data/broker-map.json'), 'utf8'));
@@ -43,17 +43,12 @@ describe('computeLayout', () => {
     for (const [, x, y, r] of out.stars) for (const n of [x, y, r]) expect(Math.round(n * 10) / 10).toBe(n);
   });
 
-  it('buyers sit on the rim', () => {
-    const buyers = pick(isBuyer);
-    expect(buyers.length).toBeGreaterThan(0);
-    for (const [, x, y] of buyers) expect(Math.abs(Math.hypot(x - 500, y - 500) - 470)).toBeLessThan(0.6);
-  });
-
-  it('the first buyer in id order sits at -90 degrees (top)', () => {
-    const first = map.brokers.filter(isBuyer).map((b) => b.id).sort()[0];
-    const [, x, y] = byId.get(first);
-    expect(x).toBeCloseTo(500, 0);
-    expect(y).toBeCloseTo(30, 0);
+  it('buyers sit in rows, not a ring: government at the bottom (satellites), the rest along the top', () => {
+    const gov = map.brokers.filter((b) => isBuyer(b) && b.id.startsWith('us-')).map((b) => byId.get(b.id));
+    const others = map.brokers.filter((b) => isBuyer(b) && !b.id.startsWith('us-')).map((b) => byId.get(b.id));
+    expect(gov).toHaveLength(12);
+    for (const [, , y] of gov) expect(y).toBe(900);
+    for (const [, , y] of others) expect(y).toBe(26);
   });
 
   describe('the crowd as constellations (Liz 2026-10-24: "a ring instead of like... constellations")', () => {
@@ -61,11 +56,17 @@ describe('computeLayout', () => {
     const idx = new Map(out.stars.map((s, i) => [s[0], i]));
     const kindOf = new Map(map.brokers.map((b) => [b.id, b.kind[0] ?? '']));
 
-    it('is not a ring: crowd stars spread across the sky, a fifth or more inside r < 330', () => {
-      const ds = crowd.map((b) => dist(byId.get(b.id)));
-      for (const d of ds) expect(d).toBeLessThanOrEqual(440.5);
-      // The old ring had none in here; the centre is mostly hubs and their linked stars.
-      expect(ds.filter((d) => d < 330).length / ds.length).toBeGreaterThan(0.2);
+    it("is not a ring and not a circle: the field fills the map's width, inside its ragged edge", () => {
+      const pts = crowd.map((b) => byId.get(b.id));
+      for (const [, x, y] of pts) expect(inSky(x, y), `${x},${y}`).toBe(true);
+      // Liz 2026-10-29 "make the stars not be a circle": the corners of the sky have stars too.
+      const corner = (fx, fy) => pts.filter(([, x, y]) => fx(x) && fy(y)).length;
+      expect(corner((x) => x < 200, (y) => y < 250)).toBeGreaterThan(5);
+      expect(corner((x) => x > 800, (y) => y < 250)).toBeGreaterThan(5);
+      expect(corner((x) => x < 200, (y) => y > 600)).toBeGreaterThan(5);
+      expect(corner((x) => x > 800, (y) => y > 600)).toBeGreaterThan(5);
+      const xs = pts.map((p) => p[1]);
+      expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(850);
     });
 
     it('no two crowd stars sit closer than the star gap, and none on a hub', () => {
@@ -110,14 +111,16 @@ describe('computeLayout', () => {
     it('one name per named kind, inside the sky', () => {
       const kinds = new Set(crowd.map((b) => b.kind[0]).filter(Boolean));
       expect(out.names.map((m) => m[0]).sort()).toEqual([...kinds].map((k) => KIND_NAMES[k]).sort());
-      for (const [, x, y] of out.names) expect(Math.hypot(x - 500, y - 500)).toBeLessThanOrEqual(460);
+      for (const [, x, y] of out.names) expect(x >= SKY.left && x <= SKY.right && y >= SKY.top - 30 && y <= SKY.bottom).toBe(true);
     });
   });
 
-  it('linked brokers sit inside 330', () => {
+  // How far past the linked brokers' box a point sits (0 inside), and how close to its edge.
+  const boxOut = ([, x, y]) => Math.max(Math.abs(x - 500) - INNER_BOX.hx, Math.abs(y - CY) - INNER_BOX.hy);
+  it('linked brokers sit inside their box in the middle of the field', () => {
     const inner = pick((b) => !isBuyer(b) && linked.has(b.id));
     expect(inner.length).toBeGreaterThan(0);
-    for (const s of inner) expect(dist(s)).toBeLessThanOrEqual(330.1);
+    for (const s of inner) expect(boxOut(s)).toBeLessThanOrEqual(0.1);
   });
 
   describe('M1: hubs with their crowd as a nebula (controller ruling, mockup A)', () => {
@@ -144,8 +147,8 @@ describe('computeLayout', () => {
       expect(ds[Math.floor(ds.length / 2)]).toBeLessThanOrEqual(90);
     });
 
-    it('linked non-hubs do not pile on the r=330 clamp (<= 10% at r >= 315)', () => {
-      const edge = linkedNonHubs.filter((b) => dist(byId.get(b.id)) >= 315);
+    it('linked non-hubs do not pile on the box edge (<= 10% within 15 of it)', () => {
+      const edge = linkedNonHubs.filter((b) => boxOut(byId.get(b.id)) >= -15);
       expect(edge.length / linkedNonHubs.length).toBeLessThanOrEqual(0.1);
     });
 

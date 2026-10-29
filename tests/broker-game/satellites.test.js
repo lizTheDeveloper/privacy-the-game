@@ -69,20 +69,24 @@ describe('government satellites', () => {
     expect(satDimmed(satelliteLines(map, light({ bigCheck: all }))['us-usss'])).toBe(true);
   });
 
-  it('drawn above the field with initials only: no image, no link, no seal, no diamond', () => {
+  it('drawn below the field, over the city, with initials only: no image, no link, no seal, no diamond', () => {
     const svg = constellationSvg({ map, layout, lighting: light({}) });
     expect(svg.match(/class="sat[ "]/g)).toHaveLength(12);
     expect(svg.match(/data-sat="\d+"/g)).toHaveLength(12);
     expect(svg).not.toMatch(/<image|<a |href=|seal/i);
     expect(svg.match(/class="buyer"/g)).toHaveLength(6);
-    for (const s of satelliteBand()) expect(s.y).toBeLessThan(0);
-    expect(SAT_BAND.top).toBe(VIEW_BOUNDS.top);
+    // Liz 2026-10-29: at the bottom. Every star of the field sits above the band.
+    const fieldBottom = Math.max(...layout.stars.filter((st) => !st[0].startsWith('us-')).map((st) => st[2]));
+    for (const s of satelliteBand()) expect(s.y).toBeGreaterThan(fieldBottom + 30);
+    for (const s of satelliteBand()) expect(s.y).toBeLessThan(1000);
   });
 
   it('the satellite view shows the band', () => {
     const v = satelliteView(0.8);
+    expect(v.y + v.h).toBeGreaterThanOrEqual(SAT_BAND.y + 30);
     expect(v.y).toBeLessThanOrEqual(SAT_BAND.y - 30);
     expect(v.w).toBe(1000);
+    expect(VIEW_BOUNDS.panFull).toBe(true);
   });
 
   it('the card names the buyer, counts the lines, and links each broker by star index', () => {

@@ -318,7 +318,7 @@ describe('fix round 1: labels clear of the zoom buttons and the edges (ruling M5
   const lighting = brokerLighting(map, {}, T);
   const PX = 328;
   const STAGE_H = 628;
-  const CONTROLS = { w: 60, h: 160 };
+  const CONTROLS = { w: 60, h: 212 }; // four buttons since ↓ GOV (2026-10-29)
   const around = (id, w) => {
     const s = layout.stars.find((x) => x[0] === id);
     const h = (w * STAGE_H) / PX;

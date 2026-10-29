@@ -180,24 +180,32 @@ describe('constellationSvg', () => {
   it("a few lit stars are named even zoomed out; a DROP crowd of them is not", () => {
     const d = '2026-10-20';
     const few = brokerLighting(realMap, { missions: {}, brokerFiled: { 'people_search-fortify-web-forms': { since: d, lines: { spokeo: d, whitepages: d, beenverified: d } } } }, '2026-10-24');
-    const names = labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: few, px: 288 })).map((l) => l.text);
+    // A 360px phone zoomed right out (the map opens zoomed in on the lit stars). On a 320px phone the
+    // three sit too close together at this zoom since the sky stopped being a circle (2026-10-29).
+    const names = labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: few, px: 328 })).map((l) => l.text);
     expect(names).toEqual(expect.arrayContaining(['Spokeo', 'Whitepages', 'BeenVerified']));
     const crowd = brokerLighting(realMap, setResidency({ brokerFiled: { 'people_search-reclaim-stragglers': { since: d, lines: { drop: d } } } }, 'yes'), '2026-10-24');
     expect(labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: crowd, px: 288 })).every((l) => l.cls === 'hub-label')).toBe(true);
   });
 
-  it('Babel Street and Experian Information Solutions keep a full gap on a phone with DROP lit', () => {
-    // Their labels once stacked 2px apart and read as one name (phone opening view, 328px wide).
+  it('no two labels stack into one name on a phone with DROP lit, wherever the view is', () => {
+    // Babel Street and Experian Information Solutions once stacked 2px apart and read as one name.
+    // The sky was re-laid (2026-10-29), so check every hub's phone view (328px wide), not one pair.
     const lit = brokerLighting(realMap, setResidency({ brokerFiled: { 'people_search-reclaim-stragglers': { since: '2026-10-20', lines: { drop: '2026-10-20' } } } }, 'yes'), '2026-10-24');
-    const s = constellationSvg({ map: realMap, layout: realLayout, lighting: lit, view: { x: 0, y: 185.16, w: 416.88, h: 762.58 }, px: 328 });
-    const ls = labelsOf(s);
-    const babel = ls.find((l) => l.text === 'Babel Street');
-    const exp = ls.find((l) => l.text.startsWith('Experian Information'));
-    expect(babel && exp).toBeTruthy();
-    const f = (babel.box.bottom - babel.box.top) / LABEL_LINE_EM;
-    const gapY = Math.max(exp.box.top - babel.box.bottom, babel.box.top - exp.box.bottom);
-    const gapX = Math.max(exp.box.left - babel.box.right, babel.box.left - exp.box.right);
-    expect(Math.max(gapX, gapY)).toBeGreaterThanOrEqual(f * LABEL_CLEAR_EM - 1e-6);
+    const hubs = realMap.brokers.filter((b) => b.hub).map((b) => realLayout.stars.find((st) => st[0] === b.id));
+    let checked = 0;
+    for (const [, hx, hy] of hubs) {
+      const view = { x: hx - 208.44, y: hy - 381.29, w: 416.88, h: 762.58 };
+      const ls = labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: lit, view, px: 328 }));
+      for (let i = 0; i < ls.length; i++) for (let j = i + 1; j < ls.length; j++) {
+        const a = ls[i].box, b = ls[j].box;
+        const f = Math.min(a.bottom - a.top, b.bottom - b.top) / LABEL_LINE_EM;
+        const gap = Math.max(b.top - a.bottom, a.top - b.bottom, b.left - a.right, a.left - b.right);
+        expect(gap, `${ls[i].text} / ${ls[j].text}`).toBeGreaterThanOrEqual(f * LABEL_TIGHT_EM - 1e-6);
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
   });
 
   it('is one svg with a viewBox from the view and an accessible label', () => {

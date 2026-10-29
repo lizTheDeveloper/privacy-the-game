@@ -239,7 +239,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="in" aria-label="Zoom in">+</button>'
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="out" aria-label="Zoom out">−</button>'
     + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-zoom" data-dir="reset" aria-label="Reset the view">RESET</button>'
-    + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-sats" aria-label="Show the government satellites">↑ GOV</button>'
+    + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-sats" aria-label="Show the government satellites">↓ GOV</button>'
     + '</div></div>'
     + `<p class="constellation-pick" aria-live="polite">${selected ? esc(shortName(selected.name)) : ''}</p>`
     + starList(map, layout, lighting, selectedId, listOpen)

@@ -64,20 +64,22 @@ export function zoomViewBox(viewBox, factor, cx, cy, bounds = {}) {
   const clamp = (v, side, pad = 0) => (side >= size ? (size - side) / 2 : Math.min(size - side + side * pad, Math.max(-side * pad, v))) + 0;
   // The whole sky's width in view: centre it top to bottom (padY is for a zoomed-in view, so a star
   // near the rim can sit mid-screen; zoomed right out it only left an empty band).
-  // With a top above the field, the whole width may still pan up and down between it and the bottom.
-  const y2 = nw >= size ? (top < 0 ? clampY(py - (py - y) * k, nh, 0) : (size - nh) / 2 + 0) : clampY(py - (py - y) * k, nh, padY);
+  // panFull: at the whole width the view may still pan up and down within the map (a wide screen
+  // can't show the stars and the satellites' band at once); otherwise it's centred.
+  const y2 = nw >= size ? (bounds.panFull ? clampY(py - (py - y) * k, nh, 0) : (size - nh) / 2 + 0) : clampY(py - (py - y) * k, nh, padY);
   const out = { x: clamp(px - (px - x) * k, nw), y: y2, w: nw };
   if (h !== null) out.h = nh;
   return out;
 }
 
 // The map screen's view bounds: up to half a screen of sky past the top or bottom of the map.
-export const VIEW_BOUNDS = Object.freeze({ padY: 0.5, top: -170 });
+export const VIEW_BOUNDS = Object.freeze({ padY: 0.5, panFull: true });
 
-// The satellites' band, the whole width of the sky, top-aligned.
+// The satellites' band at the bottom, the whole width of the sky, bottom-aligned.
 export function satelliteView(ratio = 1) {
   const r = Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
-  return zoomViewBox({ x: 0, y: VIEW_BOUNDS.top, w: 1000, h: 1000 * r }, 1, 500, VIEW_BOUNDS.top, VIEW_BOUNDS);
+  const h = 1000 * r;
+  return zoomViewBox({ x: 0, y: 1000 - h, w: 1000, h }, 1, 500, 1000, VIEW_BOUNDS);
 }
 
 // Step zoom: widths 1000 -> 500 -> 250 and back, centred on the map point (cx, cy) and clamped
