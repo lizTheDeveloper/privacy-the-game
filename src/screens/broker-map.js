@@ -15,6 +15,9 @@ import { locationQuiz, QUIZ_CSS } from '../components/location-quiz.js';
 import { homeOf } from '../utils/broker-state.js';
 import { ladder } from '../utils/sky-ladder.js';
 import { ladderPanel, LADDER_CSS } from '../components/sky-ladder.js';
+import { satelliteCard, SATELLITE_CARD_CSS } from '../components/satellite-card.js';
+import { satelliteBand, satelliteLines } from '../utils/satellites.js';
+import { SKY_LADDER_DIALOGUE } from '../data/dialogue.js';
 
 const BACK = '<a class="back-link" href="#/district/reclamation">← THE RECLAMATION</a>';
 const BIG_CHECK_HASH = '#/reclamation/big-check';
@@ -88,6 +91,8 @@ const STYLE = `<style>
 ${TICK_CSS}
 ${QUIZ_CSS}
 ${LADDER_CSS}
+${SATELLITE_CARD_CSS}
+.constellation-sats-head{margin:10px 0 0;font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(0,229,255,0.6)}
 @media (min-width:900px){.constellation-wrap.has-side{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}}
 </style>`;
 
@@ -100,16 +105,20 @@ const LEGEND = [
   [swatch('<circle cx="9" cy="9" r="3" fill="#3a4256"/><circle cx="9" cy="9" r="6.5" fill="none" stroke="#00E5FF" stroke-width="1.2" stroke-dasharray="2 2"/>'), 'Credit frozen (still sells data)'],
   [swatch('<circle cx="9" cy="9" r="8" fill="#EDEFF3" opacity="0.25"/><circle cx="9" cy="9" r="3" fill="#3a4256"/>'), 'Opted out in this browser only', 'sweeps'],
   [swatch('<rect x="5" y="5" width="8" height="8" fill="none" stroke="#8a93a6" stroke-width="1.4" transform="rotate(45 9 9)"/>'), 'Buyers'],
+  [swatch('<rect x="1" y="7" width="5" height="4" fill="#22324a" stroke="#00E5FF" stroke-width=".8"/><rect x="12" y="7" width="5" height="4" fill="#22324a" stroke="#00E5FF" stroke-width=".8"/><rect x="6.5" y="6" width="5" height="6" rx="1" fill="#1d2433" stroke="#EDEFF3"/>'), 'Government buyer (a satellite)'],
+  [swatch('<line x1="3" y1="3" x2="15" y2="15" stroke="#EDEFF3" stroke-dasharray="3 4" opacity=".6"/>'), 'It buys from this broker (public record)'],
+  [swatch('<line x1="3" y1="3" x2="15" y2="15" stroke="#EDEFF3" stroke-dasharray="1 5" opacity=".3"/>'), 'Line cut: you opted out of that broker'],
+  [swatch('<line x1="3" y1="3" x2="15" y2="15" stroke="#FF2D9B" stroke-dasharray="3 4" opacity=".8"/>'), 'No known way out: no opt-out on file for that broker'],
   [swatch('<line x1="2" y1="14" x2="16" y2="4" stroke="#00E5FF" stroke-width="1.4" opacity=".6"/>'), 'A documented business link'],
   [swatch('<line x1="2" y1="12" x2="9" y2="6" stroke="#EDEFF3" stroke-width=".8" opacity=".45"/><line x1="9" y1="6" x2="16" y2="9" stroke="#EDEFF3" stroke-width=".8" opacity=".45"/><circle cx="9" cy="6" r="1.4" fill="#3a4256"/>'), 'Constellation: same kind of company, not a deal'],
 ];
 
 // The zoom buttons' corner, in CSS px (44px buttons, 8px inset, gaps): labels keep clear of it.
-const CONTROLS = { w: 60, h: 160 };
+const CONTROLS = { w: 60, h: 212 };
 // Under 360px of screen the buttons lie in a row along the bottom-right instead (see the CSS).
 const NARROW_VIEWPORT = 360;
 const GUTTER = 32;
-const CONTROLS_NARROW = { w: 3 * 44 + 2 * 6 + 20, h: 60, corner: 'bottom-right' };
+const CONTROLS_NARROW = { w: 4 * 44 + 3 * 6 + 20, h: 60, corner: 'bottom-right' };
 export const controlsFor = (stage) => (stage?.w > 0 && stage.w + GUTTER < NARROW_VIEWPORT ? CONTROLS_NARROW : CONTROLS);
 
 // The legend's "browser only" row describes stars the sweeps light; with no sweep members, none do.
@@ -166,7 +175,8 @@ function starList(map, layout, lighting, selectedId, open) {
   const reach = (b) => (Number.isFinite(b.reach) ? b.reach : 0);
   rows.sort((p, q) => reach(q.b) - reach(p.b) || (p.b.id < q.b.id ? -1 : 1));
   const items = rows.map(({ b, index, st }) => `<li><button type="button" class="constellation-star" data-action="select-star" data-star="${index}" aria-pressed="${b.id === selectedId ? 'true' : 'false'}">${esc(shortName(b.name))} <span style="color: rgba(237,239,243,0.5); font-size: 11px;">· ${STATE_WORD[st] ?? 'Not yet'}</span></button></li>`).join('');
-  return `${toggle}<ul class="constellation-stars">${items}</ul>`;
+  const sats = satelliteBand().map((sat) => `<li><button type="button" class="constellation-star" data-action="select-sat" data-sat="${sat.index}">${esc(sat.initials)} <span style="color: rgba(237,239,243,0.5); font-size: 11px;">· government buyer</span></button></li>`).join('');
+  return `${toggle}<ul class="constellation-stars">${items}</ul><p class="constellation-sats-head">GOVERNMENT BUYERS</p><ul class="constellation-stars">${sats}</ul>`;
 }
 
 // The loading and error states, shared with the Big Check (it reads the same file).
@@ -181,15 +191,15 @@ export function brokerDataStatusBlock(status) {
 export function renderBrokerMap(state, {
   status = 'idle', data = null, today = localDay(), selectedId = null, view = null, newlyLit = new Set(),
   stage = null, firstVisit = false, scoutLine = null, cardScoutLine = null, editingResidency = false, listOpen = false,
-  quiz = {}, rung = null, ladderOpen = false,
+  quiz = {}, rung = null, ladderOpen = false, selectedSat = null,
 } = {}) {
   const body = status === 'ready' && data
-    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen })
+    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen, selectedSat })
     : brokerDataStatusBlock(status);
   return `${renderHud(state)}${STYLE}<div class="screen broker-map">${BACK}${body}</div>`;
 }
 
-function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen }) {
+function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen, selectedSat }) {
   const lighting = brokerLighting(map, state, today);
   const ratio = stage?.w > 0 && stage?.h > 0 ? stage.h / stage.w : 1;
   const v = view ?? initialView(map, layout, lighting, ratio);
@@ -199,14 +209,20 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   const home = homeOf(state);
   const asking = home === null || editingResidency;
   const quizHtml = locationQuiz({ ...quiz, home, editing: editingResidency });
-  const open = Number.isInteger(rung) && rungs[rung] && !selectedId ? rungs[rung] : null;
+  const sat = Number.isInteger(selectedSat) && !selectedId && satelliteBand()[selectedSat] ? selectedSat : null;
+  const open = Number.isInteger(rung) && rungs[rung] && !selectedId && sat === null ? rungs[rung] : null;
   const shimmer = rungs.find((r) => r.kind === 'gpc')?.status === 'done' || open?.kind === 'gpc';
-  const svg = constellationSvg({ map, layout, lighting, selectedId, newlyLit, view: v, px: stage?.w ?? null, controls: controlsFor(stage), highlight: open ? open.starIds : null, shimmer });
+  const svg = constellationSvg({ map, layout, lighting, selectedId, newlyLit, view: v, px: stage?.w ?? null, controls: controlsFor(stage), highlight: open ? open.starIds : null, shimmer, selectedSat: sat });
   const selected = selectedId ? map.brokers.find((b) => b.id === selectedId) : null;
   // The tapped star's card: below the map on a phone, beside it from 900px.
   // The side column (desktop) or bottom sheet (phone) holds the star card or the ladder, never both.
+  const satScout = () => {
+    const info = satelliteLines(map, lighting)[satelliteBand()[sat].id];
+    return info.cut > 0 ? SKY_LADDER_DIALOGUE.firstCut : SKY_LADDER_DIALOGUE.satellites;
+  };
   const card = selected
     ? starCard(map, lighting, selectedId, state, { scoutLine: cardScoutLine })
+    : sat !== null ? satelliteCard(map, layout, lighting, sat, { scoutLine: satScout() })
     : ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state), top: asking ? quizHtml : '' });
   const height = stage?.h > 0 ? ` style="height:${Math.round(stage.h)}px"` : '';
   // Scout's line (the first visit's, else this visit's one-time line) floats over the top of the
@@ -218,11 +234,12 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   // Each half keeps to one line, so a phone never breaks "HUBS LIT" from its count.
   return `<h1 class="map-head">${fieldHeader(fieldCoverage(map, lighting)).split(' · ').map((part) => `<span class="nw">${esc(part)}</span>`).join(' · ')}</h1>`
     + '<p class="map-sub">estimated share of the field your opt-outs reach</p>'
-    + `<div class="constellation-wrap has-side${selected ? ' has-card' : ''}"><div class="map-col">`
+    + `<div class="constellation-wrap has-side${selected || sat !== null ? ' has-card' : ''}"><div class="map-col">`
     + `<div class="map-stage" tabindex="-1"${height}>${svg}${scout}<div class="constellation-controls">`
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="in" aria-label="Zoom in">+</button>'
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="out" aria-label="Zoom out">−</button>'
     + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-zoom" data-dir="reset" aria-label="Reset the view">RESET</button>'
+    + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-sats" aria-label="Show the government satellites">↑ GOV</button>'
     + '</div></div>'
     + `<p class="constellation-pick" aria-live="polite">${selected ? esc(shortName(selected.name)) : ''}</p>`
     + starList(map, layout, lighting, selectedId, listOpen)

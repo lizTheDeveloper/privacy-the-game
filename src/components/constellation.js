@@ -6,6 +6,7 @@
 
 import { isBuyer } from '../utils/broker-lighting.js';
 import { shortName } from '../utils/broker-view.js';
+import { SATELLITE_IDS, satelliteBand, satelliteLines, satDimmed } from '../utils/satellites.js';
 
 // Fill opacity of an amber (re-check due) star. It still counts in full; it just draws dimmer.
 export const RECHECK_OPACITY = 0.55;
@@ -61,6 +62,19 @@ const STYLE = `<style>
 .constellation--focus .stars>:not(.is-hl),.constellation--focus .figures,.constellation--focus .links{opacity:.22}
 .constellation .hl-ring{fill:none;stroke:${CYAN};stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:.85}
 .constellation .shimmer{fill:${PALE};opacity:.035}
+.constellation .beams,.constellation .sats{pointer-events:none}
+.constellation .beam{stroke:${PALE};stroke-width:1;stroke-dasharray:3 4;opacity:.38;vector-effect:non-scaling-stroke}
+.constellation .beam--noway{stroke:${MAGENTA};opacity:.5}
+.constellation .beam--cut{stroke:${PALE};stroke-dasharray:1 7;opacity:.1}
+.constellation .beam--sel{opacity:.85}
+.constellation .sat-body{fill:#1d2433;stroke:${PALE};stroke-width:1;vector-effect:non-scaling-stroke}
+.constellation .sat-panel{fill:#22324a;stroke:${CYAN};stroke-width:.8;vector-effect:non-scaling-stroke}
+.constellation .sat-dish{fill:none;stroke:${PALE};stroke-width:1;vector-effect:non-scaling-stroke}
+.constellation .sat-name{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;fill:${PALE};paint-order:stroke;stroke:${MIDNIGHT};stroke-linejoin:round;letter-spacing:.5px}
+.constellation .sat--dim{opacity:.35}
+.constellation .sat--sel .sat-body{stroke:${LIME}}
+.constellation .sat--sel .sat-name{fill:${LIME}}
+.constellation .sat-hit{cursor:pointer;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion: no-preference){
 .constellation .star--new,.constellation .glow,.constellation .burst,.constellation .selected{transform-box:fill-box;transform-origin:center}
 @keyframes rc-bloom{0%{transform:scale(0);opacity:0}55%{transform:scale(2.4);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -75,6 +89,8 @@ const STYLE = `<style>
 .constellation .star--tw{animation:rc-twinkle 5s ease-in-out infinite}
 .constellation .selected{animation:rc-select 1.6s ease-in-out infinite}
 .constellation .hl-ring{transform-box:fill-box;transform-origin:center;animation:rc-select 1.8s ease-in-out infinite}
+@keyframes rc-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-3px)}}
+.constellation .sat-drift{animation:rc-drift 7s ease-in-out infinite}
 @keyframes rc-shimmer{0%,100%{opacity:.02}50%{opacity:.07}}
 .constellation .shimmer{animation:rc-shimmer 6s ease-in-out infinite}
 }
@@ -171,7 +187,7 @@ function starState(broker, lighting) {
 // buttons) that labels keep clear of. Needs `px`.
 // highlight: star ids a selected ladder rung covers (they ring and the rest dim). shimmer: the
 // whole-sky Global Privacy Control layer (browser-wide, so it marks no star).
-export function constellationSvg({ map, layout, lighting, selectedId = null, newlyLit = new Set(), view = { x: 0, y: 0, w: 1000 }, px = null, controls = null, highlight = null, shimmer = false }) {
+export function constellationSvg({ map, layout, lighting, selectedId = null, newlyLit = new Set(), view = { x: 0, y: 0, w: 1000 }, px = null, controls = null, highlight = null, shimmer = false, selectedSat = null }) {
   const hl = new Set(highlight ?? []);
   const vx = Number.isFinite(view?.x) ? view.x : 0;
   const vy = Number.isFinite(view?.y) ? view.y : 0;
@@ -197,7 +213,8 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
     if (!Array.isArray(s)) return;
     const [id, x, y, r0] = s;
     const broker = byId.get(id);
-    if (!broker || pos.has(id) || ![x, y, r0].every(Number.isFinite)) return;
+    // The 12 government buyers are drawn as satellites above the field, not as stars.
+    if (!broker || pos.has(id) || SATELLITE_IDS.has(id) || ![x, y, r0].every(Number.isFinite)) return;
     const st = { id, index, x, y, r: Math.max(r0, minR), broker, state: starState(broker, lighting) };
     stars.push(st);
     pos.set(id, st);
@@ -403,6 +420,32 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
   const sel = selectedId === null ? null : pos.get(selectedId);
   if (sel) effects.push(`<circle class="selected" cx="${n(sel.x)}" cy="${n(sel.y)}" r="${n(sel.r + 6)}" fill="none" stroke="${PALE}" stroke-width="1.5"/>`);
 
+  // Government satellites: a band above the field, a beam down to each broker the record shows them
+  // buying from. Sized in screen pixels like the labels. Each hit carries its satellite's index.
+  const u = scale ? 1 / scale : vw / ASSUMED_PX;
+  // Only agencies the map has: a satellite with no record would have nothing to show.
+  const sats = satelliteBand(Number.isFinite(layout?.size) ? layout.size : 1000, u).filter((sat) => byId.has(sat.id));
+  const satLines = satelliteLines(map, lighting);
+  const beams = [];
+  const satMarks = [];
+  for (const sat of sats) {
+    const info = satLines[sat.id];
+    const selSat = selectedSat === sat.index;
+    for (const line of info.lines) {
+      const b = pos.get(line.broker.id);
+      if (!b) continue;
+      const cls = line.cut ? 'beam beam--cut' : line.way ? 'beam' : 'beam beam--noway';
+      beams.push(`<line class="${cls}${selSat ? ' beam--sel' : ''}" x1="${n(sat.x)}" y1="${n(sat.y + 6 * u)}" x2="${n(b.x)}" y2="${n(b.y)}"/>`);
+    }
+    const k = n(u);
+    satMarks.push(`<g class="sat${satDimmed(info) ? ' sat--dim' : ''}${selSat ? ' sat--sel' : ''}" transform="translate(${n(sat.x)} ${n(sat.y)}) scale(${k})"><g class="sat-drift">`
+      + '<rect class="sat-panel" x="-15" y="-3" width="8" height="6"/><rect class="sat-panel" x="7" y="-3" width="8" height="6"/>'
+      + '<line class="sat-dish" x1="-7" y1="0" x2="7" y2="0"/><rect class="sat-body" x="-4.5" y="-4.5" width="9" height="9" rx="1.5"/>'
+      + '<path class="sat-dish" d="M-3 -4.5 Q0 -10 3 -4.5"/>'
+      + `<text class="sat-name" x="0" y="15" font-size="9" text-anchor="middle">${esc(sat.initials)}</text></g></g>`);
+    hits.push(`<circle class="sat-hit" cx="${n(sat.x)}" cy="${n(sat.y + 4 * u)}" r="${n(HIT_PX * u)}" data-sat="${sat.index}" fill="transparent" pointer-events="all"/>`);
+  }
+
   const aria = `Map of data brokers: ${stars.length} companies, ${lit + amber} lit by your opt-outs (${amber} due for a re-check), ${none} with no opt-out`;
 
   // Hit circles sit on top and overlap in the dense crowd; the app resolves a tap with
@@ -414,10 +457,12 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
     + `<g class="names">${shownNames.filter((m) => !placed.some((q) => overlaps(m.box, q.box))).map((m) => `<text class="const-name" x="${n(m.x)}" y="${n(m.y)}" font-size="${n(nameSize)}" text-anchor="middle">${esc(m.text)}</text>`).join('')}</g>`
     + `<g class="figures">${figures.join('')}</g>`
     + `<g class="links">${links.join('')}</g>`
+    + `<g class="beams">${beams.join('')}</g>`
     + `<g class="stars">${glows.join('')}${marks.join('')}</g>`
     + `<g class="rings">${rings.join('')}${halos.join('')}</g>`
     + `<g class="effects">${effects.join('')}</g>`
     + `<g class="labels">${labels.join('')}</g>`
+    + `<g class="sats">${satMarks.join('')}</g>`
     + `<g class="hits">${hits.join('')}</g>`
     + '</svg>';
 }

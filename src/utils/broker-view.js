@@ -56,18 +56,29 @@ export function zoomViewBox(viewBox, factor, cx, cy, bounds = {}) {
   // padY: how far (as a share of the box's height) it may run past the map's top or bottom edge.
   // The sky and the skyline draw out there, so a star near the rim can still sit mid-screen.
   const padY = Number.isFinite(bounds.padY) ? bounds.padY : 0;
+  // top: the highest map y the view may show (the government satellites hang above the field, y < 0).
+  const top = Number.isFinite(bounds.top) ? Math.min(0, bounds.top) : 0;
+  const span = size - top;
+  const clampY = (v, side, pad) => (side >= span ? top + (span - side) / 2 : Math.min(size - side + side * pad, Math.max(top - side * pad, v))) + 0;
   // (+ 0 turns a -0 into 0.)
   const clamp = (v, side, pad = 0) => (side >= size ? (size - side) / 2 : Math.min(size - side + side * pad, Math.max(-side * pad, v))) + 0;
   // The whole sky's width in view: centre it top to bottom (padY is for a zoomed-in view, so a star
   // near the rim can sit mid-screen; zoomed right out it only left an empty band).
-  const y2 = nw >= size ? (size - nh) / 2 + 0 : clamp(py - (py - y) * k, nh, padY);
+  // With a top above the field, the whole width may still pan up and down between it and the bottom.
+  const y2 = nw >= size ? (top < 0 ? clampY(py - (py - y) * k, nh, 0) : (size - nh) / 2 + 0) : clampY(py - (py - y) * k, nh, padY);
   const out = { x: clamp(px - (px - x) * k, nw), y: y2, w: nw };
   if (h !== null) out.h = nh;
   return out;
 }
 
 // The map screen's view bounds: up to half a screen of sky past the top or bottom of the map.
-export const VIEW_BOUNDS = Object.freeze({ padY: 0.5 });
+export const VIEW_BOUNDS = Object.freeze({ padY: 0.5, top: -170 });
+
+// The satellites' band, the whole width of the sky, top-aligned.
+export function satelliteView(ratio = 1) {
+  const r = Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+  return zoomViewBox({ x: 0, y: VIEW_BOUNDS.top, w: 1000, h: 1000 * r }, 1, 500, VIEW_BOUNDS.top, VIEW_BOUNDS);
+}
 
 // Step zoom: widths 1000 -> 500 -> 250 and back, centred on the map point (cx, cy) and clamped
 // to the map (or to `bounds`, e.g. VIEW_BOUNDS). A width between steps goes to the next step.

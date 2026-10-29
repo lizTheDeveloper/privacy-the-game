@@ -435,7 +435,7 @@ export const SKY_LADDER_DIALOGUE = {
   quizGuessOff: "You've turned sharing off, so we haven't looked. Tap to guess from your internet connection, or just pick.",
   firstRung: 'Start with the big ones. Each of these covers a whole patch of sky at once.',
   dropElsewhere: "DROP only works for people who live in California. I'm showing you anyway, so you can see what one good law does.",
-  firstCut: "One line cut. They're still up there buying, but that broker can't sell them you any more.",
+  firstCut: "You've cut a line. They're still up there buying, but that broker can't sell them you any more.",
   satellites: "They're up there buying. You can't stop them buying, but you can stop the brokers selling them you.",
 };
 

@@ -34,8 +34,9 @@ import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, new
 import { guessFromWhoami } from './components/location-quiz.js';
 import { mapScoutLine, mapScoutTriggers, cardScoutLine, bigCheckScoutLine } from './utils/broker-scout.js';
 import { brokerLighting } from './utils/broker-lighting.js';
-import { litIds, initialView, withRatio, zoomViewBox, zoomView, zoomAnchor, nearestStarId, fitView, VIEW_BOUNDS } from './utils/broker-view.js';
+import { litIds, initialView, withRatio, zoomViewBox, zoomView, zoomAnchor, nearestStarId, fitView, satelliteView, VIEW_BOUNDS } from './utils/broker-view.js';
 import { ladder } from './utils/sky-ladder.js';
+import { SATELLITE_IDS, satelliteBand } from './utils/satellites.js';
 import { isTap, isWidest, keepStarInView, panView, pinchView, wheelView, wheelZooms, TAP_MAX_PX } from './utils/map-gestures.js';
 import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
@@ -106,6 +107,8 @@ let mapListOpen = false;
 // The sky ladder: the open rung (a list index) and whether the phone's sheet is pulled up. Memory only.
 let selectedRung = null;
 let ladderOpen = false;
+// The open government satellite's index (SATELLITES), or null. Memory only.
+let selectedSat = null;
 // When the player last saw the city map before this visit (Scout waves after a while away).
 let cityArrival;
 // The first-2FA hug was on screen this visit; it counts as seen once they leave.
@@ -183,7 +186,7 @@ const screens = {
       status: brokerDataStatus(), data, selectedId, view, newlyLit, stage: mapStage,
       firstVisit: mapFirstVisit && !mapScoutDismissed, editingResidency, listOpen: mapListOpen,
       quiz: { guess: guessFromWhoami(whoamiView), guessAllowed: guessAllowed(), guessStatus: whoamiView.status },
-      rung: selectedRung, ladderOpen,
+      rung: selectedRung, ladderOpen, selectedSat,
       scoutLine: mapScoutDismissed ? null : mapScout?.line ?? null,
       cardScoutLine: cardScout && cardScout.id === selectedId ? cardScout.line : null,
     });
@@ -307,6 +310,7 @@ function startScreenVisit(route) {
     mapListOpen = false;
     selectedRung = null;
     ladderOpen = false;
+    selectedSat = null;
     mapFirstVisit = false;
     mapScoutDismissed = false;
     mapScout = null;
@@ -368,17 +372,52 @@ function afterBrokerMapRender(renderFn, params) {
 
 // A tap on the sky selects the nearest star within a 44px target (24 css px) and opens its card.
 // A miss closes an open card; with no card open, a miss at the widest view zooms in on that point.
+// The layout without the 12 agencies' old star positions (they're drawn as satellites), indices kept.
+let skyLayoutCache = null;
+function skyLayout(layout) {
+  if (skyLayoutCache?.from !== layout) skyLayoutCache = { from: layout, value: { ...layout, stars: layout.stars.map((s) => (SATELLITE_IDS.has(s?.[0]) ? null : s)) } };
+  return skyLayoutCache.value;
+}
+
+// The satellite under a tap (map units; u = map units per CSS px, as the drawing scales them), or null.
+function satelliteAt(x, y, maxDist, u) {
+  let best = null;
+  let bestD = maxDist * maxDist;
+  for (const s of satelliteBand(1000, u)) {
+    const d = (s.x - x) ** 2 + (s.y + 4 * u - y) ** 2;
+    if (d <= bestD) { best = s.index; bestD = d; }
+  }
+  return best;
+}
+
+function openSat(index, returnTo) {
+  selectedSat = index;
+  selectedId = null;
+  selectedRung = null;
+  ladderOpen = false;
+  mapScoutDismissed = true;
+  cardReturn = returnTo;
+  renderCurrentRoute();
+  focusCard();
+}
+
 function tapSky(svg, clientX, clientY) {
   const data = brokerData();
   const ctm = svg.getScreenCTM?.();
   if (!data || !ctm || !ctm.a) return;
   const p = new DOMPoint(clientX, clientY).matrixTransform(ctm.inverse());
-  const id = nearestStarId(data.layout, p.x, p.y, (HIT_PX + 2) / ctm.a);
+  // A satellite first (they hang above the field), then the nearest drawn star.
+  const sat = satelliteAt(p.x, p.y, (HIT_PX + 2) / ctm.a, 1 / ctm.a);
+  if (sat !== null) {
+    openSat(sat, '.map-stage');
+    return;
+  }
+  const id = nearestStarId(skyLayout(data.layout), p.x, p.y, (HIT_PX + 2) / ctm.a);
   if (id) {
     openCard(id, selectedId ? cardReturn : '.map-stage');
     return;
   }
-  if (selectedId) {
+  if (selectedId || selectedSat !== null) {
     closeCard();
     return;
   }
@@ -398,9 +437,10 @@ const isPhone = () => !window.matchMedia?.('(min-width: 900px)').matches;
 
 function openCard(id, returnTo) {
   selectedId = id;
-  // One sheet at a time: a star's card replaces the ladder.
+  // One sheet at a time: a star's card replaces the ladder or a satellite's card.
   selectedRung = null;
   ladderOpen = false;
+  selectedSat = null;
   // Tapping a star is what Scout's first-visit note asks for; the note then gives the sky back.
   mapScoutDismissed = true;
   cardReturn = returnTo;
@@ -418,6 +458,7 @@ function openCard(id, returnTo) {
 function closeCard() {
   const back = cardReturn;
   selectedId = null;
+  selectedSat = null;
   cardReturn = null;
   cardScout = null;
   cardFocusPending = false;
@@ -647,6 +688,19 @@ function mapAction(action, el) {
     quizAction(action, el);
   } else if (LADDER_ACTIONS.has(action)) {
     ladderAction(action, el, data);
+  } else if (action === 'select-sat') {
+    const index = Number(el.dataset.sat);
+    if (Number.isInteger(index) && satelliteBand()[index]) openSat(index, `[data-action="select-sat"][data-sat="${index}"]`);
+  } else if (action === 'close-sat') {
+    const back = cardReturn;
+    selectedSat = null;
+    cardReturn = null;
+    renderCurrentRoute();
+    ((back && app.querySelector(back)) || app.querySelector('.map-stage'))?.focus({ preventScroll: true });
+  } else if (action === 'map-sats') {
+    view = satelliteView(mapStage ? mapStage.h / mapStage.w : 1);
+    renderCurrentRoute();
+    app.querySelector('[data-action="map-sats"]')?.focus();
   }
 }
 
@@ -783,7 +837,7 @@ function ladderAction(action, el, data) {
   }
 }
 
-const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', ...QUIZ_ACTIONS, ...LADDER_ACTIONS]);
+const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', 'select-sat', 'close-sat', 'map-sats', ...QUIZ_ACTIONS, ...LADDER_ACTIONS]);
 
 function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
   render(parseRoute(location.hash), cause);
@@ -1387,7 +1441,12 @@ app.addEventListener('keydown', (e) => {
     if (btn) { e.preventDefault(); btn.click(); }
     return;
   }
-  if (e.key === 'Escape' && selectedId && app.querySelector('.star-card')) {
+  if (e.key === 'Escape' && selectedRung !== null && app.querySelector('.sky-rung-card')) {
+    e.preventDefault();
+    app.querySelector('[data-action="close-rung"]')?.click();
+    return;
+  }
+  if (e.key === 'Escape' && (selectedId || selectedSat !== null) && app.querySelector('.star-card')) {
     // Straight to closeCard: a click on CLOSE could be swallowed by a tap's click window.
     e.preventDefault();
     swallowClickUntil = 0;

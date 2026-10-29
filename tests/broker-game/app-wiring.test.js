@@ -6,7 +6,7 @@ const src = readFileSync('src/app.js', 'utf8');
 
 describe('broker map wiring (source checks)', () => {
   it('Escape closes the card directly, not through a swallowable click', () => {
-    const i = src.indexOf("e.key === 'Escape' && selectedId");
+    const i = src.indexOf("e.key === 'Escape' && (selectedId || selectedSat !== null)");
     expect(i).toBeGreaterThan(-1);
     const block = src.slice(i, i + 400);
     expect(block).toContain('closeCard()');

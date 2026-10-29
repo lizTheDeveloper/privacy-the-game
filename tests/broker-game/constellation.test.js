@@ -209,8 +209,11 @@ describe('constellationSvg', () => {
   it('draws one mark per laid-out broker', () => {
     const circles = svg.match(/<circle class="star[ "]/g).length;
     const xs = svg.match(/<path class="star-x"/g).length;
-    const diamonds = svg.match(/<rect class="buyer"/g).length;
-    expect(circles + xs + diamonds).toBe(12);
+    const diamonds = (svg.match(/<rect class="buyer"/g) ?? []).length;
+    const sats = svg.match(/<g class="sat[ "]/g).length;
+    // The fixture's one buyer is ICE, a government buyer: drawn as a satellite, not a star.
+    expect(circles + xs + diamonds).toBe(11);
+    expect(sats).toBe(1);
   });
 
   it('lit, amber and dim stars get their class', () => {
@@ -246,13 +249,14 @@ describe('constellationSvg', () => {
     expect(x[0]).toMatch(/d="M[^"]+L[^"]+M[^"]+L[^"]+"/);
   });
 
-  it('a buyer is a diamond', () => {
-    const d = svg.match(/<rect class="buyer"[^>]*>/g);
-    expect(d).toHaveLength(1);
-    expect(d[0]).toMatch(/stroke="#8a93a6"/);
+  it('a buyer is a diamond; a government buyer is a satellite instead', () => {
+    expect(svg).not.toMatch(/<rect class="buyer"/);
+    expect(svg.match(/<g class="sat[ "][^>]*>/g)).toHaveLength(1);
+    const real = constellationSvg({ map: realMap, layout: realLayout, lighting: brokerLighting(realMap, {}, '2026-10-19') });
+    const d = real.match(/<rect class="buyer"[^>]*>/g);
+    expect(d).toHaveLength(6);
+    for (const tag of d) expect(tag).toMatch(/stroke="#8a93a6"[^>]*transform="rotate\(45 /);
     expect(d[0]).toMatch(/fill="none"/);
-    const [, x, y] = at('us-ice');
-    expect(d[0]).toContain(`rotate(45 ${x} ${y})`);
   });
 
   it('a frozen star gets the frozen ring', () => {
@@ -348,7 +352,7 @@ describe('constellationSvg', () => {
     const lay = { stars: [...layout.stars.filter((s) => s[0] !== 'acxiom'), ['not-in-map', 5, 5, 2]] };
     const s = constellationSvg({ map, layout: lay, lighting });
     const marks = s.match(/<circle class="star[ "]|<path class="star-x"|<rect class="buyer"/g).length;
-    expect(marks).toBe(11);
+    expect(marks).toBe(10); // 12 laid out, less acxiom, less ICE (a satellite); not-in-map never draws
     expect(s).not.toMatch(/cx="5" cy="5"/);
     // The link to the missing star goes too.
     expect(s.match(/<line class="link"/g)).toHaveLength(2);
@@ -408,7 +412,8 @@ describe('constellationSvg', () => {
     const ms = performance.now() - t0;
     expect(ms).toBeLessThan(200);
     const marks = s.match(/<circle class="star[ "]|<path class="star-x"|<rect class="buyer"/g).length;
-    expect(marks).toBe(realMap.brokers.length);
+    expect(marks).toBe(realMap.brokers.length - 12);
+    expect(s.match(/<g class="sat[ "]/g)).toHaveLength(12);
     expect(s.match(/<text class="hub-label"/g).length).toBeGreaterThanOrEqual(10);
     expect(s.match(/<line class="link"/g).length).toBeGreaterThan(0);
     expect(s).not.toMatch(/\bfilter="/);
@@ -466,9 +471,12 @@ describe('constellationSvg: tappable and zoomable', () => {
   it('every drawn star gets a hit circle keyed by its layout index, on top of everything', () => {
     const s = render({ selectedId: 'spokeo' });
     const hits = hitsOf(s);
-    expect(hits).toHaveLength(12);
+    // Every laid-out star but ICE (drawn as a satellite, with its own data-sat hit).
+    const ice = layout.stars.findIndex((st) => st[0] === 'us-ice');
+    expect(hits).toHaveLength(11);
     const idx = hits.map((h) => Number(h.match(/data-star="(\d+)"/)[1]));
-    expect(idx.sort((a, b) => a - b)).toEqual([...Array(12).keys()]);
+    expect(idx.sort((a, b) => a - b)).toEqual([...Array(12).keys()].filter((i) => i !== ice));
+    expect(s.match(/<circle class="sat-hit"[^>]*data-sat="1"/g)).toHaveLength(1);
     for (const h of hits) expect(h).toMatch(/fill="transparent" pointer-events="all"/);
     expect(s.indexOf('<circle class="star-hit"')).toBeGreaterThan(s.lastIndexOf('<text class="hub-label"'));
     // Only the hit layer takes pointer events.
@@ -584,8 +592,11 @@ describe('constellationSvg: links (controller ruling M3)', () => {
 
   it("a buyer's links stay faint", () => {
     expect(BUYER_LINK_OPACITY).toBeLessThanOrEqual(0.15);
-    const tag = linkTags(constellationSvg({ map: m, layout, lighting })).find((t) => t.includes(`x1="${bx}" y1="${by}"`));
-    expect(Number(tag.match(/opacity="([\d.]+)"/)[1])).toBeLessThanOrEqual(0.15);
+    // ICE is a satellite now: its purchase is a beam from the satellite, not a faint link from a diamond.
+    const mini = constellationSvg({ map: m, layout, lighting });
+    expect((linkTags(mini) ?? []).find((t) => t.includes(`x1="${bx}" y1="${by}"`))).toBeUndefined();
+    const buys = { ...map, links: [...map.links, { from: 'us-ice', to: 'hub-a', type: 'buys', tier: 'A', claim: 'c', sources: [{ url: 'a' }] }] };
+    expect(constellationSvg({ map: buys, layout, lighting })).toMatch(/<line class="beam[ "]/);
     // On the real map too.
     const buyers = new Set(realMap.brokers.filter((b) => b.kind.includes('buyer')).map((b) => b.id));
     const pts = new Set(realLayout.stars.filter((st) => buyers.has(st[0])).map((st) => `${st[1]},${st[2]}`));
@@ -606,10 +617,10 @@ describe('constellationSvg: links (controller ruling M3)', () => {
     expect(sel[0]).toMatch(/opacity="0.8"/);
     const [, ax, ay] = at('acxiom');
     expect(sel[0]).toContain(`x2="${ax}" y2="${ay}"`);
-    // Selecting the buyer brightens its faint link too.
-    const b = constellationSvg({ map: m, layout, lighting, selectedId: 'us-ice' }).match(/<line class="link link--selected"[^>]*>/g);
-    expect(b).toHaveLength(1);
-    expect(b[0]).toMatch(/opacity="0.8"/);
+    // Selecting a satellite brightens its beams.
+    const buys = { ...map, links: [...map.links, { from: 'us-ice', to: 'hub-a', type: 'buys', tier: 'A', claim: 'c', sources: [{ url: 'a' }] }] };
+    const b = constellationSvg({ map: buys, layout, lighting, selectedSat: 1 }).match(/<line class="beam[^"]*beam--sel"/g);
+    expect(b.length).toBeGreaterThan(0);
     expect(svg).not.toMatch(/link--selected/);
   });
 });
