@@ -30,11 +30,12 @@ import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-dat
 import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle } from './utils/interior-state.js';
 import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
-import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf } from './utils/broker-state.js';
+import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf, setPrescreen } from './utils/broker-state.js';
 import { guessFromWhoami } from './components/location-quiz.js';
 import { mapScoutLine, mapScoutTriggers, cardScoutLine, bigCheckScoutLine } from './utils/broker-scout.js';
 import { brokerLighting } from './utils/broker-lighting.js';
-import { litIds, initialView, withRatio, zoomViewBox, zoomView, zoomAnchor, nearestStarId, VIEW_BOUNDS } from './utils/broker-view.js';
+import { litIds, initialView, withRatio, zoomViewBox, zoomView, zoomAnchor, nearestStarId, fitView, VIEW_BOUNDS } from './utils/broker-view.js';
+import { ladder } from './utils/sky-ladder.js';
 import { isTap, isWidest, keepStarInView, panView, pinchView, wheelView, wheelZooms, TAP_MAX_PX } from './utils/map-gestures.js';
 import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
@@ -102,6 +103,9 @@ let cardScout = null;
 let bigCheckScout = null;
 let editingResidency = false;
 let mapListOpen = false;
+// The sky ladder: the open rung (a list index) and whether the phone's sheet is pulled up. Memory only.
+let selectedRung = null;
+let ladderOpen = false;
 // When the player last saw the city map before this visit (Scout waves after a while away).
 let cityArrival;
 // The first-2FA hug was on screen this visit; it counts as seen once they leave.
@@ -179,6 +183,7 @@ const screens = {
       status: brokerDataStatus(), data, selectedId, view, newlyLit, stage: mapStage,
       firstVisit: mapFirstVisit && !mapScoutDismissed, editingResidency, listOpen: mapListOpen,
       quiz: { guess: guessFromWhoami(whoamiView), guessAllowed: guessAllowed(), guessStatus: whoamiView.status },
+      rung: selectedRung, ladderOpen,
       scoutLine: mapScoutDismissed ? null : mapScout?.line ?? null,
       cardScoutLine: cardScout && cardScout.id === selectedId ? cardScout.line : null,
     });
@@ -300,6 +305,8 @@ function startScreenVisit(route) {
     newlyLit = [];
     editingResidency = false;
     mapListOpen = false;
+    selectedRung = null;
+    ladderOpen = false;
     mapFirstVisit = false;
     mapScoutDismissed = false;
     mapScout = null;
@@ -391,6 +398,9 @@ const isPhone = () => !window.matchMedia?.('(min-width: 900px)').matches;
 
 function openCard(id, returnTo) {
   selectedId = id;
+  // One sheet at a time: a star's card replaces the ladder.
+  selectedRung = null;
+  ladderOpen = false;
   // Tapping a star is what Scout's first-visit note asks for; the note then gives the sky back.
   mapScoutDismissed = true;
   cardReturn = returnTo;
@@ -635,6 +645,8 @@ function mapAction(action, el) {
     app.querySelector('[data-action="map-list"]')?.focus();
   } else if (QUIZ_ACTIONS.has(action)) {
     quizAction(action, el);
+  } else if (LADDER_ACTIONS.has(action)) {
+    ladderAction(action, el, data);
   }
 }
 
@@ -732,7 +744,41 @@ function quizAction(action, el) {
   app.querySelector('[data-action="change-home"]')?.focus();
 }
 
-const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', ...QUIZ_ACTIONS]);
+// The sky ladder: selecting a rung previews its stars (the camera fits them). Memory only, except
+// I DID THIS on OptOutPrescreen, which saves the day in the game. No track(), nothing in the URL.
+const LADDER_ACTIONS = new Set(['select-rung', 'close-rung', 'ladder-toggle', 'prescreen-did', 'prescreen-undo']);
+function ladderAction(action, el, data) {
+  if (action === 'select-rung') {
+    const index = Number(el.dataset.rung);
+    const rungs = data ? ladder(data.map, state, brokerLighting(data.map, state, localDay())) : [];
+    if (!rungs[index]) return;
+    selectedRung = index;
+    selectedId = null;
+    cardReturn = `[data-action="select-rung"][data-rung="${index}"]`;
+    view = fitView(data.layout, rungs[index].starIds, mapStage ? mapStage.h / mapStage.w : 1);
+    renderCurrentRoute();
+    app.querySelector('.sky-rung-card')?.focus({ preventScroll: true });
+  } else if (action === 'close-rung') {
+    const back = cardReturn;
+    selectedRung = null;
+    cardReturn = null;
+    renderCurrentRoute();
+    ((back && app.querySelector(back)) || app.querySelector('.sky-ladder-bar'))?.focus({ preventScroll: true });
+  } else if (action === 'ladder-toggle') {
+    if (selectedRung !== null) {
+      selectedRung = null;
+      ladderOpen = true;
+    } else ladderOpen = !ladderOpen;
+    renderCurrentRoute();
+    app.querySelector('.sky-ladder-bar')?.focus({ preventScroll: true });
+  } else if (action === 'prescreen-did' || action === 'prescreen-undo') {
+    setState(setPrescreen(state, action === 'prescreen-did' ? localDay() : null));
+    renderCurrentRoute();
+    app.querySelector('[data-action="prescreen-did"],[data-action="prescreen-undo"]')?.focus({ preventScroll: true });
+  }
+}
+
+const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', ...QUIZ_ACTIONS, ...LADDER_ACTIONS]);
 
 function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
   render(parseRoute(location.hash), cause);

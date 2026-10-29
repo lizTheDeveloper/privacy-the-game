@@ -54,7 +54,7 @@ describe('the location quiz', () => {
 
   it('the location never reaches track() or the URL from the quiz', () => {
     const app = readFileSync('src/app.js', 'utf8');
-    const quiz = app.slice(app.indexOf('function quizAction'), app.indexOf('const MAP_ACTIONS'));
+    const quiz = app.slice(app.indexOf('function quizAction'), app.indexOf('// The sky ladder: selecting a rung'));
     expect(quiz).not.toMatch(/track\(|navigate\(|location\.hash|captureError/);
   });
 });

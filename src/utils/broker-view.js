@@ -197,3 +197,20 @@ export function whatsLeft(map, lighting, n = 5) {
     .sort((a, b) => b.reach - a.reach || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
     .slice(0, n);
 }
+
+// A view that fits the given stars (a ladder rung's), with a margin: width 260–1000 map units at the
+// stage's h:w ratio. No stars in the layout fits the whole sky.
+export function fitView(layout, ids, ratio = 1) {
+  const r = Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+  const want = new Set(ids ?? []);
+  const pts = (Array.isArray(layout?.stars) ? layout.stars : []).filter((s) => Array.isArray(s) && want.has(s[0]) && Number.isFinite(s[1]) && Number.isFinite(s[2]));
+  if (!pts.length) return zoomViewBox({ x: 0, y: 500 - (1000 * r) / 2, w: 1000, h: 1000 * r }, 1, 500, 500, VIEW_BOUNDS);
+  const xs = pts.map((s) => s[1]);
+  const ys = pts.map((s) => s[2]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const M = 60;
+  const w = Math.min(1000, Math.max(260, x1 - x0 + 2 * M, (y1 - y0 + 2 * M) / r));
+  const cx = (x0 + x1) / 2;
+  const cy = (y0 + y1) / 2;
+  return zoomViewBox({ x: cx - w / 2, y: cy - (w * r) / 2, w, h: w * r }, 1, cx, cy, VIEW_BOUNDS);
+}

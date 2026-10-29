@@ -282,7 +282,20 @@
     "https://support.apple.com/en-us/102420": "curl 200 with a browser user agent, 2026-10-27 (URL updated in 06e7c2d)",
     "https://legal.epsilon.com/us/consumer-information": "curl 200 with a browser user agent, 2026-10-27 (URL updated in 06e7c2d)",
     "https://www.starbucks.com/terms/privacy-notice": "curl 200 with a browser user agent, 2026-10-27 (URL updated in 06e7c2d)",
-    "https://www.affirm.com/u/loans": "curl 200 with a browser user agent, 2026-10-27 (URL updated in 06e7c2d)"
+    "https://www.affirm.com/u/loans": "curl 200 with a browser user agent, 2026-10-27 (URL updated in 06e7c2d)",
+    "https://oag.ca.gov/privacy/ccpa": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://coag.gov/resources/colorado-privacy-act/": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://portal.ct.gov/ag/sections/privacy/the-connecticut-data-privacy-act": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://attorneygeneral.delaware.gov/fraud/personal-data-privacy-portal/frequently-asked-questions/": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://www.revisor.mn.gov/statutes/cite/325M.14": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://mca.legmt.gov/bills/mca/title_0300/chapter_0140/part_0280/section_0090/0300-0140-0280-0090.html": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://nebraskalegislature.gov/laws/statutes.php?statute=87-1111": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://gc.nh.gov/rsa/html/LII/507-H/507-H-6.htm": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://pub.njleg.gov/bills/2022/PL23/266_.HTM": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://www.doj.state.or.us/consumer-protection/id-theft-data-breaches/privacy/": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://statutes.capitol.texas.gov/Docs/BC/htm/BC.541.htm": "curl 200 (2026-10-29, sky ladder GPC law)",
+    "https://www.optoutprescreen.com/": "browser 200 2026-10-29 (Akamai refuses curl with 403); names Equifax, Experian, Innovis and TransUnion",
+    "https://consumer.ftc.gov/articles/what-know-about-prescreened-offers-credit-and-insurance": "browser 200 2026-10-29 (curl gets 404 from the FTC CDN)"
   },
   "dns": {
     "checked": "2026-10-08",

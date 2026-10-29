@@ -58,6 +58,9 @@ const STYLE = `<style>
 .constellation .hub-label{font-weight:700}
 .constellation .star-hit{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .constellation .burst{opacity:0}
+.constellation--focus .stars>:not(.is-hl),.constellation--focus .figures,.constellation--focus .links{opacity:.22}
+.constellation .hl-ring{fill:none;stroke:${CYAN};stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:.85}
+.constellation .shimmer{fill:${PALE};opacity:.035}
 @media (prefers-reduced-motion: no-preference){
 .constellation .star--new,.constellation .glow,.constellation .burst,.constellation .selected{transform-box:fill-box;transform-origin:center}
 @keyframes rc-bloom{0%{transform:scale(0);opacity:0}55%{transform:scale(2.4);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -71,6 +74,9 @@ const STYLE = `<style>
 .constellation .glow--hub{animation:rc-twinkle 4.2s ease-in-out infinite}
 .constellation .star--tw{animation:rc-twinkle 5s ease-in-out infinite}
 .constellation .selected{animation:rc-select 1.6s ease-in-out infinite}
+.constellation .hl-ring{transform-box:fill-box;transform-origin:center;animation:rc-select 1.8s ease-in-out infinite}
+@keyframes rc-shimmer{0%,100%{opacity:.02}50%{opacity:.07}}
+.constellation .shimmer{animation:rc-shimmer 6s ease-in-out infinite}
 }
 </style>`;
 
@@ -163,7 +169,10 @@ function starState(broker, lighting) {
 
 // `controls`: { w, h } in CSS px, a block in the top-right corner of the drawn SVG (the zoom
 // buttons) that labels keep clear of. Needs `px`.
-export function constellationSvg({ map, layout, lighting, selectedId = null, newlyLit = new Set(), view = { x: 0, y: 0, w: 1000 }, px = null, controls = null }) {
+// highlight: star ids a selected ladder rung covers (they ring and the rest dim). shimmer: the
+// whole-sky Global Privacy Control layer (browser-wide, so it marks no star).
+export function constellationSvg({ map, layout, lighting, selectedId = null, newlyLit = new Set(), view = { x: 0, y: 0, w: 1000 }, px = null, controls = null, highlight = null, shimmer = false }) {
+  const hl = new Set(highlight ?? []);
   const vx = Number.isFinite(view?.x) ? view.x : 0;
   const vy = Number.isFinite(view?.y) ? view.y : 0;
   const vw = Number.isFinite(view?.w) && view.w > 0 ? view.w : 1000;
@@ -274,27 +283,28 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
 
     if (hub) sky.push(`<circle class="nebula" cx="${cx}" cy="${cy}" r="${n(70 + r * 6)}" fill="url(#${state === 'lit' || state === 'amber' ? 'rc-neb-lit' : 'rc-neb'})"/>`);
 
+    const hk = hl.has(s.id) ? ' is-hl' : '';
     if (state === 'buyer') {
-      marks.push(`<rect class="buyer" x="${n(x - r)}" y="${n(y - r)}" width="${n(2 * r)}" height="${n(2 * r)}" fill="none" stroke="${BUYER}" stroke-width="1.2" transform="rotate(45 ${cx} ${cy})"/>`);
+      marks.push(`<rect class="buyer${hk}" x="${n(x - r)}" y="${n(y - r)}" width="${n(2 * r)}" height="${n(2 * r)}" fill="none" stroke="${BUYER}" stroke-width="1.2" transform="rotate(45 ${cx} ${cy})"/>`);
     } else if (state === 'no-opt-out') {
       none += 1;
       const k = r + 1;
-      marks.push(`<path class="star-x" d="M${n(x - k)} ${n(y - k)}L${n(x + k)} ${n(y + k)}M${n(x + k)} ${n(y - k)}L${n(x - k)} ${n(y + k)}" stroke="${MAGENTA}" stroke-width="1.8" stroke-linecap="round" fill="none"/>`);
+      marks.push(`<path class="star-x${hk}" d="M${n(x - k)} ${n(y - k)}L${n(x + k)} ${n(y + k)}M${n(x + k)} ${n(y - k)}L${n(x - k)} ${n(y + k)}" stroke="${MAGENTA}" stroke-width="1.8" stroke-linecap="round" fill="none"/>`);
     } else if (state === 'lit') {
       lit += 1;
       const g = hub ? ' glow--hub' : '';
       const gn = d === undefined ? '' : ' glow--new';
-      glows.push(`<circle class="glow${g}${gn}" cx="${cx}" cy="${cy}" r="${n(Math.max(7, r * 3.2))}" fill="url(#rc-glow)"${anim}/>`);
-      marks.push(`<circle class="star star--lit${d === undefined ? '' : ' star--new'}" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${LIME}"${anim}/>`);
+      glows.push(`<circle class="glow${g}${gn}${hk}" cx="${cx}" cy="${cy}" r="${n(Math.max(7, r * 3.2))}" fill="url(#rc-glow)"${anim}/>`);
+      marks.push(`<circle class="star star--lit${d === undefined ? '' : ' star--new'}${hk}" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${LIME}"${anim}/>`);
       if (d !== undefined) effects.push(`<circle class="burst" cx="${cx}" cy="${cy}" r="${n(r + 2)}" fill="none" stroke="${LIME}" stroke-width="1"${anim}/>`);
     } else if (state === 'amber') {
       amber += 1;
-      marks.push(`<circle class="star star--amber" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${AMBER}" fill-opacity="${RECHECK_OPACITY}"/>`);
+      marks.push(`<circle class="star star--amber${hk}" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${AMBER}" fill-opacity="${RECHECK_OPACITY}"/>`);
     } else {
       const h = hashId(s.id);
       const tw = h % TWINKLE_EVERY === 0;
       const twStyle = tw ? ` style="animation-delay:-${(h >>> 8) % 5000}ms;animation-duration:${4000 + ((h >>> 4) % 3000)}ms"` : '';
-      marks.push(`<circle class="star star--dim${tw ? ' star--tw' : ''}" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${DIM_TINTS[(h >>> 3) % DIM_TINTS.length]}"${twStyle}/>`);
+      marks.push(`<circle class="star star--dim${tw ? ' star--tw' : ''}${hk}" cx="${cx}" cy="${cy}" r="${n(r)}" fill="${DIM_TINTS[(h >>> 3) % DIM_TINTS.length]}"${twStyle}/>`);
     }
 
     if (hub || s.id === selId || (nameStars && inView(s))) wanted.push(s);
@@ -388,6 +398,8 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
     if (halo.has(s.id)) halos.push(`<circle class="halo" cx="${n(s.x)}" cy="${n(s.y)}" r="${n(s.r + 4)}" fill="${PALE}" opacity="0.12"/>`);
   }
 
+  for (const s of stars) if (hl.has(s.id)) effects.push(`<circle class="hl-ring" cx="${n(s.x)}" cy="${n(s.y)}" r="${n(s.r + 3.5)}"/>`);
+
   const sel = selectedId === null ? null : pos.get(selectedId);
   if (sel) effects.push(`<circle class="selected" cx="${n(sel.x)}" cy="${n(sel.y)}" r="${n(sel.r + 6)}" fill="none" stroke="${PALE}" stroke-width="1.5"/>`);
 
@@ -395,9 +407,9 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
 
   // Hit circles sit on top and overlap in the dense crowd; the app resolves a tap with
   // nearestStar (broker-view.js) on the tap point, not with whichever circle is uppermost.
-  return `<svg class="constellation" viewBox="${n(vx)} ${n(vy)} ${n(vw)} ${n(vh)}" role="img" aria-label="${esc(aria)}" xmlns="http://www.w3.org/2000/svg">${STYLE}${DEFS}`
+  return `<svg class="constellation${hl.size ? ' constellation--focus' : ''}" viewBox="${n(vx)} ${n(vy)} ${n(vw)} ${n(vh)}" role="img" aria-label="${esc(aria)}" xmlns="http://www.w3.org/2000/svg">${STYLE}${DEFS}`
     // A faint Milky Way band across the sky: a soft gradient, never points that could pass for stars.
-    + `<g class="sky"><rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#rc-sky)"/><ellipse class="milky" cx="520" cy="470" rx="760" ry="150" transform="rotate(-24 520 470)" fill="url(#rc-milky)"/><ellipse class="milky" cx="430" cy="530" rx="420" ry="70" transform="rotate(-21 430 530)" fill="url(#rc-milky)"/>${sky.join('')}</g>`
+    + `<g class="sky"><rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#rc-sky)"/><ellipse class="milky" cx="520" cy="470" rx="760" ry="150" transform="rotate(-24 520 470)" fill="url(#rc-milky)"/><ellipse class="milky" cx="430" cy="530" rx="420" ry="70" transform="rotate(-21 430 530)" fill="url(#rc-milky)"/>${shimmer ? '<rect class="shimmer" x="-1000" y="-1000" width="3000" height="3000"/>' : ''}${sky.join('')}</g>`
     + `<g class="skyline" transform="translate(${n(vx)} ${n(vy + vh)}) scale(${n(vw / 1000)})"><path d="${SKYLINE.body}" fill="url(#rc-city)" stroke="${CYAN}" stroke-opacity=".35" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="${SKYLINE.windows}" fill="${LIME}" opacity=".55"/></g>`
     + `<g class="names">${shownNames.filter((m) => !placed.some((q) => overlaps(m.box, q.box))).map((m) => `<text class="const-name" x="${n(m.x)}" y="${n(m.y)}" font-size="${n(nameSize)}" text-anchor="middle">${esc(m.text)}</text>`).join('')}</g>`
     + `<g class="figures">${figures.join('')}</g>`

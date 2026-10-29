@@ -65,7 +65,9 @@ describe('the sky ladder', () => {
   it('GPC text by state', () => {
     const must = Object.keys(GPC_STATES);
     expect(must.length).toBeGreaterThan(0);
-    expect(byId(rungs(setHome({}, must[0])), 'gpc').text).toMatch(/must honor this in/);
+    expect(byId(rungs(setHome({}, 'US-CO')), 'gpc').text).toMatch(/Colorado requires/);
+    expect(byId(rungs(setHome({}, 'US-TX')), 'gpc').text).toMatch(/already handle these signals for other states/);
+    expect(must).not.toContain('US-MD');
     const not = ['US-AL', 'US-MS', 'US-WY'].find((s) => !must.includes(s));
     expect(byId(rungs(setHome({}, not)), 'gpc').text).toMatch(/don't have to honor/);
   });

@@ -42,7 +42,7 @@ export function ladder(map, state, lighting, checklists = BROKER_CHECKLISTS) {
   const gpc = {
     id: 'gpc', kind: 'gpc', label: LADDER_COPY.gpc.label, mission: GPC_MISSION, starIds: [], count: null,
     status: gpcDone ? 'done' : 'todo',
-    text: fill(Object.hasOwn(GPC_STATES, home ?? '') ? LADDER_COPY.gpc.must : LADDER_COPY.gpc.may, { state: stateName }),
+    text: Object.hasOwn(GPC_STATES, home ?? '') ? GPC_STATES[home].line : LADDER_COPY.gpc.may,
     doneOn: gpcDone && typeof gpcRec.completedAt === 'string' ? gpcRec.completedAt.slice(0, 10) : null,
   };
 

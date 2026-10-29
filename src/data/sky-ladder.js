@@ -33,10 +33,31 @@ export const GPC_DONE = Object.freeze(['completed', 'already-done']);
 export const DROP_MISSION = 'people_search-reclaim-stragglers';
 export const DAA_MISSION = 'ad_trackers-fortify-bulk';
 
-// States whose law makes businesses honor a browser opt-out signal like GPC, each with the
-// official page that says so (research 2026-10-29; every url is in verified-urls.json).
-// { since: first day in force, url, line: a sentence the player sees }.
-export const GPC_STATES = Object.freeze({});
+// States whose law, in force now, makes businesses honor a browser opt-out signal like GPC, each
+// with the official page that says so (research 2026-10-29; every url is in verified-urls.json).
+// Texas and Nebraska only bind businesses that already honor the signals for other states, and
+// their lines say so. Maryland's law makes the signal optional, so it isn't here.
+// { since: first day in force, url, line: the sentence the player sees }.
+export const GPC_STATES = Object.freeze({
+  'US-CA': Object.freeze({ since: '2023-01-01', url: "https://oag.ca.gov/privacy/ccpa", line: "California requires covered businesses to honor a Global Privacy Control signal as a request to stop selling or sharing your data." }),
+  'US-CO': Object.freeze({ since: '2024-07-01', url: "https://coag.gov/resources/colorado-privacy-act/", line: "Since July 2024, Colorado requires businesses to accept opt-outs sent by signals like Global Privacy Control." }),
+  'US-CT': Object.freeze({ since: '2025-01-01', url: "https://portal.ct.gov/ag/sections/privacy/the-connecticut-data-privacy-act", line: "Connecticut requires businesses covered by its privacy law to honor opt-out signals like Global Privacy Control." }),
+  'US-DE': Object.freeze({ since: '2026-01-01', url: "https://attorneygeneral.delaware.gov/fraud/personal-data-privacy-portal/frequently-asked-questions/", line: "Since 2026, Delaware requires businesses to treat universal opt-out signals as valid requests." }),
+  'US-MN': Object.freeze({ since: '2025-07-31', url: "https://www.revisor.mn.gov/statutes/cite/325M.14", line: "Minnesota law requires businesses to let you opt out of data sales and targeted ads with a browser opt-out signal." }),
+  'US-MT': Object.freeze({ since: '2025-01-01', url: "https://mca.legmt.gov/bills/mca/title_0300/chapter_0140/part_0280/section_0090/0300-0140-0280-0090.html", line: "Montana law requires businesses to accept browser opt-out signals for data sales and targeted ads." }),
+  'US-NE': Object.freeze({ since: '2025-01-01', url: "https://nebraskalegislature.gov/laws/statutes.php?statute=87-1111", line: "Nebraska lets you opt out with a browser setting; businesses that already honor these signals for other states must honor yours." }),
+  'US-NH': Object.freeze({ since: '2025-01-01', url: "https://gc.nh.gov/rsa/html/LII/507-H/507-H-6.htm", line: "New Hampshire requires businesses to honor opt-out signals for data sales and targeted ads." }),
+  'US-NJ': Object.freeze({ since: '2025-07-15', url: "https://pub.njleg.gov/bills/2022/PL23/266_.HTM", line: "New Jersey requires businesses to let you opt out of data sales and targeted ads with a universal opt-out signal." }),
+  'US-OR': Object.freeze({ since: '2026-01-01', url: "https://www.doj.state.or.us/consumer-protection/id-theft-data-breaches/privacy/", line: "Since 2026, Oregon businesses must honor opt-out signals like Global Privacy Control." }),
+  'US-TX': Object.freeze({ since: '2025-01-01', url: "https://statutes.capitol.texas.gov/Docs/BC/htm/BC.541.htm", line: "Texas lets you opt out with a browser setting; businesses that already handle these signals for other states must honor it." }),
+});
+
+// Where to do it. optoutprescreen.com is the credit reporting companies' own site (it names all four);
+// the FTC page explains it. Both checked in a browser 2026-10-29 (curl is refused by both).
+export const PRESCREEN_LINKS = Object.freeze([
+  Object.freeze({ label: 'OptOutPrescreen.com (opt out for five years, or start the permanent one)', url: 'https://www.optoutprescreen.com/' }),
+  Object.freeze({ label: 'The FTC on prescreened offers', url: 'https://consumer.ftc.gov/articles/what-know-about-prescreened-offers-credit-and-insurance' }),
+]);
 
 // Player-facing copy for the ladder. {state} is the player's state name; {count} a number.
 export const LADDER_COPY = Object.freeze({
@@ -50,7 +71,6 @@ export const LADDER_COPY = Object.freeze({
   gpc: Object.freeze({
     label: 'Global Privacy Control',
     count: 'every website, this browser',
-    must: 'Companies must honor this in {state}.',
     may: "Companies don't have to honor this where you live, but many do.",
     body: 'One browser setting that tells every site you visit: do not sell or share my data. It stops future selling; it deletes nothing.',
   }),

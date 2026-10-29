@@ -13,6 +13,8 @@ import { MISSIONS } from '../data/missions.js';
 import { localDay } from '../state.js';
 import { locationQuiz, QUIZ_CSS } from '../components/location-quiz.js';
 import { homeOf } from '../utils/broker-state.js';
+import { ladder } from '../utils/sky-ladder.js';
+import { ladderPanel, LADDER_CSS } from '../components/sky-ladder.js';
 
 const BACK = '<a class="back-link" href="#/district/reclamation">← THE RECLAMATION</a>';
 const BIG_CHECK_HASH = '#/reclamation/big-check';
@@ -85,6 +87,8 @@ const STYLE = `<style>
 .map-big-check:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 ${TICK_CSS}
 ${QUIZ_CSS}
+${LADDER_CSS}
+@media (min-width:900px){.constellation-wrap.has-side{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}}
 </style>`;
 
 const swatch = (inner) => `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">${inner}</svg>`;
@@ -177,22 +181,28 @@ export function brokerDataStatusBlock(status) {
 export function renderBrokerMap(state, {
   status = 'idle', data = null, today = localDay(), selectedId = null, view = null, newlyLit = new Set(),
   stage = null, firstVisit = false, scoutLine = null, cardScoutLine = null, editingResidency = false, listOpen = false,
-  quiz = {},
+  quiz = {}, rung = null, ladderOpen = false,
 } = {}) {
   const body = status === 'ready' && data
-    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz })
+    ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen })
     : brokerDataStatusBlock(status);
   return `${renderHud(state)}${STYLE}<div class="screen broker-map">${BACK}${body}</div>`;
 }
 
-function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz }) {
+function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen }) {
   const lighting = brokerLighting(map, state, today);
   const ratio = stage?.w > 0 && stage?.h > 0 ? stage.h / stage.w : 1;
   const v = view ?? initialView(map, layout, lighting, ratio);
-  const svg = constellationSvg({ map, layout, lighting, selectedId, newlyLit, view: v, px: stage?.w ?? null, controls: controlsFor(stage) });
+  const rungs = ladder(map, state, lighting);
+  const open = Number.isInteger(rung) && rungs[rung] && !selectedId ? rungs[rung] : null;
+  const shimmer = rungs.find((r) => r.kind === 'gpc')?.status === 'done' || open?.kind === 'gpc';
+  const svg = constellationSvg({ map, layout, lighting, selectedId, newlyLit, view: v, px: stage?.w ?? null, controls: controlsFor(stage), highlight: open ? open.starIds : null, shimmer });
   const selected = selectedId ? map.brokers.find((b) => b.id === selectedId) : null;
   // The tapped star's card: below the map on a phone, beside it from 900px.
-  const card = selected ? starCard(map, lighting, selectedId, state, { scoutLine: cardScoutLine }) : '';
+  // The side column (desktop) or bottom sheet (phone) holds the star card or the ladder, never both.
+  const card = selected
+    ? starCard(map, lighting, selectedId, state, { scoutLine: cardScoutLine })
+    : ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state) });
   const height = stage?.h > 0 ? ` style="height:${Math.round(stage.h)}px"` : '';
   // Scout's line (the first visit's, else this visit's one-time line) floats over the top of the
   // sky (dismissable), so the map keeps the phone's height; it leaves the zoom buttons' corner clear.
@@ -203,7 +213,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   // Each half keeps to one line, so a phone never breaks "HUBS LIT" from its count.
   return `<h1 class="map-head">${fieldHeader(fieldCoverage(map, lighting)).split(' · ').map((part) => `<span class="nw">${esc(part)}</span>`).join(' · ')}</h1>`
     + '<p class="map-sub">estimated share of the field your opt-outs reach</p>'
-    + `<div class="constellation-wrap${card ? ' has-card' : ''}"><div class="map-col">`
+    + `<div class="constellation-wrap has-side${selected ? ' has-card' : ''}"><div class="map-col">`
     + `<div class="map-stage" tabindex="-1"${height}>${svg}${scout}<div class="constellation-controls">`
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="in" aria-label="Zoom in">+</button>'
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="out" aria-label="Zoom out">−</button>'
