@@ -16,6 +16,7 @@ const ROUTES = [
   { pattern: /^#\/reclamation\/map$/, screen: 'broker-map', params: () => ({}) },
   { pattern: /^#\/reclamation\/big-check$/, screen: 'big-check', params: () => ({}) },
   { pattern: /^#\/saints$/, screen: 'saints', params: () => ({}) },
+  { pattern: /^#\/prism$/, screen: 'prism', params: () => ({}) },
   { pattern: /^#\/garage$/, screen: 'garage', params: () => ({}) },
   { pattern: /^#\/timeline$/, screen: 'timeline', params: () => ({}) },
   { pattern: /^#\/quiz\/phishing$/, screen: 'phishing', params: () => ({}) },

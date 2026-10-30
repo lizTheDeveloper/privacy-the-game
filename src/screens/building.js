@@ -1,6 +1,7 @@
 // A building's interior: a cutaway of its floors, top to bottom. Roof (the
 // player's own checkup), the company's records desk, the ground-floor entries,
 // and a saint's alcove. Spec: docs/superpowers/specs/2026-10-20-building-interiors-design.md
+import { prismTag } from '../components/prism-tag.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
@@ -329,7 +330,7 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
     ${renderHud(state)}
     <div class="interior" data-building="${esc(accountId)}">
       <a class="btn-secondary interior-back" href="#/district/${esc(account.district)}">← ${esc((district?.name ?? 'DISTRICT').toUpperCase())}</a>
-      <div class="interior-title">${esc(account.name.toUpperCase())}</div>
+      <div class="interior-title">${esc(account.name.toUpperCase())}${prismTag(accountId)}</div>
       <div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
       ${meter(state, accountId, rows, now)}
       ${scout}

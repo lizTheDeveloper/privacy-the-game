@@ -93,7 +93,7 @@ export function eventHasOnlyThirdPartyFrames(event, pageOrigin) {
 // title. Inside a building or the saints gallery those name the player's
 // devices, the building opened and the saints honored: drop them before an
 // error report is built. Lean strict: any labelled element goes too.
-const PRIVATE_UI = /aria-label=|title=|device-x|devices?-input|building-link|candle-btn|interior|saint|broker-checklist|constellation|star-card|residency|big-check|sky-ladder|rung|satellite/;
+const PRIVATE_UI = /aria-label=|title=|device-x|devices?-input|building-link|candle-btn|interior|saint|broker-checklist|constellation|star-card|residency|big-check|sky-ladder|rung|satellite|prism/;
 
 export function isPrivateBreadcrumb(b) {
   if (!b || typeof b.category !== 'string' || !b.category.startsWith('ui.')) return false;

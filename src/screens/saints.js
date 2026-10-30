@@ -40,6 +40,7 @@ function card(state, s) {
         <div class="alcove-tribute"><span>Scout: “${esc(s.tribute)}”</span></div>
         <details class="saint-story" data-fold="saint-story-${esc(s.id)}" data-open-desktop><summary>Their story</summary><div class="alcove-story">${esc(s.story)}</div>
         ${sources(s.sources)}</details>
+        ${s.id === 'snowden' ? '<a class="saint-prism" href="#/prism" style="display: inline-flex; align-items: center; min-height: 44px; margin: 4px 0; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #FF2D9B; text-decoration: none;">◈ PRISM MAP →</a>' : ''}
         ${renderCandle(state, s)}
       </div>`;
 }

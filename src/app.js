@@ -22,6 +22,7 @@ import { renderCityMap } from './screens/city-map.js';
 import { renderDistrict } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
 import { renderSaints } from './screens/saints.js';
+import { renderPrism } from './screens/prism.js';
 import { renderBrokerMap } from './screens/broker-map.js';
 import { renderBigCheck } from './screens/big-check.js';
 import { initDecks, deckPositions, openFolds, restoreFolds, applyOpenDesktop, recordHandToggle, desktopFoldKey, rectOnScreen } from './components/deck.js';
@@ -166,6 +167,7 @@ const screens = {
   }),
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
+  prism: () => renderPrism(state),
   'broker-map': () => {
     if (brokerDataStatus() === 'idle') loadBrokerMapData();
     const data = brokerDataStatus() === 'ready' ? brokerData() : null;

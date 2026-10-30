@@ -1,3 +1,5 @@
+import { prismTag } from '../components/prism-tag.js';
+import { prismLabel } from '../data/prism.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
@@ -330,7 +332,7 @@ function surveyChips(state, districtAccounts, questionFn) {
       return `<button type="button" class="survey-chip survey-chip--soon" disabled>${esc(account.name)} <span class="survey-chip-soon">COMING SOON</span></button>`;
     }
     const on = !!state.accounts[id].enabled;
-    return `<button type="button" class="survey-chip${on ? ' is-on' : ''}" data-action="toggle-account" data-account="${id}" aria-pressed="${on}" aria-label="${esc(questionFn(account.name))}"><span class="survey-chip-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(account.name)}</button>`;
+    return `<button type="button" class="survey-chip${on ? ' is-on' : ''}" data-action="toggle-account" data-account="${id}" aria-pressed="${on}" aria-label="${esc(questionFn(account.name))}"><span class="survey-chip-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(account.name)}${prismLabel(id) ? ' <span class="survey-chip-prism" style="color: #FF2D9B;" aria-hidden="true">◈</span>' : ''}</button>`;
   }).join('');
   return `<div class="phone-only survey-chips"><div class="survey-ask">${esc(surveyAsk(questionFn))}</div><div class="survey-chip-grid">${chips}</div></div><!-- /survey-chips -->`;
 }
@@ -351,7 +353,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       const enabled = state.accounts[id].enabled;
       return `
       <div class="panel" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
-        <div style="flex: 1; font-size: 14px; color: ${enabled ? 'var(--offwhite)' : 'rgba(237,239,243,0.45)'};">${esc(questionFn(account.name))}</div>
+        <div style="flex: 1; font-size: 14px; color: ${enabled ? 'var(--offwhite)' : 'rgba(237,239,243,0.45)'};">${esc(questionFn(account.name))}${prismTag(id)}</div>
         <span data-action="toggle-account" data-account="${id}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid ${enabled ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${enabled ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${enabled ? 'var(--lime)' : 'rgba(237,239,243,0.35)'};">${enabled ? 'ON' : 'OFF'}</span>
       </div>`;
     })
@@ -434,7 +436,7 @@ function renderQuizFacility(state, facilityId, district) {
       <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
         ${renderBuilding(facilityId, buildingState, 40)}
         <div style="flex: 1; min-width: 0;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}</div>
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId)}</div>
           <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
             <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
           </div>
@@ -508,7 +510,7 @@ function renderFacilitySection(state, facilityId, district) {
       <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
         <span class="facility-icon">${renderBuilding(facilityId, buildingState, 40)}</span>
         <div style="flex: 1; min-width: 0;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}</div>
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId)}</div>
           <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
             <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
           </div>

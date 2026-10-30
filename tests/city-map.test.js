@@ -363,11 +363,11 @@ describe('city map: the lights', () => {
 describe('city map: the way up to the broker sky', () => {
   beforeEach(() => { globalThis.localStorage = memoryStorage(); });
 
-  it('LOOK UP sits between STATS and WHOLE CITY and opens the broker map', () => {
+  it('LOOK UP and PRISM sit between STATS and WHOLE CITY', () => {
     const html = renderCityMap(createInitialState());
     const actions = html.slice(html.indexOf('<div class="city-actions">'), html.indexOf('<div class="city-skyline">'));
     const hrefs = [...actions.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
-    expect(hrefs).toEqual(['#/quickquest', '#/stats', '#/reclamation/map', '#/city-together']);
+    expect(hrefs).toEqual(['#/quickquest', '#/stats', '#/reclamation/map', '#/prism', '#/city-together']);
     expect(actions).toContain('LOOK UP');
   });
 });
