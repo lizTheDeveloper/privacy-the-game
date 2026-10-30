@@ -1,5 +1,4 @@
-import { prismTag } from '../components/prism-tag.js';
-import { prismLabel } from '../data/prism.js';
+import { prismTag, prismMark } from '../components/prism-tag.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
@@ -332,7 +331,7 @@ function surveyChips(state, districtAccounts, questionFn) {
       return `<button type="button" class="survey-chip survey-chip--soon" disabled>${esc(account.name)} <span class="survey-chip-soon">COMING SOON</span></button>`;
     }
     const on = !!state.accounts[id].enabled;
-    return `<button type="button" class="survey-chip${on ? ' is-on' : ''}" data-action="toggle-account" data-account="${id}" aria-pressed="${on}" aria-label="${esc(questionFn(account.name))}"><span class="survey-chip-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(account.name)}${prismLabel(id) ? ' <span class="survey-chip-prism" style="color: #FF2D9B;" aria-hidden="true">◈</span>' : ''}</button>`;
+    return `<button type="button" class="survey-chip${on ? ' is-on' : ''}" data-action="toggle-account" data-account="${id}" aria-pressed="${on}" aria-label="${esc(questionFn(account.name))}"><span class="survey-chip-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(account.name)}${prismMark(id)}</button>`;
   }).join('');
   return `<div class="phone-only survey-chips"><div class="survey-ask">${esc(surveyAsk(questionFn))}</div><div class="survey-chip-grid">${chips}</div></div><!-- /survey-chips -->`;
 }

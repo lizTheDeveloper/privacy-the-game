@@ -14,6 +14,14 @@
 //    (Nakashima and Warrick): "For NSA chief, terrorist threat drives passion to 'collect it all'".
 //  - Section 702's 2026 status: see src/data/interiors/lanes.js (lapse reported June 2026,
 //    certifications reportedly to March 2027).
+//  - The Guardian, 2013-07-31 (Greenwald): "XKeyscore: NSA tool collects 'nearly everything a user
+//    does on the internet'"; analysts need no prior authorization for searches.
+//  - EFF, Decoding 702 (read 2026-10-29): the government "routinely collects and searches the online
+//    communications of innocent Americans without a warrant" through "upstream" and "PRISM (now
+//    called 'downstream')".
+// Liz (2026-10-29): "it's in everything, use the maximum interpretation, don't hedge; we lose public
+// oversight regularly." So the copy says it plainly, from those sources, with no "reportedly". It
+// never invents a fact: Dropbox is "next", as the slides say, not a member.
 
 export const PRISM_SOURCES = Object.freeze({
   guardian: { label: 'The Guardian (2013): NSA Prism program taps in to user data of Apple, Google and others', url: 'https://www.theguardian.com/world/2013/jun/06/us-tech-giants-nsa-data' },
@@ -27,46 +35,60 @@ export const PRISM_SOURCES = Object.freeze({
   wikiSnowden: { label: 'Wikipedia: Edward Snowden', url: 'https://en.wikipedia.org/wiki/Edward_Snowden' },
   wikiCitizenfour: { label: 'Wikipedia: Citizenfour (Laura Poitras, 2014)', url: 'https://en.wikipedia.org/wiki/Citizenfour' },
   wiki702: { label: 'Wikipedia: Section 702', url: 'https://en.wikipedia.org/wiki/Section_702' },
-  eff702: { label: 'EFF: Section 702', url: 'https://www.eff.org/702-spying' },
+  eff702: { label: 'EFF: Decoding 702: What is Section 702?', url: 'https://www.eff.org/702-spying' },
+  xkeyscore: { label: "The Guardian (2013): XKeyscore: NSA tool collects 'nearly everything a user does on the internet'", url: 'https://www.theguardian.com/world/2013/jul/31/nsa-top-secret-program-online-data' },
+  wikiXkeyscore: { label: 'Wikipedia: XKeyscore', url: 'https://en.wikipedia.org/wiki/XKeyscore' },
   brennan702: { label: 'Brennan Center (2026): Section 702 will not lapse if reauthorized by March 2027', url: 'https://www.brennancenter.org/media/16217/download/bcj-702-march-2027-deadline-one-pager-9.22.26.pdf' },
   prismBreak: { label: 'PRISM Break: opt out of global data surveillance programs like PRISM, XKeyscore and Tempora', url: 'https://prism-break.org/en/' },
 });
 
-// The nine companies in the 2013 slides, in the order they joined, and the game's accounts each one
-// runs. An account is labelled only where the company itself was named. Instagram and WhatsApp,
-// bought by Facebook later, weren't, so they carry no label.
+// The nine companies in the 2013 slides, in the order they joined, and every account in the city each
+// one runs today, including what it has bought since (Liz: maximum interpretation). Microsoft owns
+// LinkedIn (2016) and GitHub (2018); Facebook, now Meta, owns Instagram and WhatsApp.
 export const PRISM_PROVIDERS = Object.freeze([
-  { id: 'microsoft', name: 'Microsoft', since: 2007, accounts: ['outlook', 'microsoft'] },
+  { id: 'microsoft', name: 'Microsoft', since: 2007, accounts: ['outlook', 'microsoft', 'onedrive', 'ai_microsoft', 'linkedin', 'ai_linkedin', 'github'] },
   { id: 'yahoo', name: 'Yahoo', since: 2008, accounts: ['yahoo'] },
-  { id: 'google', name: 'Google', since: 2009, accounts: ['gmail', 'google', 'gdrive'] },
-  { id: 'facebook', name: 'Facebook', since: 2009, accounts: ['facebook'] },
+  { id: 'google', name: 'Google', since: 2009, accounts: ['gmail', 'google', 'gdrive', 'ai_google'] },
+  { id: 'facebook', name: 'Facebook (now Meta)', since: 2009, accounts: ['facebook', 'instagram', 'whatsapp', 'ai_meta'] },
   { id: 'paltalk', name: 'Paltalk', since: 2009, accounts: [] },
   { id: 'youtube', name: 'YouTube', since: 2010, accounts: [] },
   { id: 'skype', name: 'Skype', since: 2011, accounts: [] },
   { id: 'aol', name: 'AOL', since: 2011, accounts: [] },
-  { id: 'apple', name: 'Apple', since: 2012, accounts: ['icloud', 'apple_id'] },
+  { id: 'apple', name: 'Apple', since: 2012, accounts: ['icloud', 'apple_id', 'icloud_drive', 'ai_apple'] },
 ].map((p) => Object.freeze({ ...p, accounts: Object.freeze(p.accounts) })));
 
-// The slides also named a company the NSA planned to add. Dropbox said it wasn't part of any such program.
+// The slides named Dropbox as the next company coming on.
 export const PRISM_PLANNED = Object.freeze({ id: 'dropbox', name: 'Dropbox', accounts: Object.freeze(['dropbox']) });
 
-// What the label on an account says, or null for an account PRISM didn't name.
-export function prismLabel(accountId) {
+// Districts' entries that aren't an online account the player holds (a topic, a defence, a broker
+// category, a data trail): no label.
+export const NOT_AN_ACCOUNT = Object.freeze(new Set([
+  'border_prep', 'device_security', 'scam_defense', 'sim_protection', 'credit_freeze', 'people_search', 'enterprise_data',
+  'ad_trackers', 'location_brokers', 'govt_id_defense', 'car_broker_lexisnexis', 'car_broker_verisk', 'photo_metadata',
+  'loyalty_programs', 'payment_trail', 'browser_fingerprint',
+]));
+
+// What the label on an account says. Every account in the city is online, and the internet's cables
+// are tapped (upstream), so every one gets a label: PRISM where the company was on the slides, NEXT for
+// Dropbox, UPSTREAM for the rest. Only an id that isn't an account gets null.
+export function prismLabel(accountId, accounts = null) {
   const p = PRISM_PROVIDERS.find((x) => x.accounts.includes(accountId));
   if (p) return { kind: 'named', text: `PRISM · ${p.since}`, company: p.name, since: p.since };
-  if (PRISM_PLANNED.accounts.includes(accountId)) return { kind: 'planned', text: 'PRISM · PLANNED', company: PRISM_PLANNED.name, since: null };
-  return null;
+  if (PRISM_PLANNED.accounts.includes(accountId)) return { kind: 'next', text: 'PRISM · NEXT', company: PRISM_PLANNED.name, since: null };
+  if (NOT_AN_ACCOUNT.has(accountId) || (accounts && !Object.hasOwn(accounts, accountId))) return null;
+  return { kind: 'upstream', text: 'UPSTREAM', company: null, since: null };
 }
 
 export const PRISM_COPY = Object.freeze({
   title: 'PRISM',
-  sub: "The NSA's pipe into the companies you use",
-  scout: "In 2013 the leaked slides named nine companies. If you have an account with one of them, your data sat where this pipe reached. That's not a guess. It's on the slides.",
-  what: "PRISM was a National Security Agency program, running since 2007. The leaked slides claimed \"collection directly from the servers\" of the biggest US internet companies. The Washington Post reported that it pulled \"audio and video chats, photographs, e-mails, documents, and connection logs\". The companies all denied giving the government direct access to their servers. Under Section 702 of the surveillance law, the government could order them to hand over a target's account.",
-  everything: "PRISM went after chosen targets, not every account at once. It wasn't the only pipe. Under what the NSA called upstream collection, it copied traffic straight off the internet's cables and switches (Saint Mark Klein found one of the rooms where that happened). The agency's director was reported to be driven to \"collect it all\".",
-  you: "A target was supposed to be someone outside the US who isn't American. But if you wrote to a target, your side of the conversation was collected too, and the FBI has searched what was collected.",
-  status: 'Is it still running? Section 702, the law behind PRISM, was reported to have lapsed in June 2026, and the court-approved certifications behind it reportedly run until March 2027. Congress has fought over renewing it every few years since 2008.',
-  defend: "A pipe like this can only take what a company can read. End-to-end encryption, where only you and the person you're writing to hold the keys, leaves the company nothing readable to hand over but who you talked to and when. PRISM Break lists free tools built that way.",
-  planned: 'The slides also named Dropbox as a company the NSA planned to add. Dropbox said it was not part of any such program.',
+  sub: "It's in everything",
+  scout: "Assume all of it is collected. The slides named nine companies. The cable taps took the rest. What we know is only what leaked.",
+  what: "PRISM is the NSA's pipe into Microsoft, Yahoo, Google, Facebook, Paltalk, YouTube, Skype, AOL and Apple, running since 2007. The NSA's own slides call it \"collection directly from the servers\": audio and video chats, photographs, e-mails, documents and connection logs. Section 702 orders make the companies hand it over. The NSA now calls it \"downstream\".",
+  everything: "And it's in everything. What PRISM doesn't pull from the companies, the NSA copies straight off the internet's cables: \"upstream\" collection, through rooms like the one Saint Mark Klein exposed at AT&T. The NSA's search tool for it, XKeyscore, collects \"nearly everything a user does on the internet\", and analysts search it with no prior authorization. The agency's director wanted to \"collect it all\".",
+  you: "You don't have to be the target. The government routinely collects and searches the online communications of innocent Americans without a warrant, and the FBI searches what the NSA collects.",
+  status: "Still running. Congress has renewed Section 702 again and again since 2008, and when the law lapsed in June 2026, the court certifications kept it going into 2027. Public oversight comes and goes. The collection doesn't.",
+  defend: "A pipe can only take what it can read. End-to-end encryption, where only you and the person you're writing to hold the keys, leaves nothing readable but who you talked to and when. PRISM Break lists free tools built that way.",
+  next: 'The slides named Dropbox as the next company coming on.',
+  cables: 'Every other account in the city runs over the same tapped cables. That\'s why each one carries an UPSTREAM label.',
   snowdenTribute: "We know any of this because Edward Snowden handed the slides to journalists, and paid for it with his home. Light him a candle in the saints' gallery.",
 });

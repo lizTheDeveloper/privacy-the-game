@@ -5,7 +5,7 @@ import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
-import { PRISM_PROVIDERS, PRISM_PLANNED, PRISM_SOURCES, PRISM_COPY } from '../data/prism.js';
+import { PRISM_PROVIDERS, PRISM_PLANNED, PRISM_SOURCES, PRISM_COPY, NOT_AN_ACCOUNT } from '../data/prism.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const link = (src) => `<a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.label)}</a>`;
@@ -55,7 +55,7 @@ function diagram(state) {
     beams.push(`<line class="beam" x1="232" y1="${y}" x2="${px - 30}" y2="${py}" stroke="${colour}" stroke-opacity="${yours ? 0.85 : 0.35}" stroke-width="${yours ? 2 : 1.2}"/>`);
     nodes.push(`<circle cx="222" cy="${y}" r="${yours ? 6 : 4.5}" fill="${colour}"/>`
       + `<text x="10" y="${y + 5}" font-size="13" fill="rgba(237,239,243,0.45)">${p.since}</text>`
-      + `<text x="58" y="${y + 6}" font-size="17" fill="${yours ? '#FF2D9B' : '#EDEFF3'}">${esc(p.name)}${yours ? ' ◂' : ''}</text>`);
+      + `<text x="58" y="${y + 6}" font-size="17" fill="${yours ? '#FF2D9B' : '#EDEFF3'}">${esc(p.name.replace(/ \(.*\)$/, ''))}${yours ? ' ◂' : ''}</text>`);
   });
   const prism = `<path d="M${px - 30} ${py + 56} L${px + 30} ${py - 62} L${px + 90} ${py + 56} Z" fill="rgba(255,45,155,0.12)" stroke="#FF2D9B" stroke-width="2"/>`
     + `<text x="${px + 30}" y="${py + 42}" font-size="15" font-weight="700" text-anchor="middle" fill="#FF2D9B" letter-spacing="3">PRISM</text>`;
@@ -78,8 +78,18 @@ function companies(state) {
   };
   const rows = PRISM_PROVIDERS.map((p) => `<li><span class="co">${esc(p.name)}</span><span class="yr">since ${p.since}</span>`
     + (p.accounts.length ? p.accounts.map(acct).join('') : '<span class="none">no account in this city</span>') + '</li>').join('');
-  const planned = `<li><span class="co">${esc(PRISM_PLANNED.name)}</span><span class="yr">planned</span>${PRISM_PLANNED.accounts.map(acct).join('')}</li>`;
-  return `<ul class="prism-companies">${rows}${planned}</ul><p class="prism-key">${esc(PRISM_COPY.planned)}</p>`;
+  const next = `<li><span class="co">${esc(PRISM_PLANNED.name)}</span><span class="yr">next</span>${PRISM_PLANNED.accounts.map(acct).join('')}</li>`;
+  return `<ul class="prism-companies">${rows}${next}</ul><p class="prism-key">${esc(PRISM_COPY.next)}</p>`;
+}
+
+// Every other account the player has: all of it over the tapped cables.
+function cables(state) {
+  const named = new Set([...PRISM_PROVIDERS.flatMap((p) => p.accounts), ...PRISM_PLANNED.accounts]);
+  const theirs = Object.keys(ACCOUNTS).filter((id) => !named.has(id) && !NOT_AN_ACCOUNT.has(id) && mine(state, id));
+  const list = theirs.length
+    ? `<p>${theirs.map((id) => `<span class="acct acct--mine" style="display: inline-flex; margin: 2px 4px 2px 0; padding: 2px 8px; font-size: 12px; border: 1px dashed rgba(255,45,155,0.6); color: #FF2D9B; border-radius: 4px;">${esc(ACCOUNTS[id].name)}</span>`).join('')}</p>`
+    : '';
+  return `<div class="prism-panel"><div class="label">EVERYTHING ELSE: THE CABLES</div><p>${esc(PRISM_COPY.cables)}</p>${list}</div>`;
 }
 
 export function renderPrism(state) {
@@ -93,8 +103,9 @@ export function renderPrism(state) {
     + `<p class="prism-key">${yours ? `Magenta ◂: a company you told the city you have ${yours === 1 ? 'an account' : 'accounts'} with.` : 'Tell the city which accounts you have (in Master Keys) and yours light up here.'}</p>`
     + `<div class="prism-panel"><div class="label">WHO WAS ON THE SLIDES</div>${companies(state)}</div>`
     + `<div class="prism-panel"><div class="label">WHAT IT WAS</div><p>${esc(PRISM_COPY.what)}</p><p>${link(PRISM_SOURCES.guardian)} · ${link(PRISM_SOURCES.wapo)}</p></div>`
-    + `<div class="prism-panel"><div class="label">WASN'T IT EVERYTHING?</div><p>${esc(PRISM_COPY.everything)}</p><p>${esc(PRISM_COPY.you)}</p><p>${link(PRISM_SOURCES.wikiUpstream)} · ${link(PRISM_SOURCES.collectAll)} · <a href="#/saints">Saint Mark Klein</a></p></div>`
-    + `<div class="prism-panel"><div class="label">IS IT STILL RUNNING?</div><p>${esc(PRISM_COPY.status)}</p><p>${link(PRISM_SOURCES.wiki702)} · ${link(PRISM_SOURCES.brennan702)} · ${link(PRISM_SOURCES.eff702)}</p></div>`
+    + `<div class="prism-panel"><div class="label">IT'S IN EVERYTHING</div><p>${esc(PRISM_COPY.everything)}</p><p>${esc(PRISM_COPY.you)}</p><p>${link(PRISM_SOURCES.xkeyscore)} · ${link(PRISM_SOURCES.eff702)} · ${link(PRISM_SOURCES.wikiUpstream)} · ${link(PRISM_SOURCES.collectAll)} · <a href="#/saints">Saint Mark Klein</a></p></div>`
+    + cables(state)
+    + `<div class="prism-panel"><div class="label">STILL RUNNING</div><p>${esc(PRISM_COPY.status)}</p><p>${link(PRISM_SOURCES.wiki702)} · ${link(PRISM_SOURCES.brennan702)} · ${link(PRISM_SOURCES.eff702)}</p></div>`
     + `<div class="prism-panel"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="prism-go" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a></div>`
     + `<div class="prism-panel prism-saint"><div class="label">SAINT EDWARD SNOWDEN</div><p>${esc(PRISM_COPY.snowdenTribute)}</p>`
     + `<p>${link(PRISM_SOURCES.snowden)} · ${link(PRISM_SOURCES.wikiSnowden)} · ${link(PRISM_SOURCES.wikiCitizenfour)} · ${link(PRISM_SOURCES.nsaFiles)} · ${link(PRISM_SOURCES.slides)}</p>`
