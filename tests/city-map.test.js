@@ -367,7 +367,7 @@ describe('city map: the way up to the broker sky', () => {
     const html = renderCityMap(createInitialState());
     const actions = html.slice(html.indexOf('<div class="city-actions">'), html.indexOf('<div class="city-skyline">'));
     const hrefs = [...actions.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
-    expect(hrefs).toEqual(['#/quickquest', '#/stats', '#/reclamation/map', '#/prism', '#/city-together']);
+    expect(hrefs).toEqual(['#/quickquest', '#/stats', '#/reclamation/map', '#/prism', '#/government', '#/city-together']);
     expect(actions).toContain('LOOK UP');
   });
 });

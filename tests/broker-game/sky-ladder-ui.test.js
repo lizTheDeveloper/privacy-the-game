@@ -96,7 +96,7 @@ describe('the ladder on the sky', () => {
     for (const m of ['button.sky-rung', 'button.sky-ladder-bar', 'button.sky-rung-did', 'button.star-card-close'])
       expect(isPrivateBreadcrumb({ category: 'ui.click', message: m })).toBe(true);
     const app = readFileSync('src/app.js', 'utf8');
-    const fn = app.slice(app.indexOf('function ladderAction'), app.indexOf('const MAP_ACTIONS'));
+    const fn = app.slice(app.indexOf('function ladderAction'), app.indexOf('// The government map: open or close'));
     expect(fn).not.toMatch(/track\(|navigate\(|location\.hash|captureError/);
   });
 

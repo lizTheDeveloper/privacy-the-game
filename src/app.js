@@ -23,6 +23,9 @@ import { renderDistrict } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
 import { renderSaints } from './screens/saints.js';
 import { renderPrism } from './screens/prism.js';
+import { renderGovernment } from './screens/government.js';
+import { renderLeak } from './screens/leak.js';
+import { leakById, GOV_DATA } from './data/leaks/index.js';
 import { renderBrokerMap } from './screens/broker-map.js';
 import { renderBigCheck } from './screens/big-check.js';
 import { initDecks, deckPositions, openFolds, restoreFolds, applyOpenDesktop, recordHandToggle, desktopFoldKey, rectOnScreen } from './components/deck.js';
@@ -110,6 +113,8 @@ let selectedRung = null;
 let ladderOpen = false;
 // The open government satellite's index (SATELLITES), or null. Memory only.
 let selectedSat = null;
+// The government map's open file (a node id). Memory only, never the URL.
+let govSelected = null;
 // When the player last saw the city map before this visit (Scout waves after a while away).
 let cityArrival;
 // The first-2FA hug was on screen this visit; it counts as seen once they leave.
@@ -168,6 +173,8 @@ const screens = {
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
   prism: () => renderPrism(state),
+  government: () => renderGovernment(state, GOV_DATA, { selected: govSelected }),
+  leak: ({ id }) => renderLeak(state, leakById(id)),
   'broker-map': () => {
     if (brokerDataStatus() === 'idle') loadBrokerMapData();
     const data = brokerDataStatus() === 'ready' ? brokerData() : null;
@@ -303,6 +310,7 @@ function startScreenVisit(route) {
   }
   if (route.screen === 'city') cityArrival = { before: state.lastCityVisit || null };
   // Each visit to the map opens fresh: zoomed in on the player's stars, nothing selected.
+  if (route.screen === 'government') govSelected = null;
   if (route.screen === 'broker-map') {
     selectedId = null;
     cardReturn = null;
@@ -850,6 +858,13 @@ function ladderAction(action, el, data) {
   }
 }
 
+// The government map: open or close a node's file. In memory only; no track(), nothing in the URL.
+function govAction(action, el) {
+  govSelected = action === 'gov-select' && el.dataset.node !== govSelected ? el.dataset.node : null;
+  renderCurrentRoute();
+  if (govSelected) app.querySelector('.gov-file')?.focus({ preventScroll: false });
+}
+
 const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', 'select-sat', 'close-sat', 'map-sats', ...QUIZ_ACTIONS, ...LADDER_ACTIONS]);
 
 function renderCurrentRoute(cause = RENDER_CAUSE.REFRESH) {
@@ -1106,6 +1121,10 @@ app.addEventListener('click', async (e) => {
   const el = e.target.closest('[data-action]');
   if (!el || !app.contains(el)) return;
   const action = el.dataset.action;
+  if (action === 'gov-select' || action === 'gov-close') {
+    govAction(action, el);
+    return;
+  }
   if (MAP_ACTIONS.has(action)) {
     mapAction(action, el);
     return;
@@ -1469,7 +1488,9 @@ app.addEventListener('keydown', (e) => {
   const el = keyActivationTarget(e);
   if (!el || !app.contains(el)) return;
   e.preventDefault();
-  el.click();
+  // An SVG element (the government map's nodes) has no click(): send one.
+  if (typeof el.click === 'function') el.click();
+  else el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 });
 
 // Debrief follow-ups appear once the answers they depend on are given; in a

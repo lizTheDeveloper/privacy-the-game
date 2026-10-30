@@ -97,6 +97,7 @@ export function renderPrism(state) {
   const sources = Object.values(PRISM_SOURCES).map(link).join('');
   return `${renderHud(state)}${STYLE}<div class="screen prism">`
     + '<a class="back-link" href="#/city">← THE CITY</a>'
+    + '<a class="back-link" href="#/government" style="margin-left: 16px;">◎ WHO GETS YOUR DATA</a>'
     + `<h1>${esc(PRISM_COPY.title)}</h1><p class="prism-sub">${esc(PRISM_COPY.sub.toUpperCase())}</p>`
     + `<div style="margin-bottom: 10px;">${renderScout(esc(PRISM_COPY.scout), { feeling: 'thinkingA' })}</div>`
     + diagram(state)

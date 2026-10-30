@@ -125,7 +125,7 @@ export const DISTRICTS = [
     description: 'Smart home devices — your house is listening',
     flavor: 'Every smart device is a microphone, camera, or tracker you invited inside.',
     type: 'facility',
-    facilityOrder: ['smart_network', 'smart_tv', 'voice_assistant', 'smart_camera', 'smart_appliances'],
+    facilityOrder: ['smart_network', 'smart_tv', 'voice_assistant', 'smart_camera', 'smart_appliances', 'weather_app', 'phone_carrier'],
     facilityIntro: 'You locked down your accounts, your car, and your phone. Now look around your house. Every smart device in here is collecting data and sending it somewhere.',
   },
   {

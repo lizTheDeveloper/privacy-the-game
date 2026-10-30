@@ -34,4 +34,18 @@ export const GRID_ACCOUNTS = {
     buildingDark: 'assets/buildings/iso_occupied.png',
     riskLevel: 'high',
   },
+  weather_app: {
+    name: 'Weather App',
+    district: 'grid',
+    building: 'assets/buildings/iso_tower_occ.png',
+    buildingDark: 'assets/buildings/iso_tower_occ.png',
+    riskLevel: 'medium',
+  },
+  phone_carrier: {
+    name: 'Phone Carrier',
+    district: 'grid',
+    building: 'assets/buildings/iso_occupied.png',
+    buildingDark: 'assets/buildings/iso_occupied.png',
+    riskLevel: 'high',
+  },
 };

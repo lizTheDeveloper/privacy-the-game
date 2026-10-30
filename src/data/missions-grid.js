@@ -28,6 +28,19 @@ const DEVICE_ACTION_DEBRIEF = [
   },
 ];
 
+// Weather app and phone carrier: an app or an account, not a device.
+const APP_ACTION_DEBRIEF = [
+  {
+    id: "action",
+    label: "Did you complete the action?",
+    options: [
+      { value: "completed", text: "Yes, done", severity: "safe" },
+      { value: "not-applicable", text: "This doesn't apply to me", severity: "safe" },
+      { value: "later", text: "I'll come back to this", severity: "skip" },
+    ],
+  },
+];
+
 const NETWORK_DEBRIEF = [
   {
     id: "action",
@@ -390,5 +403,142 @@ export const GRID_MISSIONS = [
       },
     },
     estimatedMinutes: 8,
+  },
+  // ══════════════════════════════════════════════════════
+  // WEATHER APP
+  // ══════════════════════════════════════════════════════
+  {
+    id: "weather_app-recon-location",
+    accountId: "weather_app",
+    phase: "recon",
+    title: "Check What Location Your Weather App Gets",
+    briefing: "A weather app needs to know roughly where you are. Most of them ask for your exact location, all the time, and the forecast is only part of what that location is used for. Location is worth money: in ad auctions, to data brokers, to anyone building a picture of where people sleep, work, and worship. A forecast for your town doesn't need your street address at 3 a.m. Your phone lets you choose: never, only while you're using the app, and whether the app gets your precise position or just the area you're in.",
+    steps: [
+      { text: "iPhone: Settings → Privacy & Security → Location Services → tap your weather app. Choose \"While Using the App\" (or \"Never\" if you'll type in a city instead). Never leave it on \"Always\"" },
+      { text: "iPhone: on the same screen, turn off Precise Location. The app gets your general area, which is all a forecast needs" },
+      { text: "Android: Settings → Location → App location permissions → tap your weather app → choose \"Allow only while using the app\" or \"Don't allow\"", url: "https://support.google.com/android/answer/6179507" },
+      { text: "Android: on the same screen, turn off \"Use precise location\"" },
+      { text: "While you're in that list, look at which other apps have \"Allowed all the time.\" Weather apps are rarely the only ones" },
+    ],
+    debriefQs: DEVICE_AUDIT_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"In 2019 the Los Angeles City Attorney sued the company behind The Weather Channel app, saying the app asked for your location for forecasts and didn't make clear it was also shared with third parties for advertising and other business. IBM, which owned it then, settled in 2020 without admitting anything and changed how the app explains itself. The lesson isn't one company. It's that the location you give a forecast doesn't stay with the forecast. Let's see what yours gets.\"",
+      debrief: {
+        ...scoutDevice(
+        "\"Already on While Using, precise location off. Your weather app knows what town you're in when you look. That's all it needs.\"",
+        "\"Found it asking for more than a forecast needs. Trimmed back now.\"",
+        "\"Always on, precise to the meter. Your weather app knew where you slept every night. Not anymore.\""
+      ),
+        "skip": "\"No rush. The app will still be asking tomorrow. Come back when you have your phone handy.\"",
+      },
+    },
+    estimatedMinutes: 5,
+  },
+  {
+    id: "weather_app-fortify-background",
+    accountId: "weather_app",
+    phase: "fortify",
+    title: "Stop the App Working When You're Not Looking",
+    briefing: "Even with location limited, a weather app can wake up in the background to refresh, and every refresh is a chance to report in: your network, your device, the ad identifier your phone hands out so ad companies can link what you do across apps. Turning off background refresh keeps the app quiet until you open it. Turning off tracking, or deleting the advertising ID, breaks the thread that ties your weather app to everything else an ad network knows about you. Severe-weather alerts don't depend on this: emergency alerts come from the phone system, not the app.",
+    steps: [
+      { text: "iPhone: Settings → General → Background App Refresh → turn it off for your weather app" },
+      { text: "iPhone: Settings → Privacy & Security → Tracking → turn off \"Allow Apps to Request to Track.\" Apps that can't track you get a blank advertising ID" },
+      { text: "Android: Settings → Apps → your weather app → Mobile data → turn off Background data. Then App battery usage → Restricted (names vary a little by phone maker)" },
+      { text: "Android: Settings → search for \"Ads\" → Delete advertising ID (on older phones: Reset advertising ID, and turn on Opt out of Ads Personalization)" },
+      { text: "Keep government emergency alerts on: iPhone: Settings → Notifications → Government Alerts. Android: search Settings for Wireless emergency alerts" },
+    ],
+    debriefQs: APP_ACTION_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"In 2017 a security researcher found AccuWeather's iPhone app sending your Wi-Fi router's name and hardware address to a location-data company, Reveal Mobile, even with location access turned off. A router's address can be looked up to find where it is. AccuWeather blamed the company's code kit and pulled it out. The setting you trusted wasn't the whole story. Cut the background chatter and the ad ID, and there's less for any kit to send.\"",
+      debrief: {
+        ...scoutAction(
+        "\"Background refresh off, ad ID gone. The app speaks when you open it, and it doesn't carry a name tag anymore.\"",
+        "\"No weather app? You probably check the forecast some other way. Make sure that way isn't asking for your location all the time either.\""
+      ),
+        "later": "\"Worth coming back to. Until then the app keeps checking in while you're not looking.\"",
+      },
+    },
+    estimatedMinutes: 6,
+  },
+  {
+    id: "weather_app-reclaim-city",
+    accountId: "weather_app",
+    phase: "reclaim",
+    title: "Get the Forecast Without Giving Your Location",
+    briefing: "The forecast for your town is the same whether the app found you by GPS or you typed the town's name. Typing it means the app never needs location permission at all. The National Weather Service, the US government agency whose forecasts many weather apps start from, takes a city or ZIP code on its website and doesn't need an account. Most weather apps, including the one built into your phone, also let you add a city by hand.",
+    steps: [
+      { text: "In your weather app, add your town by name or ZIP code (usually a + or search button), then set location permission to Never or Don't allow" },
+      { text: "Or use the National Weather Service: go to weather.gov and type \"City, State\" or a ZIP code into Local forecast. Bookmark the page it gives you", url: "https://www.weather.gov/" },
+      { text: "If you keep a commercial weather app, look in its own settings for a privacy section and opt out of data sale or sharing (\"Do Not Sell or Share My Personal Information\") where it offers one" },
+      { text: "Delete weather apps you no longer use. A forgotten app with location permission still has it" },
+    ],
+    debriefQs: APP_ACTION_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"Here's the cleanest fix in the whole district: don't tell it where you are. Type your city. The rain doesn't care how the app found you, and an app that never had your location can't sell it.\"",
+      debrief: {
+        ...scoutAction(
+        "\"Forecast by city name. Your weather app knows what town you care about, not where you are. That's the whole job done right.\"",
+        "\"No weather app at all? Then the sky is your forecast, and nobody's buying that data.\""
+      ),
+        "later": "\"Whenever you're ready. Typing a city takes ten seconds, and it's the fix that keeps working.\"",
+      },
+    },
+    estimatedMinutes: 5,
+  },
+
+  // ══════════════════════════════════════════════════════
+  // PHONE CARRIER
+  // ══════════════════════════════════════════════════════
+  {
+    id: "phone_carrier-fortify-lock",
+    accountId: "phone_carrier",
+    phase: "fortify",
+    title: "Put a PIN and a Port-Out Lock on Your Line",
+    briefing: "Your carrier account is where your phone number lives, and your phone number is how a lot of your accounts recognize you. Anyone who can talk a carrier rep into moving your number to their SIM, or porting it to another carrier, starts getting your texts and calls, including sign-in codes. Each of the big three US carriers gives you two defenses: an account PIN they ask for when you call or visit a store, and a lock that blocks moving your number away until you turn it off yourself. If you already did this in The Perimeter, use this to check both are still on.",
+    steps: [
+      { text: "T-Mobile PIN: in the T-Life app, Account → gear icon → Security → T-Mobile ID → Account PIN/Passcode. Use 6–15 digits that aren't sequential, repeating, part of your phone number, or your birthday", url: "https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud" },
+      { text: "T-Mobile port-out lock: in T-Life, Manage tab → See Plans → Manage add-ons → tick Port Out Protection → Continue → Agree & Submit. It's free. Repeat for each line on the account" },
+      { text: "AT&T: in the myAT&T app, tap the person icon → Wireless account lock and swipe to lock. It blocks moving your number to another carrier until you unlock it. Also set your account passcode for calls and store visits", url: "https://www.att.com/support/article/wireless/000102016/" },
+      { text: "Verizon: set a 4-digit Account PIN in the My Verizon app (or at vzw.com/PIN), then turn on Number Lock: My Verizon app → Me → Edit profile and settings → Security → Number Lock, for each line", url: "https://www.verizon.com/support/knowledge-base-309293/" },
+      { text: "Another carrier: call customer service and ask for an account PIN and port-out protection by name. Write down the PIN somewhere safe, like your password manager" },
+    ],
+    debriefQs: APP_ACTION_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"Your number is a key to half your accounts, and the carrier holds the spare. A PIN means the rep has to ask for something only you know. The port-out lock means even a convincing caller can't walk your number out the door. Two settings, and they work while you sleep.\"",
+      debrief: {
+        ...scoutAction(
+        "\"PIN set, number locked. Anyone who wants your line now has to get past you, not just past a tired rep.\"",
+        "\"No carrier account in your name? If you're on someone else's plan, ask the account holder to set the PIN and lock. They're the only one who can.\""
+      ),
+        "later": "\"Come back to this one soon. Until the lock is on, your number is one convincing phone call away.\"",
+      },
+    },
+    estimatedMinutes: 8,
+  },
+  {
+    id: "phone_carrier-reclaim-ads",
+    accountId: "phone_carrier",
+    phase: "reclaim",
+    title: "Opt Out of Your Carrier's Data Programs",
+    briefing: "Your carrier sees which apps and sites your phone talks to, where your phone is, and who you call. Federal law calls the calling and usage records CPNI, Customer Proprietary Network Information, and lets you limit how it's used for marketing. On top of that, each big carrier runs its own ad program, and you're in some of them by default: Verizon puts postpaid customers in Custom Experience unless they opt out, AT&T puts every customer in its basic Personalized program, and T-Mobile uses your data for ads and analytics unless you turn it off. The opt-outs are per account, and often per line.",
+    steps: [
+      { text: "Verizon: My Verizon app → Edit profile & settings → Privacy preferences. Turn off Custom Experience, make sure Custom Experience Plus is off, and set CPNI to not share, for each line. By phone: 1-800-333-9956 for CPNI", url: "https://www.verizon.com/about/privacy/full-privacy-policy" },
+      { text: "AT&T: sign in at att.com/privacychoices and opt out of Personalized and Personalized Plus (opting in to Plus cancels an earlier Personalized opt-out, so check both), plus any sharing or selling of your information", url: "https://www.att.com/privacychoices/" },
+      { text: "AT&T CPNI: att.com/cpni/optout → restrict the use of your CPNI for marketing", url: "https://www.att.com/cpni/optout" },
+      { text: "T-Mobile: open the Privacy Dashboard in the T-Mobile Privacy Center, sign in, and under Advertising and analytics turn off each toggle (such as \"Use my data to make ads more relevant to me\"). Also turn on Do not sell or share my personal information. Repeat for each line", url: "https://www.t-mobile.com/privacy-center/dashboard" },
+      { text: "T-Mobile instructions, if the dashboard moves: T-Mobile's Manage privacy & notifications page", url: "https://www.t-mobile.com/support/account/manage-privacy-and-notifications" },
+    ],
+    debriefQs: APP_ACTION_DEBRIEF,
+    scoutDialog: {
+      briefing: "\"You pay your carrier every month, and they still put you in their ad programs by default. Verizon's Custom Experience reads the sites and apps on your phone. AT&T's Personalized is on for everyone. T-Mobile shares for ads and analytics until you say no. The switches exist because the law makes them offer one. Flip them.\"",
+      debrief: {
+        ...scoutAction(
+        "\"Opted out. Your carrier still connects your calls. It just stopped selling the story of them.\"",
+        "\"Smaller carrier or prepaid? Look for a privacy or 'your privacy choices' page on its site, and ask about CPNI by name when you call.\""
+      ),
+        "later": "\"Come back when you have your carrier login handy. Every month you're opted in is another month of your data in their ad programs.\"",
+      },
+    },
+    estimatedMinutes: 10,
   },
 ];

@@ -43,9 +43,11 @@ describe('the PRISM map', () => {
   });
 
   it('the tag links to the PRISM map, and only where there is a label', () => {
-    expect(prismTag("gmail")).toMatch(/^<a class="prism-tag prism-tag--named" href="#\/prism"[^>]*>.*PRISM · 2009<\/a>$/);
+    expect(prismTag("gmail")).toMatch(/^<a class="prism-tag prism-tag--named" href="#\/prism"[^>]*><span aria-hidden="true">◈<\/span>PRISM · 2009<\/a>/);
     expect(prismTag('dropbox')).toContain('PRISM · NEXT');
-    expect(prismTag('signal')).toMatch(/class="prism-tag prism-tag--upstream"[^>]*>.*UPSTREAM<\/a>$/);
+    expect(prismTag('signal')).toMatch(/^<a class="prism-tag prism-tag--upstream"[^>]*><span aria-hidden="true">◈<\/span>UPSTREAM<\/a>/);
+    // Signal's encryption holds; the CIA takes the message off a hacked phone first (Vault 7).
+    expect(prismTag('signal')).toContain('href="#/leak/before-encryption"');
     expect(prismTag('not-an-account')).toBe('');
   });
 
