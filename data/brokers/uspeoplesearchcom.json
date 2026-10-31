@@ -1,0 +1,12 @@
+{
+  "id": "uspeoplesearchcom",
+  "name": "USPeopleSearch.com, LLC",
+  "opt_out": {
+    "method": "web-form",
+    "url": "https://uspeoplesearch.com/privacy-rights/",
+    "status": "working",
+    "last_checked": "2026-10-18",
+    "requires": ["email"],
+    "notes": "Verified accessible in a normal browser; final URL after redirects: https://uspeoplesearch.com/privacy-rights/"
+  }
+}
