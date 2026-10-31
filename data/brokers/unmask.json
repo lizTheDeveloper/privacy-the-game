@@ -1,0 +1,11 @@
+{
+  "id": "unmask",
+  "name": "UNMASK, LLC",
+  "opt_out": {
+    "method": "web-form",
+    "url": "https://unmask.com/privacy-rights/",
+    "status": "ok",
+    "last_checked": "2026-10-19",
+    "notes": "Verified manually; form requires email and phone; no payment or ID upload observed."
+  }
+}
