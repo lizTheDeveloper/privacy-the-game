@@ -1,0 +1,10 @@
+{
+  "slug": "vendelux",
+  "name": "Vendelux, Inc.",
+  "method": "web-form",
+  "optOutUrl": "https://vendelux.com/privacy-center/",
+  "status": "blocked",
+  "lastChecked": "2026-10-18",
+  "requires": ["email"],
+  "notes": "URL retained pending manual verification; robot received a blocked response (likely bot protection)."
+}
