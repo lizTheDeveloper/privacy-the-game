@@ -172,7 +172,9 @@ describe('briefing: no reset needed', () => {
     expect(g).toContain('https://passwords.google.com/checkup');
     const a = renderBriefing({ ...s0, passwordManager: 'apple' }, 'password_manager-recon-report');
     expect(a).toContain('Security Recommendations');
-    expect(a).toContain('data-url=""');
+    // Apple's steps link nowhere: START keeps them on screen (no button that opens nothing).
+    expect(a).toContain('data-action="start-mission"');
+    expect(a).not.toContain('data-url=""');
   });
 });
 

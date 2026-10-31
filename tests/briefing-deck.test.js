@@ -90,11 +90,13 @@ describe('briefings are slides on phones', () => {
       const html = renderBriefing(state, id);
       const d = deckOf(html);
       expect(d, id).not.toBe('');
-      expect(d).not.toContain('data-action="go-do-it"');
+      // GO DO IT where there's a site to open, START where there isn't (temu-recon-activity).
+      const go = html.includes('data-action="go-do-it"') ? 'data-action="go-do-it"' : 'data-action="start-mission"';
+      expect(d).not.toContain(go);
       expect(d).not.toContain('NOT NOW');
-      expect(html).toContain('data-action="go-do-it"');
+      expect(html).toContain(go);
       // The row comes after the deck's controls, before the sidebar.
-      expect(html.indexOf('data-action="go-do-it"')).toBeGreaterThan(html.indexOf('data-deck-controls'));
+      expect(html.indexOf(go)).toBeGreaterThan(html.indexOf('data-deck-controls'));
     }
   });
 

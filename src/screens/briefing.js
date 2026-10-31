@@ -39,9 +39,11 @@ export function renderBriefing(state, missionId, opts = {}) {
   const districtId = missionDistrict(mission) || '';
   const district = DISTRICTS.find((d) => d.id === districtId);
   const missionStepList = missionSteps(mission, state);
-  // A mission with no account (the password-manager report) opens nothing
-  // unless its steps link somewhere.
-  const goUrl = missionStepList.find((s) => s.url)?.url || account?.securityUrl || (account ? '#' : '');
+  // Where GO DO IT sends the player: the first step's link, else the account's security page. With
+  // neither (the steps happen in an app, or in results the player already has), there is nothing to
+  // open: the button is START, which keeps the steps on screen (Liz 2026-10-31: a "#" opened a second
+  // copy of the game).
+  const goUrl = missionStepList.find((s) => s.url)?.url || account?.securityUrl || '';
   const noReset = isPasswordMission(mission) && !opts.resetAnyway
     && passwordResetNeed(state, mission.accountId) === 'not-needed';
   const noResetFiled = noReset && state.missions[mission.id]?.status === 'not-needed';
@@ -111,8 +113,10 @@ export function renderBriefing(state, missionId, opts = {}) {
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
           ${noReset ? renderNoResetActions(mission, districtId, targetTab, noResetFiled) : state.startedMissions?.[mission.id]
             ? `<a class="btn-primary" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}" style="text-decoration: none;">I DID IT &#10003;</a>
-          <button class="btn-secondary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT AGAIN</button>`
-            : `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`}
+          ${goUrl ? `<button class="btn-secondary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT AGAIN</button>` : ''}`
+            : goUrl
+              ? `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`
+              : `<button class="btn-primary" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`}
           ${noResetFiled ? '' : `<a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>`}
         </div>`;
 

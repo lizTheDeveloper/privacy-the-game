@@ -346,7 +346,8 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
     : recheck
       ? `<div data-recheck-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">A re-check keeps this filed as it was. Pick an answer, or go back.</div>
     <button class="btn-primary" data-action="submit-recheck" data-mission="${mission.id}">SAVE RE-CHECK</button>`
-      : `<button class="btn-primary" data-action="submit-debrief" data-mission="${mission.id}">SUBMIT REPORT</button>`;
+      : `<div data-debrief-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">Answer every question to file the report.</div>
+    <button class="btn-primary" data-action="submit-debrief" data-mission="${mission.id}">SUBMIT REPORT</button>`;
 
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">

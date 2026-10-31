@@ -116,6 +116,15 @@ export function isCandleLit(state, saintId) {
 }
 
 // Local only. Idempotent; unknown saints are ignored.
+// The candle is a toggle (aria-pressed): pressing a lit one puts it out (Liz 2026-10-31: a lit candle
+// that did nothing when pressed read as a broken button).
+export function putOutCandle(state, saintId) {
+  if (!Object.hasOwn(SAINTS, saintId) || !isCandleLit(state, saintId)) return state;
+  const candles = { ...state.candles };
+  delete candles[saintId];
+  return { ...state, candles };
+}
+
 export function lightCandle(state, saintId) {
   if (!Object.hasOwn(SAINTS, saintId) || isCandleLit(state, saintId)) return state;
   return { ...state, candles: { ...state.candles, [saintId]: true } };

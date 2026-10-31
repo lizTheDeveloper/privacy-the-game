@@ -88,7 +88,7 @@
     .city-readout__dot.is-secured { background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: none; }
     @keyframes cityBlink { to { visibility: hidden; } }
 
-    .city-actions { position: absolute; top: 62px; right: 20px; z-index: 30; display: flex; gap: 8px; }
+    .city-actions { position: absolute; top: 62px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 420px); }
     .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
