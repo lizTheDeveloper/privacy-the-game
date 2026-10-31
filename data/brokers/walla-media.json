@@ -1,0 +1,13 @@
+{
+  "id": "walla-media",
+  "name": "Walla Media, LLC",
+  "optOut": {
+    "method": "web-form",
+    "url": "https://consumerdataprotect.com",
+    "status": "ok",
+    "lastChecked": "2026-10-18",
+    "requires": ["email"],
+    "finalUrl": "https://consumerdataprotect.com",
+    "notes": "Verified via normal browser; real opt-out form present. No newer URL found on broker site."
+  }
+}
