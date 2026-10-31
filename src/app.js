@@ -31,7 +31,7 @@ import { renderBigCheck } from './screens/big-check.js';
 import { initDecks, deckPositions, openFolds, restoreFolds, applyOpenDesktop, recordHandToggle, desktopFoldKey, rectOnScreen } from './components/deck.js';
 import { nameMatches } from './utils/big-check.js';
 import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-data.js';
-import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle } from './utils/interior-state.js';
+import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle, putOutCandle, isCandleLit } from './utils/interior-state.js';
 import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
 import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf, setPrescreen } from './utils/broker-state.js';
@@ -884,9 +884,18 @@ function submitDebrief(missionId) {
   const mission = MISSIONS.find((m) => m.id === missionId);
   if (!mission) return navigate('#/city');
 
-  // Nothing happens until every question on screen is answered.
+  // Nothing is filed until every question on screen is answered: say so, and go to the first one
+  // left (Liz 2026-10-31: a silent SUBMIT read as a broken button).
   const filed = fileDebrief(state, mission, readAnswers(app, mission));
-  if (!filed) return;
+  if (!filed) {
+    const msg = app.querySelector('[data-debrief-msg]');
+    if (msg) msg.hidden = false;
+    const open = [...app.querySelectorAll('[data-question]')].find((g) => !g.hidden
+      && !g.querySelector('input:checked') && !g.querySelector('input[type="number"]')?.value);
+    open?.scrollIntoView({ block: 'center' });
+    open?.querySelector('input')?.focus({ preventScroll: true });
+    return;
+  }
   // The "which did you file?" ticks stay in this browser: no track(), no event.
   const ticks = [...app.querySelectorAll('[data-broker-checklist] input[name="filed"]:checked')].map((el) => el.value);
   const withTicks = applyChecklistFiling(filed.state, missionId, filed.event?.status, ticks, localDay());
@@ -1143,7 +1152,7 @@ app.addEventListener('click', async (e) => {
     app.querySelector('[data-device-input]')?.focus();
   } else if (action === 'light-candle') {
     // Local only: no track(); which saints you honor stays on this phone.
-    const next = lightCandle(state, el.dataset.saint);
+    const next = isCandleLit(state, el.dataset.saint) ? putOutCandle(state, el.dataset.saint) : lightCandle(state, el.dataset.saint);
     if (next !== state) {
       setState(next);
       renderCurrentRoute();
@@ -1159,6 +1168,14 @@ app.addEventListener('click', async (e) => {
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
     track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
+  } else if (action === 'start-mission') {
+    // Nothing to open: the steps are right here. Remember the start and draw the briefing again, which
+    // now offers I DID IT under the same steps.
+    const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+    setState(markMissionStarted(state, el.dataset.mission));
+    track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    renderCurrentRoute();
+    app.querySelector('[data-action="i-did-it"]')?.focus({ preventScroll: true });
   } else if (action === 'i-did-it') {
     // A plain link without JS; here Scout cheers first.
     e.preventDefault();
@@ -1197,6 +1214,11 @@ app.addEventListener('click', async (e) => {
     if (next !== state) {
       setState(next);
       renderCurrentRoute();
+    } else if (kind === 'flag' || kind === 'changed') {
+      // No number (or not a whole number from 1 up): say so and put the cursor in the box.
+      const msg = app.querySelector(`[data-pm-cat-msg="${CSS.escape(districtId)}"]`);
+      if (msg) msg.hidden = false;
+      app.querySelector(`#pm-cat-num-${CSS.escape(districtId)}`)?.focus();
     }
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
@@ -1289,7 +1311,12 @@ app.addEventListener('click', async (e) => {
     const districtId = el.dataset.district;
     const input = app.querySelector('#custom-account-input');
     const name = input?.value?.trim();
-    if (!name) return;
+    if (!name) {
+      // Nothing typed: put the cursor in the box rather than doing nothing.
+      input?.setAttribute('placeholder', 'Type the account’s name, then + ADD');
+      input?.focus();
+      return;
+    }
     if (!state.customAccounts) state.customAccounts = {};
     if (!state.customAccounts[districtId]) state.customAccounts[districtId] = [];
     state.customAccounts[districtId].push(name);

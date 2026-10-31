@@ -37,6 +37,7 @@ function askControls(districtId, { label, numAction, numButton, clearButton, cle
       <input id="${id}" type="number" min="1" max="9999" step="1" inputmode="numeric" style="width: 84px; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 16px; padding: 8px 10px; font-family: var(--font-mono);">
       <button class="btn-secondary" style="padding: 8px 14px;" data-action="${numAction}" data-district="${districtId}">${numButton}</button>
     </div>
+    <div data-pm-cat-msg="${districtId}" role="status" hidden style="margin-top: 6px; font-size: 12px; color: var(--amber);">Type a number from 1 up first.</div>
     <div style="margin-top: 10px;">
       <button class="btn-secondary" style="padding: 8px 14px;" data-action="${clearAction}" data-district="${districtId}">${clearButton}</button>
     </div>`;
