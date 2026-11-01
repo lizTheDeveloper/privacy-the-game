@@ -107,6 +107,64 @@ export function optOutBlock(b) {
     : `<p>We couldn't confirm their opt-out page.</p>`;
 }
 
+// California's legal options, for the cases with no opt-out page to send the player to: no
+// opt-out exists, we only know the company's homepage, or we couldn't confirm its page. Each claim is from a primary source:
+//   CCPA rights: Civil Code 1798.105 (delete what it collected from you), 1798.110 (know),
+//     1798.120 (opt out of sale or sharing), 1798.121 (limit sensitive data), via leginfo.
+//   Who the CCPA covers: 1798.140(d)(1)(B)-(C). Two request methods incl. a toll-free number, and
+//     the online-only exception: 1798.130(a)(1)(A). Authorized agents: 1798.135(e) and the
+//     Attorney General's CCPA FAQ (oag.ca.gov/privacy/ccpa, A.12).
+//   DROP: privacy.ca.gov/drop/ (California residents; free; registered data brokers; since
+//     2026-08-01 brokers must access DROP at least once every 45 days). Registration: the CPPA's
+//     registry page (cppa.ca.gov/data_broker_registry/). Complaint form and its "It's unclear how to
+//     submit a privacy request to a business" box: cppa.ca.gov/webapplications/complaint.
+// The player's residency (state.caResident) sets how much shows: 'yes' all of it, unset or 'unsaid'
+// all of it under CALIFORNIA LAW, said as "If you live in California", 'no' one line saying the rights are California's.
+export const CA_LINKS = Object.freeze({
+  rights: 'https://oag.ca.gov/privacy/ccpa',
+  drop: 'https://privacy.ca.gov/drop/',
+  registry: 'https://cppa.ca.gov/data_broker_registry/',
+  complaint: 'https://cppa.ca.gov/webapplications/complaint',
+});
+export const CA_DROP_MISSION = 'people_search-reclaim-stragglers';
+
+// 'none' (no opt-out exists), 'homepage' (only their front page, or a page we couldn't confirm:
+// blocked, dead or suspect, so the player has nowhere sure to go), or null.
+export function noRouteCase(b) {
+  const o = b?.optOut;
+  if (!isObj(o)) return null;
+  if (o.method === 'none') return 'none';
+  if (o.status !== 'verified') return 'homepage';
+  const u = parseUrl(o.url);
+  return u && isBareHomepage(u) ? 'homepage' : null;
+}
+
+export function californiaBlock(b, state = null) {
+  const kase = noRouteCase(b);
+  if (!kase) return '';
+  const name = esc(shortName(b.name ?? b.id));
+  const resident = state?.caResident;
+  if (resident === 'no') {
+    return `<p class="star-card-note star-card-ca">California residents get more options here under California law (the CCPA and DROP). You told the map you live outside California.</p>`;
+  }
+  const yes = resident === 'yes';
+  const registered = Boolean(b.registries?.CA);
+  const drop = registered
+    ? `<p>${name} is on California's data broker registry, so DROP reaches it. DROP is one free request, run by the California Privacy Protection Agency (CPPA), that tells registered data brokers to delete your data and stop selling it. Since August 1, 2026, each one must check DROP at least once every 45 days. <a href="#/mission/${CA_DROP_MISSION}/briefing">DROP MISSION →</a></p>`
+    : `<p>DROP, the CPPA's one free deletion request, goes to registered data brokers. We didn't find ${name} on California's data broker registry (${ext(CA_LINKS.registry, 'check it ↗')}). Any business that meets California's definition of a data broker must register with the CPPA every year.</p>`;
+  const complaint = kase === 'homepage'
+    ? `<p>If you can't find how to send ${name} a request, tell the CPPA: its ${ext(CA_LINKS.complaint, 'complaint form ↗')} has a box for "It's unclear how to submit a privacy request to a business."</p>`
+    : `<p>If ${name} ignores a request, the CPPA complaint form above is where to report it.</p>`;
+  return `<div class="label">${yes ? 'YOUR CALIFORNIA RIGHTS' : 'CALIFORNIA LAW'}</div><div class="star-card-ca">`
+    + `<p>${yes ? 'You live in California, so state law gives you options here.' : 'If you live in California, state law gives you options here.'} If California's privacy law (the CCPA) covers ${name}, you can tell ${name} to:</p>`
+    + '<ul class="star-card-list"><li>stop selling or sharing your personal information</li><li>limit how it uses your sensitive personal information</li><li>tell you what personal information it has collected about you</li><li>delete the personal information it collected from you</li></ul>'
+    + `<p class="star-card-note">Among others, the CCPA covers a company that makes half its yearly revenue selling or sharing personal information, or that buys, sells or shares the data of 100,000 or more Californians or households a year.</p>`
+    + `<p>A covered company must take requests to know or delete in at least two ways, one of them a toll-free phone number (a company that only operates online and deals with you directly can use email instead). Someone you authorize, an "authorized agent," can send these requests for you.</p>`
+    + drop + complaint
+    + `<p class="star-card-note">${ext(CA_LINKS.rights, 'Your CCPA rights, from California\'s Attorney General ↗')}</p>`
+    + '</div>';
+}
+
 // A holding company often takes no opt-outs itself; the companies a published link shows it owning
 // may. Their checker-confirmed pages, each named, when this record has no confirmed link of its own.
 export function ownedRoutesBlock(map, b, byId) {
@@ -214,7 +272,7 @@ export function starCard(map, lighting, id, state = null, { scoutLine = null } =
     + (full && full !== short ? `<p class="star-card-full">${esc(full)}</p>` : '')
     + (parent ? `<p class="star-card-parent">Part of ${esc(shortName(parent.name ?? parent.id))}</p>` : '')
     + stateLine + buyer + frozen + halo
-    + `<div class="label">OPT-OUT ROUTE</div>${optOutBlock(b)}${ownedRoutesBlock(map, b, byId)}`
+    + `<div class="label">OPT-OUT ROUTE</div>${optOutBlock(b)}${ownedRoutesBlock(map, b, byId)}${californiaBlock(b, state)}`
     + (scoutLine ? `<div class="star-card-scout" role="note">${smallScout('thinkingA', 28)}<p>${esc(scoutLine)}</p></div>` : '')
     + (sells.length ? `<div class="label">WHAT ITS RECORDS SAY IT SELLS</div><ul class="star-card-list">${sells.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
     + linksBlock(map, id, byId)
