@@ -223,8 +223,8 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Gmail',
     briefing: 'Two-factor authentication means a stolen password alone isn’t enough. Even if someone has your credentials, they can’t get in without the second factor on your device.',
     steps: [
-      { text: 'Open Google 2-Step Verification', url: 'https://myaccount.google.com/signinoptions/two-step-verification' },
-      { text: 'Enable 2-Step Verification if not already on' },
+      { text: 'Open Google Account Security', url: 'https://myaccount.google.com/security' },
+      { text: 'Enable 2-Step Verification if not already on (under "How you sign in to Google")' },
       { text: 'Prefer an authenticator app or security key over SMS' },
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
@@ -932,8 +932,8 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Google Account',
     briefing: 'Google supports multiple 2FA methods: authenticator apps, security keys, phone prompts, and backup codes. For an identity provider account, the strongest option you’re comfortable with is the right choice.',
     steps: [
-      { text: 'Open Google 2-Step Verification', url: 'https://myaccount.google.com/signinoptions/two-step-verification' },
-      { text: 'Enable 2-Step Verification' },
+      { text: 'Open Google Account Security', url: 'https://myaccount.google.com/security' },
+      { text: 'Enable 2-Step Verification (under "How you sign in to Google")' },
       { text: 'Add a security key or authenticator app as your primary method' },
       { text: 'Save your backup codes in a secure location' },
     ],
