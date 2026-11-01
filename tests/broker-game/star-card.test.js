@@ -335,7 +335,7 @@ describe('California options where there is no opt-out page', () => {
     expect(noRouteCase(byId.get('biointelli'))).toBe('homepage');
     expect(noRouteCase(byId.get('bigdbm'))).toBeNull();
     expect(noRouteCase(mini.brokers.find((b) => b.id === 'page'))).toBeNull();
-    expect(noRouteCase(mini.brokers.find((b) => b.id === 'blocked'))).toBeNull();
+    expect(noRouteCase(mini.brokers.find((b) => b.id === 'blocked'))).toBe('homepage');
     expect(noRouteCase({ id: 'x' })).toBeNull();
   });
 
@@ -403,12 +403,15 @@ describe('California options where there is no opt-out page', () => {
     for (const f of COMPLAINT_FORMS) expect(none).toContain(`href="${f.url}"`);
   });
 
-  it('a card with a real opt-out page, or an unconfirmed one, gets no California block', () => {
-    for (const id of ['page', 'blocked']) for (const s of [as('yes'), as(undefined), as('no')]) {
-      const html = card(id, s);
-      expect(html).not.toContain('star-card-ca');
-    }
+  it('a card with a real opt-out page gets no California block', () => {
+    for (const s of [as('yes'), as(undefined), as('no')]) expect(card('page', s)).not.toContain('star-card-ca');
     expect(californiaBlock(byId.get('spokeo'), as('yes'))).toBe('');
+  });
+  it('a card whose page we couldn\'t confirm gets the California block, after the "couldn\'t confirm" line', () => {
+    const html = card('blocked', as('yes'));
+    expect(html).toContain("We couldn't confirm their opt-out page");
+    expect(html).toContain('YOUR CALIFORNIA RIGHTS');
+    expect(html.indexOf("couldn't confirm")).toBeLessThan(html.indexOf('YOUR CALIFORNIA RIGHTS'));
   });
 
   it('the real no-opt-out and homepage-only stars show it, with only allowed links', () => {

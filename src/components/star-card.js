@@ -107,8 +107,8 @@ export function optOutBlock(b) {
     : `<p>We couldn't confirm their opt-out page.</p>`;
 }
 
-// California's legal options, for the two cases with no opt-out page to send the player to: no
-// opt-out exists, or we only know the company's homepage. Each claim is from a primary source:
+// California's legal options, for the cases with no opt-out page to send the player to: no
+// opt-out exists, we only know the company's homepage, or we couldn't confirm its page. Each claim is from a primary source:
 //   CCPA rights: Civil Code 1798.105 (delete what it collected from you), 1798.110 (know),
 //     1798.120 (opt out of sale or sharing), 1798.121 (limit sensitive data), via leginfo.
 //   Who the CCPA covers: 1798.140(d)(1)(B)-(C). Two request methods incl. a toll-free number, and
@@ -128,12 +128,13 @@ export const CA_LINKS = Object.freeze({
 });
 export const CA_DROP_MISSION = 'people_search-reclaim-stragglers';
 
-// 'none' (no opt-out exists), 'homepage' (only their front page), or null.
+// 'none' (no opt-out exists), 'homepage' (only their front page, or a page we couldn't confirm:
+// blocked, dead or suspect, so the player has nowhere sure to go), or null.
 export function noRouteCase(b) {
   const o = b?.optOut;
   if (!isObj(o)) return null;
   if (o.method === 'none') return 'none';
-  if (o.status !== 'verified') return null;
+  if (o.status !== 'verified') return 'homepage';
   const u = parseUrl(o.url);
   return u && isBareHomepage(u) ? 'homepage' : null;
 }
