@@ -16,8 +16,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://www.outbrain.com/privacy/user-policy",
-    "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "status": "verified",
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

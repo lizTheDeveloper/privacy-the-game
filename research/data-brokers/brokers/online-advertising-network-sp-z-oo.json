@@ -17,8 +17,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://oan.pl/do-not-sell-my-personal-info/",
-    "status": "suspect",
-    "verifiedAt": "2026-10-19"
+    "status": "verified",
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

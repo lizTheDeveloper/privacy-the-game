@@ -13,9 +13,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.fushiamedia.com/request-delete",
+    "url": "https://www.fushiamedia.com/privacy",
     "status": "verified",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

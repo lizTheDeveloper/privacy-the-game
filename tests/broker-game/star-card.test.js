@@ -158,7 +158,8 @@ describe('starCard', () => {
     const blocked = starCard(map, l, '33across');
     expect(blocked).not.toContain('OPT OUT ↗');
     expect(blocked).not.toContain('https://www.33across.com"');
-    expect(blocked).toContain("We couldn't confirm their opt-out page when we last checked (2026-10-19).");
+    const checked = map.brokers.find((x) => x.id === '33across').optOut.verifiedAt;
+    expect(blocked).toContain(`We couldn't confirm their opt-out page when we last checked (${checked}).`);
     for (const st of ['dead', 'suspect']) {
       const b = map.brokers.find((x) => x.optOut?.status === st);
       const html = starCard(map, l, b.id);

@@ -24,7 +24,7 @@
     "url": "https://myprivacy.equifax.com/opt-in-opt-out/personal-info",
     "notes": "Linked as 'Your Privacy Choices' from The Work Number and Equifax pages; returned HTTP 200 (JavaScript app) on 2026-10-18, contents not machine-readable. Credit freezes are separate (equifax.com credit-freeze page).",
     "status": "verified",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": true,
