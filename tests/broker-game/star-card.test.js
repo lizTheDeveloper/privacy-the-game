@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { starCard, optOutHrefs, COMPLAINT_FORMS, isBareHomepage } from '../../src/components/star-card.js';
+import { starCard, optOutHrefs, COMPLAINT_FORMS, isBareHomepage, californiaBlock, noRouteCase, CA_LINKS } from '../../src/components/star-card.js';
 import { nearestStar, nearestStarId, zoomView, VIEW_BOUNDS } from '../../src/utils/broker-view.js';
 import { screenToMap, isTap, isWidest, keepStarInView, panView, pinchView, wheelView, TAP_MAX_PX, MAX_W } from '../../src/utils/map-gestures.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
@@ -307,6 +307,125 @@ describe('starCard', () => {
       const anchors = html.match(/<a href="https?:[^>]*>/g) ?? [];
       for (const a of anchors) expect(a).toContain('target="_blank" rel="noopener noreferrer"');
     }
+  });
+});
+
+describe('California options where there is no opt-out page', () => {
+  const as = (caResident) => (caResident === undefined ? fresh() : { ...fresh(), caResident });
+  const DROP_LINK = 'href="#/mission/people_search-reclaim-stragglers/briefing"';
+  const RIGHTS = ['stop selling or sharing your personal information', 'limit how it uses your sensitive personal information',
+    'tell you what personal information it has collected about you', 'delete the personal information it collected from you'];
+  const NOT_RESIDENT = 'California residents get more options here under California law (the CCPA and DROP). You told the map you live outside California.';
+  const rec = (id, optOut, CA) => ({ id, name: id.toUpperCase(), optOut, registries: { CA }, missions: [], sources: [] });
+  const mini = {
+    brokers: [
+      rec('none-reg', { method: 'none', url: 'https://none-reg.example/privacy', status: 'verified' }, '2026'),
+      rec('none-unreg', { method: 'none', url: 'https://none-unreg.example/privacy', status: 'verified' }, null),
+      rec('home-reg', { method: 'web-form', url: 'https://home-reg.example/', status: 'verified' }, '2026'),
+      rec('home-unreg', { method: 'web-form', url: 'https://home-unreg.example/', status: 'verified' }, null),
+      rec('page', { method: 'web-form', url: 'https://page.example/optout', status: 'verified' }, '2026'),
+      rec('blocked', { method: 'web-form', url: 'https://blocked.example/', status: 'blocked' }, '2026'),
+    ],
+    links: [],
+  };
+  const card = (id, s) => starCard(mini, { stars: {}, frozen: [], halo: [] }, id, s);
+
+  it('finds the two cases: no opt-out, and homepage only', () => {
+    expect(noRouteCase(byId.get('dallas-computer-services'))).toBe('none');
+    expect(noRouteCase(byId.get('biointelli'))).toBe('homepage');
+    expect(noRouteCase(byId.get('bigdbm'))).toBeNull();
+    expect(noRouteCase(mini.brokers.find((b) => b.id === 'page'))).toBeNull();
+    expect(noRouteCase(mini.brokers.find((b) => b.id === 'blocked'))).toBeNull();
+    expect(noRouteCase({ id: 'x' })).toBeNull();
+  });
+
+  it('a California resident sees all of it, under YOUR CALIFORNIA RIGHTS', () => {
+    const html = card('home-reg', as('yes'));
+    expect(html).toContain('<div class="label">YOUR CALIFORNIA RIGHTS</div>');
+    expect(html).toContain('You live in California, so state law gives you options here.');
+    expect(html).not.toContain('CALIFORNIA LAW</div>');
+    for (const r of RIGHTS) expect(html).toContain(r);
+    expect(html).toContain('one of them a toll-free phone number');
+    expect(html).toContain('Someone you authorize, an "authorized agent," can send these requests for you.');
+    expect(html).toContain(`href="${CA_LINKS.rights}"`);
+    expect(html).not.toContain(NOT_RESIDENT);
+  });
+
+  it('an unanswered or unsaid residency sees all of it, as "If you live in California"', () => {
+    for (const s of [as(undefined), as('unsaid'), null]) {
+      const html = card('none-unreg', s);
+      expect(html).toContain('<div class="label">CALIFORNIA LAW</div>');
+      expect(html).toContain('If you live in California, state law gives you options here.');
+      expect(html).not.toContain('YOUR CALIFORNIA RIGHTS');
+      for (const r of RIGHTS) expect(html).toContain(r);
+    }
+  });
+
+  it('a player outside California gets one line saying the rights are California\'s, and nothing about other states', () => {
+    for (const id of ['none-reg', 'home-unreg']) {
+      const html = card(id, as('no'));
+      expect(html).toContain(NOT_RESIDENT);
+      expect(html).not.toContain('CALIFORNIA LAW</div>');
+      expect(html).not.toContain('YOUR CALIFORNIA RIGHTS');
+      for (const r of RIGHTS) expect(html).not.toContain(r);
+      expect(html).not.toContain(DROP_LINK);
+      expect(html).not.toMatch(/other states/i);
+    }
+  });
+
+  it('a broker on the California registry links the DROP mission; one off it says DROP may not reach it', () => {
+    for (const id of ['none-reg', 'home-reg']) {
+      const html = card(id, as('yes'));
+      expect(html).toContain(`${id.toUpperCase()} is on California's data broker registry, so DROP reaches it.`);
+      expect(html).toContain(DROP_LINK);
+      expect(html).toContain('Since August 1, 2026, each one must check DROP at least once every 45 days.');
+      expect(html).not.toContain(CA_LINKS.registry);
+    }
+    for (const id of ['none-unreg', 'home-unreg']) {
+      const html = card(id, as('yes'));
+      expect(html).toContain(`We didn't find ${id.toUpperCase()} on California's data broker registry`);
+      expect(html).toContain(`<a href="${CA_LINKS.registry}" target="_blank" rel="noopener noreferrer">check it ↗</a>`);
+      expect(html).not.toContain(DROP_LINK);
+    }
+  });
+
+  it('a homepage-only card points at the CPPA form box for "unclear how to submit"; a no-opt-out card at the form above', () => {
+    const home = card('home-unreg', as('yes'));
+    expect(home).toContain(`<a href="${CA_LINKS.complaint}" target="_blank" rel="noopener noreferrer">complaint form ↗</a>`);
+    expect(home).toContain('"It\'s unclear how to submit a privacy request to a business."');
+    // The existing homepage route stays.
+    expect(home).toContain('THEIR SITE ↗');
+    expect(home).toContain("We haven't found a direct opt-out page.");
+    const none = card('none-unreg', as('yes'));
+    expect(none).toContain('If NONE-UNREG ignores a request, the CPPA complaint form above is where to report it.');
+    // The existing complaint forms stay.
+    expect(none).toContain('No opt-out exists.');
+    for (const f of COMPLAINT_FORMS) expect(none).toContain(`href="${f.url}"`);
+  });
+
+  it('a card with a real opt-out page, or an unconfirmed one, gets no California block', () => {
+    for (const id of ['page', 'blocked']) for (const s of [as('yes'), as(undefined), as('no')]) {
+      const html = card(id, s);
+      expect(html).not.toContain('star-card-ca');
+    }
+    expect(californiaBlock(byId.get('spokeo'), as('yes'))).toBe('');
+  });
+
+  it('the real no-opt-out and homepage-only stars show it, with only allowed links', () => {
+    const dallas = starCard(map, l, 'dallas-computer-services', as('yes'));
+    expect(dallas).toContain("We didn't find Dallas Computer Services on California's data broker registry");
+    const bio = byId.get('biointelli');
+    const bioCard = starCard(map, l, 'biointelli', as('unsaid'));
+    expect(bioCard).toContain('If you live in California, state law gives you options here.');
+    expect(bioCard).toContain(DROP_LINK);
+    for (const s of [as('yes'), as('unsaid'), as('no'), as(undefined)]) {
+      for (const b of map.brokers.filter((x) => noRouteCase(x))) {
+        const html = starCard(map, l, b.id, s);
+        for (const u of external(html)) expect(allowedExternal(u, b), `${b.id} ${u}`).toBe(true);
+      }
+    }
+    expect(bio.registries.CA).toBeTruthy();
+    for (const u of Object.values(CA_LINKS)) expect(Object.hasOwn(verified.urls, u), u).toBe(true);
   });
 });
 
