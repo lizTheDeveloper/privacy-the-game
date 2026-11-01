@@ -10,6 +10,8 @@ import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
 import { deck, splitWords, countWords } from '../components/deck.js';
+import { renderBankNotesPanel } from '../components/bank-notes.js';
+import { missionUsesBankNotes } from '../utils/bank-notes.js';
 
 function notFound(state) {
   return `
@@ -43,6 +45,11 @@ export function renderBriefing(state, missionId, opts = {}) {
   // neither (the steps happen in an app, or in results the player already has), there is nothing to
   // open: the button is START, which keeps the steps on screen (Liz 2026-10-31: a "#" opened a second
   // copy of the game).
+  // "Your bank", "your card", "your brokerage": the game can't know which, so the player's own bank
+  // notes are the way out, a panel under the steps with a link to each saved bank (Liz 2026-11-01:
+  // "it doesn't link you anywhere"). Their addresses stay in that panel (class bank-note-panel,
+  // private to error reports), never in GO DO IT's data-url.
+  const bankNotesHere = missionUsesBankNotes(mission);
   const goUrl = missionStepList.find((s) => s.url)?.url || account?.securityUrl || '';
   const noReset = isPasswordMission(mission) && !opts.resetAnyway
     && passwordResetNeed(state, mission.accountId) === 'not-needed';
@@ -126,7 +133,9 @@ export function renderBriefing(state, missionId, opts = {}) {
     ? briefingSlides({ header, briefing: mission.briefing, stepRows, stepRow, missionStepList, noResetPanel: noReset ? renderNoResetPanel(state, mission) : '', scoutLine, scoutFeeling, preview, loreData })
     : null;
 
+  const bankPanel = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   const main = slides ? `${deck(slides, { label: 'Mission briefing', className: 'brief-deck' })}
+        ${bankPanel ? `<div style="margin-top: 20px;">${bankPanel}</div>` : ''}
         <div style="margin-top: 20px;">${actions}</div>` : `${header}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
@@ -140,6 +149,7 @@ export function renderBriefing(state, missionId, opts = {}) {
             ${steps}
           </div>
         </div>`}
+${bankPanel}
 ${actions}`;
 
   return `

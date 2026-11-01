@@ -92,8 +92,9 @@ export function eventHasOnlyThirdPartyFrames(event, pageOrigin) {
 // Click and input breadcrumbs record the element's selector, aria-label and
 // title. Inside a building or the saints gallery those name the player's
 // devices, the building opened and the saints honored: drop them before an
-// error report is built. Lean strict: any labelled element goes too.
-const PRIVATE_UI = /aria-label=|title=|device-x|devices?-input|building-link|candle-btn|interior|saint|broker-checklist|constellation|star-card|residency|big-check|sky-ladder|rung|satellite|prism|gov-|leak/;
+// error report is built. Lean strict: any labelled element goes too. The bank
+// notes (bank-note…) are the player's own list of banks: never in a report.
+const PRIVATE_UI = /aria-label=|title=|device-x|devices?-input|building-link|candle-btn|interior|saint|broker-checklist|constellation|star-card|residency|big-check|sky-ladder|rung|satellite|prism|gov-|leak|bank-note/;
 
 export function isPrivateBreadcrumb(b) {
   if (!b || typeof b.category !== 'string' || !b.category.startsWith('ui.')) return false;

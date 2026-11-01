@@ -17,6 +17,7 @@ import { renderPasswordProgress, renderCategoryAsk, renderCategoryQuiet } from '
 import { neededResets } from '../utils/bursts.js';
 import { checklistFor } from '../data/broker-checklists.js';
 import { splitWords } from '../components/deck.js';
+import { renderBankNotesCard } from '../components/bank-notes.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -690,6 +691,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
     </div>
     ${showsPasswordProgress(state, districtId) ? `<div style="padding: 12px 24px 0;">${renderPasswordProgress(state, { withBurst: true })}</div>` : ''}
     ${renderDistrictIntro(state, districtId)}
+    ${districtId === 'vault' ? renderBankNotesCard(state) : ''}
     ${renderTabs(districtId, activeTab)}
     ${content}
     ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}
