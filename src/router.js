@@ -28,6 +28,11 @@ const ROUTES = [
   { pattern: /^#\/ghost\/done$/, screen: 'ghost-done', params: () => ({}) },
   { pattern: /^#\/ghost\/early$/, screen: 'ghost-early', params: () => ({}) },
   { pattern: /^#\/stats$/, screen: 'stats', params: () => ({}) },
+  {
+    pattern: /^#\/vault\/banks(?:\?(.*))?$/,
+    screen: 'bank-notes',
+    params: (m) => ({ from: (m[1] ? new URLSearchParams(m[1]).get('from') : null) || null }),
+  },
 ];
 
 export function parseRoute(hash) {

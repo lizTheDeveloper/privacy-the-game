@@ -34,6 +34,8 @@ import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-dat
 import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle, putOutCandle, isCandleLit } from './utils/interior-state.js';
 import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
+import { renderBankNotesScreen } from './components/bank-notes.js';
+import { addBankNote, updateBankNote, removeBankNote } from './utils/bank-notes.js';
 import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf, setPrescreen } from './utils/broker-state.js';
 import { guessFromWhoami } from './components/location-quiz.js';
 import { mapScoutLine, mapScoutTriggers, cardScoutLine, bigCheckScoutLine } from './utils/broker-scout.js';
@@ -217,7 +219,37 @@ const screens = {
   'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
   'ghost-early': () => renderGhostEarly(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
   stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, notice: currentNotice() }),
+  'bank-notes': ({ from }) => renderBankNotesScreen(state, { from, ...bankForm }),
 };
+
+// The bank-notes form between draws: which note is being edited, what was typed when a save was
+// refused, and why. In memory only, and forgotten on leaving the screen. PRIVATE: no track(), no
+// captureError context, nothing in the URL (utils/bank-notes.js).
+let bankForm = {};
+
+function readBankForm() {
+  const form = app.querySelector('form[data-bank-note-form]');
+  if (!form) return null;
+  const field = (k) => form.querySelector(`[data-field="${k}"]`)?.value ?? '';
+  return { form, editId: form.dataset.edit || null, input: { name: field('name'), loginUrl: field('loginUrl'), resetUrl: field('resetUrl') } };
+}
+
+function saveBankForm() {
+  const read = readBankForm();
+  if (!read) return;
+  const result = read.editId ? updateBankNote(state, read.editId, read.input) : addBankNote(state, read.input);
+  if (result.error) {
+    bankForm = { editId: result.error === 'missing' ? null : read.editId, error: result.error, draft: read.input };
+    renderCurrentRoute();
+    const bad = { name: 'name', loginUrl: 'loginUrl', resetUrl: 'resetUrl' }[result.error];
+    if (bad) app.querySelector(`form[data-bank-note-form] [data-field="${bad}"]`)?.focus();
+    return;
+  }
+  bankForm = {};
+  setState(result.state);
+  renderCurrentRoute();
+  app.querySelector('form[data-bank-note-form] [data-field="name"]')?.focus({ preventScroll: true });
+}
 
 function renderWelcome() {
   return `
@@ -253,6 +285,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     // The saints gallery's back link: the building it was opened from. Kept
     // in memory only, never in the URL (pageviews read the URL).
     if (route.screen !== 'saints') saintsFrom = null;
+    if (route.screen !== 'bank-notes') bankForm = {};
     else if (lastRoute?.screen === 'building') saintsFrom = lastRoute.params.id;
     lastRoute = route;
     const renderFn = screens[route.screen] || screens.city;
@@ -1180,6 +1213,26 @@ app.addEventListener('click', async (e) => {
     // A plain link without JS; here Scout cheers first.
     e.preventDefault();
     cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
+  } else if (action === 'bank-note-open') {
+    // A saved bank's page opens itself (default action left alone). Remember the start so the
+    // briefing offers I DID IT; no track(): nothing about the player's banks leaves this browser.
+    setState(markMissionStarted(state, el.dataset.mission));
+    setTimeout(() => renderCurrentRoute(), 0);
+  } else if (action === 'bank-note-save') {
+    e.preventDefault();
+    saveBankForm();
+  } else if (action === 'bank-note-edit') {
+    bankForm = { editId: el.dataset.note };
+    renderCurrentRoute();
+    app.querySelector('form[data-bank-note-form]')?.scrollIntoView?.({ block: 'start' });
+    app.querySelector('form[data-bank-note-form] [data-field="name"]')?.focus({ preventScroll: true });
+  } else if (action === 'bank-note-cancel') {
+    bankForm = {};
+    renderCurrentRoute();
+  } else if (action === 'bank-note-delete') {
+    if (bankForm.editId === el.dataset.note) bankForm = {};
+    setState(removeBankNote(state, el.dataset.note));
+    renderCurrentRoute();
   } else if (action === 'mission-step') {
     // A step link opens the real site itself (default action is left alone);
     // just remember the start so the briefing offers "I did it" on return.
@@ -1582,6 +1635,12 @@ app.addEventListener('gesturestart', (e) => {
   if (e.target.closest?.('.map-stage')) e.preventDefault();
 });
 
+// Enter in a bank-notes field saves, the same as the button. Local only: no track().
+app.addEventListener('submit', (e) => {
+  if (!e.target.matches?.('form[data-bank-note-form]')) return;
+  e.preventDefault();
+  saveBankForm();
+});
 app.addEventListener('change', refreshDebriefForm);
 app.addEventListener('input', refreshDebriefForm);
 app.addEventListener('change', bigCheckChange);

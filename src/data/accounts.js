@@ -118,6 +118,9 @@ const BASE_ACCOUNTS = {
     district: 'vault',
     building: 'assets/buildings/cashapp.png',
     buildingDark: 'assets/buildings/cashapp_dark.png',
+    // Its Trust & Safety page (Security Lock, controls), loaded 2026-11-01: the steps happen in the
+    // app, and this was the Vault's one known company with nowhere to go.
+    securityUrl: 'https://cash.app/security',
     riskLevel: 'medium',
   },
   // Chapter 3: The Square
