@@ -15,10 +15,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://boam.ai/",
+    "method": "email",
+    "url": "https://boam.ai/your-privacy-choices",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@boam.ai"
   },
   "size": {
     "known": false,

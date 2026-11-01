@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.smarte.pro",
+    "url": "https://smarteprivacy.com/unsubscribe",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@smarteprivacy.com"
   },
   "size": {
     "known": false,

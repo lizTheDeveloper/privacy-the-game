@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.elocal.com",
+    "url": "https://www.elocal.com/ccpa/opt_outs/new",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "correspondence@elocal.com"
   },
   "size": {
     "known": false,

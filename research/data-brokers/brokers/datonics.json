@@ -16,9 +16,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://datonics.com/",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.datonics.com/privacy/privacy-choices",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@datonics.com"
   },
   "size": {
     "known": false,

@@ -22,9 +22,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://loopme.com",
-    "status": "suspect",
-    "verifiedAt": "2026-10-31"
+    "url": "https://legal.loopme.com/privacy-center/loopme-opt-out",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

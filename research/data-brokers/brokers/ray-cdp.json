@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.rayinsights.com",
+    "url": "https://www.rayinsights.com/privacy-notice/consumer-choice-portal/ray-cdp-opt-out-and-delete-request/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@rayinsights.com"
   },
   "size": {
     "known": false,

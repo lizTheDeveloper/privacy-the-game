@@ -13,9 +13,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://dmsunsub.io",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://dms-privacy.my.onetrust.com/webform/506f8b15-11ff-4f18-95fa-48ff903e623f/345b3cd9-d30a-4ef2-9ec9-360d143f486b",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

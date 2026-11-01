@@ -16,9 +16,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.salesintel.io",
+    "url": "https://salesintel.io/opt-out/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "support@salesintel.io"
   },
   "size": {
     "known": false,

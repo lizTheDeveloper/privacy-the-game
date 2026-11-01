@@ -18,9 +18,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.catalina.com",
+    "url": "https://privacyportal.onetrust.com/webform/7665c53e-aae8-4a03-9dd3-66fb6bce8f55/1bb0c042-b42f-49cc-8779-0bdf8f2ac522",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacyteam@catalina.com"
   },
   "size": {
     "known": false,

@@ -18,8 +18,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://preferences.seamless.ai/",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

@@ -17,9 +17,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://adagio.io",
+    "url": "https://adagio.io/legal/privacy-center",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@adagio.io"
   },
   "size": {
     "known": false,

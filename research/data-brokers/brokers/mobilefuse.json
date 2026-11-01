@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://mobilefuse.com",
+    "url": "https://privacyportal.onetrust.com/webform/613d75ce-3c5b-4623-bcef-a0d3694b4214/5d4c0df7-4981-40cd-b9b0-00fa325d444f",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

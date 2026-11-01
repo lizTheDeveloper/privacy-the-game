@@ -18,9 +18,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.ziffdavis.com",
+    "url": "https://www.ziffdavis.com/privacy-rights-request",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@ziffdavis.com"
   },
   "size": {
     "known": false,

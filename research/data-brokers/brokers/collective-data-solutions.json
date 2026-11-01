@@ -20,9 +20,9 @@
   ],
   "optOut": {
     "method": "web-form",
-    "url": "https://collectivedata.io",
+    "url": "https://www.collectivedata.io/opt-out-do-not-sell-request-process/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

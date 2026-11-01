@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://account.monocl.com",
-    "status": "dead",
-    "verifiedAt": "2026-10-31"
+    "url": "https://preferences.definitivehc.com/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

@@ -13,9 +13,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.mylife.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.mylife.com/privacyrequest",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

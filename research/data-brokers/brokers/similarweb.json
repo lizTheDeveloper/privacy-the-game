@@ -12,10 +12,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://similarweb.com/",
+    "method": "email",
+    "url": "https://www.similarweb.com/corp/legal/privacy-policy/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@similarweb.com"
   },
   "size": {
     "known": false,

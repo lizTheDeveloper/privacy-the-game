@@ -14,10 +14,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.wurl.com/",
+    "method": "email",
+    "url": "https://www.wurl.com/wurl-advertising-and-media-services-privacy-notice/#h15",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "legal@wurl.com"
   },
   "size": {
     "known": false,

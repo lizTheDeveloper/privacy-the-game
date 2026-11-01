@@ -12,10 +12,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://privacy.ogury.com/",
+    "method": "email",
+    "url": "https://www.ogury.com/user-choice-portal/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "dpo@ogury.co"
   },
   "size": {
     "known": false,

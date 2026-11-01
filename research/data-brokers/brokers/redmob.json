@@ -15,10 +15,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://redmob.io/",
+    "method": "email",
+    "url": "https://www.redmob.io/privacy-policy",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@redmob.io"
   },
   "size": {
     "known": false,

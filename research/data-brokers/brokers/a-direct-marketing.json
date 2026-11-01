@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.bookyourdata.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://optout.bookyourdata.com/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

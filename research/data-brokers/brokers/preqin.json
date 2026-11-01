@@ -14,10 +14,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.preqin.com",
+    "method": "email",
+    "url": "https://www.preqin.com/policies/privacy-policy#your-rights",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "GroupPrivacy@BlackRock.com"
   },
   "size": {
     "known": false,

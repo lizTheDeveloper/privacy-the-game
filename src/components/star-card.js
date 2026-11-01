@@ -33,6 +33,11 @@ function parseUrl(url) {
   }
 }
 
+// A site's front page, not an opt-out page. A root URL on a subdomain made for privacy requests
+// (optout.bigdbm.com, preferences.bombora.com) is the opt-out itself.
+const OPT_OUT_HOST = /^(optout|opt-out|privacy|preferences|datasubject|consumerprivacy|ccparequest|dsar|form|requests?)\./i;
+export const isBareHomepage = (u) => (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash && !OPT_OUT_HOST.test(u.hostname);
+
 // The opt-out (and their-site) hrefs a card shows (for the tests' "only verified" check).
 export function optOutHrefs(html) {
   return [...String(html).matchAll(/<a href="([^"]*)"[^>]*>(?:OPT OUT|THEIR SITE) ↗<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&'));
@@ -86,7 +91,7 @@ export function optOutBlock(b) {
     const u = parseUrl(o.url);
     const email = typeof o.email === 'string' && o.email ? `<p>Or email ${esc(o.email)}</p>` : '';
     if (u) {
-      const bare = (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash;
+      const bare = isBareHomepage(u);
       const insecure = u.protocol === 'http:' ? `<p class="star-card-note">Their page isn't on a secure (https) link.</p>` : '';
       if (bare) {
         return `<p class="star-card-go">${ext(o.url, THEIR_SITE_TEXT)}</p><p class="star-card-note">We haven't found a direct opt-out page. Look for "Do Not Sell" or "Privacy" on their site.</p>${insecure}${email}`;
@@ -114,7 +119,7 @@ export function ownedRoutesBlock(map, b, byId) {
     .filter((c) => c && !seen.has(c.id) && seen.add(c.id) && isObj(c.optOut) && c.optOut.status === 'verified' && c.optOut.method !== 'none' && parseUrl(c.optOut.url))
     .map((c) => {
       const u = parseUrl(c.optOut.url);
-      const bare = (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash;
+      const bare = isBareHomepage(u);
       return { name: shortName(c.name ?? c.id), url: c.optOut.url, bare };
     })
     .sort((x, y) => x.bare - y.bare || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0));

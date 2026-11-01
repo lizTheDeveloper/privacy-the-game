@@ -18,9 +18,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://datadelivers.com",
+    "url": "https://dsr.trustsuperset.com/?orgId=275d6c62-eb0f-4f8a-80c2-b72573902714",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

@@ -22,9 +22,9 @@
   ],
   "optOut": {
     "method": "web-form",
-    "url": "https://consumerprivacy.experian.com",
+    "url": "https://consumerprivacy.experian.com/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

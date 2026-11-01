@@ -12,10 +12,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.strategicdataintelligence.com",
+    "method": "email",
+    "url": "https://www.strategicdataintelligence.com/privacy-choices/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@sdintelligence.com"
   },
   "size": {
     "known": false,

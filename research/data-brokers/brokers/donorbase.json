@@ -17,9 +17,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://donorbase.com",
-    "status": "suspect",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.data-axle.com/privacy-rights-request/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

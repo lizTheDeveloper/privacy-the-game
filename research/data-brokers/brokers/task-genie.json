@@ -16,10 +16,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.datalane.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "method": "email",
+    "url": "https://www.datalane.com/privacy-policy",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "admin@datalane.com"
   },
   "size": {
     "known": false,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { starCard, optOutHrefs, COMPLAINT_FORMS } from '../../src/components/star-card.js';
+import { starCard, optOutHrefs, COMPLAINT_FORMS, isBareHomepage } from '../../src/components/star-card.js';
 import { nearestStar, nearestStarId, zoomView, VIEW_BOUNDS } from '../../src/utils/broker-view.js';
 import { screenToMap, isTap, isWidest, keepStarInView, panView, pinchView, wheelView, TAP_MAX_PX, MAX_W } from '../../src/utils/map-gestures.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
@@ -181,10 +181,9 @@ describe('starCard', () => {
   it('a verified bare homepage is THEIR SITE, never OPT OUT (M7)', () => {
     const bare = map.brokers.filter((b) => {
       if (b.optOut?.status !== 'verified' || b.optOut.method === 'none') return false;
-      const u = new URL(b.optOut.url);
-      return (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash;
+      return isBareHomepage(new URL(b.optOut.url));
     });
-    expect(bare.length).toBeGreaterThan(100);
+    expect(bare.length).toBeGreaterThan(0);
     for (const b of bare) {
       const html = starCard(map, l, b.id);
       expect(html, b.id).not.toContain('OPT OUT ↗');
@@ -194,6 +193,13 @@ describe('starCard', () => {
     const anchor = starCard(map, l, 'anchor-computer');
     expect(anchor).toContain('THEIR SITE ↗');
     expect(anchor).toContain("Their page isn't on a secure (https) link.");
+  });
+  it('a root URL on a privacy subdomain is the opt-out, not their site', () => {
+    expect(isBareHomepage(new URL('https://optout.bigdbm.com/'))).toBe(false);
+    expect(isBareHomepage(new URL('https://preferences.bombora.com/'))).toBe(false);
+    expect(isBareHomepage(new URL('https://www.jdpower.com'))).toBe(true);
+    const html = starCard(map, l, 'bigdbm');
+    expect(html).toContain('<a href="https://optout.bigdbm.com/" target="_blank" rel="noopener noreferrer">OPT OUT ↗</a>');
   });
   it('shows a verified opt-out email as text', () => {
     const b = map.brokers.find((x) => x.optOut?.status === 'verified' && x.optOut.email && x.optOut.method !== 'none');

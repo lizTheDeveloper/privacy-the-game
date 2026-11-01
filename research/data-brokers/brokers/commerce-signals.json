@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.commercesignals.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://service.transunion.com/dss/ccpa_optout.page",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

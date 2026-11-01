@@ -16,9 +16,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.creatorwizard.com/",
+    "url": "https://mole.creatorwizard.com/opt-out",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "support@creatorwizard.com"
   },
   "size": {
     "known": false,

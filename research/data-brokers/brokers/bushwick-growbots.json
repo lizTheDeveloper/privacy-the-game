@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://growbots.com",
+    "url": "https://www.growbots.com/do-not-sell-my-info/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@growbots.com"
   },
   "size": {
     "known": false,

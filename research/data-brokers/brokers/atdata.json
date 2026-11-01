@@ -20,9 +20,9 @@
   ],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.atdata.com",
+    "url": "https://instantdata.atdata.com/optout",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": true,

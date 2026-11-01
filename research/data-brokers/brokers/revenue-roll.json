@@ -17,9 +17,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://meettie.com",
+    "url": "https://app.termly.io/dsar/ee5088c4-5eb2-475c-a9ea-9376f1b70eb6",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

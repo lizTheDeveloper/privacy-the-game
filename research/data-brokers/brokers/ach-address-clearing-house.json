@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.achcoop.com/",
+    "url": "https://www.achcoop.com/do-not-sell-my-personal-info",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "Privacy@achcoop.com"
   },
   "size": {
     "known": false,
