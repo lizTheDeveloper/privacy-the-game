@@ -17,8 +17,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://keymarketingadvantage.com/do_not_use_my_personal_information",
-    "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "status": "dead",
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

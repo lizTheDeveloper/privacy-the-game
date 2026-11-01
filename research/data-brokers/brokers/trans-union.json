@@ -24,7 +24,7 @@
     "url": "https://www.transunion.com/consumer-privacy",
     "notes": "Data privacy requests (opt out, limit, access, correct, delete) via a TransUnion Service Center account, or as a guest with results by mail. Live page returned HTTP 403 to automated fetches on 2026-10-18; content confirmed from the 2026-10-01 Wayback capture. The mission adds that TLO is included.",
     "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

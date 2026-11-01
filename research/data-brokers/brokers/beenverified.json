@@ -24,7 +24,7 @@
     "url": "https://www.beenverified.com/svc/optout/search/optouts",
     "notes": "beenverified.com/faq/opt-out/ (the mission URL) redirects here. Live site returned 403 to automated fetches on 2026-10-18 and the latest Wayback capture (2025-05-09) is a JavaScript shell, so the form contents were not confirmed.",
     "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

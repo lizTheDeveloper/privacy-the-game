@@ -14,8 +14,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://privacy.targetsmart.com/",
-    "status": "verified",
-    "verifiedAt": "2026-10-19"
+    "status": "blocked",
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

@@ -17,9 +17,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.datanyze.com/privacy-center",
+    "url": "https://www.zoominfo.com/trust-center/your-privacy",
     "status": "verified",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

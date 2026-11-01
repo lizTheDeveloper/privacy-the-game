@@ -17,7 +17,7 @@
     "url": "https://suppression.peopleconnect.us/login",
     "notes": "'PeopleConnect - Suppression Center' returned HTTP 200 on 2026-10-18 (JavaScript app; only its title is machine-readable). Third-party guides say one suppression covers Intelius, TruthFinder, Instant Checkmate and US Search; that coverage is not confirmed from PeopleConnect's own text.",
     "status": "verified",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

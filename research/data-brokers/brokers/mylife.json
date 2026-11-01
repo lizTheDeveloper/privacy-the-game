@@ -16,7 +16,7 @@
     "url": "https://www.mylife.com/ccpa/index.pubview",
     "notes": "'Opt out of sale of personal information' form requests opt-out and deletion and removes any matching Reputation Profile. Live page returned 403 to automated fetches on 2026-10-18; content confirmed from the 2026-02-02 Wayback capture.",
     "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

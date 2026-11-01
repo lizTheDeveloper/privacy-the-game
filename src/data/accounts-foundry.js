@@ -67,7 +67,7 @@ export const FOUNDRY_ACCOUNTS = {
     district: 'foundry',
     building: 'assets/buildings/ai_amazon.png',
     buildingDark: 'assets/buildings/ai_amazon_dark.png',
-    securityUrl: 'https://www.amazon.com/alexa-privacy/apd/rvd',
+    securityUrl: 'https://www.amazon.com/alexa-privacy/apd/home',
     riskLevel: 'high',
     dataCollected: ['voice recordings', 'smart home commands', 'music/media requests', 'shopping queries'],
     settingsPath: 'Alexa app: More > Settings > Alexa Privacy > Manage Your Alexa Data',

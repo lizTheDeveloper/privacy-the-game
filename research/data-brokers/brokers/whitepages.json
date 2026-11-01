@@ -25,7 +25,7 @@
     "url": "https://www.whitepages.com/suppression-requests",
     "notes": "5-step opt-out starting with your profile URL. Live page returned 403 to automated fetches on 2026-10-18; content confirmed from the 2026-10-14 Wayback capture.",
     "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,

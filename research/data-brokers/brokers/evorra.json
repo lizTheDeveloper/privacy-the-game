@@ -14,8 +14,8 @@
   "optOut": {
     "method": "web-form",
     "url": "https://evorra.com/privacy-data-policies/product-privacy-policy/",
-    "status": "blocked",
-    "verifiedAt": "2026-10-19"
+    "status": "verified",
+    "verifiedAt": "2026-10-31"
   },
   "size": {
     "known": false,
