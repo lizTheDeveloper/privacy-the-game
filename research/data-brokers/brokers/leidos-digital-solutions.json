@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.leidosiq.com",
+    "url": "https://leidosiq.com/california-privacy/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "IQDataRequest@leidos.com"
   },
   "size": {
     "known": false,

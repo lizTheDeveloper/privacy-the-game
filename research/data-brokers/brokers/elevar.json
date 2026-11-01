@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://getelevar.com",
-    "status": "suspect",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.audiense.com/legal/consumer-personal-information-requests/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "consumerprivacy@audiense.com"
   },
   "size": {
     "known": false,

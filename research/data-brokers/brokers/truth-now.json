@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://checksecrets.com",
+    "url": "https://www.checksecrets.com/api/helper/optOutLight/search?type=removal",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

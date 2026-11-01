@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.wealthfeed.com",
+    "url": "https://www.wealthfeed.com/do-not-sell-my-data/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

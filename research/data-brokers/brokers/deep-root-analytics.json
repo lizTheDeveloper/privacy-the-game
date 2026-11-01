@@ -13,9 +13,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://deeprootanalytics.com",
+    "url": "https://privacy.deeprootanalytics.com/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

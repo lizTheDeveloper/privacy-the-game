@@ -20,9 +20,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.mobiityglobal.com",
-    "status": "dead",
-    "verifiedAt": "2026-10-31"
+    "url": "https://privacyportal.onetrust.com/webform/87c0b060-447b-4c56-a99e-6fc89bd3c7e4/16d2d526-dd07-4f31-b8ec-ce2451c0c373",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@mobilityglobal.com"
   },
   "size": {
     "known": false,

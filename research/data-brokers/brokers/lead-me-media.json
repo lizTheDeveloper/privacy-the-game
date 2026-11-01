@@ -17,9 +17,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://leadmemedia.com",
+    "url": "https://policy.leadmemedia.com/States/privacyrequestform.html",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

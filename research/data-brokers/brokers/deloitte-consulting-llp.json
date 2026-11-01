@@ -15,7 +15,8 @@
     "method": "web-form",
     "url": "https://datasubject.deloitte.com/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "DataSubjectRequest@deloitte.com"
   },
   "size": {
     "known": false,

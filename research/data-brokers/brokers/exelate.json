@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.nielsen.com",
+    "url": "https://sites.nielsen.com/legal/privacy-statement/exelate-privacy-policy/opt-in-opt-out/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

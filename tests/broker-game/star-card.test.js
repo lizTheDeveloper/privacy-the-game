@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { starCard, optOutHrefs, COMPLAINT_FORMS } from '../../src/components/star-card.js';
+import { starCard, optOutHrefs, COMPLAINT_FORMS, isBareHomepage } from '../../src/components/star-card.js';
 import { nearestStar, nearestStarId, zoomView, VIEW_BOUNDS } from '../../src/utils/broker-view.js';
 import { screenToMap, isTap, isWidest, keepStarInView, panView, pinchView, wheelView, TAP_MAX_PX, MAX_W } from '../../src/utils/map-gestures.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
@@ -155,11 +155,11 @@ describe('starCard', () => {
   it('a verified opt-out is a link; any other status is not', () => {
     const v = starCard(map, l, 'spokeo');
     expect(v).toContain('<a href="https://www.spokeo.com/optout" target="_blank" rel="noopener noreferrer">OPT OUT ↗</a>');
-    const blocked = starCard(map, l, '33across');
+    const blockedB = map.brokers.find((x) => x.optOut?.status === 'blocked' && x.optOut.verifiedAt && !map.links.some((k) => k.type === 'owns' && k.from === x.id));
+    const blocked = starCard(map, l, blockedB.id);
     expect(blocked).not.toContain('OPT OUT ↗');
-    expect(blocked).not.toContain('https://www.33across.com"');
-    const checked = map.brokers.find((x) => x.id === '33across').optOut.verifiedAt;
-    expect(blocked).toContain(`We couldn't confirm their opt-out page when we last checked (${checked}).`);
+    expect(blocked).not.toContain(`href="${blockedB.optOut.url}"`);
+    expect(blocked).toContain(`We couldn't confirm their opt-out page when we last checked (${blockedB.optOut.verifiedAt}).`);
     for (const st of ['dead', 'suspect']) {
       const b = map.brokers.find((x) => x.optOut?.status === st);
       const html = starCard(map, l, b.id);
@@ -181,19 +181,26 @@ describe('starCard', () => {
   it('a verified bare homepage is THEIR SITE, never OPT OUT (M7)', () => {
     const bare = map.brokers.filter((b) => {
       if (b.optOut?.status !== 'verified' || b.optOut.method === 'none') return false;
-      const u = new URL(b.optOut.url);
-      return (u.pathname === '' || u.pathname === '/') && !u.search && !u.hash;
+      return isBareHomepage(new URL(b.optOut.url));
     });
-    expect(bare.length).toBeGreaterThan(100);
+    expect(bare.length).toBeGreaterThan(0);
     for (const b of bare) {
       const html = starCard(map, l, b.id);
       expect(html, b.id).not.toContain('OPT OUT ↗');
       expect(html).toContain('THEIR SITE ↗');
       expect(html).toContain('We haven\'t found a direct opt-out page. Look for "Do Not Sell" or "Privacy" on their site.');
     }
-    const anchor = starCard(map, l, 'anchor-computer');
+    const http = { id: 'http-bare', name: 'Http Bare', optOut: { method: 'web-form', url: 'http://example.com/', status: 'verified', verifiedAt: '2026-11-01' } };
+    const anchor = starCard({ ...map, brokers: [...map.brokers, http] }, l, 'http-bare');
     expect(anchor).toContain('THEIR SITE ↗');
     expect(anchor).toContain("Their page isn't on a secure (https) link.");
+  });
+  it('a root URL on a privacy subdomain is the opt-out, not their site', () => {
+    expect(isBareHomepage(new URL('https://optout.bigdbm.com/'))).toBe(false);
+    expect(isBareHomepage(new URL('https://preferences.bombora.com/'))).toBe(false);
+    expect(isBareHomepage(new URL('https://www.jdpower.com'))).toBe(true);
+    const html = starCard(map, l, 'bigdbm');
+    expect(html).toContain('<a href="https://optout.bigdbm.com/" target="_blank" rel="noopener noreferrer">OPT OUT ↗</a>');
   });
   it('shows a verified opt-out email as text', () => {
     const b = map.brokers.find((x) => x.optOut?.status === 'verified' && x.optOut.email && x.optOut.method !== 'none');
@@ -278,7 +285,13 @@ describe('starCard', () => {
     expect(h).toContain('Companies it owns have their own:');
     expect(h).toContain(`Experian Information Solutions · <a href="${byId.get('experian-information-solutions').optOut.url}"`);
     // Confirmed opt-out pages before bare homepages.
-    expect(h.indexOf('Experian Information Solutions ·')).toBeLessThan(h.indexOf('AtData ·'));
+    const ok = (id, name, url) => ({ id, name, optOut: { method: 'web-form', url, status: 'verified', verifiedAt: '2026-11-01' } });
+    const mini = {
+      brokers: [{ id: 'hold', name: 'Hold Co' }, ok('a-bare', 'Aardvark', 'https://aardvark.example/'), ok('z-page', 'Zebra', 'https://zebra.example/optout')],
+      links: [{ type: 'owns', from: 'hold', to: 'a-bare' }, { type: 'owns', from: 'hold', to: 'z-page' }],
+    };
+    const mh = starCard(mini, l, 'hold');
+    expect(mh.indexOf('Zebra ·')).toBeLessThan(mh.indexOf('Aardvark ·'));
     // A broker with its own confirmed route doesn't list its companies'.
     for (const b of map.brokers.filter((x) => x.optOut?.status === 'verified' && /^https?:/.test(x.optOut.url ?? ''))) {
       expect(starCard(map, l, b.id)).not.toContain('Companies it owns have their own:');

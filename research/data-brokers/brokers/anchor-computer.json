@@ -16,9 +16,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "http://www.anchorcomputer.com/",
+    "url": "https://ecom2.anchorcomputer.com/privacyrequest",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacyteam@anchorcomputer.com"
   },
   "size": {
     "known": false,

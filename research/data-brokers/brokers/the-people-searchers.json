@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "http://peopesearcher.cm",
-    "status": "dead",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.peoplesearcher.com/api/helper/optOutLight/search",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

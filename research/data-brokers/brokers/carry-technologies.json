@@ -18,9 +18,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://preferences.hightouch.com",
+    "url": "https://preferences.hightouch.com/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "datadeletion@hightouch.com"
   },
   "size": {
     "known": false,

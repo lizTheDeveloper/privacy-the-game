@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://dstillery.com",
+    "url": "https://dstillery.com/do-not-sell-my-information/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@dstillery.com"
   },
   "size": {
     "known": false,

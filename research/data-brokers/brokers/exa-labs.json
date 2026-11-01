@@ -15,10 +15,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://exa.ai",
+    "method": "email",
+    "url": "https://exa.ai/privacy-policy",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@exa.ai"
   },
   "size": {
     "known": false,

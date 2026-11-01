@@ -18,9 +18,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.videoamp.com",
+    "url": "https://videoamp.com/your-privacy-choices",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

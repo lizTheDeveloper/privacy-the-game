@@ -19,9 +19,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.viantinc.com",
+    "url": "https://www.viantinc.com/privacy-center/#opt-out",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://juicebox.ai/",
+    "url": "https://juicebox.ai/privacy-center",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

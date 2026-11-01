@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.finthrive.com",
+    "url": "https://privacyportal.onetrust.com/webform/e2abd578-6539-47f6-9895-b18d23b76ac4/c3d22390-d038-4464-83d3-3f0c91c76a01",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@finthrive.com"
   },
   "size": {
     "known": false,

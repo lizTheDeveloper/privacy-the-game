@@ -19,7 +19,8 @@
     "method": "web-form",
     "url": "https://privacychoice.com/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacychoice@semcasting.com"
   },
   "size": {
     "known": false,

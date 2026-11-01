@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://consumerdataprotect.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://www.wallamedia.com/california-rights.html",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

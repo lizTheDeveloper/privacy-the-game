@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.facteus.com",
+    "url": "https://facteus.com/data-subject-request",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@facteus.com"
   },
   "size": {
     "known": false,

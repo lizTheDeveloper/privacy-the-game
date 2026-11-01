@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://trueblueanalytics.org/",
+    "url": "https://trueblueanalytics.org/dont-sell",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

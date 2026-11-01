@@ -22,9 +22,9 @@
   ],
   "optOut": {
     "method": "web-form",
-    "url": "https://preferences.inmarket.com",
+    "url": "https://preferences.inmarket.com/form/opt_out",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": true,

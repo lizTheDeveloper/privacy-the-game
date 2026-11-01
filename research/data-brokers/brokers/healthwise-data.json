@@ -17,9 +17,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.healthwisedata.com",
+    "url": "https://healthwisedata.com/compliance-optout/",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@healthwisedata.com"
   },
   "size": {
     "known": false,

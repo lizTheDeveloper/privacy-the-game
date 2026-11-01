@@ -15,9 +15,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.weinform.org",
+    "url": "https://www.weinform.org/api/helper/optOutLight/search",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

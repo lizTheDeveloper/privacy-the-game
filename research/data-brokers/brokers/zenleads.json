@@ -16,9 +16,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.apollo.io/",
+    "url": "https://www.apollo.io/privacy-policy/remove",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@apollo.io"
   },
   "size": {
     "known": false,

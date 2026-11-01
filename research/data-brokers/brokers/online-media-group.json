@@ -14,10 +14,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.omginc.xyz",
+    "method": "email",
+    "url": "https://omginc.xyz/privacy#ccpa",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@omginc.xyz"
   },
   "size": {
     "known": false,

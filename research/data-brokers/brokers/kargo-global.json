@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://kargo.com",
+    "url": "https://www.kargo.com/privacy-portal#opt-out",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

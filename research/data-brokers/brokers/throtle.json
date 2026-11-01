@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.throtle.io",
+    "url": "https://privacyportal.onetrust.com/webform/07e8dc4d-6686-403e-9b11-39fe7347d2f4/2f999bd2-c826-498c-a504-894eaf543b6f",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacyofficer@iqvia.com"
   },
   "size": {
     "known": false,

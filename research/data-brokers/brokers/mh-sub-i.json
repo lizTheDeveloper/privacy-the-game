@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.internetbrands.com",
+    "url": "https://www.internetbrands.com/privacy/privacy-contact-form",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@internetbrands.com"
   },
   "size": {
     "known": false,

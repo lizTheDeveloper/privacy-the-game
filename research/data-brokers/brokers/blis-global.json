@@ -16,10 +16,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.blis.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "method": "email",
+    "url": "https://blis.com/ccpa-opt-out/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@blis.com"
   },
   "size": {
     "known": false,

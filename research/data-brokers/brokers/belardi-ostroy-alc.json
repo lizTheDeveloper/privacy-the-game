@@ -13,9 +13,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://belardiwong.com/",
+    "url": "https://privacyportal.onetrust.com/webform/3d2d5e0c-bd98-46b8-906c-ede68a6f6a80/400f54ed-fcbb-4749-ab5b-32f491c72390",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

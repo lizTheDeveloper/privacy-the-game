@@ -12,10 +12,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.kontextdata.com",
-    "status": "dead",
-    "verifiedAt": "2026-10-31"
+    "method": "email",
+    "url": "https://kontextdata.com/opt_out",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@kontextdata.com"
   },
   "size": {
     "known": false,

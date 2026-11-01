@@ -17,9 +17,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.perion.com",
-    "status": "blocked",
-    "verifiedAt": "2026-10-31"
+    "url": "https://forms.monday.com/forms/2e643e95786ac0c2cdf2dca015d20c68?r=use1",
+    "status": "verified",
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

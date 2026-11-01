@@ -12,10 +12,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.sabioctv.com/",
+    "method": "email",
+    "url": "https://www.sabioctv.com/do-not-sell-my-info",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@sabio.inc"
   },
   "size": {
     "known": false,

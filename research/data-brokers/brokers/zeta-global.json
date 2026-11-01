@@ -19,9 +19,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.zetaglobal.com",
+    "url": "https://privacyportal-cdn.onetrust.com/dsarwebform/bc2d3301-11a5-4de5-b15e-ce796187a352/d0720d0f-d427-4a7d-a773-5d6793229f15.html",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

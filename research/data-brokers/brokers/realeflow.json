@@ -15,9 +15,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.realeflow.com",
+    "url": "https://data-removal.realeflow.com/submit",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacy@realeflow.com"
   },
   "size": {
     "known": false,

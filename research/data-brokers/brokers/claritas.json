@@ -17,9 +17,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.claritas.com",
+    "url": "https://privacyportal.onetrust.com/webform/68582716-6ce4-4f6e-bf08-78371b5f3292/6c7dc52d-0e2b-481f-9256-0755179e3783",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "privacyinfo@claritas.com"
   },
   "size": {
     "known": false,

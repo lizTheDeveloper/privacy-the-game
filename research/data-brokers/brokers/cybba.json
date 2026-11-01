@@ -19,9 +19,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://cybba.com",
+    "url": "https://cybba-requests.my.onetrust.com/webform/a4a1351e-d293-4305-bde4-b9cf8f5c0989/97252121-4ff1-4a11-860a-78edbf9798b6",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

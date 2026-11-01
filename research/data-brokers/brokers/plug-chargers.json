@@ -14,10 +14,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://www.plug-industries.com",
+    "method": "email",
+    "url": "https://www.plug-industries.com/do-not-sell",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "DataRetrieval@plug-industries.com"
   },
   "size": {
     "known": false,

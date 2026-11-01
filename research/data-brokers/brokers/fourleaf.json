@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.fourleafdata.com/",
+    "url": "https://dsr.trustsuperset.com/?orgId=e1edf3bb-a29d-47f8-9f3c-2bb23d3c3152",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

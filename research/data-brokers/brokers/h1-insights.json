@@ -13,9 +13,10 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://www.h1.co",
-    "status": "suspect",
-    "verifiedAt": "2026-10-31"
+    "url": "https://h1.com/privacy-preferences-center/",
+    "status": "verified",
+    "verifiedAt": "2026-11-01",
+    "email": "inquiries@h1.com"
   },
   "size": {
     "known": false,

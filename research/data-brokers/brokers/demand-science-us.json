@@ -16,9 +16,9 @@
   "sells": [],
   "optOut": {
     "method": "web-form",
-    "url": "https://demandscience.com/",
+    "url": "https://portal.privacyengine.io/app/0CEB4BAE-BBE7-4DD9-BD70-4E2DBB01D64D/4F5BED3F-8BFB-4BF4-A1F8-8A2261BDE0CE",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01"
   },
   "size": {
     "known": false,

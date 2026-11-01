@@ -14,10 +14,11 @@
   },
   "sells": [],
   "optOut": {
-    "method": "web-form",
-    "url": "https://coasttechnology.com/",
+    "method": "email",
+    "url": "https://www.coasttechnology.com/privacy/california",
     "status": "verified",
-    "verifiedAt": "2026-10-31"
+    "verifiedAt": "2026-11-01",
+    "email": "support@coasttech.ai"
   },
   "size": {
     "known": false,
