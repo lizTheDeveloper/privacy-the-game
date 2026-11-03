@@ -1,4 +1,5 @@
-import { MISSIONS, missionDistrict } from '../data/missions.js';
+import { missionDistrict } from '../data/missions.js';
+import { findMission } from '../data/custom-missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
@@ -314,7 +315,7 @@ function recheckUnavailable(state, mission) {
 }
 
 export function renderDebrief(state, missionId, { recheck = false } = {}) {
-  const mission = MISSIONS.find((m) => m.id === missionId);
+  const mission = findMission(state, missionId);
   if (!mission) return notFound(state);
   if (recheck && (state.missions[missionId]?.status !== 'completed' || !canRecheck(mission))) return recheckUnavailable(state, mission);
 

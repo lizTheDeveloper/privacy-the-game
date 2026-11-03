@@ -25,6 +25,10 @@ function run({ off = false } = {}) {
 const PRIVATE = [
   ['https://x/reclaim-city/#/building/gmail', 'https://x/reclaim-city/#/building'],
   ['https://x/reclaim-city/#/mission/gmail-recon-login/recheck', 'https://x/reclaim-city/#/mission/recheck'],
+  // A mission for an account the player added by hand (data/custom-missions.js), on any of its screens.
+  ['https://x/reclaim-city/#/mission/custom_square_1a2b3c_signin/briefing', 'https://x/reclaim-city/#/mission/custom'],
+  ['https://x/reclaim-city/#/mission/custom_square_1a2b3c_signin/debrief', 'https://x/reclaim-city/#/mission/custom'],
+  ['https://x/reclaim-city/#/mission/custom_square_1a2b3c_signin/recheck', 'https://x/reclaim-city/#/mission/custom'],
 ];
 const PUBLIC = [
   'https://x/reclaim-city/#/district/master-keys',

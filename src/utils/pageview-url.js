@@ -1,9 +1,18 @@
 // What a pageview (or an error report) may say about where the player is.
 // A building interior names an account, and a re-check names a mission on
-// one: those stay on the device. Every other route goes out unchanged.
+// one: those stay on the device. So does any screen of a mission for an account
+// the player added by hand (its id carries a hash of the name; data/custom-missions.js).
+// Every other route goes out unchanged.
 import { parseRoute } from '../router.js';
+import { isCustomMission } from '../data/custom-missions.js';
 
 const PRIVATE_HASH = { building: '#/building', recheck: '#/mission/recheck' };
+const MISSION_SCREENS = new Set(['briefing', 'debrief', 'recheck']);
+
+function privateHash(route) {
+  if (MISSION_SCREENS.has(route?.screen) && isCustomMission(route.params?.id)) return '#/mission/custom';
+  return PRIVATE_HASH[route?.screen];
+}
 
 function withHash(href, hash) {
   const i = href.indexOf('#');
@@ -11,7 +20,7 @@ function withHash(href, hash) {
 }
 
 export function pageviewUrl(route, href) {
-  const hash = PRIVATE_HASH[route?.screen];
+  const hash = privateHash(route);
   return hash && typeof href === 'string' ? withHash(href, hash) : href;
 }
 
@@ -25,7 +34,7 @@ export function sanitizeHref(href) {
 
 // The error-report context for a screen: private screens send no params.
 export function errorContext(route) {
-  return PRIVATE_HASH[route?.screen] ? { screen: route.screen } : { screen: route?.screen, params: route?.params };
+  return privateHash(route) ? { screen: route.screen } : { screen: route?.screen, params: route?.params };
 }
 
 // An error report carries the page URL and navigation breadcrumbs: the same

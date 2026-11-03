@@ -390,6 +390,16 @@ function getReturnLine(lastVisit) {
   return null;
 }
 
+// The streak note from the check as the game opens (utils/notifications.js), labelled as
+// what it is. The game sends no reminders: this is only ever shown to a player who is back.
+// The text is the game's own (a number and fixed words), never the player's.
+// Drawn twice: under the HUD where the city stacks (phones, <=768px), in Scout's bar where the
+// HUD floats over the map and its buttons fill the top right (wider screens).
+function renderWelcomeBack(text, where) {
+  if (!text) return '';
+  return `<div data-welcome-back class="welcome-back welcome-back--${where}" style="margin: 8px 20px 0; padding: 8px 14px; background: rgba(9,11,16,0.92); border: 1px solid rgba(255,159,0,0.3); font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.5;"><span style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--amber); margin-right: 8px;">WELCOME BACK</span>${escAttr(text)}</div>`;
+}
+
 // feeling: Scout's feeling for this visit (utils/scout-feelings.js), on every line.
 function renderCityScout(state, feeling, lastVisit) {
   const say = (message, options = {}) => renderScout(message, { ...options, feeling });
@@ -751,8 +761,11 @@ const STYLE = `
     @media (max-width: 960px) { .city-iso { transform: scale(0.88); } }
     @media (max-width: 860px) { .city-iso { transform: scale(0.76); } }
 
+    .welcome-back--top { display: none; }
     /* ---------- mobile: city shrinks, labels flow into a grid ---------- */
     @media (max-width: 768px) {
+      .welcome-back--top { display: block; }
+      .welcome-back--scout { display: none; }
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
       .city-actions { position: relative; top: auto; right: auto; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
@@ -788,7 +801,7 @@ const STYLE = `
     }
   </style>`;
 
-export function renderCityMap(state, { collective, whoami, arrival } = {}) {
+export function renderCityMap(state, { collective, whoami, arrival, welcomeBack } = {}) {
   if (Object.values(state.accounts).every((a) => !a.enabled)) {
     return renderAllOffline();
   }
@@ -813,7 +826,7 @@ export function renderCityMap(state, { collective, whoami, arrival } = {}) {
     radial-gradient(ellipse 34% 20% at 50% ${ORIGIN_TOP + plaza.y}px, rgba(0,229,255,${hazeCyan}) 0%, transparent 70%);"></div>
   <div class="city-floor"></div>
   ${renderStreams()}
-  <div class="city-hud">${renderHud(state)}</div>
+  <div class="city-hud">${renderHud(state)}${renderWelcomeBack(welcomeBack, 'top')}</div>
   <div class="city-readout">
     <span class="city-readout__dot ${securedCount === DISTRICTS.length ? 'is-secured' : ''}"></span>
     <span>SECTOR MAP <b>LIVE</b></span>
@@ -846,6 +859,6 @@ export function renderCityMap(state, { collective, whoami, arrival } = {}) {
   <div class="city-labels">
     ${renderDistrictLabels(state, startHere)}
   </div>
-  <div class="city-scout">${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
+  <div class="city-scout">${renderWelcomeBack(welcomeBack, 'scout')}${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
 </div>`;
 }

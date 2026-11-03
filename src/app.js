@@ -8,7 +8,8 @@ import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { localDay, hasSavedState, loadState, saveState, updateMission, updateStreak, streakAfterFiling, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity, districtBreachedAddresses } from './utils/calc.js';
-import { MISSIONS, missionDistrict } from './data/missions.js';
+import { missionDistrict } from './data/missions.js';
+import { findMission, isCustomMission, cleanCustomName } from './data/custom-missions.js';
 import { fileDebrief, applyRecheck, recheckWithChecklist, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
 import { ensureBurst, startBurst } from './utils/bursts.js';
 import { applyCategoryAction } from './utils/pm-categories.js';
@@ -119,6 +120,9 @@ let selectedSat = null;
 let govSelected = null;
 // When the player last saw the city map before this visit (Scout waves after a while away).
 let cityArrival;
+// The welcome-back note about the streak, for the first city visit after the game opens.
+let welcomeBack = null;
+let welcomeBackShown = false;
 // The first-2FA hug was on screen this visit; it counts as seen once they leave.
 let twoFactorHugShown = false;
 // Scout is cheering the player out of the briefing; ignore further clicks.
@@ -168,7 +172,7 @@ function loadWhoami() {
 }
 
 const screens = {
-  city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival }),
+  city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival, welcomeBack }),
   district: ({ id, tab }) => renderDistrict(state, id, tab, {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
   }),
@@ -342,6 +346,9 @@ function startScreenVisit(route) {
     setState(markTwoFactorHugSeen(state));
   }
   if (route.screen === 'city') cityArrival = { before: state.lastCityVisit || null };
+  // Leaving the map (or the game opening elsewhere) ends the welcome-back note.
+  if (route.screen !== 'city' || welcomeBackShown) welcomeBack = null;
+  if (route.screen === 'city' && welcomeBack) welcomeBackShown = true;
   // Each visit to the map opens fresh: zoomed in on the player's stars, nothing selected.
   if (route.screen === 'government') govSelected = null;
   if (route.screen === 'broker-map') {
@@ -914,7 +921,7 @@ function setState(next) {
 }
 
 function submitDebrief(missionId) {
-  const mission = MISSIONS.find((m) => m.id === missionId);
+  const mission = findMission(state, missionId);
   if (!mission) return navigate('#/city');
 
   // Nothing is filed until every question on screen is answered: say so, and go to the first one
@@ -939,7 +946,7 @@ function submitDebrief(missionId) {
 // Re-check: the answers are confirmed again, nothing is reopened or sent.
 // No afterMissionRecorded, no track.
 function submitRecheck(missionId) {
-  const mission = MISSIONS.find((m) => m.id === missionId);
+  const mission = findMission(state, missionId);
   if (!mission) return navigate('#/city');
   // A broker mission's ticked lines get today's date; the rest keep theirs.
   const ticks = [...app.querySelectorAll('[data-broker-checklist] input[name="filed"]:checked')].map((el) => el.value);
@@ -975,7 +982,7 @@ function readAnswers(root, mission) {
 
 // "GOT IT" on a password reset the player's own recon showed isn't needed.
 function markNotNeeded(missionId) {
-  const mission = MISSIONS.find((m) => m.id === missionId);
+  const mission = findMission(state, missionId);
   if (!mission) return;
   const next = recordNotNeeded(state, missionId);
   if (next === state) return;
@@ -1019,7 +1026,10 @@ function afterMissionRecorded(mission, event) {
 
   // "Change the next 3" sends one event, when the whole job is done (not per
   // burst); no counts are ever sent.
-  if (event) track('mission-completed', missionEventData(mission, { ...record, status: event.status }));
+  // A custom account's missions send nothing (data/custom-missions.js).
+  if (event && !isCustomMission(mission)) track('mission-completed', missionEventData(mission, { ...record, status: event.status }));
+  // Never true until push arrives with the app (REMINDERS_DELIVERABLE in utils/notifications.js):
+  // asking for permission now would promise reminders the game can't deliver.
   if (status === 'completed' && shouldAskPermission(state)) {
     requestPermission();
   }
@@ -1195,18 +1205,19 @@ app.addEventListener('click', async (e) => {
     setState(removeDevice(state, el.dataset.building, Number(el.dataset.index)));
     renderCurrentRoute();
   } else if (action === 'go-do-it') {
-    const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+    const mission = findMission(state, el.dataset.mission);
     // Save first: on phones the new tab can get this one reloaded.
     setState(markMissionStarted(state, el.dataset.mission));
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
-    track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    // A custom account's missions stay in this browser (data/custom-missions.js): no event.
+    if (!isCustomMission(el.dataset.mission)) track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'start-mission') {
     // Nothing to open: the steps are right here. Remember the start and draw the briefing again, which
     // now offers I DID IT under the same steps.
-    const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+    const mission = findMission(state, el.dataset.mission);
     setState(markMissionStarted(state, el.dataset.mission));
-    track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    if (!isCustomMission(el.dataset.mission)) track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     renderCurrentRoute();
     app.querySelector('[data-action="i-did-it"]')?.focus({ preventScroll: true });
   } else if (action === 'i-did-it') {
@@ -1238,8 +1249,8 @@ app.addEventListener('click', async (e) => {
     // just remember the start so the briefing offers "I did it" on return.
     const firstTime = !state.startedMissions?.[el.dataset.mission];
     setState(markMissionStarted(state, el.dataset.mission));
-    if (firstTime) {
-      const mission = MISSIONS.find((m) => m.id === el.dataset.mission);
+    if (firstTime && !isCustomMission(el.dataset.mission)) {
+      const mission = findMission(state, el.dataset.mission);
       track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     }
     setTimeout(() => renderCurrentRoute(), 0);
@@ -1363,7 +1374,8 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'add-custom-account') {
     const districtId = el.dataset.district;
     const input = app.querySelector('#custom-account-input');
-    const name = input?.value?.trim();
+    // No markup characters, one space between words, at most CUSTOM_NAME_MAX long.
+    const name = cleanCustomName(input?.value);
     if (!name) {
       // Nothing typed: put the cursor in the box rather than doing nothing.
       input?.setAttribute('placeholder', 'Type the account’s name, then + ADD');
@@ -1372,7 +1384,9 @@ app.addEventListener('click', async (e) => {
     }
     if (!state.customAccounts) state.customAccounts = {};
     if (!state.customAccounts[districtId]) state.customAccounts[districtId] = [];
-    state.customAccounts[districtId].push(name);
+    // The same account twice would share its missions: add it once.
+    const have = state.customAccounts[districtId].some((n) => cleanCustomName(n).toLowerCase() === name.toLowerCase());
+    if (!have) state.customAccounts[districtId].push(name);
     setState(state);
     renderCurrentRoute();
   } else if (action === 'dismiss-intro') {
@@ -1592,7 +1606,7 @@ function refreshDebriefForm(e) {
   if (input.type === 'number' && input.value !== '') {
     for (const other of form.querySelectorAll(`input[type="checkbox"][name="${input.name}"]`)) other.checked = false;
   }
-  const mission = MISSIONS.find((m) => m.id === form.dataset.debrief);
+  const mission = findMission(state, form.dataset.debrief);
   if (!mission) return;
   // The first question changing ticks or clears the boxes once; the player can still change them.
   if (input.name === `q_${mission.debriefQs[0]?.id}`) {
@@ -1678,9 +1692,11 @@ document.fonts?.addEventListener?.('loadingdone', () => {
   if (parseRoute(location.hash).screen === 'broker-map') renderCurrentRoute();
 });
 
+// The streak check runs once as the game opens; what it finds is a labelled WELCOME BACK
+// note on the city map (utils/notifications.js), shown until the player leaves the map.
+welcomeBack = checkStreakReminder(state);
 initRouter(render);
 mountClassAd();
 mountBugReporter();
-checkStreakReminder(state);
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).
 announceReady();

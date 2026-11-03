@@ -1,5 +1,7 @@
 # Scout Dialogue -- Chapter 11: The Clinic
 
+> **Wired in v7.13.0** as `DISTRICT_DIALOGUE.clinic` in `src/data/dialogue.js`, cut to what the Clinic missions' own briefings support. Changed: 23andMe is no longer "about to be sold"; TTAM Research Institute bought it in July 2025. Left out because the missions don't support them: the "$58 billion" wellness figure, life insurers buying social-media data, GoodRx's "55 million users", BetterHelp's "2 million users", and Google's Fitbit ad commitment to the EU. The shipped lines are the source of truth; this draft is history.
+
 > Health, fitness, and genetic data.
 > Tone: Scout at their most protective. This data is about people's bodies.
 > Angry at the HIPAA gap. Post-Dobbs urgency for reproductive data.
