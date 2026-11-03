@@ -28,7 +28,7 @@ const BREACH_DEBRIEF = [
   PASSWORD_EXPOSED_QUESTION,
 ];
 
-const LOGIN_DEBRIEF = [
+export const LOGIN_DEBRIEF = [
   {
     id: 'finding',
     label: 'What did you find?',
@@ -56,7 +56,7 @@ const DEVICE_DEBRIEF = [
   },
 ];
 
-const PASSWORD_DEBRIEF = [
+export const PASSWORD_DEBRIEF = [
   {
     id: 'action',
     label: 'Did you update your password?',

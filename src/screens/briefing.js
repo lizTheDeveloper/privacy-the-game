@@ -1,4 +1,4 @@
-import { MISSIONS } from '../data/missions.js';
+import { findMission } from '../data/custom-missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { renderHud } from '../components/hud.js';
@@ -34,7 +34,7 @@ const NO_RESET_BADGE = '<div style="font-family: var(--font-mono); font-size: 9p
 
 // opts.resetAnyway: the player chose to reset a password recon showed is fine.
 export function renderBriefing(state, missionId, opts = {}) {
-  const mission = MISSIONS.find((m) => m.id === missionId);
+  const mission = findMission(state, missionId);
   if (!mission) return notFound(state);
 
   const account = ACCOUNTS[mission.accountId];

@@ -1,5 +1,7 @@
 # Scout Dialogue -- Chapter 12: The Trail
 
+> **Wired in v7.13.0** as `DISTRICT_DIALOGUE.trail` in `src/data/dialogue.js`, cut to what the Trail missions' own briefings support. Left out because the missions don't support them: the geotagged-photo safe-house case, the "2018 study" of insurers buying grocery data, the MIT "four points, 90%" figures (the missions keep the general finding), and the BNPL credit-reporting claims (the missions say Afterpay and Klarna's Pay in 4 don't report). The shipped lines are the source of truth; this draft is history.
+
 > Passive data leakage: photos, loyalty cards, payments, browser fingerprints.
 > Tone: philosophical, resigned but determined. This isn't about what someone did to you -- it's about data you left behind just by existing.
 

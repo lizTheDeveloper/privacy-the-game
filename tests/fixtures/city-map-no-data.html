@@ -206,8 +206,11 @@
     @media (max-width: 960px) { .city-iso { transform: scale(0.88); } }
     @media (max-width: 860px) { .city-iso { transform: scale(0.76); } }
 
+    .welcome-back--top { display: none; }
     /* ---------- mobile: city shrinks, labels flow into a grid ---------- */
     @media (max-width: 768px) {
+      .welcome-back--top { display: block; }
+      .welcome-back--scout { display: none; }
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
       .city-actions { position: relative; top: auto; right: auto; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }

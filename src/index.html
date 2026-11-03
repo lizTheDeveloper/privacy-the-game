@@ -16,14 +16,14 @@
   <!-- The portal caches .css for 7 days but never index.html, so the version
        query makes each release fetch its own stylesheet. Kept equal to
        package.json's version by tests/css-cache-bust.test.js. -->
-  <link rel="stylesheet" href="style.css?v=7.12.0">
+  <link rel="stylesheet" href="style.css?v=7.13.0">
   <script src="https://browser.sentry-cdn.com/7.119.0/bundle.min.js" integrity="sha384-N/+t7zuoySxu9rbUlySpn5qv9w/rBT0D7HE35N2dXNy/1W68iV8i6hc13TPJnKOB" crossorigin="anonymous"></script>
   <!-- Reclaim City's own Umami property. Players can turn sharing off on the
        Your City screen; then the script is never loaded (utils/analytics-pref.js).
        __rcBeforeSend (Umami's data-before-send) strips the account or mission id
        from building and re-check URLs in every payload's url and referrer: the
        same rule as utils/pageview-url.js sanitizeHref. -->
-  <script>(function(){var f=function(u){return typeof u!=="string"?u:u.replace(/#\/building\/[^/]+$/,"#/building").replace(/#\/mission\/[^/]+\/recheck$/,"#/mission/recheck");};window.__rcBeforeSend=function(t,p){try{if(p&&typeof p==="object"){if("url" in p)p.url=f(p.url);if("referrer" in p)p.referrer=f(p.referrer);}}catch(e){}return p;};window.__rcLoadAnalytics=function(){if(window.__rcAnalyticsLoaded)return;window.__rcAnalyticsLoaded=true;var s=document.createElement("script");s.defer=true;s.src=(location.hostname.endsWith("multiversestudios.xyz")?"https://analytics.multiversestudios.xyz":"https://analytics.multiversegames.ai")+"/script.js";s.setAttribute("data-website-id","9a3e18e2-56a6-4b69-90af-d88db951b600");s.setAttribute("data-before-send","__rcBeforeSend");document.head.appendChild(s);};var off=false;try{off=localStorage.getItem("reclaim-city.analytics-off")==="1";}catch(e){}if(!off)window.__rcLoadAnalytics();})();</script>
+  <script>(function(){var f=function(u){return typeof u!=="string"?u:u.replace(/#\/mission\/custom_[^/]+\/(?:briefing|debrief|recheck)$/,"#/mission/custom").replace(/#\/building\/[^/]+$/,"#/building").replace(/#\/mission\/[^/]+\/recheck$/,"#/mission/recheck");};window.__rcBeforeSend=function(t,p){try{if(p&&typeof p==="object"){if("url" in p)p.url=f(p.url);if("referrer" in p)p.referrer=f(p.referrer);}}catch(e){}return p;};window.__rcLoadAnalytics=function(){if(window.__rcAnalyticsLoaded)return;window.__rcAnalyticsLoaded=true;var s=document.createElement("script");s.defer=true;s.src=(location.hostname.endsWith("multiversestudios.xyz")?"https://analytics.multiversestudios.xyz":"https://analytics.multiversegames.ai")+"/script.js";s.setAttribute("data-website-id","9a3e18e2-56a6-4b69-90af-d88db951b600");s.setAttribute("data-before-send","__rcBeforeSend");document.head.appendChild(s);};var off=false;try{off=localStorage.getItem("reclaim-city.analytics-off")==="1";}catch(e){}if(!off)window.__rcLoadAnalytics();})();</script>
 </head>
 <body>
   <div id="app"></div>

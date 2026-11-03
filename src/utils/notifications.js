@@ -1,5 +1,20 @@
+// Streak reminders, honestly (v7.13.0).
+//
+// The game has no push server and sends no email, and checkStreakReminder could only
+// run when the game was opened: the "reminder" fired after the player had already come
+// back, so it never reminded anyone (feature map row 14). Until real push arrives with
+// the app, the game doesn't ask for notification permission (nothing could be delivered
+// with it) and shows no system notification. What the check found is shown on the city
+// map instead, labelled for what it is: a WELCOME BACK note about the streak.
+//
+// The permission helpers stay, unused, for when push is real: flip
+// REMINDERS_DELIVERABLE then, and not before.
+
 const LAST_VISIT_KEY = 'reclaim_last_visit';
 const NOTIF_ASKED_KEY = 'reclaim_notif_asked';
+
+// True only once something can reach a player who isn't in the game (push from the app).
+export const REMINDERS_DELIVERABLE = false;
 
 // A storage-blocked iframe throws on any localStorage access.
 function store(op, key, value) {
@@ -11,10 +26,11 @@ function store(op, key, value) {
 }
 
 function notificationsSupported() {
-  return 'Notification' in window && 'serviceWorker' in navigator;
+  return typeof window !== 'undefined' && 'Notification' in window && 'serviceWorker' in navigator;
 }
 
 export function shouldAskPermission(state) {
+  if (!REMINDERS_DELIVERABLE) return false;
   if (!notificationsSupported()) return false;
   if (Notification.permission !== 'default') return false;
   if (store('get', NOTIF_ASKED_KEY)) return false;
@@ -33,43 +49,33 @@ export async function requestPermission() {
   return result === 'granted';
 }
 
-export function checkStreakReminder(state) {
-  if (!notificationsSupported()) return;
-  if (Notification.permission !== 'granted') return;
-
-  const now = Date.now();
-  const lastVisit = parseInt(store('get', LAST_VISIT_KEY) || '0', 10);
-  store('set', LAST_VISIT_KEY, String(now));
-
-  if (!lastVisit) return;
-
+// The welcome-back note for a player returning after 20 hours or more, or null.
+// lastVisit and now are ms timestamps.
+export function welcomeBackNote(state, lastVisit, now = Date.now()) {
+  if (!lastVisit) return null;
   const hoursSince = (now - lastVisit) / (1000 * 60 * 60);
-  if (hoursSince < 20) return;
+  if (hoursSince < 20) return null;
 
   const streak = state.streak?.current || 0;
-  const completedCount = Object.values(state.missions).filter((m) => m.status === 'completed').length;
-  const totalMissions = Object.keys(state.missions).length;
+  const completedCount = Object.values(state.missions || {}).filter((m) => m.status === 'completed').length;
+  if (completedCount === 0 || streak === 0) return null;
 
-  if (completedCount === 0) return;
+  // The streak counts days with a filing: alive while the last one was yesterday or today.
+  const last = state.streak?.lastDate ? new Date(`${state.streak.lastDate}T00:00:00`) : null;
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const daysAgo = last && !Number.isNaN(last.getTime()) ? Math.round((today - last) / 86400000) : null;
+  const days = `${streak}-day streak`;
+  if (daysAgo === 0) return `Your ${days} is still going, and today already counts.`;
+  if (daysAgo === 1) return `Your ${days} is still going. File one mission today to keep it.`;
+  return `Your ${days} ended while you were away. Everything you secured still counts. One mission today starts a new one.`;
+}
 
-  let body;
-  if (streak > 0 && hoursSince < 48) {
-    body = `Your ${streak}-day streak is still alive! Keep it going with a quick mission.`;
-  } else if (streak > 0) {
-    body = `Your ${streak}-day streak expired. Start a new one — pick up where you left off.`;
-  } else if (completedCount < totalMissions) {
-    body = `You've secured ${completedCount} missions. The city still needs you.`;
-  } else {
-    return;
-  }
-
-  navigator.serviceWorker.ready.then((reg) => {
-    reg.showNotification('Reclaim City', {
-      body,
-      icon: './icons/icon-192.png',
-      badge: './icons/icon-192.png',
-      tag: 'streak-reminder',
-      renotify: false,
-    });
-  });
+// Run once as the game opens: remembers this visit, and returns the welcome-back note
+// for this one (null for none). It used to post a system notification here, to a
+// player who was already looking at the game.
+export function checkStreakReminder(state, now = Date.now()) {
+  const lastVisit = parseInt(store('get', LAST_VISIT_KEY) || '0', 10);
+  store('set', LAST_VISIT_KEY, String(now));
+  return welcomeBackNote(state, lastVisit, now);
 }

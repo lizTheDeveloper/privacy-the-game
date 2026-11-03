@@ -18,6 +18,7 @@ import { neededResets } from '../utils/bursts.js';
 import { checklistFor } from '../data/broker-checklists.js';
 import { splitWords } from '../components/deck.js';
 import { renderBankNotesCard } from '../components/bank-notes.js';
+import { customMissionsFor } from '../data/custom-missions.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -264,12 +265,34 @@ function renderMissionRow(state, mission) {
 
 const PHASE_PREREQ = { fortify: 'recon', reclaim: 'fortify' };
 
+// The missions for accounts the player added by hand, under the game's own: bonus
+// missions that never count toward progress. `custom-account` keeps the names out of
+// error-report breadcrumbs (PRIVATE_UI).
+function renderCustomMissions(state, districtId, activeTab) {
+  const missions = customMissionsFor(state, districtId).filter((m) => m.phase === activeTab);
+  if (!missions.length) return '';
+  return `
+  <div class="custom-account" style="padding: 0 24px 24px;">
+    <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 6px;">ACCOUNTS YOU ADDED</div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.5; margin-bottom: 10px;">The game doesn’t know these services, so their missions are steps that work on almost any account. They stay in this browser and don’t count toward the district’s progress.</div>
+    <div class="panel" style="padding: 4px;">
+      ${missions.map((m) => renderMissionRow(state, m)).join('')}
+    </div>
+  </div>`;
+}
+
 function renderMissionList(state, districtId, activeTab) {
+  return renderGameMissionList(state, districtId, activeTab, Boolean(customMissionsFor(state, districtId).some((m) => m.phase === activeTab)))
+    + renderCustomMissions(state, districtId, activeTab);
+}
+
+function renderGameMissionList(state, districtId, activeTab, hasCustom) {
   const missions = getMissionsForDistrict(districtId).filter(
     (m) => m.phase === activeTab && isMissionInPlay(state, m),
   );
   missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0));
   if (missions.length === 0) {
+    if (hasCustom) return '';
     return `
     <div style="padding: 12px 24px 24px;">
       <div class="panel" style="padding: 32px; text-align: center; font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.4);">No missions available in this phase yet.</div>
@@ -361,7 +384,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
 
   const customAccounts = (state.customAccounts?.[districtId] || []);
   const customRows = customAccounts.map((name, i) => `
-    <div class="panel" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
+    <div class="panel custom-account" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
       <div style="flex: 1; font-size: 14px; color: var(--offwhite);">${esc(name)}</div>
       <span data-action="remove-custom-account" data-district="${districtId}" data-index="${i}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid rgba(255,45,155,0.3); background: rgba(255,45,155,0.05); color: var(--magenta);">REMOVE</span>
     </div>`).join('');
@@ -374,6 +397,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
     ${surveyChips(state, districtAccounts, questionFn)}
     ${district?.askPasswordManager ? renderPasswordManagerQuestion(state) : ''}
     ${customRows}
+    ${customAccounts.length ? `<div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.5; margin: 4px 0 8px;">Each account you add gets its own missions under Recon, Fortify and Reclaim: steps that work on almost any account. Its name stays in this browser.</div>` : ''}
     <div class="panel" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; margin-top: 16px;">
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
       <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
@@ -655,7 +679,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
     </div>`;
     content = timelineBanner + renderMissionList(state, districtId, activeTab);
   } else if (allDisabled && activeTab !== 'survey') {
-    content = renderDisabledPanel(districtId);
+    content = renderDisabledPanel(districtId) + renderCustomMissions(state, districtId, activeTab);
   } else if (activeTab === 'survey') {
     content = renderSurvey(state, districtId, districtAccounts, allDisabled);
   } else {

@@ -1,5 +1,7 @@
 # Scout Dialogue — Chapter 10: The Grid
 
+> **Wired in v7.13.0** as `DISTRICT_DIALOGUE.grid` in `src/data/dialogue.js`, cut to what the Grid missions' own briefings support. Left out because the missions don't support them: Ring's "2,000 police departments", Wyze "hid it for two years" (the missions say Wyze disclosed the 2019 exposure within days; the long silence was an unpatched camera flaw reported in 2022), the Amazon–iRobot deal, and the Nest Guard microphone. The shipped lines are the source of truth; this draft is history.
+
 > Smart Home & IoT Devices
 > Tone: Scout is unnerved. The call is coming from inside the house.
 > Warm underneath, but genuinely unsettled by what people volunteered to install.

@@ -25,9 +25,11 @@ export function feedbackHost(hostname = globalThis.location?.hostname || '') {
   return hostname.endsWith('multiversestudios.xyz') ? 'https://feedback.multiversestudios.xyz' : 'https://feedback.multiversegames.ai';
 }
 
-// The route only (e.g. "#/reclamation/map"), never a query string.
+// The route only (e.g. "#/reclamation/map"), never a query string. A mission for an
+// account the player added by hand is just "#/mission/custom" (data/custom-missions.js).
 export function currentScreen(hash = globalThis.location?.hash || '') {
-  return (hash.split('?')[0] || '#/').slice(0, 200);
+  const route = (hash.split('?')[0] || '#/').slice(0, 200);
+  return /^#\/mission\/custom_[^/]+\//.test(route) ? '#/mission/custom' : route;
 }
 
 // The release, from the stylesheet's cache-bust query (kept equal to package.json by a test).

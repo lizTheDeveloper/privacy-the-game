@@ -361,6 +361,205 @@ export const DISTRICT_DIALOGUE = {
       { name: 'Signal Foundation', url: 'https://signal.org/donate/', description: 'The encrypted messenger that refuses to compromise.' },
     ],
   },
+
+  // The five later districts (v7.13.0). Every fact here is already in that
+  // district's own mission briefings (src/data/missions-<district>.js), which
+  // were fact-checked against the companies' and regulators' pages; drafts in
+  // docs/scout-dialogue-ch10..12 were cut to what those briefings support
+  // (tests/district-voice-late.test.js holds the numbers to them).
+  'foundry': {
+    intro: `Welcome to The Foundry. This is where what you write gets melted down and poured into somebody's AI model. Chats with assistants, public posts, the photos you left visible: most of the services in this district have a policy that lets them use some of it to train or improve their models. LinkedIn switched most of its members in to AI training by default in 2024, everywhere but the EU, the UK and Switzerland. Meta trains on public Facebook and Instagram posts, and in the US there's no switch to stop it. OpenAI uses your ChatGPT conversations unless you turn that off. The opt-outs mostly exist, just never where you'd look first. Let's go find them.`,
+    progress: {
+      25: [
+        `A quarter of The Foundry done. Every switch you flip here is one less shovelful of you going into the furnace.`,
+        `25%. The first opt-outs are in. Where you've switched it off, your next chat is a chat, not training material.`,
+      ],
+      50: [
+        `Halfway through The Foundry. One thing worth knowing: at Meta, an objection only covers what you post after it. Sooner beats perfect.`,
+        `50%. Half this district's switches are flipped. The defaults were the companies' choice. These ones are yours.`,
+      ],
+      75: [
+        `Three-quarters done. What's left is mostly the places with no switch at all, like Meta in the US. There the lever is making less of yourself public.`,
+        `75%. The Foundry is cooling down. The furnaces still run, just on less of you.`,
+      ],
+      100: [
+        `The Foundry is yours. Every switch you could find, flipped. Where there wasn't one, you made less of yourself public. The models will keep getting built, just from a little less of you.`,
+        `District done. The defaults were set by the companies, and you overruled them, one settings page at a time. That's the whole Foundry.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `No rush. The setting will still be buried in the same menu when you come back.`,
+        `Parked. What you've already posted is already out there; the switch is about what comes next.`,
+      ],
+    },
+    lore: {
+      linkedin_default: { title: 'LinkedIn’s Default (2024)', text: `In 2024 LinkedIn started using members’ profiles, posts, articles and engagement to train its generative AI, and switched most members in by default. Members in the EU, the UK and Switzerland were left out of it. There is a toggle, and turning it off doesn’t change how recruiters see you.` },
+      meta_no_switch: { title: 'No Switch in the US', text: `Meta trains its AI on public Facebook and Instagram posts, comments, and Meta AI chats. In the EU and the UK there’s a form to object, and since May 27, 2025 an objection only covers what comes after it. In the US there’s no form at all. What you can do is make less of it public.` },
+      gemini_72: { title: '72 Hours', text: `Turning off Gemini’s Keep Activity stops Google using your conversations for training. Google still keeps the chats for 72 hours for safety. Off isn’t the same as never stored.` },
+      reddit_deals: { title: 'Sold by the Forum', text: `Reddit licensed its data to AI companies; Google and OpenAI announced deals in 2024. Reddit’s terms of service give it broad rights to public posts, so one person’s opt-outs are limited. What you can control is what you post in public.` },
+    },
+    allies: [
+      { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization — in every fight on this list.' },
+      { name: 'The Markup', url: 'https://themarkup.org/', description: 'Investigative tech journalism — they built the Blacklight website privacy inspector.' },
+    ],
+  },
+
+  'freeway': {
+    intro: `Welcome to The Freeway. Your car is a computer that happens to have wheels, and it has been keeping notes. Where you drove, how hard you braked, how fast you went, what time of day. Until April 2024, GM's Smart Driver and Honda's Driver Feedback sent driving data on to insurers, through data exchanges run by LexisNexis and Verisk. Some carmakers still run programs like that if you're enrolled: Toyota's Insure Connect, Kia's Driving Score, Volkswagen's DriveView. This district is mostly paperwork. Ask your carmaker what it has, tell it to stop selling it, then tell it to delete it. Boring. Effective. Let's drive.`,
+    progress: {
+      25: [
+        `A quarter of The Freeway done. The first requests are filed. Answers take a while, and that's normal. The clock is on your carmaker's side of the desk now.`,
+        `25%. Your car is still a computer on wheels. It's just a computer whose maker now has your request in writing.`,
+      ],
+      50: [
+        `Halfway. Under California's rules a business has 15 business days to act on an opt-out. Write down the day you sent yours.`,
+        `50% of The Freeway. The insurance checks matter: LexisNexis and Verisk are where driving data met insurers, and your report from each shows what they hold.`,
+      ],
+      75: [
+        `Three-quarters done. Deletion requests are the last step. The law gives you that right with some exceptions, so read what comes back.`,
+        `75%. Your car still knows where it's been. Its maker is being told to forget.`,
+      ],
+      100: [
+        `The Freeway is clear. Requests filed, selling stopped, deletions asked for, insurance reports checked. Your car still has a GPS and a modem. Now it also has a driver who asked, in writing, what it reports and to whom. Paper trails are how this gets enforced.`,
+        `District done. The Freeway is yours. Drive wherever you like. Fewer notes are being taken.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `Parked. These requests keep, and a deletion answer can take 45 days or more anyway. Start the clock when you can.`,
+        `No rush. Your car will keep driving either way. The notes can wait one more day.`,
+      ],
+    },
+    lore: {
+      smart_driver: { title: 'Smart Driver (ended 2024)', text: `GM’s Smart Driver took driving habits from connected cars, braking and acceleration and time-of-day patterns, and sent driving data to insurers. It ended in April 2024, and so did Honda’s Driver Feedback. Ending a program stops new data. Asking what’s already held, and asking for it to be deleted, is what the missions here are for.` },
+      data_exchanges: { title: 'The Exchanges', text: `Driving data reaches insurers through data exchanges run by LexisNexis and Verisk. LexisNexis gathers driving data from several carmakers and resells it to insurance companies. Verisk shut its driving-data exchange in April 2024. Opting out with your carmaker is separate from opting out with LexisNexis or Verisk, so the broker side gets its own mission.` },
+      the_clock: { title: 'The Clock on Your Request', text: `California’s law, and similar laws in other states, let you tell a business to stop selling or sharing your personal information, and to delete it, with some exceptions. Under California’s rules a business has 15 business days to act on an opt-out, and up to 45 days to answer a deletion request, extendable to 90.` },
+    },
+    allies: [
+      { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization — in every fight on this list.' },
+      { name: 'Consumer Reports', url: 'https://www.consumerreports.org/', description: 'Now rates companies on privacy, not just product quality.' },
+    ],
+  },
+
+  'grid': {
+    intro: `Welcome to The Grid. You locked down your accounts; now look around your living room, because some of the devices in it report back. Your TV can fingerprint what's on screen several times a second and send it off to be identified. Vizio paid the FTC $2.2 million for doing that without telling anyone. Your voice assistant can keep recordings; in 2019 Bloomberg revealed that Amazon employed thousands of people to listen to Alexa recordings. Some robot vacuums sell the map of your floor plan. You invited all of it in, and that's fine. Inviting a device in doesn't mean it gets to report on you. Let's close the pipes that don't need to be open.`,
+    progress: {
+      25: [
+        `A quarter of The Grid. You've started closing the pipes in your own house. You know what the TV reports now. Most people don't.`,
+        `25%. Every device you fix is one less way in. A smart bulb with a hole in it can be used to attack the laptop on the same network.`,
+      ],
+      50: [
+        `Halfway through The Grid. This is what privacy looks like in a smart home: not unplugging everything, but deciding what each device is allowed to send.`,
+        `50%. Half the house is quieter than it was. Smart features, less reporting. That's a trade you're allowed to make.`,
+      ],
+      75: [
+        `Three-quarters done. What's left is the fine-tuning: the guest network, encrypted DNS, the weather app that wanted your street address at 3 a.m.`,
+        `75%. You've audited more connected devices than most people know they own.`,
+      ],
+      100: [
+        `The Grid is secured. The TV's content recognition is off, the voice recordings are reviewed, the cameras answer to you, the router isn't on its factory password, and the smart stuff lives on its own network. The devices haven't changed. What each one is allowed to send has.`,
+        `The Grid is yours. You brought these devices in because they were convenient. They still are. You don't have to unplug from the modern world. You just get to decide what it takes.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `Parked. Some of these need you standing next to the device with the settings open. Come back when you're home.`,
+        `No problem. The remote will still be under the couch cushion tomorrow.`,
+      ],
+    },
+    lore: {
+      vizio_acr: { title: 'Vizio and ACR', text: `Automatic Content Recognition takes a fingerprint of what’s on your screen several times a second and sends it to a server that works out what you’re watching: live TV, streaming, Blu-ray, even video calls. Vizio paid $2.2 million to the FTC for doing it without telling anyone. Samsung, LG, Roku and Fire TV do it too; the consent is in the terms of service.` },
+      alexa_listeners: { title: 'The Listeners (2019)', text: `In 2019 Bloomberg revealed that Amazon employed thousands of people around the world to listen to Alexa recordings, to “improve the service.” Google and Apple had similar programs. A recording catches more than the command: background conversation, the TV, whatever else is happening in the room.` },
+      ring_emergency: { title: 'Ring’s Emergency Door', text: `Ring lets police ask nearby owners for footage through Community Requests, and you can say no to any of them. That isn’t the only door. Police can go to Ring directly with a warrant, and in 2022 Ring said it had given footage to police without the owner’s consent 11 times that year, under its emergency policy.` },
+      wyze_two_stories: { title: 'Wyze, Two Stories', text: `In 2019 Wyze exposed data on 2.4 million customers, and disclosed it within days. The long silence was about something else: a camera vulnerability it left unpatched for about three years, reported in 2022.` },
+      isp_repeal: { title: 'The 2017 Repeal', text: `In 2017 Congress repealed FCC rules that would have made internet providers get your permission before selling your browsing history. By default your DNS lookups go to your provider in plain text. Encrypted DNS hides them. Your provider still sees which servers you connect to.` },
+    },
+    allies: [
+      { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization — in every fight on this list.' },
+      { name: 'Fight for the Future', url: 'https://www.fightforthefuture.org/', description: 'Campaigning against surveillance and for digital rights.' },
+      { name: 'Consumer Reports', url: 'https://www.consumerreports.org/', description: 'Now rates companies on privacy, not just product quality.' },
+    ],
+  },
+
+  'clinic': {
+    intro: `This district is different from the others. Everything so far was about what you do; The Clinic is about what you are: your heart rate, your sleep, your cycle, your DNA, your prescriptions. And here's the part that makes me angry. HIPAA protects what your doctor keeps. It doesn't cover most of what your apps keep. GoodRx sent people's prescription data to Meta and Google for advertising, and HIPAA didn't cover it, because GoodRx is a tech company, not your doctor. BetterHelp put Facebook's pixel on the form where people describe their mental health struggles. The FTC stepped in on both, after the fact. Let's not wait for the FTC.`,
+    progress: {
+      25: [
+        `A quarter of The Clinic. You're finding out how much of your body has become data, and how little of it the law most people assume applies actually covers. Keep going.`,
+        `25%. You know what your wristband shares now, and with whom.`,
+      ],
+      50: [
+        `Halfway through The Clinic. The missions here feel personal, and that's right: every one is about your body, not just an account.`,
+        `50%. If you've done the genetic missions, you've done the most permanent work in this district. You can change a password. You can't change your genome.`,
+      ],
+      75: [
+        `Three-quarters of The Clinic. Prescription searches, therapy intake forms, heart-rate histories: fewer of them are going anywhere you didn't choose.`,
+        `75%. You looked at the places most people only hear about when a fine makes the news.`,
+      ],
+      100: [
+        `The Clinic is yours. Trackers locked down, health apps checked, genetic data deleted or locked down, prescription sharing reviewed, the wellness program understood. This was the most personal district in the city. It's yours again.`,
+        `Every facility in The Clinic, done. HIPAA still doesn't cover most health apps. You can't change that law from here, but you closed the gap for yourself. The groups working to close it for everyone could use the help.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `No pressure. The Clinic is heavy. It's about your body, not just your accounts. Come back when you're ready.`,
+        `Understood. Some of these are harder than others. The mission will be here.`,
+      ],
+    },
+    lore: {
+      hipaa_gap: { title: 'The HIPAA Gap', text: `HIPAA covers “covered entities,” like your doctor. Most health apps aren’t one. The FTC’s Health Breach Notification Rule covers some of them, and its first case was GoodRx, which had shared users’ prescription data with Meta and Google for advertising: a $1.5 million fine and a ban on sharing health data for ads.` },
+      betterhelp: { title: 'BetterHelp (2023)', text: `BetterHelp, the largest online therapy platform, paid a $7.8 million FTC settlement in 2023 for sharing therapy data with Facebook for ad targeting. The Facebook pixel was on its intake questionnaire, the form where you describe what you’re struggling with. In April 2024 Cerebral agreed to an FTC order that included paying more than $7 million, after sharing patients’ health information with advertisers including Google, TikTok and Snapchat.` },
+      period_data: { title: 'Period Data After Dobbs', text: `Flo, a period tracker with 300 million downloads, was caught in 2019 sharing health data with Facebook for ad targeting, and settled with the FTC. Since the Dobbs decision in 2022, prosecutors in states with abortion bans can subpoena app data to try to prove a pregnancy and its timing. Flo now has an Anonymous Mode. Clue, based in Germany, is bound by EU privacy law.` },
+      new_owner: { title: '23andMe’s New Owner', text: `23andMe went bankrupt in 2025, and TTAM Research Institute bought it in July 2025. Your DNA data moved with it. During the bankruptcy, California’s Attorney General urged customers to consider deleting their data. TTAM says it honors deletion, so deleting is still your choice, and still permanent.` },
+      relatives: { title: 'Your Relatives’ DNA', text: `The Golden State Killer was identified through DNA a distant relative had uploaded to GEDmatch, a public genealogy database. Law enforcement agencies have used the technique in hundreds of cases. GEDmatch later made law enforcement use opt-in. You can’t opt your cousins out, but you can know the exposure exists.` },
+    },
+    allies: [
+      { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization — in every fight on this list.' },
+      { name: 'Access Now', url: 'https://www.accessnow.org/', description: 'Global digital rights and the Digital Security Helpline.' },
+      { name: 'The Markup', url: 'https://themarkup.org/', description: 'Investigative tech journalism — they built the Blacklight website privacy inspector.' },
+    ],
+  },
+
+  'trail': {
+    intro: `The other districts were about accounts someone could break into. Nobody broke into anything here. You took photos, bought groceries, browsed the web and paid with a card, and each of those left a trace. A photo of your living room can carry the GPS coordinates of your living room. Your loyalty card knows your diet. Your browser's setup, its fonts and screen size and timezone, can pick you out with no cookie at all: in EFF's 2010 study, 83% of browsers were unique. Welcome to The Trail. Most of it can be thinned out.`,
+    progress: {
+      25: [
+        `A quarter of The Trail. You're seeing what most people walk past: the coordinates inside a photo, the data behind a loyalty card.`,
+        `25%. Every pipe you've closed here was running in the background. Now it isn't.`,
+      ],
+      50: [
+        `Halfway. The loudest leaks are handled. The rest are quieter, and still worth closing.`,
+        `50%. You can't unsee it now: the location in a photo, the sharing toggle in a rewards app, the lookups your internet provider can read.`,
+      ],
+      75: [
+        `Three-quarters done. Photos stripped, loyalty accounts trimmed, bank connections reviewed, browser hardened. The trail's getting faint.`,
+        `75%. A few left. What you scatter just by living is a trickle now, not a flood.`,
+      ],
+      100: [
+        `The Trail is yours. Photos without coordinates, loyalty programs opted out or closed, Plaid connections reviewed, the browser harder to fingerprint, the lookups encrypted. The trail you leave now is one you chose.`,
+        `District done. Nobody hacked you here, and nobody had to. The trail was the product. Now there's less of it.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `No rush. The trail isn't going anywhere. That's kind of the whole problem. It'll be here when you're ready.`,
+        `Noted. Most of these are smaller than they look. The hard part is remembering to do them.`,
+      ],
+    },
+    lore: {
+      photo_exif: { title: 'What a Photo Says', text: `A phone photo can carry EXIF data: the GPS coordinates where it was taken, the date and time, the device model. Twitter, Facebook and Instagram strip it on upload. Email, iMessage, Telegram, cloud shares and forums don’t. Google Photos and Apple Photos turn the coordinates into a map of everywhere you’ve been.` },
+      fingerprint_83: { title: '83%', text: `In EFF’s 2010 study, 83% of browsers were unique, from screen resolution, fonts, timezone, language, plugins and how the browser draws. Private browsing doesn’t change any of that, because the fingerprint is your browser’s setup, not what it stores. Mozilla works to make Firefox users look alike.` },
+      plaid: { title: 'Plaid’s Settlement', text: `If you’ve connected a bank account to Venmo, Robinhood, Coinbase, YNAB or a budgeting app, you probably went through Plaid. Plaid was sued for allegedly collecting more transaction data than users authorized, and settled for $58 million, announced in 2021 and approved in 2022. The Plaid Portal lists the apps you’ve connected, and lets you disconnect them.` },
+      card_data: { title: 'Anonymous, Supposedly', text: `Visa and Mastercard sell aggregated transaction data to marketers and analytics firms. It’s supposed to be anonymous. Researchers have repeatedly shown that card records can be traced back to people: the store, the date and the amount are often enough to identify one person.` },
+    },
+    allies: [
+      { name: 'EFF', url: 'https://www.eff.org/', description: 'The oldest digital rights organization — in every fight on this list.' },
+      { name: 'The Markup', url: 'https://themarkup.org/', description: 'Investigative data journalism. Built the Blacklight privacy inspector.' },
+      { name: 'Consumer Reports', url: 'https://www.consumerreports.org/', description: 'Now rates companies on privacy, not just product quality.' },
+    ],
+  },
 };
 
 export const GHOST_DIALOGUE = {
