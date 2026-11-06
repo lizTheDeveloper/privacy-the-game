@@ -1,0 +1,31 @@
+{
+  "id": "quality-planning-corporation",
+  "name": "Quality Planning Corporation",
+  "aliases": [
+    "Quality Planning Corporation",
+    "QUALITY PLANNING CORPORATION"
+  ],
+  "parent": null,
+  "kind": [],
+  "registries": {
+    "CA": null,
+    "VT": "2026",
+    "TX": null,
+    "OR": null
+  },
+  "sells": [],
+  "optOut": {
+    "method": "mail",
+    "url": "https://bizfilings.vermont.gov/databrokersearch/Search",
+    "status": "verified",
+    "verifiedAt": "2026-10-19"
+  },
+  "size": {
+    "known": false,
+    "signals": []
+  },
+  "sources": [
+    "registry-vt-2026-10-19"
+  ],
+  "website": null
+}
