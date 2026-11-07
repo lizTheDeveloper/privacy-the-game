@@ -62,9 +62,6 @@ describe('the location quiz', () => {
     expect(app).toMatch(/function guessAllowed\(\) \{\n {2}return !isAnalyticsOff\(\) && !hasGoneGhost\(\);/);
   });
 
-  it('the location never reaches track() or the URL from the quiz', () => {
-    const app = readFileSync('src/app.js', 'utf8');
-    const quiz = app.slice(app.indexOf('function quizAction'), app.indexOf('// The sky ladder: selecting a rung'));
-    expect(quiz).not.toMatch(/track\(|navigate\(|location\.hash|captureError/);
-  });
+  // "The location never reaches track() or the URL from the quiz" is driven for real in
+  // tests/app/local-only-actions.test.js.
 });

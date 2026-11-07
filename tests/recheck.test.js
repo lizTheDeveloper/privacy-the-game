@@ -96,15 +96,12 @@ describe('applyRecheck', () => {
     }
   });
 
-  it('never reaches analytics: no track calls, and the action path has no track or filing tail', () => {
+  it('never reaches analytics: no track calls from applyRecheck', () => {
     applyRecheck(completedState(), mission, good());
     for (const fn of Object.values(analytics)) expect(fn).not.toHaveBeenCalled();
     const util = readFileSync('src/utils/debrief.js', 'utf8');
     expect(util).not.toMatch(/analytics/);
-    const app = readFileSync('src/app.js', 'utf8');
-    const body = app.slice(app.indexOf('function submitRecheck'), app.indexOf('function readAnswers'));
-    expect(body.length).toBeGreaterThan(100);
-    expect(body).not.toMatch(/track|afterMissionRecorded|updateMission|fileDebrief/);
+    // The app.js submit-recheck click is driven for real in tests/app/local-only-actions.test.js.
   });
 });
 

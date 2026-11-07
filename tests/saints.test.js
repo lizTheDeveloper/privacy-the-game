@@ -75,15 +75,9 @@ describe('saint copy', () => {
 });
 
 describe('lighting a candle never reaches analytics', () => {
-  it('the light-candle action path has no track and saints code imports no analytics', async () => {
+  // The app.js light-candle click is driven for real in tests/app/local-only-actions.test.js.
+  it('saints code imports no analytics', async () => {
     const { readFileSync } = await import('node:fs');
-    const app = readFileSync('src/app.js', 'utf8');
-    const start = app.indexOf("action === 'light-candle'");
-    const body = app.slice(start, app.indexOf('} else if', start + 10)).replace(/\/\/.*$/gm, '');
-    expect(start).toBeGreaterThan(0);
-    expect(body.length).toBeGreaterThan(50);
-    expect(body).toContain('lightCandle(');
-    expect(body).not.toMatch(/\btrack|afterMissionRecorded|captureError/);
     for (const f of ['src/screens/saints.js', 'src/utils/interior-state.js', 'src/data/interiors/saints.js']) {
       const code = readFileSync(f, 'utf8').replace(/\/\/.*$/gm, '');
       expect(code).not.toMatch(/analytics|track\(/);

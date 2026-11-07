@@ -20,7 +20,7 @@ const DATA = {
 };
 // The explainer splits into four slides on its sentence starts; a copy edit that moves them
 // gets the whole text on one slide instead (the fallback), never a lost or broken sentence.
-const FOUR = explainerSlides().length === 4;
+// The real explainer must split: a fallback is a failure here, not a reason to skip.
 const CSS = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
 const RUN_PY = readFileSync(new URL('../collective/job/run.py', import.meta.url), 'utf8');
 const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -57,12 +57,12 @@ describe("every word of Scout's explainer reaches The Whole City, in every state
 describe("Scout's explainer as four slides", () => {
   it('the four parts are the explainer, word for word, split at sentence ends', () => {
     const parts = explainerSlides().map((s) => norm(s.html.replace(/<span class="k-dots[\s\S]*?<\/span><\/span>/g, '').replace(/<summary>[\s\S]*?<\/summary>/g, '')));
-    expect(FOUR ? 4 : 1).toBe(parts.length);
+    expect(parts).toHaveLength(4);
     expect(parts.join(' ')).toBe(COLLECTIVE_DIALOGUE.explainer);
     for (const p of parts) expect(p).toMatch(/[.?!]$/);
   });
 
-  it.runIf(FOUR)('one fact each: what is sent, what never is, the 50-player rule, deletion', () => {
+  it('one fact each: what is sent, what never is, the 50-player rule, deletion', () => {
     const [sent, never, rule, deletion] = explainerSlides().map((s) => norm(s.html));
     expect(sent).toContain('the game tells our own server');
     expect(sent).toContain('the place your internet connection points to');
@@ -74,21 +74,21 @@ describe("Scout's explainer as four slides", () => {
   for (const [name, collective] of STATES) {
     it(`renders as a four-slide deck in Scout's bubble (${name})`, () => {
       const html = renderCityTogether(createInitialState(), { collective });
-      expect(slidesOf(html)).toHaveLength(FOUR ? 4 : 0);
+      expect(slidesOf(html)).toHaveLength(4);
       expect(html).toContain('aria-label="How we know any of this"');
       expect(html).toContain('WHAT WE KNOW ABOUT YOU');
       expect(html).toContain('scout/thinking-a.png');
     });
   }
 
-  it.runIf(FOUR)('a slide shows at most 35 words with its fold closed; the long list is behind a fold open on desktop', () => {
+  it('a slide shows at most 35 words with its fold closed; the long list is behind a fold open on desktop', () => {
     const slides = slidesOf(renderCityTogether(createInitialState(), { collective: { status: 'error' } }));
     for (const s of slides) expect(countWords(closedDetails(dropHidden(s)))).toBeLessThanOrEqual(35);
     expect(slides[0]).toMatch(/<details class="explainer-more" data-fold="explainer-sent" data-open-desktop><summary>[^<]+<\/summary><\/details><span class="explainer-more-text">That's things like/);
     expect(CSS).toMatch(/\.explainer-more:not\(\[open\]\) \+ \.explainer-more-text \{ display: none; \}/);
   });
 
-  it.runIf(FOUR)(`the dots: exactly POD_MIN_PLAYERS of them, hidden from screen readers, phone only`, () => {
+  it(`the dots: exactly POD_MIN_PLAYERS of them, hidden from screen readers, phone only`, () => {
     const rule = explainerSlides()[2].html;
     const dots = rule.match(/<span class="k-dots[^"]*" aria-hidden="true">([\s\S]*?)<\/span><\/span>/);
     expect(dots).not.toBeNull();
@@ -102,6 +102,18 @@ describe("Scout's explainer as four slides", () => {
     expect(RUN_PY).toMatch(new RegExp(`^K = ${POD_MIN_PLAYERS}$`, 'm'));
     expect(COLLECTIVE_DIALOGUE.explainer).toContain(`at least ${POD_MIN_PLAYERS} players`);
     expect(renderCityTogether(createInitialState(), { collective: { status: 'ready', data: DATA } })).toContain(`fewer than ${POD_MIN_PLAYERS} players`);
+  });
+
+  it('says what K counts: browser sessions, not people (the job counts sessions, all time)', () => {
+    const rule = norm(explainerSlides()[2].html);
+    expect(rule).toContain(`at least ${POD_MIN_PLAYERS} players: browser sessions, not people`);
+    expect(rule).toContain('one person counts again per device, connection and month');
+    expect(COLLECTIVE_DIALOGUE.explainer).not.toMatch(/nobody can be picked out/i);
+    const footer = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: DATA } });
+    expect(footer).toContain('“Players” are anonymous browser sessions, not people: one person counts again on each device, connection and month.');
+    // What the footer and explainer describe is what the job counts: every Umami session of the site.
+    const BUILD = readFileSync(new URL('../collective/job/sql/build.sql', import.meta.url), 'utf8');
+    expect(BUILD).toMatch(/CREATE TEMP TABLE rc_s ON COMMIT DROP AS\nSELECT s\.session_id,[\s\S]*?FROM session s\n WHERE s\.website_id = :'website';/);
   });
 
   it('on desktop the slides flow as one paragraph, as the bubble always did', () => {

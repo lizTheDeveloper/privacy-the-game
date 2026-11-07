@@ -238,7 +238,7 @@ function footer(data) {
   if (when && !Number.isNaN(when.getTime())) lines.push(`As of ${esc(when.toLocaleString())}.`);
   lines.push('Breach rates now count email addresses only.');
   lines.push(...pageviewLines());
-  lines.push(`“Players” are anonymous browser sessions. Places with fewer than ${POD_MIN_PLAYERS} players are grouped into a bigger place.`);
+  lines.push(`“Players” are anonymous browser sessions, not people: one person counts again on each device, connection and month. Places with fewer than ${POD_MIN_PLAYERS} players are grouped into a bigger place.`);
   const tail = [];
   if (isNum(city.ghosts)) tail.push(`${fmt(city.ghosts)} people have gone ghost`);
   if (isNum(city.optedOut)) tail.push(`${fmt(city.optedOut)} opted out`);

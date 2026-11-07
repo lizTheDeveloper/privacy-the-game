@@ -7,7 +7,7 @@ import { validateDataset } from '../../research/data-brokers/build/schema.js';
 
 const src = (extra = {}) => ({
   url: 'https://example.gov/doc', title: 'Doc', kind: 'ftc-complaint', accessed: '2026-10-18',
-  archived: 'https://web.archive.org/web/2026/https://example.gov/doc', ...extra,
+  archived: 'https://web.archive.org/web/20261018000000/https://example.gov/doc', ...extra,
 });
 const broker = (id, name, extra = {}) => ({
   id, name, aliases: [], parent: null, kind: ['marketing'], registries: {}, sells: [], optOut: null,

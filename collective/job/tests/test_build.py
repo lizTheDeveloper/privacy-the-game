@@ -457,6 +457,37 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(doc["city"]["actions"], 60)
         self.assertEqual(doc["city"]["districts"], 2)
 
+    # C2 (2026-11 sweep): "actions" and "districts" count each mission and
+    # district once per session, like the per-kind figures. A debrief re-filed,
+    # or resent by restore.js, is the same step taken.
+    def test_a_mission_filed_twice_is_one_action(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed"},
+               at="now() - interval '2 hours'")
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed"},
+               at="now() - interval '1 hour'")
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed", "restored": "1"})
+        events(sids[:10], "mission-completed", {"mission": "gmail-fortify-2fa", "status": "completed", "method": "sms"})
+        doc = build()
+        self.assertEqual(doc["city"]["actions"], 70)
+        self.assertEqual(pods_by_id(doc)["us-il-chicago"]["actions"], 70)
+
+    def test_a_mission_refiled_as_skipped_is_no_action(self):
+        sids = players(60)
+        events(sids, "mission-completed", {"mission": "gmail-recon-login", "status": "completed"},
+               at="now() - interval '1 hour'")
+        events(sids[:20], "mission-completed", {"mission": "gmail-recon-login", "status": "skipped"})
+        self.assertEqual(build()["city"]["actions"], 40)
+
+    def test_a_district_sent_twice_counts_once(self):
+        sids = players(60)
+        events(sids[:5], "district-completed", {"district": "master-keys"}, at="now() - interval '1 hour'")
+        events(sids[:5], "district-completed", {"district": "master-keys", "restored": "1"})
+        events(sids[:2], "district-completed", {"district": "vault"})
+        doc = build()
+        self.assertEqual(doc["city"]["districts"], 7)
+        self.assertEqual(pods_by_id(doc)["us-il-chicago"]["districts"], 7)
+
 
 
 def done(sids, mission, status="completed"):

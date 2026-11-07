@@ -12,6 +12,8 @@ import {
   qualifiedRefs,
   hasWaybackLink,
   isTestPath,
+  isAllowedBountyPath,
+  BOUNTY_CONFIG_FILES,
   sanitizePath,
   guardComments,
   closeComment,
@@ -157,6 +159,37 @@ describe('assessPr: tests rule', () => {
     expect(assessPr(codePr([file('tests/b.test.js', 0, 0, 'RENAMED', 'tests/a.test.js')]), ctx()).action).toBe('ok');
   });
 
+  it('outside PRs touching test config, fixtures, package.json or the guard are held for a maintainer (B3, probes C, E, F)', () => {
+    for (const path of [
+      'vitest.config.js',
+      'tests/fixtures/verified-urls.json',
+      'tests/fixtures/bounty-guard/pr-435.json',
+      'scripts/bounty-guard/guard.mjs',
+      'scripts/bounty-guard/install.sh',
+      'package.json',
+      'package-lock.json',
+    ]) {
+      for (const f of [file(path, 1, 1), file(path, 0, 400)]) {
+        const d = assessPr(codePr([f]), ctx());
+        expect(d.action, path).toBe('flag');
+        expect(d.needsMaintainer, path).toBe(true);
+        expect(d.karmaFarming, path).toBe(false);
+        expect(d.paths, path).toContain(path);
+      }
+    }
+    // Collaborators are trusted as before.
+    expect(assessPr(codePr([file('vitest.config.js', 1, 1)], { authorAssociation: 'COLLABORATOR' }), ctx()).action).toBe('ok');
+  });
+
+  it('an outside PR rewriting more than 20 lines of one test in place (net 0) is held for a maintainer (probe D)', () => {
+    const d = assessPr(codePr([file('tests/collective.test.js', 30, 30)]), ctx());
+    expect(d).toMatchObject({ action: 'flag', needsMaintainer: true, karmaFarming: false });
+    expect(d.reasons.join('\n')).toMatch(/Rewrites more than 20 lines of existing tests/);
+    // Up to 20 lines rewritten, or a new test file, is still fine.
+    expect(assessPr(codePr([file('tests/collective.test.js', 20, 20)]), ctx()).action).toBe('ok');
+    expect(assessPr(codePr([file('tests/new.test.js', 300, 0, 'ADDED')]), ctx()).action).toBe('ok');
+  });
+
   it('on a bounty PR, gutting tests is karma-farming', () => {
     const d = assessPr(legitBountyPr({ files: [file('tests/data.test.js', 0, 50)] }), ctx());
     expect(d.action).toBe('close');
@@ -170,6 +203,39 @@ describe('assessPr: bounty PRs', () => {
     expect(d.action).toBe('close');
     expect(d.karmaFarming).toBe(true);
     expect(d.paths).toEqual(['data/brokers.json']);
+  });
+
+  it('only the four dataset config files are allowed bounty paths; sweeps.json is generated (B1)', () => {
+    expect(BOUNTY_CONFIG_FILES.map((p) => p.split('/').pop()).sort()).toEqual(['alias-blocklist.json', 'id-map.json', 'link-overrides.json', 'record-overrides.json']);
+    for (const p of BOUNTY_CONFIG_FILES) expect(existsSync(p), p).toBe(true);
+    expect(isAllowedBountyPath('research/data-brokers/build/brokers_update.json')).toBe(false);
+    expect(isAllowedBountyPath('research/data-brokers/build/sweeps.json')).toBe(false);
+    const sweeps = assessPr(legitBountyPr({ files: [file('research/data-brokers/build/sweeps.json', 3, 1)] }), ctx());
+    expect(sweeps.action).toBe('close');
+    const sweepsOutside = assessPr(codePr([file('research/data-brokers/build/sweeps.json', 3, 1)]), ctx());
+    expect(sweepsOutside.action).toBe('close'); // a hand-edited generated file
+  });
+
+  it('a bounty PR adding a new data file under build/ is closed as karma-farming (audit probe A)', () => {
+    const d = assessPr(legitBountyPr({
+      body: `Refs #7 ${WAYBACK}`,
+      files: [file('research/data-brokers/build/brokers_update.json', 500, 0, 'ADDED')],
+    }), ctx({ bountyIssues: new Set([7]) }));
+    expect(d.action).toBe('close');
+    expect(d.karmaFarming).toBe(true);
+    expect(d.reasons.join('\n')).toMatch(/new data file/);
+    expect(d.paths).toEqual(['research/data-brokers/build/brokers_update.json']);
+    // Renamed or copied into build/ is new too.
+    const renamed = assessPr(legitBountyPr({ files: [file('research/data-brokers/build/x.json', 0, 0, 'RENAMED', 'research/data-brokers/build/id-map.json')] }), ctx());
+    expect(renamed.action).toBe('close');
+  });
+
+  it('an outside non-bounty PR adding a data file under build/ is held for a maintainer', () => {
+    const d = assessPr(codePr([file('research/data-brokers/build/extra.json', 40, 0, 'ADDED')]), ctx());
+    expect(d).toMatchObject({ action: 'flag', needsMaintainer: true, karmaFarming: false });
+    expect(d.labels).toContain('needs-maintainer');
+    // A new build script is code, not a data file: fine.
+    expect(assessPr(codePr([file('research/data-brokers/build/new-step.js', 40, 0, 'ADDED')]), ctx()).action).toBe('ok');
   });
 
   it('a nested file under build/ is not an allowed bounty path', () => {
@@ -313,8 +379,33 @@ describe('text helpers', () => {
 
   it('a Wayback link means a web.archive.org capture URL, not the bare word', () => {
     expect(hasWaybackLink(`see ${WAYBACK}`)).toBe(true);
-    expect(hasWaybackLink('https://web.archive.org/save/https://x.com')).toBe(true);
+    expect(hasWaybackLink('(https://web.archive.org/web/20261022153000/http://example.org/a?b=1)')).toBe(true);
+    expect(hasWaybackLink('https://web.archive.org/web/20261022153000id_/https://example.org/')).toBe(true);
     expect(hasWaybackLink('I saved it on web.archive.org')).toBe(false);
+  });
+
+  it('a /save/ link, a bare root, a short timestamp or a placeholder is not a snapshot (B2)', () => {
+    for (const fake of [
+      'https://web.archive.org/save/https://x.com', // asks for a capture; proves none was made
+      'https://web.archive.org/save/<url>', // CONTRIBUTING's own placeholder
+      'Captures: `https://web.archive.org/save/<url>`',
+      'https://web.archive.org/web/x',
+      'https://web.archive.org/',
+      'https://web.archive.org/web/2026/https://example.com/',
+      'https://web.archive.org/web/20261022000000/<url>',
+      'https://web.archive.org/web/20261022000000/https://<url>',
+      'https://web.archive.org/web/20261022000000/javascript:alert(1)',
+      'https://web.archive.org/web/20261022000000/example.com',
+      'https://web.archive.org/web/*/https://example.com/*',
+    ]) expect(hasWaybackLink(fake), fake).toBe(false);
+    // The audit's probe B: the guard's own evidence placeholder no longer clears needs-evidence.
+    const d = assessPr(legitBountyPr({ body: 'Refs #200 https://web.archive.org/web/x' }), ctx());
+    expect(d).toMatchObject({ action: 'flag', needsEvidence: true });
+    const placeholder = assessPr(legitBountyPr({ body: 'Refs #200 https://web.archive.org/save/<url>' }), ctx());
+    expect(placeholder.needsEvidence).toBe(true);
+    // The guard's request names the snapshot shape, not the /save/ placeholder.
+    expect(d.reasons.join('\n')).toContain('https://web.archive.org/web/<14-digit timestamp>/<url>');
+    expect(d.reasons.join('\n')).not.toContain('/save/');
   });
 
   it('untrusted paths cannot break out of the code block or forge a marker', () => {

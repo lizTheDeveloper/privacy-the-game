@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { createInitialState } from '../src/state.js';
 import { customMissionsFor, findMission, findCustomMission, cleanCustomName, isCustomMission, customAccountsIn } from '../src/data/custom-missions.js';
 import { renderDistrict } from '../src/screens/district.js';
@@ -14,7 +13,6 @@ import { MISSIONS } from '../src/data/missions.js';
 import { currentScreen } from '../src/components/bug-reporter.js';
 
 const withCustom = (district, names) => ({ ...createInitialState(), customAccounts: { [district]: names } });
-const APP = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
 
 describe('custom accounts get their own missions (feature map row 16)', () => {
   it('each added account gets a sign-in check, a password, a second step and recovery', () => {
@@ -125,11 +123,6 @@ describe('custom accounts stay in this browser', () => {
     expect(isPrivateBreadcrumb({ category: 'ui.input', message: 'input#custom-account-input' })).toBe(true);
   });
 
-  it('app.js sends no event for them: every mission track() is behind isCustomMission', () => {
-    const tracks = APP.split('\n').filter((l) => /track\('mission-(started|completed)'/.test(l));
-    // mission-step's track sits inside an if that checks it; every other one checks on its own line.
-    expect(APP).toMatch(/if \(firstTime && !isCustomMission\(el\.dataset\.mission\)\) \{\n\s+const mission = findMission\(state, el\.dataset\.mission\);\n\s+track\('mission-started'/);
-    expect(tracks.filter((l) => !/isCustomMission/.test(l))).toHaveLength(1);
-    expect(tracks.length).toBe(4);
-  });
+  // "app.js sends no event for them" is driven for real (start, step, GO DO IT, filing) in
+  // tests/app/local-only-actions.test.js.
 });

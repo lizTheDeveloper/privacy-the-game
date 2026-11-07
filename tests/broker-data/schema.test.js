@@ -8,7 +8,7 @@ import {
 } from '../../research/data-brokers/build/schema.js';
 
 const sourceIds = new Set(['s1']);
-const src = { url: 'https://example.com/a', archived: 'https://web.archive.org/web/2026/https://example.com/a', kind: 'sec-10k', title: 'T', accessed: '2026-10-18' };
+const src = { url: 'https://example.com/a', archived: 'https://web.archive.org/web/20261018000000/https://example.com/a', kind: 'sec-10k', title: 'T', accessed: '2026-10-18' };
 const broker = (o = {}) => ({
   id: 'acme', name: 'Acme', aliases: [], parent: null, kind: ['marketing'],
   registries: { CA: '2024', VT: null }, sells: ['lists'],

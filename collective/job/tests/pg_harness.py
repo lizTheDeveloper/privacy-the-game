@@ -2,10 +2,16 @@
 
 Runs `postgres:18-alpine` in Docker, locally or on another host when
 RC_TEST_SSH is set (e.g. RC_TEST_SSH="ssh -i ~/.ssh/hetzner_cto_tycoon root@204.168.205.161").
+
+RC_TEST_PG=local runs a throwaway cluster from the Postgres binaries on this
+machine instead (initdb into a temp dir, Unix socket only, no TCP port, removed
+on stop). RC_TEST_PG_BIN picks the bin directory (default: initdb on PATH).
 """
 import os
 import shlex
+import shutil
 import subprocess
+import tempfile
 import time
 import uuid
 from pathlib import Path
@@ -15,7 +21,56 @@ SQL_DIR = HERE.parent / "sql"
 WEBSITE = "9a3e18e2-56a6-4b69-90af-d88db951b600"
 
 
+class LocalPg:
+    """The same surface as PgHarness, on a private local cluster."""
+
+    def __init__(self, name="rc-sqltest"):
+        self.name = name
+        bin_dir = os.environ.get("RC_TEST_PG_BIN") or str(Path(shutil.which("initdb") or "initdb").parent)
+        self.bin = Path(bin_dir)
+        self.dir = None
+
+    def _run(self, args, stdin=None, check=True):
+        r = subprocess.run(args, input=stdin, capture_output=True, text=True)
+        if check and r.returncode != 0:
+            raise RuntimeError(f"{[str(a) for a in args[:3]]} failed: {r.stderr.strip()}")
+        return r
+
+    def start(self):
+        self.dir = Path(tempfile.mkdtemp(prefix=f"{self.name}-"))
+        data, sock = self.dir / "data", self.dir / "sock"
+        sock.mkdir()
+        self._run([self.bin / "initdb", "-D", data, "-U", "umami", "--auth=trust", "-E", "UTF8", "--no-instructions"])
+        try:
+            self._run([self.bin / "pg_ctl", "-D", data, "-l", self.dir / "log", "-w", "start",
+                       "-o", f"-c listen_addresses='' -k {sock} -c fsync=off"])
+            self._run([self.bin / "createdb", "-h", sock, "-U", "umami", "umami"])
+            self.reset()
+        except Exception:
+            self.stop()
+            raise
+
+    def stop(self):
+        if not self.dir:
+            return
+        self._run([self.bin / "pg_ctl", "-D", self.dir / "data", "-m", "immediate", "stop"], check=False)
+        shutil.rmtree(self.dir, ignore_errors=True)
+        self.dir = None
+
+    def sql(self, text, variables=None):
+        args = [self.bin / "psql", "-h", self.dir / "sock", "-U", "umami", "-d", "umami",
+                "-v", "ON_ERROR_STOP=1", "-qAt"]
+        for k, v in (variables or {}).items():
+            args += ["-v", f"{k}={v}"]
+        return self._run(args, stdin=text).stdout
+
+
 class PgHarness:
+    def __new__(cls, name="rc-sqltest"):
+        if cls is PgHarness and os.environ.get("RC_TEST_PG") == "local":
+            return _LocalHarness(name)
+        return super().__new__(cls)
+
     def __init__(self, name="rc-sqltest"):
         self.name = name
         self.ssh = shlex.split(os.environ.get("RC_TEST_SSH", ""))
@@ -87,6 +142,13 @@ class PgHarness:
         if table == "event_data":
             return int(self.sql(f"SELECT count(*) FROM event_data d JOIN website_event e ON e.event_id = d.website_event_id WHERE e.session_id = '{session_id}';").strip())
         return int(self.sql(f"SELECT count(*) FROM {table} WHERE {col} = '{session_id}';").strip())
+
+
+class _LocalHarness(LocalPg, PgHarness):
+    """LocalPg's start/stop/sql with PgHarness's helpers (reset, inserts, run_files)."""
+
+    def __init__(self, name="rc-sqltest"):
+        LocalPg.__init__(self, name)
 
 
 def q(v):
