@@ -712,8 +712,11 @@ describe('round 6 ruling: unsourced stats and absolutes stay removed', () => {
     expect(all).toContain('about 147 million people');
   });
 
-  it('LinkedIn AI training: most users, not in the EU, UK or Switzerland', () => {
-    expect(all).toContain('opted most users in to AI training in 2024 (not in the EU, UK or Switzerland)');
+  // LinkedIn's own help (a6278444, a5538339): the setting is on by default, and
+  // from 3 November 2025 the EEA, Switzerland and the UK are covered too.
+  it('LinkedIn AI training: most users in 2024, and the EU, EEA, Switzerland and UK since 3 November 2025', () => {
+    expect(all).toContain('opted most users in to AI training in 2024, and since 3 November 2025 that includes members in the EU, the EEA, Switzerland and the UK');
+    expect(all).not.toContain('not in the EU, UK or Switzerland');
   });
 });
 

@@ -163,7 +163,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     briefing: `If your bank password is the same as any other account's, automated scripts can try it against your bank whenever that other account leaks. Your password manager can generate a unique one. Let it do its job.`,
     steps: [
       { text: `Log into your bank's website or app` },
-      { text: 'Go to Settings → Security → Change Password' },
+      { text: "Find the password option in your account's security settings (each provider names it differently)" },
       { text: 'Use your password manager to generate a new unique password (16+ characters)' },
       { text: `Save it in your password manager -- don't try to memorize it` },
       { text: 'Verify you can log back in with the new password' },
@@ -258,7 +258,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     briefing: "Your credit card portal password protects your card number, your billing address, and your credit limit. Generate a new one in your password manager -- you know the drill from Chapter 1.",
     steps: [
       { text: "Log into your credit card portal" },
-      { text: "Go to Account Settings → Security → Change Password" },
+      { text: "Find the password option in your account's security settings (each provider names it differently)" },
       { text: "Generate a new unique password in your password manager" },
       { text: "While you're here, check if 2FA is available and turn it on" },
     ],
@@ -546,7 +546,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     briefing: "New password and 2FA on the account that holds your retirement savings. If your brokerage offers a security key or authenticator app, use it: for an account measured in decades of savings, take the strongest option available.",
     steps: [
       { text: "Log into your brokerage account" },
-      { text: "Go to Security Settings → Change Password" },
+      { text: "Find the password option in your account's security settings (each provider names it differently)" },
       { text: "Generate a new unique password in your password manager" },
       { text: "Enable 2FA -- authenticator app or security key" },
       { text: `Check your beneficiary designations while you're here -- make sure they're correct` },
@@ -723,7 +723,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     briefing: 'State government IT is… variable. Some states have modern systems. Some run on code older than their interns. A strong, unique password compensates for a lot. If they offer 2FA, enable it -- you might be their only user who does.',
     steps: [
       { text: 'Log into your state DMV online account' },
-      { text: 'Go to Account Settings → Security → Change Password' },
+      { text: "Find the password option in your account's security settings (each provider names it differently)" },
       { text: 'Generate a new unique password in your password manager' },
       { text: 'Check if 2FA is available -- enable it if so' },
     ],
@@ -771,7 +771,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     briefing: 'Healthcare IT security budgets are notoriously thin. Your password is probably the strongest security layer between your medical records and the outside world. If the portal offers 2FA, consider it a minor miracle and enable it.',
     steps: [
       { text: 'Log into your healthcare portal (Healthcare.gov, insurer, or MyChart)', url: 'https://www.healthcare.gov/login/' },
-      { text: 'Go to Account Settings → Security → Change Password' },
+      { text: "Find the password option in your account's security settings (each provider names it differently)" },
       { text: 'Generate a new unique password in your password manager' },
       { text: 'Check for 2FA options and enable if available' },
       { text: 'Do the same for any separate patient portals (MyChart, etc.)' },

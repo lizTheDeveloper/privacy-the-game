@@ -90,7 +90,7 @@ export const TRAIL_MISSIONS = [
     accountId: "photo_metadata",
     phase: "fortify",
     title: "Strip Metadata Before Sharing",
-    briefing: "The fix has two parts: stop embedding location in new photos, and know which sharing methods strip metadata from existing ones. Some platforms (Twitter, Facebook, Instagram) strip EXIF on upload. Others (email, iMessage, Telegram, cloud shares, forums) don't. The safest move is to turn off location tagging at the camera level.",
+    briefing: "The fix has two parts: stop embedding location in new photos, and know which sharing methods strip metadata from existing ones. Some platforms (Twitter, Facebook, Instagram) strip EXIF on upload. Others (email, iMessage, cloud shares, forums) don't. The safest move is to turn off location tagging at the camera level.",
     steps: [
       { text: "iPhone: Settings > Privacy & Security > Location Services > Camera > set to 'Never'. This stops new photos from getting GPS coordinates." },
       { text: "Android: Open your Camera app > Settings (gear icon) > look for 'Location tags,' 'Save location,' or 'Geo tag' > turn it OFF. The setting name varies by manufacturer." },
@@ -253,7 +253,7 @@ export const TRAIL_MISSIONS = [
     ],
     debriefQs: TRAIL_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Buy Now Pay Later is the financial product designed to feel like it isn't one. One click at checkout, and you've opened an account that keeps your purchase history and stays open until you close it. Most people who've shopped online in the last three years have at least one BNPL account they forgot about. Each one is a financial record with your name on it, and each one feeds the data economy.\"",
+      briefing: "\"Buy Now Pay Later is the financial product designed to feel like it isn't one. One click at checkout, and you've opened an account that keeps your purchase history and stays open until you close it. It's easy to have one you forgot about. Each one is a financial record with your name on it, and each one feeds the data economy.\"",
       debrief: scoutTrail(
         "\"BNPL accounts audited and cleaned up. Fewer open financial accounts, fewer copies of your purchase history.\"",
         "\"Already on top of your BNPL. That's financial hygiene most people never think about.\"",
@@ -271,7 +271,7 @@ export const TRAIL_MISSIONS = [
     steps: [
       { text: 'Chase: sign in and review the privacy and marketing preferences in your profile settings to opt out of sharing for marketing' },
       { text: "Capital One: sign in and review its privacy choices to limit sharing", url: "https://www.capitalone.com/privacy/" },
-      { text: "American Express: Log in > Account Services > Privacy > opt out of 'sharing information with Amex business partners'", url: "https://global.americanexpress.com/privacy/opt-out" },
+      { text: "American Express: log in to your account, call the number on the back of your card, or call 1 (855) AXP-PRIV to review whether Amex can share certain data with its business partners", url: "https://www.americanexpress.com/us/privacy-center/" },
       { text: "Bank of America: sign in and review its privacy and ad choices", url: "https://www.bankofamerica.com/privacy/consumer-privacy-notice.go" },
       { text: "For any card not listed: search '[your card issuer] privacy opt out' or call the number on the back of your card and ask for their privacy department." },
     ],

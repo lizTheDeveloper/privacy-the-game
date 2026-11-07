@@ -273,7 +273,7 @@ export const FOUNDRY_MISSIONS = [
     accountId: 'ai_linkedin',
     phase: 'fortify',
     title: 'Disable LinkedIn AI Training',
-    briefing: "LinkedIn opted most users in to AI training in 2024 (not in the EU, UK or Switzerland). Your profile, posts, articles, and engagement data are used to train their generative AI. There's a toggle. Turning it off doesn't affect your visibility to recruiters.",
+    briefing: "LinkedIn opted most users in to AI training in 2024, and since 3 November 2025 that includes members in the EU, the EEA, Switzerland and the UK. Your profile, posts, articles, and engagement data are used to train their generative AI. There's a toggle. Turning it off doesn't affect your visibility to recruiters.",
     steps: [
       { text: 'Open LinkedIn Privacy Settings', url: 'https://www.linkedin.com/mypreferences/d/categories/privacy' },
       { text: 'Find "Data for Generative AI Improvement"' },
@@ -412,14 +412,14 @@ export const FOUNDRY_MISSIONS = [
     briefing: "X (formerly Twitter) uses your public posts, engagement data, and Grok conversations to train xAI's models. They also share data with third-party AI collaborators. The opt-out is buried in privacy settings — most users don't even know it exists.",
     steps: [
       { text: 'Open X Privacy Settings', url: 'https://x.com/settings/privacy_and_safety' },
-      { text: 'Find "Data sharing and personalization"' },
-      { text: 'Open "Grok" settings and uncheck the training data box' },
-      { text: 'Also uncheck "Third-party Collaborators" data sharing' },
+      { text: 'Scroll to "Data sharing and personalization" and select "Grok & Third-party Collaborators"' },
+      { text: 'Under Data Sharing, uncheck "Allow your public data as well as your interactions, inputs, and results with Grok and xAI to be used for training and fine-tuning"' },
+      { text: 'Under Grok Personalization, uncheck "Allow X to personalize your experience with Grok" if you don\'t want that either' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
     optOut: { action: ['opted-out'] },
     scoutDialog: {
-      briefing: '"X feeds your posts and engagement straight into Grok. Two checkboxes control it — uncheck both."',
+      briefing: '"X feeds your posts and engagement straight into Grok. Two boxes under Grok & Third-party Collaborators control it — uncheck both."',
       debrief: {
         'opted-out': '"Grok cut off from your data. Your posts stay social, not training material."',
         'no-account': '"No X account — nothing for Grok to learn from."',

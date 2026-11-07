@@ -184,7 +184,7 @@ export const PERIMETER_MISSIONS = [
     ],
     debriefQs: PHISHING_DEBRIEF,
     scoutDialog: {
-      briefing: "\"Let's train your eye. The biggest tell in a phishing email isn't bad grammar or threats -- it's the domain. Every company sends from specific domains. Google uses accounts.google.com. Your bank uses their actual domain. Phishers use domains that look close but aren't: google-security.com, chase-verify.com, paypa1.com. One wrong character is all it takes. Once you train yourself to check the domain before anything else, you catch 90% of phishing on sight.\"",
+      briefing: "\"Let's train your eye. The biggest tell in a phishing email isn't bad grammar or threats -- it's the domain. Every company sends from specific domains. Google uses accounts.google.com. Your bank uses their actual domain. Phishers use domains that look close but aren't: google-security.com, chase-verify.com, paypa1.com. One wrong character is all it takes. Once you train yourself to check the domain before anything else, you catch a lot of phishing on sight.\"",
       debrief: {
         "no-breaches": "\"Good eye. The domain check becomes a habit with practice -- two seconds, every email. It won’t catch everything, but it catches a lot.\"",
         "1-2-breaches": "\"The tricky ones are the real emails that look fake. Microsoft's actual domain -- accountprotection.microsoft.com -- sounds made up. But it's real. The skill is checking, not guessing.\"",

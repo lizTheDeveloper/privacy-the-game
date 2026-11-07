@@ -319,8 +319,8 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Outlook',
     briefing: 'Your Microsoft password protects not just email but OneDrive, Office 365, and any app using Microsoft SSO. A unique, strong password here closes the door to your entire Microsoft life.',
     steps: [
-      { text: 'Open Microsoft security settings', url: 'https://account.live.com/proofs/manage' },
-      { text: 'Click "Change password"' },
+      { text: 'Sign in to your Microsoft account and open Security', url: 'https://account.microsoft.com/security' },
+      { text: 'Select the Change password link at the top of the page' },
       { text: 'Set a new unique password (16+ characters, password manager recommended)' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -671,8 +671,8 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: ProtonMail',
     briefing: 'Proton uses zero-knowledge encryption — they can’t read your mail even if compelled. But that means a lost or compromised password is catastrophic. Make it strong and backed up.',
     steps: [
-      { text: 'Open Proton Account Settings', url: 'https://account.proton.me/u/0/mail/security' },
-      { text: 'Change your password' },
+      { text: 'Sign in to your Proton account → Settings → All settings', url: 'https://account.proton.me' },
+      { text: 'Select Account and password, then click the pencil button next to your password and enter your current one' },
       { text: 'Set a strong, unique password and store it in a password manager' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -693,9 +693,9 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: ProtonMail',
     briefing: 'Proton supports TOTP authenticator apps and security keys for two-factor authentication. Given Proton’s role as a privacy-first provider, 2FA here completes the security picture.',
     steps: [
-      { text: 'Open Proton Account Security', url: 'https://account.proton.me/u/0/mail/security' },
-      { text: 'Enable "Two-factor authentication"' },
-      { text: 'Set up with an authenticator app — save your recovery codes securely' },
+      { text: 'Sign in to your Proton account → Settings → All settings', url: 'https://account.proton.me' },
+      { text: 'Select Account and password and scroll to Two-factor authentication' },
+      { text: 'Set it up with an authenticator app or a security key — save the recovery codes Proton gives you somewhere safe' },
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,
     scoutDialog: {
@@ -716,7 +716,7 @@ const CHAPTER_1_MISSIONS = [
     title: 'Privacy Review: ProtonMail',
     briefing: 'Proton is privacy-focused by design, but there are still settings worth reviewing: default email encryption, metadata protection, and whether your recovery email could be a leak vector.',
     steps: [
-      { text: 'Open Proton Mail Settings', url: 'https://account.proton.me/u/0/mail/security' },
+      { text: 'Sign in to your Proton account → Settings → All settings', url: 'https://account.proton.me' },
       { text: 'Review recovery methods — a recovery email on Gmail exposes your Proton use' },
       { text: 'Check that PGP encryption defaults are sensible for your threat model' },
     ],
@@ -1031,8 +1031,8 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Microsoft Account',
     briefing: 'Your Microsoft password protects Outlook, OneDrive, Office, Xbox, and any service using Microsoft SSO. Microsoft also supports passwordless sign-in via the Authenticator app if you want to go further.',
     steps: [
-      { text: 'Open Microsoft security settings', url: 'https://account.live.com/proofs/manage' },
-      { text: 'Change your password' },
+      { text: 'Sign in to your Microsoft account and open Security', url: 'https://account.microsoft.com/security' },
+      { text: 'Select the Change password link at the top of the page' },
       { text: 'Set a new, unique password (consider going passwordless with Microsoft Authenticator)' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -1148,8 +1148,8 @@ const CHAPTER_1_MISSIONS = [
     title: 'Password Reset: Facebook',
     briefing: 'Your Facebook password protects your social identity and every app using Facebook Login. Because Facebook is a common SSO provider, a compromised Facebook password can cascade to dozens of other services.',
     steps: [
-      { text: 'Open Facebook Security Settings', url: 'https://www.facebook.com/settings?tab=security' },
-      { text: 'Click "Change password"' },
+      { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
+      { text: 'Select Password and security → Change password, then pick your Facebook account' },
       { text: 'Set a new, unique password' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -1170,8 +1170,8 @@ const CHAPTER_1_MISSIONS = [
     title: '2FA Setup: Facebook',
     briefing: 'Facebook supports authenticator apps, security keys, and SMS for two-factor authentication. An authenticator app is recommended — SMS can be intercepted via SIM swapping, which is a known attack vector on social media accounts.',
     steps: [
-      { text: 'Open Facebook Security Settings', url: 'https://www.facebook.com/settings?tab=security' },
-      { text: 'Click "Use two-factor authentication"' },
+      { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
+      { text: 'Select Password and security → Two-factor authentication, then pick your Facebook account' },
       { text: 'Set up with an authenticator app (not SMS)' },
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,

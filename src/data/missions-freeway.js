@@ -261,7 +261,7 @@ function makeManufacturerMissions(accountId) {
     briefing: `The final step: ask ${name} to delete the data they've already collected. That includes past location history, driving behavior records, and data shared with partners. California's law and similar state laws give you this right, with some exceptions. They have up to 45 days to respond (extendable to 90).`,
     steps: [
       { text: `Open ${name}'s privacy portal`, url: acct.securityUrl },
-      { text: 'Select "Delete My Personal Information"' },
+      { text: 'Choose the request to delete your personal information (the brand’s privacy request form names it)' },
       { text: 'Verify your identity with VIN or account credentials' },
       { text: 'Submit the deletion request and save confirmation' },
     ],

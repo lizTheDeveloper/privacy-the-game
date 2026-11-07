@@ -47,7 +47,7 @@ const BASE_ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/protonmail.png',
     buildingDark: 'assets/buildings/protonmail_dark.png',
-    securityUrl: 'https://account.proton.me/u/0/mail/security',
+    securityUrl: 'https://account.proton.me',
     riskLevel: 'high',
   },
   apple_id: {
@@ -79,7 +79,7 @@ const BASE_ACCOUNTS = {
     district: 'master-keys',
     building: 'assets/buildings/facebook.png',
     buildingDark: 'assets/buildings/facebook_dark.png',
-    securityUrl: 'https://www.facebook.com/settings?tab=security',
+    securityUrl: 'https://accountscenter.facebook.com/password_and_security',
     riskLevel: 'high',
   },
   // Chapter 2: The Vault

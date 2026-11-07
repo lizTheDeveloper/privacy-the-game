@@ -8,7 +8,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://www.facebook.com/privacy/center/',
     riskLevel: 'high',
     dataCollected: ['public posts', 'comments', 'photos', 'Meta AI conversations'],
-    settingsPath: 'Instagram: Settings > Account > Data use for AI improvement',
   },
   ai_google: {
     name: 'Google Gemini',
@@ -18,7 +17,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://myactivity.google.com/product/gemini',
     riskLevel: 'high',
     dataCollected: ['prompts', 'shared files', 'connected app data', 'search history'],
-    settingsPath: 'Gemini: Settings & help > Activity > Turn off "Keep activity"',
   },
   ai_openai: {
     name: 'ChatGPT',
@@ -29,7 +27,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://chatgpt.com/settings',
     riskLevel: 'high',
     dataCollected: ['prompts', 'uploaded files', 'conversation history'],
-    settingsPath: 'Settings > Data controls > "Improve the model for everyone"',
   },
   ai_microsoft: {
     name: 'Microsoft Copilot',
@@ -39,7 +36,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://account.microsoft.com/privacy/',
     riskLevel: 'medium',
     dataCollected: ['Copilot prompts', 'documents', 'Bing searches', 'Edge browsing data'],
-    settingsPath: 'Microsoft Privacy Dashboard > Manage your data',
   },
   ai_linkedin: {
     name: 'LinkedIn AI',
@@ -49,7 +45,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://www.linkedin.com/mypreferences/d/categories/privacy',
     riskLevel: 'high',
     dataCollected: ['profile data', 'posts', 'articles', 'engagement patterns'],
-    settingsPath: 'Settings > Data Privacy > "Data for Generative AI Improvement" > Off',
   },
   ai_adobe: {
     name: 'Adobe Firefly',
@@ -60,7 +55,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://account.adobe.com/privacy',
     riskLevel: 'medium',
     dataCollected: ['uploaded images', 'creative work', 'Firefly prompts'],
-    settingsPath: 'Account > Privacy > Content analysis',
   },
   ai_amazon: {
     name: 'Amazon Alexa',
@@ -70,7 +64,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://www.amazon.com/alexa-privacy/apd/home',
     riskLevel: 'high',
     dataCollected: ['voice recordings', 'smart home commands', 'music/media requests', 'shopping queries'],
-    settingsPath: 'Alexa app: More > Settings > Alexa Privacy > Manage Your Alexa Data',
   },
   ai_apple: {
     name: 'Apple Intelligence',
@@ -81,7 +74,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://privacy.apple.com/',
     riskLevel: 'low',
     dataCollected: ['Siri requests', 'dictation data', 'on-device usage patterns'],
-    settingsPath: 'Settings > Privacy & Security > Analytics & Improvements > Improve Siri & Dictation',
   },
   ai_x: {
     name: 'X / Grok',
@@ -92,7 +84,6 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://x.com/settings/privacy_and_safety',
     riskLevel: 'high',
     dataCollected: ['public posts', 'engagement data', 'Grok conversations'],
-    settingsPath: 'Settings > Privacy and safety > Grok > Disable data sharing',
   },
   ai_reddit: {
     name: 'Reddit',
@@ -102,6 +93,5 @@ export const FOUNDRY_ACCOUNTS = {
     securityUrl: 'https://www.reddit.com/settings/privacy',
     riskLevel: 'medium',
     dataCollected: ['posts', 'comments', 'upvote patterns', 'community participation'],
-    settingsPath: 'Settings > Privacy > Disable personalization features',
   },
 };
