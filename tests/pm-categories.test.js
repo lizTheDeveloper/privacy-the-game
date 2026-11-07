@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readFileSync } from 'node:fs';
 
 vi.mock('../src/utils/analytics.js', () => ({
   track: vi.fn(), trackNow: vi.fn(), trackThenStop: vi.fn(), waitForTracker: vi.fn(),
@@ -110,18 +109,19 @@ describe('14b: the per-category ask', () => {
     expect(getAccountPhaseGate(t, 'vault', 'primary_bank', 'recon')).toEqual(getAccountPhaseGate(s, 'vault', 'primary_bank', 'recon'));
   });
 
-  it('nothing from here is ever tracked', () => {
+  it('nothing from here is ever tracked, and restore never resends it', () => {
     let s = withPm;
+    // Real progress, so restore has events to send next to the category counts.
+    for (const m of MISSIONS.filter((x) => isCoreMission(x) && s.accounts[x.accountId]?.enabled).slice(0, 6)) {
+      s = updateMission(s, m.id, { status: 'completed', completedAt: '2026-10-01T00:00:00.000Z' });
+    }
     for (const [a, v] of [['flag', '7'], ['changed', '3'], ['clear'], ['reopen'], ['flag', '2'], ['changed', '6'], ['clear']]) s = act(s, 'vault', a, v);
+    expect(s.pmByDistrict.vault.flagged).toBe(9);
     expect(track).not.toHaveBeenCalled();
-    for (const e of restoreEvents(s)) expect(JSON.stringify(e.data)).not.toMatch(/pmByDistrict|flagged|changed/);
-    // The click handler in app.js for these actions never calls track().
-    const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
-    const start = app.indexOf("action.startsWith('pm-cat-')");
-    expect(start).toBeGreaterThan(0);
-    const branch = app.slice(start, app.indexOf('} else if', start));
-    expect(branch).toContain('applyCategoryAction');
-    expect(branch).not.toMatch(/track\w*\(/);
+    const events = restoreEvents(s);
+    expect(events.length).toBeGreaterThan(0);
+    for (const e of events) expect(JSON.stringify(e.data)).not.toMatch(/pmByDistrict|flagged|changed/);
+    // The app.js click handler is driven for real in tests/app/pm-categories-click.test.js.
   });
 });
 

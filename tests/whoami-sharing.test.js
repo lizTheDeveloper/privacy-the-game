@@ -10,7 +10,6 @@ import { setAnalyticsOff } from '../src/utils/analytics-pref.js';
 import { markGoneGhost } from '../src/utils/ghost.js';
 import { createInitialState } from '../src/state.js';
 import { textOf } from './helpers/on-page.mjs';
-import { readFileSync } from 'node:fs';
 
 function memoryStorage() {
   const m = new Map();
@@ -18,7 +17,6 @@ function memoryStorage() {
 }
 const NAV = { language: 'en-US', userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' };
 const SCR = { width: 390, height: 844 };
-const APP = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
 
 describe('the ghost screen and the sky look the player up only while sharing is on', () => {
   it('sharing on: the ghost screen and a broker map with no home look up', () => {
@@ -35,12 +33,9 @@ describe('the ghost screen and the sky look the player up only while sharing is 
     }
   });
 
-  it('app.js decides with it, for every screen, and loads through lookUpWhoami', () => {
-    expect(APP).toMatch(/if \(shouldAutoWhoami\(route\.screen, whoamiView\.status, \{ allowed: guessAllowed\(\)/);
-    expect(APP).not.toMatch(/route\.screen === 'ghost' && whoamiView\.status === 'idle'/);
-    expect(APP).toMatch(/const allowed = guessAllowed\(\);[\s\S]{0,200}lookUpWhoami\(\{ allowed \}\)/);
-    expect(APP).not.toMatch(/fetchWhoami\(/);
-  });
+  // app.js itself (sharing off or gone ghost: no screen sends api/whoami) is driven for real, with
+  // fetch watched, in tests/app/local-only-actions.test.js. A source grep here passed with
+  // guessAllowed() returning true.
 });
 
 describe('SHOW ME follows the sharing switch', () => {

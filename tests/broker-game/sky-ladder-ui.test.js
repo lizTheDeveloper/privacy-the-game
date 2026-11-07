@@ -92,12 +92,10 @@ describe('the ladder on the sky', () => {
     expect(fitView(layout, [], 1).w).toBe(1000);
   });
 
-  it('ladder clicks never become breadcrumbs, and selection never reaches the URL or track()', () => {
+  it('ladder clicks never become breadcrumbs', () => {
     for (const m of ['button.sky-rung', 'button.sky-ladder-bar', 'button.sky-rung-did', 'button.star-card-close'])
       expect(isPrivateBreadcrumb({ category: 'ui.click', message: m })).toBe(true);
-    const app = readFileSync('src/app.js', 'utf8');
-    const fn = app.slice(app.indexOf('function ladderAction'), app.indexOf('// The government map: open or close'));
-    expect(fn).not.toMatch(/track\(|navigate\(|location\.hash|captureError/);
+    // "Selection never reaches the URL or track()" is driven for real in tests/app/local-only-actions.test.js.
   });
 
   it('selecting a star closes the ladder sheet and opening the ladder closes the card', () => {

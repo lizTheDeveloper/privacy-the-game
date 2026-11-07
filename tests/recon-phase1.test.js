@@ -4,13 +4,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { MISSIONS, getMissionsForAccount } from '../src/data/missions.js';
 import { debriefRecord, visibleQuestions } from '../src/utils/debrief.js';
 import { debriefReaction } from '../src/screens/debrief.js';
-import { PASSWORD_DIALOGUE } from '../src/data/dialogue.js';
-import { calcFindings, getBuildingState, isCoreMission } from '../src/utils/calc.js';
+import { PASSWORD_DIALOGUE, DISTRICT_DIALOGUE } from '../src/data/dialogue.js';
+import { calcFindings, getBuildingState, isCoreMission, isEmailBreachCheck } from '../src/utils/calc.js';
 import { createInitialState, updateMission } from '../src/state.js';
 import { renderMilestone } from '../src/screens/milestone.js';
 
-const EMAIL_ACCOUNTS = ['gmail', 'outlook', 'icloud', 'yahoo', 'protonmail', 'google', 'apple_id', 'microsoft'];
-const isEmailBreachCheck = (m) => EMAIL_ACCOUNTS.some((a) => m.id === `${a}-recon-breach`);
 const byId = (id) => {
   const m = MISSIONS.find((x) => x.id === id);
   if (!m) throw new Error(`no mission ${id}`);
@@ -161,17 +159,21 @@ describe("X1: the mission's own Scout line beats the district's breach lines", (
   });
 
   it('no recon mission outside the email breach checks says "breach" unless its own copy does', () => {
-    const recon = MISSIONS.filter((m) => m.phase === 'recon' && !isEmailBreachCheck(m));
+    const recon = MISSIONS.filter((m) => m.phase === 'recon' && !isEmailBreachCheck(m.id));
     expect(recon.length).toBeGreaterThan(50);
     const bad = [];
+    // One spy for the whole sweep (a spy per draw made this the slowest test in a loaded run).
+    // The draws hit every entry of a district list up to 3 long, the longest there is.
+    const random = vi.spyOn(Math, 'random');
+    expect(Math.max(...Object.values(DISTRICT_DIALOGUE).flatMap((d) => ['clean', 'minor', 'major'].map((c) => d.debrief?.[c]?.length || 0)))).toBeLessThanOrEqual(3);
     for (const m of recon) {
       const own = Object.values(m.scoutDialog?.debrief || {});
       for (const q of allQuestions(m)) {
         for (const o of q.options || []) {
+          const state = filedState(m, { [q.id]: o.value });
           for (const r of [0, 0.5, 0.999]) {
-            vi.spyOn(Math, 'random').mockReturnValue(r);
-            const reaction = debriefReaction(filedState(m, { [q.id]: o.value }), m);
-            vi.restoreAllMocks();
+            random.mockReturnValue(r);
+            const reaction = debriefReaction(state, m);
             if (!reaction) continue;
             if (/breach/i.test(reaction.line) && !own.includes(reaction.line)) {
               bad.push(`${m.id} / ${q.id}=${o.value}: ${reaction.line.slice(0, 60)}`);
@@ -180,6 +182,7 @@ describe("X1: the mission's own Scout line beats the district's breach lines", (
         }
       }
     }
+    random.mockRestore();
     expect([...new Set(bad)]).toEqual([]);
   });
 });

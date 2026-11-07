@@ -15,6 +15,8 @@ Reclaim City is a static site served from the Multiverse Games play portal on He
 
 ## Manual deploy
 
+Deploys are this manual rsync only. There is no CI deploy: the old GitHub Actions workflow was removed in v7.13.3 (the studio runs no GitHub-hosted CI and keeps no deploy keys on GitHub).
+
 From the repo root:
 
 ```bash

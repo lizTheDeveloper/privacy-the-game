@@ -86,6 +86,22 @@ describe('city map: the broader city', () => {
     expect(block('gb')).not.toMatch(/_lib\.png|iso_liberated/);
     const lit = (id) => (block(id).match(/iso_tower_lib\.png|iso_liberated\.png/g) || []).length;
     expect(lit('us-wa-seattle')).toBeGreaterThan(0);
+    expect(lit('gb')).toBe(0);
+  });
+
+  it('lit windows are the fortified share of the block, exactly', () => {
+    const data = { ...DATA, pods: [POD('us-a', 'Place A', 300, 30), POD('us-b', 'Place B', 300, 80), POD('us-c', 'Place C', 300, 0), POD('us-d', 'Place D', 300, 100)] };
+    const html = renderCityMap(createInitialState(), ready(data));
+    const block = (id) => html.slice(html.indexOf(`data-pod="${id}"`), html.indexOf('</a>', html.indexOf(`data-pod="${id}"`)));
+    const lit = (id) => (block(id).match(/iso_tower_lib\.png|iso_liberated\.png/g) || []).length;
+    const tiles = (id) => (block(id).match(/<img /g) || []).length;
+    for (const id of ['us-a', 'us-b', 'us-c', 'us-d']) expect(tiles(id), id).toBeGreaterThanOrEqual(3);
+    expect(lit('us-a')).toBe(Math.round(0.3 * tiles('us-a')));
+    expect(lit('us-b')).toBe(Math.round(0.8 * tiles('us-b')));
+    expect(lit('us-c')).toBe(0);
+    expect(lit('us-d')).toBe(tiles('us-d'));
+    expect(lit('us-b')).toBeGreaterThan(lit('us-a'));
+    expect(lit('us-a')).toBeLessThan(tiles('us-a'));
   });
 
   it('a big city spills past the frame: extra rings render outside the 960px map for wide screens only', () => {

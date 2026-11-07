@@ -13,9 +13,13 @@ The runner then adds `asOf` (UTC time) and a human-readable `label` to every pod
 
 ## K and pods
 
-K is 50. A pod is a place: a city, a region, a country, or "rest of" a larger place. A pod is published only if it has at least K players; smaller places are folded into the "Rest of ..." pod above them, and the last remainder into "Rest of the World". City figures are counted only over places (pods) where that figure is published, so no published number can be subtracted from another to reveal a group under 50.
+K is 50, counted in players. A player is an Umami session of the site, all time (`build.sql` takes every row of `session` for the website, with no date bound): a browser on a connection, salted monthly. So one person counts again on each device, each connection and each month, and 50 players can be fewer than 50 people. The game says so in Scout's explainer and in The Whole City's footer.
+
+A pod is a place: a city, a region, a country, or "rest of" a larger place. A pod is published only if it has at least K players; smaller places are folded into the "Rest of ..." pod above them, and the last remainder into "Rest of the World". City figures are counted only over places (pods) where that figure is published, so no published number can be subtracted from another to reveal a group under 50.
 
 ## What the city publishes
+
+`actions` is missions done: each session's missions whose latest filing is completed, each mission once (a debrief re-filed or resent by restore counts once; one re-filed as skipped no longer counts). `districts` is districts taken back, each district once per session. Both are also per pod.
 
 Besides players, fortified, breach checks and rates, actions, districts, ghosts, opt-outs and the breach map by address, `city` carries these figures. Each is counted only over pods that are published (players >= K), and each is left out if fewer than K distinct players contributed to it:
 
@@ -76,11 +80,21 @@ The systemd units `rc-collective-job.service` and `rc-collective-job.timer` live
 
 ## Running tests
 
-Unit tests need no Docker:
+Run these before merging anything that touches `collective/` (the game's `npm test` does not run them).
 
-    cd collective/job && python3 -m unittest discover -s tests -p 'test_run.py' -v
+From the repo root:
 
-The SQL tests run Postgres in a throwaway container on the CI VM:
+    npm run test:collective
+
+runs the service's own `node --test` suite (`service/test/`, after an `npm ci` in `service/`) and the runner's unit tests (`job/tests/test_run.py`). Neither needs Docker or a database.
+
+The SQL tests (`test_build.py`, `test_purge.py`, `test_sql_*.py`) are what prove every published number. They need a throwaway Postgres. On a machine with the Postgres binaries installed (`initdb`, `pg_ctl`, `psql` on PATH, or set `RC_TEST_PG_BIN`):
+
+    npm run test:collective:sql
+
+starts a private cluster in a temp dir (Unix socket only, no TCP port), runs the whole job suite (the SQL tests and `test_run.py`) and deletes the cluster. Production runs Postgres 18 (`postgres:18-alpine`); the suite also passes on 17.
+
+Or in a container on the CI VM:
 
     cd collective/job/tests && RC_TEST_SSH="ssh -i $HOME/.ssh/hetzner_cto_tycoon root@204.168.205.161" python3 -m unittest -v
 

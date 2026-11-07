@@ -31,7 +31,11 @@ export const MAINTAINER_ASSOCIATIONS = new Set(['OWNER', 'MEMBER', 'COLLABORATOR
 export const EVIDENCE_GRACE_MS = 72 * 3600 * 1000;
 /** Net lines a PR may remove from existing tests before it counts as gutting them. */
 export const TEST_NET_REMOVAL_LIMIT = 20;
-/** A run planning more than this many writes is aborted untouched: something is off. */
+/**
+ * Most closes/reopens and comments one run makes. selectWithinCap runs the
+ * highest-priority actions up to the cap and defers the rest to the next run,
+ * so a flood slows enforcement down instead of switching it off.
+ */
 export const WRITE_CAP = { closes: 10, comments: 20 };
 export const LOG_MAX_BYTES = 1024 * 1024;
 /** Most actions one author can cause per run, so one account can't use up the write cap. */
@@ -108,13 +112,33 @@ export function claimedIssues(pr, repo = DEFAULT_REPO) {
   ];
 }
 
-/** A real capture URL (web.archive.org/web/... or /save/...), not just the word. */
-export const hasWaybackLink = (text) => /https?:\/\/web\.archive\.org\/(?:web|save)\/\S+/i.test(String(text || ''));
+/**
+ * A real Wayback snapshot: web.archive.org/web/<14-digit timestamp>/<http(s) url with a host>.
+ * A /save/ link only asks the archive to capture a page (it proves nothing was captured), and
+ * CONTRIBUTING's own placeholder (`.../save/<url>`) must never count as evidence.
+ */
+export const WAYBACK_SNAPSHOT_RE = /https?:\/\/web\.archive\.org\/web\/(?:19|20)\d{12}(?:[a-z]{2}_)?\/https?:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?=[/:?#\s)\]>"'`]|$)/i;
+export const hasWaybackLink = (text) => WAYBACK_SNAPSHOT_RE.test(String(text || ''));
 
 // ---------------------------------------------------------------------------
 // Paths.
 
-export const isAllowedBountyPath = (p) => /^research\/data-brokers\/build\/[^/]+\.json$/.test(p);
+/** The dataset config a bounty PR may edit (CONTRIBUTING.md). Not sweeps.json: it is generated. */
+export const BOUNTY_CONFIG_FILES = ['alias-blocklist', 'id-map', 'link-overrides', 'record-overrides']
+  .map((n) => `research/data-brokers/build/${n}.json`);
+export const isAllowedBountyPath = (p) => BOUNTY_CONFIG_FILES.includes(p);
+/** A data file under the dataset's build/ (config or not). Nothing reads a new one. */
+export const isBuildDataPath = (p) => /^research\/data-brokers\/build\/.+\.json$/.test(p);
+/**
+ * Files an outside PR may not change without a maintainer looking: what decides whether the
+ * tests run and pass (vitest config, fixtures, package.json/-lock scripts and dependencies) and
+ * the guard itself.
+ */
+export const isGuardedInfraPath = (p) =>
+  p === 'vitest.config.js' || /^vitest\.config\.[cm]?[jt]s$/.test(p) ||
+  /(^|\/)tests?\/fixtures\//.test(p) ||
+  p.startsWith('scripts/bounty-guard/') ||
+  p === 'package.json' || p === 'package-lock.json';
 export const isProtectedPath = (p) => p === 'collective' || p.startsWith('collective/');
 export const isTestPath = (p) =>
   !/(^|\/)tests?\/fixtures\//.test(p) &&
@@ -122,6 +146,7 @@ export const isTestPath = (p) =>
 export const isGeneratedPath = (p) =>
   p.startsWith('research/data-brokers/brokers/') ||
   /^research\/data-brokers\/(?:.*\/)?(?:links|sources)\.json$/.test(p) ||
+  p === 'research/data-brokers/build/sweeps.json' ||
   p === 'src/data/broker-map.json';
 
 /** Every path a file entry touches: the new one and, for renames, the old one. */
@@ -149,6 +174,20 @@ export function testDamage(files) {
   if (removed > TEST_NET_REMOVAL_LIMIT) return { reason: `Removes ${removed} net lines from existing tests.`, paths };
   return null;
 }
+
+/**
+ * Existing test files rewritten in place: more than the limit of lines taken out of one file,
+ * even when as many go back in (net 0 passes testDamage, and can still empty every assertion).
+ */
+export function testRewrites(files) {
+  const existing = files.filter((f) => f.changeType !== 'ADDED' && filePaths(f).some(isTestPath));
+  const big = existing.filter((f) => (Number(f.deletions) || 0) > TEST_NET_REMOVAL_LIMIT);
+  return big.length ? { reason: `Rewrites more than ${TEST_NET_REMOVAL_LIMIT} lines of existing tests.`, paths: [...new Set(big.flatMap(filePaths).filter(isTestPath))] } : null;
+}
+
+/** New files (added, or renamed/copied in) under research/data-brokers/build/. */
+export const newBuildDataFiles = (files) =>
+  files.filter((f) => ['ADDED', 'RENAMED', 'COPIED'].includes(f.changeType) && isBuildDataPath(f.path)).map((f) => f.path);
 
 const issueInfo = (bounty, n) => (bounty instanceof Map ? bounty.get(n) : null) || { labels: [], comments: [] };
 
@@ -229,11 +268,35 @@ export function assessPr(pr, ctx) {
   // This is also the real backstop for a bounty PR that rewrites a test in
   // place (same line count, so testDamage passes): tests/ is outside the
   // allowed bounty paths, so any test edit on a bounty PR closes here.
+  const added = newBuildDataFiles(files);
   if (isBountyPr) {
     const outside = files.flatMap(filePaths).filter((p) => !isAllowedBountyPath(p) && !isProtectedPath(p));
     if (outside.length) {
       note(outside);
-      karma.push('A bounty PR may only edit `research/data-brokers/build/*.json`; this one changes other files. Nothing reads files like these.');
+      karma.push('A bounty PR may only edit the dataset config (`research/data-brokers/build/` id-map, alias-blocklist, link-overrides, record-overrides); this one changes other files. Nothing reads files like these.');
+    }
+    if (added.length) {
+      note(added);
+      karma.push("Adds a new data file under `research/data-brokers/build/`. Don't add new data files: nothing reads them (CONTRIBUTING.md).");
+    }
+  } else {
+    // Outside, non-bounty PRs: held for a maintainer, never closed for these.
+    if (added.length) {
+      note(added);
+      needsMaintainer = true;
+      flags.push('Adds a new data file under `research/data-brokers/build/`, which nothing reads. A maintainer will review this PR.');
+    }
+    const infra = files.flatMap(filePaths).filter(isGuardedInfraPath);
+    if (infra.length) {
+      note(infra);
+      needsMaintainer = true;
+      flags.push('Changes test configuration, test fixtures, package.json or the bounty guard itself. A maintainer will review this PR.');
+    }
+    const rewrites = damage ? null : testRewrites(files);
+    if (rewrites) {
+      note(rewrites.paths);
+      needsMaintainer = true;
+      flags.push(`${rewrites.reason} A maintainer will review this PR.`);
     }
   }
 
@@ -249,9 +312,9 @@ export function assessPr(pr, ctx) {
     needsEvidence = true;
     const asked = ctx.evidenceRequestedAt ? new Date(ctx.evidenceRequestedAt).getTime() : null;
     if (asked !== null && (ctx.now || new Date()).getTime() - asked >= EVIDENCE_GRACE_MS) {
-      close.push('Still no Wayback capture (`https://web.archive.org/...`) 72 hours after evidence was requested.');
+      close.push('Still no Wayback capture (`https://web.archive.org/web/<timestamp>/<url>`) 72 hours after evidence was requested.');
     } else {
-      flags.push('No Wayback capture (`https://web.archive.org/save/<url>`) in the PR description or in your comment on the issue.');
+      flags.push('No Wayback capture in the PR description or in your comment on the issue. Save each page at web.archive.org and paste the capture link it gives you, which looks like `https://web.archive.org/web/<14-digit timestamp>/<url>`.');
     }
   }
 

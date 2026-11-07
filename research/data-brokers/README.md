@@ -144,7 +144,7 @@ The game reads a derived file, `src/data/broker-map.json`, which holds only publ
 - `verified`: the URL loaded and stayed on the same site and page.
 - `suspect`: it loaded, but redirected to another domain or to the site's home page. The form may have moved.
 - `blocked`: we could not verify it (a 401/403/429/5xx response, a timeout or other network error). Often this is bot protection. It is **not** evidence that the page is gone.
-- `dead`: a 404 or 410 response, or the domain no longer resolves.
+- `dead`: a 404 or 410 response, or the domain no longer resolves (`ENOTFOUND`; a temporary lookup failure, `EAI_AGAIN`, is `blocked`).
 - `unchecked`: not yet checked. A record with no `status` has also not been checked; `npm run brokers:check-urls -- --only=unchecked` checks both.
 
 Current results for the 743 records with an opt-out entry: 632 verified, 15 suspect, 75 blocked, 20 dead, and 1 with no status (an email-only route, which has no URL to check). The check is automated and cannot fill in forms; a `verified` page can still fail to work. It covers only `optOut.url`, not `alternates`.
@@ -306,7 +306,7 @@ npm run brokers:export
 npm run brokers:layout
 ```
 
-`merge-staging.js <family> --dry-run` shows what a merge would change without writing. `brokers:validate` exits non-zero on any error and prints the counts. `brokers:export` writes `src/data/broker-map.json` and prints the hubs.
+`merge-staging.js <family> --dry-run` shows what a merge would change without writing. `brokers:validate` checks the dataset, the research records in `staging/` and the curation config in `build/` (`id-map`, `alias-blocklist`, `link-overrides`, `record-overrides`); it exits non-zero on any error and prints the counts. The game's test suite runs it too, and checks that `src/data/broker-map.json` matches a fresh export. `brokers:check-urls` first checks that the machine is online, and writes nothing when more than 20% of the URLs come back dead (that looks like a network problem, not dead brokers) unless given `--force`. `brokers:export` writes `src/data/broker-map.json` and prints the hubs.
 
 ### Layout
 

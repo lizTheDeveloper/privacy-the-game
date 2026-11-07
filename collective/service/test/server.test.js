@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from '../server.js';
-import { podForGeo } from '../pods.js';
+import { readFileSync } from 'node:fs';
+import { podForGeo, slug } from '../pods.js';
 
 const PODS = [
   { id: 'us-il-chicago', level: 'city', country: 'US', region: 'US-IL', city: 'Chicago', label: 'Chicago' },
@@ -16,6 +17,32 @@ test('podForGeo walks city, region, country, then the pod holding the rest of th
   assert.equal(podForGeo(PODS, { country: 'US', region: 'US-TX', city: 'Austin' }).id, 'us-rest');
   assert.equal(podForGeo(PODS, { country: 'FR', region: 'FR-IDF', city: 'Paris' }).id, 'gb');
   assert.equal(podForGeo([], { country: 'US' }), null);
+});
+
+test('slug is build.sql\'s rc_slug', () => {
+  const sql = readFileSync(new URL('../../job/sql/build.sql', import.meta.url), 'utf8');
+  assert.match(sql, /SELECT trim\(both '-' from regexp_replace\(lower\(coalesce\(t, ''\)\), '\[\^a-z0-9\]\+', '-', 'g'\)\)/);
+  assert.match(sql, /city_id = CASE WHEN city <> '' AND country <> ''\s+THEN pg_temp\.rc_slug\(coalesce\(nullif\(region, ''\), country\) \|\| '-' \|\| city\) END/);
+  assert.equal(slug('St. Louis'), 'st-louis');
+  assert.equal(slug(' --Saint  Paul!! '), 'saint-paul');
+});
+
+test('podForGeo groups city and region names the way build.sql does (by slug)', () => {
+  // build.sql merges "St Louis" and "St. Louis" under one id and publishes min(city).
+  const pods = [
+    { id: 'us-mo-st-louis', level: 'city', country: 'US', region: 'US-MO', city: 'St Louis', label: 'St Louis' },
+    { id: 'us-mo-rest', level: 'region', country: 'US', region: 'US-MO', rest: true, label: 'Rest of Missouri' },
+    ...PODS,
+  ];
+  assert.equal(podForGeo(pods, { country: 'US', region: 'US-MO', city: 'St. Louis' }).id, 'us-mo-st-louis');
+  assert.equal(podForGeo(pods, { country: 'US', region: 'US-MO', city: 'St Louis' }).id, 'us-mo-st-louis');
+  assert.equal(podForGeo(pods, { country: 'us', region: ' US-MO ', city: 'ST. LOUIS ' }).id, 'us-mo-st-louis');
+  const dotted = pods.map((p) => (p.id === 'us-mo-st-louis' ? { ...p, city: 'St. Louis' } : p));
+  assert.equal(podForGeo(dotted, { country: 'US', region: 'US-MO', city: 'St Louis' }).id, 'us-mo-st-louis');
+  // Another Missouri town is the rest of Missouri, not the city.
+  assert.equal(podForGeo(pods, { country: 'US', region: 'US-MO', city: 'Kansas City' }).id, 'us-mo-rest');
+  // A region pod is matched within its country, like build.sql.
+  assert.equal(podForGeo(pods, { country: 'CA', region: 'US-MO', city: 'Elsewhere' }).id, 'gb');
 });
 
 async function call(server, path, headers = {}, method = 'GET') {

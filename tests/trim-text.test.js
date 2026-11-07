@@ -103,7 +103,14 @@ describe('every string from the data that these screens draw reaches the page, a
 
   it('the city map: every district on the map', () => {
     const html = renderCityMap(createInitialState());
-    for (const d of DISTRICTS.filter((x) => html.includes(`href="#/district/${x.id}"`))) onPage(html, d.name.replace(/^The /i, ''), 'city');
+    // The map is the main campaign: chapters 1-8 (its labels read D-01..D-08). The later
+    // districts (Freeway, Foundry, Grid, Clinic, Trail) open from inside the game, not the map.
+    const onMap = DISTRICTS.filter((d) => d.chapter <= 8);
+    expect(onMap).toHaveLength(8);
+    for (const d of onMap) {
+      expect(html, d.id).toContain(`href="#/district/${d.id}"`);
+      onPage(html, d.name.replace(/^The /i, ''), 'city');
+    }
   });
 });
 

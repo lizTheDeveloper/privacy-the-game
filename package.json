@@ -1,6 +1,6 @@
 {
   "name": "reclaim-city",
-  "version": "7.13.2",
+  "version": "7.13.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,9 @@
     "brokers:layout": "node research/data-brokers/build/layout.js",
     "dev": "npx serve src -l 3000",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:collective": "npm --prefix collective/service ci --no-audit --no-fund --silent && npm --prefix collective/service test && cd collective/job && python3 -m unittest discover -s tests -p 'test_run.py'",
+    "test:collective:sql": "cd collective/job/tests && RC_TEST_PG=local python3 -m unittest"
   },
   "devDependencies": {
     "vitest": "^5.0.3"

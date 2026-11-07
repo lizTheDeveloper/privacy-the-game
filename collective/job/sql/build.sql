@@ -197,8 +197,13 @@ SELECT DISTINCT c.session_id, c.acct,
 CREATE TEMP TABLE rc_ghost ON COMMIT DROP AS
 SELECT DISTINCT session_id FROM website_event WHERE website_id = :'website' AND event_name = 'went-ghost';
 
+-- One row per session and district taken back: a district sent again (by
+-- restore.js, or a re-filing) counts once.
 CREATE TEMP TABLE rc_districts ON COMMIT DROP AS
-SELECT session_id FROM website_event WHERE website_id = :'website' AND event_name = 'district-completed';
+SELECT DISTINCT e.session_id, d.string_value AS district
+  FROM website_event e
+  LEFT JOIN event_data d ON d.website_event_id = e.event_id AND d.data_key = 'district'
+ WHERE e.website_id = :'website' AND e.event_name = 'district-completed';
 
 -- What players did, by kind: one row per session, mission and kind, from
 -- rc_done (latest filing completed; a mission sent twice counts once).
@@ -272,7 +277,8 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_city(k int) RETURNS jsonb LANGUAGE sql AS 
         round(100.0 * (SELECT count(*) FILTER (WHERE finding IN ('1-2-breaches', '3plus-breaches')) FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'breach3PlusPct', CASE WHEN n.check_players >= k THEN
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
-    'actions', (SELECT count(*) FROM rc_mc m JOIN sp USING (session_id) WHERE m.status = 'completed'),
+    -- Missions done: each session's missions whose latest filing is completed, once each.
+    'actions', (SELECT count(*) FROM rc_done d JOIN sp USING (session_id)),
     'districts', (SELECT count(*) FROM rc_districts d JOIN sp USING (session_id)),
     'ghosts', (SELECT count(*) FROM rc_ghost g JOIN sp USING (session_id)),
     -- Per-pod figures too: only over pods that publish them (no residual).
@@ -312,7 +318,7 @@ CREATE OR REPLACE FUNCTION pg_temp.rc_totals(pod_filter text, k int) RETURNS jso
         round(100.0 * (SELECT count(*) FILTER (WHERE finding IN ('1-2-breaches', '3plus-breaches')) FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
     'breach3PlusPct', CASE WHEN n.check_players >= k THEN
         round(100.0 * (SELECT count(*) FILTER (WHERE finding = '3plus-breaches') FROM chk) / nullif((SELECT count(*) FROM chk), 0)) END,
-    'actions', (SELECT count(*) FROM rc_mc m JOIN s USING (session_id) WHERE m.status = 'completed'),
+    'actions', (SELECT count(*) FROM rc_done d JOIN s USING (session_id)),
     'districts', (SELECT count(*) FROM rc_districts d JOIN s USING (session_id)),
     'ghosts', (SELECT count(*) FROM rc_ghost g JOIN s USING (session_id)),
     'passwords', (SELECT CASE WHEN count(DISTINCT session_id) >= k THEN count(*) END FROM rc_kinds JOIN s USING (session_id) WHERE kind = 'passwords'),

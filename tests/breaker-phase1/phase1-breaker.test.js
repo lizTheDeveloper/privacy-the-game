@@ -1,7 +1,7 @@
 // Breaker round for recon campaign Phase 1 (X1, X2, X7, ${name}, old saves).
 // Failing tests are left genuinely failing: each one names the behaviour it
 // believes is wrong. Passing tests pin edges the builder did not cover.
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MISSIONS } from '../../src/data/missions.js';
 import { ACCOUNTS } from '../../src/data/accounts.js';
 import { DISTRICTS } from '../../src/data/districts.js';
@@ -239,22 +239,40 @@ describe("Scout's reaction after non-email checks", () => {
     expect(wrong).toEqual([]);
   });
 
-  it('no non-email check ever shows a district breach line, for every finding value and 25 draws', () => {
+  it('no non-email check ever shows a district breach line, for every finding value and every draw', () => {
     const district = new Set();
     // district lines are reachable only through the module's own data
     return import('../../src/data/dialogue.js').then(({ DISTRICT_DIALOGUE }) => {
-      for (const d of Object.values(DISTRICT_DIALOGUE)) for (const c of ['clean', 'minor', 'major']) (d.debrief?.[c] || []).forEach((l) => district.add(l));
+      let longest = 0;
+      for (const d of Object.values(DISTRICT_DIALOGUE)) {
+        for (const c of ['clean', 'minor', 'major']) {
+          (d.debrief?.[c] || []).forEach((l) => district.add(l));
+          longest = Math.max(longest, d.debrief?.[c]?.length || 0);
+        }
+      }
+      expect(district.size).toBeGreaterThan(0);
+      // pick() takes floor(random * length): (i + 0.5) / n lands on entry i of an n-long list, so
+      // these draws reach every entry of every list (25 random draws could miss one, and were slow).
+      const draws = [];
+      for (let n = 1; n <= longest; n++) for (let i = 0; i < n; i++) draws.push((i + 0.5) / n);
+      const random = vi.spyOn(Math, 'random');
+      const bad = [];
       for (const m of MISSIONS) {
         if (isEmailBreachCheck(m.id)) continue;
         for (const finding of ['no-breaches', '1-2-breaches', '3plus-breaches']) {
           for (const action of [undefined, 'tightened', 'already-tight']) {
             const s = stateWith({ [m.id]: { status: 'completed', finding, action } });
-            for (let i = 0; i < 25; i++) expect(district.has(debriefReaction(s, m).line)).toBe(false);
+            for (const r of draws) {
+              random.mockReturnValue(r);
+              if (district.has(debriefReaction(s, m).line)) bad.push(`${m.id} ${finding} ${action}`);
+            }
           }
         }
       }
+      random.mockRestore();
+      expect(bad).toEqual([]);
     });
-  }, 20000); // every mission x 9 states x 25 draws: slow under a loaded full run
+  });
 
   it('facility districts (no district dialogue) react without throwing', () => {
     const facility = MISSIONS.filter((m) => !ACCOUNTS[m.accountId]?.district || m.district);

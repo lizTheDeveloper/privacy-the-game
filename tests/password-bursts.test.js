@@ -22,15 +22,6 @@ const PM_REPORT = byId('password_manager-recon-report');
 const BURST = byId(PM_BURST_ID);
 const view = { collective: { status: 'idle' }, whoami: { status: 'idle' } };
 
-function allReconDone(s) {
-  for (const m of MISSIONS) {
-    if (m.phase === 'recon' && !m.optional && !m.unlock && s.accounts[m.accountId]?.enabled && !s.missions[m.id]) {
-      s = set(s, m.id, { status: 'completed', finding: 'no-breaches' });
-    }
-  }
-  return s;
-}
-
 describe('10a: counts across sources (no manager number)', () => {
   it('counts breach, password-manager and login reasons; Master Keys first', () => {
     // Recon Phase 2: a bank's old "breach check" re-checked the email and is

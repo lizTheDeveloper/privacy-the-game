@@ -312,24 +312,8 @@ describe('bank notes never leave the browser', () => {
     return st;
   };
 
-  it('the bank-note actions in app.js send nothing: no track, no error-report context', () => {
-    const app = readFileSync('src/app.js', 'utf8');
-    const start = app.indexOf("} else if (action === 'bank-note-open') {");
-    const end = app.indexOf("} else if (action === 'mission-step') {");
-    expect(start).toBeGreaterThan(-1);
-    expect(end).toBeGreaterThan(start);
-    const blocks = [
-      app.slice(start, end),
-      app.slice(app.indexOf('function readBankForm'), app.indexOf('function saveBankForm')),
-      app.slice(app.indexOf('function saveBankForm'), app.indexOf('\n}\n', app.indexOf('function saveBankForm'))),
-      app.slice(app.indexOf("app.addEventListener('submit'"), app.indexOf("app.addEventListener('change', refreshDebriefForm)")),
-    ];
-    for (const block of blocks) {
-      const b = block.replace(/\/\/[^\n]*/g, '');
-      expect(b.length).toBeGreaterThan(20);
-      expect(b).not.toMatch(/\btrack(?:Now|ThenStop)?\(|sendConfirmed|captureError|Sentry|fetch\(/);
-    }
-  });
+  // The bank-note actions in app.js (save, Enter, open, edit, delete) are driven for real, with
+  // every way out watched, in tests/app/local-only-actions.test.js.
 
   it('the bank-notes modules import nothing that sends', () => {
     for (const f of ['src/utils/bank-notes.js', 'src/components/bank-notes.js']) {

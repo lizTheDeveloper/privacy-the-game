@@ -14,7 +14,7 @@ import { buildExport } from '../../research/data-brokers/build/export.js';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const J = (x) => `${JSON.stringify(x, null, 2)}\n`;
 const source = (kind, extra = {}) => ({
-  url: `https://example.org/${kind}`, archived: `https://web.archive.org/web/2026/https://example.org/${kind}`,
+  url: `https://example.org/${kind}`, archived: `https://web.archive.org/web/20261018000000/https://example.org/${kind}`,
   kind, title: 'T', accessed: '2026-10-24', ...extra,
 });
 const sources = { nai: source(MEMBER_LIST_KIND), daa: source(MEMBER_LIST_KIND, { url: 'https://example.org/daa' }), tenk: source('sec-10k'), reg: source('registry') };
