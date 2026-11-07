@@ -34,26 +34,50 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Code and data (scripts, the stylesheet, JSON) are network-first: the first
+// load after a deploy runs the new release, and the bug reporter's version
+// (read from the page's style.css?v=) matches the code that is running. The
+// cache is only the offline copy. `no-cache` revalidates past the browser's
+// HTTP cache, where nginx keeps static files for days.
+function isCode(url, request) {
+  return /\.(m?js|css|json)$/.test(url.pathname) || ['script', 'style', 'worker'].includes(request.destination);
+}
+
+function keep(key, response) {
+  if (!response || !response.ok || response.redirected) return;
+  const clone = response.clone();
+  caches.open(CACHE_NAME).then((cache) => cache.put(key, clone));
+}
+
+function networkFirst(request, key, init) {
+  return fetch(request, init)
+    .then((response) => { keep(key, response); return response; })
+    .catch((err) => caches.match(key).then((cached) => cached || Promise.reject(err)));
+}
+
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
   if (url.origin !== location.origin) return;
   if (!shouldIntercept(url)) return;
 
+  // The page: from the network, kept as the offline copy of index.html, so
+  // offline it is the newest page that loaded and asks for that release's files.
   if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match('./index.html'))
-    );
+    e.respondWith(networkFirst(e.request, './index.html'));
     return;
   }
 
+  if (isCode(url, e.request)) {
+    e.respondWith(networkFirst(e.request, e.request, { cache: 'no-cache' }));
+    return;
+  }
+
+  // Images and icons: from the cache, refreshed behind the page.
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const fetched = fetch(e.request).then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
-        }
+        keep(e.request, response);
         return response;
       }).catch(() => cached);
       return cached || fetched;

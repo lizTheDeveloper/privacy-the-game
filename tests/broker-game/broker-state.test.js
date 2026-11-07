@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { STATE_VERSION, loadState } from '../../src/state.js';
 import {
-  RESIDENCY, dayOf, cleanBrokerState, recordChecklist, setResidency, setBigCheck, materializeLegacy,
+  RESIDENCY, dayOf, cleanBrokerState, recordChecklist, setBigCheck, materializeLegacy,
 } from '../../src/utils/broker-state.js';
 
 const M = 'people_search-fortify-web-forms';
@@ -89,10 +89,9 @@ describe('broker-state', () => {
     expect(recordChecklist(s, M, [], '2026-10-19')).toBe(s);
   });
 
-  it('setResidency accepts yes/no/unsaid and clears anything else', () => {
-    for (const v of RESIDENCY) expect(setResidency({}, v).caResident).toBe(v);
-    expect('caResident' in setResidency({ caResident: 'yes' }, 'maybe')).toBe(false);
-    expect('caResident' in setResidency({ caResident: 'yes' }, undefined)).toBe(false);
+  it('an old save keeps a yes/no/unsaid California answer and drops anything else', () => {
+    for (const v of RESIDENCY) expect(cleanBrokerState({ missions: {}, caResident: v }).caResident).toBe(v);
+    expect('caResident' in cleanBrokerState({ missions: {}, caResident: 'maybe' })).toBe(false);
   });
   it('setBigCheck ticks and unticks', () => {
     let s = setBigCheck({}, 'acxiom', true, '2026-10-19');

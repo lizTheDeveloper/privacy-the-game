@@ -1,11 +1,23 @@
 import { eventHasOnlyThirdPartyFrames, isInjectedScriptNoise, scrubBreadcrumb, isPrivateBreadcrumb } from './errorNoise.js';
 import { scrubEventUrls } from './pageview-url.js';
+import { isAnalyticsOff, SHARING_EVENT } from './analytics-pref.js';
+import { hasGoneGhost } from './ghost.js';
 
 const GLITCHTIP_DSN = 'https://ba6fd2bcdb8f47f3bc15613b5ef4e419@errors.multiversegames.ai/15';
 
-export function initErrorTracking() {
-  if (typeof Sentry === 'undefined') return;
+// "Sharing is off. Nothing from this browser is sent": that includes crash
+// reports. GlitchTip runs only while sharing is on and the player hasn't gone
+// ghost; it starts and stops with the switch (SHARING_EVENT).
+export function errorReportsAllowed() {
+  return !isAnalyticsOff() && !hasGoneGhost();
+}
 
+let started = false;
+let listening = false;
+
+function startSentry() {
+  if (started || typeof Sentry === 'undefined' || !errorReportsAllowed()) return;
+  started = true;
   Sentry.init({
     dsn: GLITCHTIP_DSN,
     environment: location.hostname === 'localhost' ? 'development' : 'production',
@@ -13,6 +25,8 @@ export function initErrorTracking() {
     // No device labels, buildings or candles in click/input breadcrumbs.
     beforeBreadcrumb: scrubBreadcrumb,
     beforeSend(event) {
+      // Sharing went off after this event was queued.
+      if (!errorReportsAllowed()) return null;
       if (eventHasOnlyThirdPartyFrames(event, location.origin)) return null;
       // In-app browser bridges and wallet extensions (window._META,
       // webkit.messageHandlers, __firefox__, window.ethereum, …) run in our page.
@@ -25,6 +39,29 @@ export function initErrorTracking() {
       return scrubEventUrls(event);
     },
   });
+}
+
+function stopSentry() {
+  if (!started) return;
+  started = false;
+  try {
+    Sentry.close();
+  } catch {
+    // Already gone: nothing more can be sent.
+  }
+}
+
+// Start or stop GlitchTip to match the sharing switch and the ghost flag.
+export function syncErrorTracking() {
+  if (errorReportsAllowed()) startSentry();
+  else stopSentry();
+}
+
+export function initErrorTracking() {
+  syncErrorTracking();
+  if (listening) return;
+  listening = true;
+  globalThis.addEventListener?.(SHARING_EVENT, syncErrorTracking);
 
   window.addEventListener('error', (event) => {
     captureError(event.error || new Error(event.message), { type: 'window-error' });
@@ -48,7 +85,7 @@ export function shouldReportRejection(event) {
 }
 
 export function captureError(error, context) {
-  if (typeof Sentry !== 'undefined') {
+  if (started && typeof Sentry !== 'undefined' && errorReportsAllowed()) {
     Sentry.captureException(error, { extra: context });
   }
   console.error(error);

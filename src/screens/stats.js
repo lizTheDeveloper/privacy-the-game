@@ -1,5 +1,5 @@
 import { isAnalyticsOff, getOptedOutAt } from '../utils/analytics-pref.js';
-import { getGhostInfo, isGhostPending } from '../utils/ghost.js';
+import { getGhostInfo, isGhostPending, hasGoneGhost } from '../utils/ghost.js';
 import { deletionStatus } from '../utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from '../data/dialogue.js';
 import { getChosenPod } from '../utils/pod-pref.js';
@@ -13,6 +13,7 @@ import {
   calcDistrictProgress,
   calcFindings,
 } from '../utils/calc.js';
+import { displayStreak } from '../state.js';
 
 const RING_SIZE = 120;
 const RING_RADIUS = 45;
@@ -159,6 +160,15 @@ export function renderWhoamiPanel(view = {}) {
     return whoamiShell(`<div style="${WHOAMI_TEXT}">We couldn't reach our analytics just now. Nothing was sent.</div>
       <button class="btn-secondary" data-action="whoami-open">TRY AGAIN</button>`);
   }
+  if (who.status === 'local' && (isAnalyticsOff() || hasGoneGhost())) {
+    // Sharing is off: nothing was sent. What this browser hands any site, read here.
+    const d = who.data || {};
+    const own = joinParts([d.language, d.screen], ' \u00b7 ');
+    return whoamiShell(`<div style="${WHOAMI_TEXT}">Sharing is off, so we didn't ask our server. This is what your browser gives any site that asks, read right here on your device:</div>
+      ${own ? `<div style="${WHOAMI_TEXT}"><b>${own}</b></div>` : ''}
+      ${d.userAgent ? `<div style="${WHOAMI_TEXT} font-family: var(--font-mono); font-size: 11px; overflow-wrap: anywhere;">${esc(d.userAgent)}</div>` : ''}
+      <div style="${WHOAMI_TEXT}">Every site you open also sees your connection's address. With sharing on, SHOW ME asks our analytics where that address places you.</div>`);
+  }
   if (who.status !== 'ready') {
     return whoamiShell(`<div style="${WHOAMI_TEXT}">Our analytics can see a few things about every visit. Want to see exactly what they see about you?</div>
       <button class="btn-secondary" data-action="whoami-open">SHOW ME</button>`);
@@ -263,7 +273,7 @@ export function renderStats(state, view = {}) {
         border: 'rgba(255,159,0,0.1)',
         content: `
         <div class="stat-streak" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div class="stat-streak-value" style="font-family: var(--font-mono); font-weight: 700; color: #FF9F00; line-height: 1; text-shadow: 0 0 15px rgba(255,159,0,0.3);">${state.streak.current}d</div>
+          <div class="stat-streak-value" style="font-family: var(--font-mono); font-weight: 700; color: #FF9F00; line-height: 1; text-shadow: 0 0 15px rgba(255,159,0,0.3);">${displayStreak(state)}d</div>
           <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 6px; letter-spacing: 1px;">BEST ${state.streak.best}d</div>
         </div>`,
       })}

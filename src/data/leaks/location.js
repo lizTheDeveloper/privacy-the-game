@@ -11,6 +11,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'Los Angeles v. The Weather Channel app',
     agency: 'The Weather Company (IBM)',
     leak: 'lawsuit',
+    pipe: 'p-buying',
     year: 2019,
     summary:
       'In January 2019 Los Angeles City Attorney Mike Feuer sued the operator of The Weather Channel app, owned by IBM, under California\'s Unfair Competition Law. The suit said the app told users their location was for "personalized local weather data, alerts and forecasts", tracked them "in minute detail" even when the app was closed, and sent that data to "IBM affiliates and other third parties" for advertising and hedge fund analysis. Feuer said the disclosures were buried in a 10,000-word privacy policy. In August 2020 the operator settled by rewriting how it tells its more than 50 million users about location tracking and the sale of their data.',
@@ -37,6 +38,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'AccuWeather and Reveal Mobile',
     agency: 'AccuWeather and Reveal Mobile',
     leak: 'reporting',
+    pipe: 'p-buying',
     year: 2017,
     summary:
       'In August 2017 security researcher Will Strafach intercepted the AccuWeather iPhone app\'s traffic and found it sending location data to Reveal Mobile, a firm "designed to monetize user locations". With location sharing switched off, the app still sent the name and MAC address of the Wi-Fi router every few hours; ZDNet used that alone to place a test iPhone "within just a few meters". With location on, it sent "down-to-the-meter precise coordinates", speed and altitude. AccuWeather told ZDNet it planned to use the Reveal data "for audience segmentation and analysis".',
@@ -61,6 +63,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'Venntel: app location data sold to DHS, ICE, CBP and the FBI',
     agency: 'DHS, ICE, CBP, the FBI, the IRS and the DEA, buying from Venntel (Gravy Analytics)',
     leak: 'foia',
+    pipe: 'p-buying',
     year: 2020,
     summary:
       'Since 2017 the Department of Homeland Security has bought access to Venntel, a subsidiary of Gravy Analytics that sells phone location data "drawn from inconspicuous cell phone apps, like games and weather apps". ICE used it to "help identify immigrants who were later arrested" and CBP to find phones in remote desert on the Mexican border; the FBI, the IRS and the DEA have bought it too. Records the ACLU won by FOIA lawsuit show Venntel telling DHS it collects "more than 15 billion location points from over 250 million cell phones and other mobile devices every day", Government lawyers approved the purchases although the Supreme Court\'s Carpenter ruling requires a warrant for phone location history from carriers. Norway\'s NRK traced one path into Venntel from a weather app through middlemen to Gravy.',
@@ -91,6 +94,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'Babel Street Locate X',
     agency: 'U.S. Special Operations Command, CBP, ICE and the Secret Service, buying from Babel Street',
     leak: 'reporting',
+    pipe: 'p-buying',
     year: 2020,
     summary:
       'Locate X, sold by Babel Street, lets a user "draw a shape on a map, see all devices Babel Street has data on in that location, and then follow a specific device around"; a former employee said "we could absolutely deanonymize a person." U.S. Special Operations Command bought it for overseas operations, and CBP, ICE and the Secret Service use it; ACLU FOIA records show CBP spent over $2 million on Babel Street location data. In 2024 404 Media watched Locate X follow one phone from a home in Alabama to an abortion clinic in Florida and back, with no warrant. Venntel supplies data behind Locate X.',
@@ -119,6 +123,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'Fog Data Science: Fog Reveal',
     agency: 'Local and state police, buying from Fog Data Science',
     leak: 'foia',
+    pipe: 'p-buying',
     year: 2022,
     summary:
       'Fog Data Science sells police Fog Reveal, a search engine over location data from "hundreds of billions of records from 250 million mobile devices", taken from advertising IDs in apps. EFF\'s public records requests and an Associated Press investigation found nearly two dozen agencies, from the California Highway Patrol and Maryland State Police to the Iowa Fusion Center, running area searches and "patterns of life" back to June 2017, often without warrants; a Maryland sergeant wrote that it "requires no paperwork". It starts at $7,500 a year. Fog Reveal\'s own code sends its searches to paths named "/Venntel/GetLocationData".',
@@ -145,6 +150,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'X-Mode: app location data to U.S. military contractors',
     agency: 'X-Mode Social (now Outlogic), selling to U.S. military contractors',
     leak: 'reporting',
+    pipe: 'p-buying',
     year: 2020,
     summary:
       'X-Mode pays app developers to embed its code, collects their users\' locations, and sold that data to U.S. military contractors including Sierra Nevada Corporation and Systems & Technology Research, "and by extension, the military". Motherboard caught Muslim Pro, the storm tracker Global Storms and the Accupedo step counter sending location to X-Mode; X-Mode\'s CEO said it tracks 25 million U.S. devices a month. A Defense Intelligence Agency memo says DIA staff searched U.S. phone location data without a warrant. In 2024 the FTC barred X-Mode, now Outlogic, from selling sensitive location data, after finding it sold raw location data to "private government contractors".',
@@ -172,6 +178,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'The Gravy Analytics breach',
     agency: 'Gravy Analytics, parent of Venntel',
     leak: 'reporting',
+    pipe: 'p-buying',
     year: 2025,
     summary:
       'In January 2025 hackers stole files from Gravy Analytics, the parent of Venntel, whose clients have included ICE, CBP, the IRS, the FBI and the DEA. The files hold tens of millions of phone coordinates tagged with the app they came from, harvested through ad auctions: games like Candy Crush, dating apps, period and pregnancy trackers, MyFitnessPal, AccuWeather, Yahoo Mail, Microsoft Outlook and Microsoft 365. Because the data is skimmed from real-time ad bidding, neither users nor the apps\' own developers know it is happening.',
@@ -198,6 +205,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'FTC order against Gravy Analytics and Venntel',
     agency: 'Federal Trade Commission',
     leak: 'court',
+    pipe: 'p-buying',
     year: 2024,
     summary:
       'In December 2024 the FTC charged Gravy Analytics and Venntel with collecting and selling location data "without obtaining verifiable user consent for commercial and government uses", including visits to medical facilities, places of worship and military installations. The companies claimed to process "more than 17 billion signals from around a billion mobile devices daily". The order, final in January 2025, bans the sale of sensitive location data, except for national security and law enforcement uses.',
@@ -224,6 +232,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'FTC order against Mobilewalla',
     agency: 'Federal Trade Commission',
     leak: 'court',
+    pipe: 'p-buying',
     year: 2024,
     summary:
       'Mobilewalla bid in real-time ad auctions and kept the data in every bid request "even when it didn\'t have a winning bid". From 2018 to 2020 it collected "more than 500 million unique consumer advertising identifiers paired with consumers\' precise location data", including visits to health clinics and places of worship, and sold the raw data to advertisers, data brokers and analytics firms. In December 2024 the FTC barred it from selling sensitive location data and from collecting ad-auction data for any other purpose.',
@@ -249,6 +258,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'FTC v. Kochava',
     agency: 'Federal Trade Commission',
     leak: 'court',
+    pipe: 'p-buying',
     year: 2022,
     summary:
       'In August 2022 the FTC sued Idaho data broker Kochava for selling "location data from hundreds of millions of mobile devices that could be used to trace the movements of individuals", including visits to health facilities and places of worship. Like Fog Reveal, Kochava hands clients advertising IDs that lead back to where a phone\'s owner lives. In May 2026 Kochava and its subsidiary Collective Data Solutions, which has taken over the broker business, agreed to an order banning sales of sensitive location data without "affirmative express consent".',
@@ -274,6 +284,7 @@ export const LEAKS_LOCATION = Object.freeze([
     title: 'FTC order against InMarket',
     agency: 'Federal Trade Commission',
     leak: 'court',
+    pipe: 'p-buying',
     year: 2024,
     summary:
       'InMarket collects location from its own apps, the shopping rewards app CheckPoints and the shopping list app ListEase, and from third-party apps that carry its code, then sorts people into nearly 2,000 audience segments such as "parents of preschoolers" and low-income millennials. The FTC found its consent prompts were "misleading half-truths". In 2024 the FTC banned InMarket from selling or licensing any precise location data, a first for the agency.',

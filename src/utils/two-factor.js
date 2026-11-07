@@ -25,15 +25,10 @@ export function twoFactorAction(answers) {
   return undefined;
 }
 
-// How strong a second step is, weakest first (ruling 2026-10-08). When two
-// answers for one account tie (same instant), the weaker one stands: the same
-// rule build.sql's rc_method_rank applies. Unknown counts as weakest.
+// How strong a second step is, weakest first (ruling 2026-10-08), as
+// build.sql's rc_method_rank ranks it: when two answers for one account tie
+// (same instant) in the nightly job, the weaker one stands. Unknown counts as
+// weakest. Kept equal to the SQL by tests/recon-phase3-districts.test.js. The
+// game itself doesn't apply this rule: on the device, currentTwoFactor
+// (utils/interior.js) takes the later filing, and a tie goes to the upgrade.
 export const METHOD_STRENGTH = { none: 0, sms: 1, email: 1, authenticator: 2, passkey: 3 };
-
-export function methodStrength(method) {
-  return METHOD_STRENGTH[method] ?? 0;
-}
-
-export function weakerMethod(a, b) {
-  return methodStrength(b) < methodStrength(a) ? b : a;
-}

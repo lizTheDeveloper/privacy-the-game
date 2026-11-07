@@ -173,6 +173,7 @@ export const TRAIL_MISSIONS = [
       { text: "For any loyalty program not listed: look for a link called \"Do Not Sell or Share My Personal Information\", \"Your Privacy Choices\" or \"Your California Privacy Choices\" (California's rules allow any of those labels)." },
     ],
     debriefQs: TRAIL_DEBRIEF,
+    optOut: { action: ["completed", "already-done"] },
     scoutDialog: {
       briefing: "\"Every one of these companies has a 'Do Not Sell My Personal Information' page, because California law requires it. Most of them made it hard to find on purpose. The pattern is always the same: log in, find Privacy or Account Settings, look for the opt-out toggle. They're counting on you not looking. Today you look.\"",
       debrief: scoutTrail(

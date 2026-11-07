@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { guessFromWhoami, locationQuiz, homeLabel } from '../../src/components/location-quiz.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
+import { shouldAutoWhoami } from '../../src/utils/collective.js';
 
 describe('the location quiz', () => {
   it('guesses a state, outside the US, or nothing', () => {
@@ -54,7 +55,10 @@ describe('the location quiz', () => {
 
   it('the guess fetch is gated on sharing and ghost', () => {
     const app = readFileSync('src/app.js', 'utf8');
-    expect(app).toMatch(/route\.screen === 'broker-map' && whoamiView\.status === 'idle' && homeOf\(state\) === null && guessAllowed\(\)\) loadWhoami\(\);/);
+    expect(app).toMatch(/if \(shouldAutoWhoami\(route\.screen, whoamiView\.status, \{ allowed: guessAllowed\(\), homeKnown: homeOf\(state\) !== null \}\)\) loadWhoami\(\);/);
+    expect(shouldAutoWhoami('broker-map', 'idle', { allowed: true, homeKnown: false })).toBe(true);
+    expect(shouldAutoWhoami('broker-map', 'idle', { allowed: false, homeKnown: false })).toBe(false);
+    expect(shouldAutoWhoami('broker-map', 'idle', { allowed: true, homeKnown: true })).toBe(false);
     expect(app).toMatch(/function guessAllowed\(\) \{\n {2}return !isAnalyticsOff\(\) && !hasGoneGhost\(\);/);
   });
 

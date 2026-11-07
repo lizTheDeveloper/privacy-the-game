@@ -18,6 +18,17 @@ export function isAnalyticsOff() {
   }
 }
 
+// Fired on the window whenever sharing or the ghost flag changes, so error
+// reporting (utils/errors.js) starts or stops with it.
+export const SHARING_EVENT = 'reclaim-city:sharing';
+export function announceSharingChange() {
+  try {
+    globalThis.dispatchEvent?.(new Event(SHARING_EVENT));
+  } catch {
+    // No window (tests without one): nothing is listening.
+  }
+}
+
 export function setAnalyticsOff(off) {
   offInMemory = Boolean(off);
   try {
@@ -31,6 +42,7 @@ export function setAnalyticsOff(off) {
   } catch {
     // Storage blocked (private mode): nothing persists, and nothing to undo.
   }
+  announceSharingChange();
 }
 
 // When this browser last turned sharing off (sent `opted-out`), so the game can

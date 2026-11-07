@@ -5,7 +5,10 @@ import { renderDistrict } from '../../src/screens/district.js';
 import { RECHECK_OPACITY, constellationSvg, labelBox, LABEL_LINE_EM } from '../../src/components/constellation.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
 import { whatsLeft, litIds, initialView, withRatio, zoomViewBox, zoomAnchor, litBunch, VIEW_BOUNDS } from '../../src/utils/broker-view.js';
-import { markMapSeen, newlyLitIds, cleanBrokerState, setResidency, setHome } from '../../src/utils/broker-state.js';
+import { markMapSeen, newlyLitIds, cleanBrokerState, setHome } from '../../src/utils/broker-state.js';
+
+// A save from before the location quiz kept only a California answer (caResident).
+const oldAnswer = (s, v) => ({ ...s, caResident: v });
 import { BROKER_MAP_DIALOGUE } from '../../src/data/dialogue.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
 import { DISTRICTS } from '../../src/data/districts.js';
@@ -103,23 +106,23 @@ describe('the map screen', () => {
 
   it('an answered location shows the answer and CHANGE; an old California yes reads as California', () => {
     expect(draw(setHome(fresh(), 'US-TX'))).toContain('NOT IN TEXAS? CHANGE');
-    expect(draw(setResidency(fresh(), 'yes'))).toContain('Where you live: <strong>California</strong>');
+    expect(draw(oldAnswer(fresh(), 'yes'))).toContain('Where you live: <strong>California</strong>');
     expect(draw(setHome(fresh(), 'outside-us'))).toContain('Where you live: <strong>Outside the US</strong>');
     // An old "not in California" doesn't say which state: asked again.
-    expect(draw(setResidency(fresh(), 'no'))).toContain('WHERE DO YOU LIVE?');
+    expect(draw(oldAnswer(fresh(), 'no'))).toContain('WHERE DO YOU LIVE?');
     const editing = draw(setHome(fresh(), 'US-TX'), { editingResidency: true });
     expect(editing).toContain('data-action="quiz-pick"');
   });
 
   it.each([['no']])('DROP explains why it lights nothing for %s', (v) => {
-    const h = draw(setResidency(withLines(fresh(), STRAG, { drop: '2026-10-01' }), v));
+    const h = draw(oldAnswer(withLines(fresh(), STRAG, { drop: '2026-10-01' }), v));
     expect(h).toContain("DROP is only for California residents, so it doesn't light anything for you. Your other opt-outs still do.");
     expect(BROKER_MAP_DIALOGUE.dropNotResident).toBe("DROP is only for California residents, so it doesn't light anything for you. Your other opt-outs still do.");
   });
 
   it('DROP reads lit, ask and off', () => {
     const dropped = withLines(fresh(), STRAG, { drop: '2026-10-01' });
-    expect(draw(setResidency(dropped, 'yes'))).toContain('DROP: filed. It lights the brokers registered in California.');
+    expect(draw(setHome(dropped, 'US-CA'))).toContain('DROP: filed. It lights the brokers registered in California.');
     expect(draw(dropped)).toContain('DROP: filed. Tell the map where you live to light it.');
     expect(html).toContain('DROP: not filed yet.');
     expect(html).toContain('href="#/mission/people_search-reclaim-stragglers/briefing"');
@@ -407,12 +410,12 @@ describe('fix round 1: framing', () => {
   it('the header reads <1% (escaped) when something is lit but the share floors to 0; DROP-yes stays 59%', () => {
     const h = draw(withLines(fresh(), WF, { spokeo: '2026-10-01' }));
     expect(head(h)).toBe('FIELD COVERED: &lt;1% · HUBS LIT 0/12');
-    const drop = draw(setResidency(withLines(fresh(), STRAG, { drop: '2026-10-01' }), 'yes'));
+    const drop = draw(setHome(withLines(fresh(), STRAG, { drop: '2026-10-01' }), 'US-CA'));
     expect(head(drop)).toBe('FIELD COVERED: 59% · HUBS LIT 6/12');
   });
 
   it('DROP with "rather not say" has its own line', () => {
-    const h = draw(setResidency(withLines(fresh(), STRAG, { drop: '2026-10-01' }), 'unsaid'));
+    const h = draw(setHome(withLines(fresh(), STRAG, { drop: '2026-10-01' }), 'unsaid'));
     expect(h).toContain('We only light DROP if you tell us you live in California.');
     expect(h).not.toContain('DROP is only for California residents');
     expect(BROKER_MAP_DIALOGUE.dropUnsaid).toBe('We only light DROP if you tell us you live in California.');

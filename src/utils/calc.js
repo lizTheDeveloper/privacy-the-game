@@ -156,6 +156,14 @@ export function isTwoFactorMission(mission) {
   return Boolean(mission?.debriefQs?.some((q) => q.kind === 'two-factor' || /two-factor|two-step|registration lock/i.test(q.label || '')));
 }
 
+// A filed opt-out: the mission is tagged `optOut: { questionId: [values] }` in
+// the data, and the completed record answers one of those values. One per
+// mission, however many brokers its form covered.
+export function isOptOutFiled(mission, record) {
+  if (!mission?.optOut || record?.status !== 'completed') return false;
+  return Object.entries(mission.optOut).some(([q, vals]) => vals.includes(record[q]));
+}
+
 export function calcFindings(state) {
   const entries = Object.entries(state.missions);
   const missions = entries.map(([, m]) => m).filter((m) => m.status === 'completed');
@@ -164,7 +172,7 @@ export function calcFindings(state) {
     breachesFound: addressChecks(state).filter((c) => c.breached).length,
     passwordsReset: missions.filter((m) => m.action === 'reset-password').length,
     twoFactorEnabled: entries.filter(([id, m]) => m.status === 'completed' && m.action === 'enabled-2fa' && isTwoFactorMission(byId.get(id))).length,
-    optOutsFiled: missions.filter((m) => m.action === 'filed-optout').length,
+    optOutsFiled: entries.filter(([id, m]) => isOptOutFiled(byId.get(id), m)).length,
   };
 }
 

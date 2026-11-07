@@ -4,6 +4,7 @@
 // Matrix room. Players are anonymous: a report is only the kind, the words they type,
 // the screen they were on and the game version. No save data, no accounts, no screenshot.
 import { track } from '../utils/analytics.js';
+import { sanitizeHref } from '../utils/pageview-url.js';
 
 export const BUG_CATEGORIES = [
   { slug: 'design_bug', emoji: '🦋', label: 'Design bug' },
@@ -25,11 +26,12 @@ export function feedbackHost(hostname = globalThis.location?.hostname || '') {
   return hostname.endsWith('multiversestudios.xyz') ? 'https://feedback.multiversestudios.xyz' : 'https://feedback.multiversegames.ai';
 }
 
-// The route only (e.g. "#/reclamation/map"), never a query string. A mission for an
-// account the player added by hand is just "#/mission/custom" (data/custom-missions.js).
+// The route only (e.g. "#/reclamation/map"), never a query string, by the same
+// rule as pageviews and error reports (utils/pageview-url.js): a building is
+// "#/building", a re-check "#/mission/recheck", and a mission for an account the
+// player added by hand "#/mission/custom". The dialog shows this same string.
 export function currentScreen(hash = globalThis.location?.hash || '') {
-  const route = (hash.split('?')[0] || '#/').slice(0, 200);
-  return /^#\/mission\/custom_[^/]+\//.test(route) ? '#/mission/custom' : route;
+  return sanitizeHref(hash.split('?')[0] || '#/').slice(0, 200);
 }
 
 // The release, from the stylesheet's cache-bust query (kept equal to package.json by a test).

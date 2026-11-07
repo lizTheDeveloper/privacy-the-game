@@ -95,6 +95,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'EU/UK: in the Privacy Center, use the “right to object” form. Since May 27, 2025 an objection only covers future data' },
     ],
     debriefQs: META_AI_DEBRIEF,
+    optOut: { meta_ai: ['objected'] },
     scoutDialog: {
       briefing: '"Meta is training their AI on every public post, photo, and comment you\'ve ever made. Let\'s see what options you have."',
       debrief: {
@@ -121,6 +122,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Avoid putting personal details into Meta AI chats. Meta says it can use them to train its models' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"Can\'t stop Meta entirely, but we can starve the pipeline. Less public data means less training fuel."',
       debrief: {
@@ -172,6 +174,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Select "All time" and confirm deletion' },
     ],
     debriefQs: HISTORY_DEBRIEF,
+    optOut: { action: ['cleared', 'opted-out'] },
     scoutDialog: {
       briefing: '"Two steps: stop the flow, then clear the reservoir. Both matter."',
       debrief: {
@@ -223,6 +226,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Confirm the change is saved' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"One switch. That\'s it. They made this one easy, at least."',
       debrief: {
@@ -277,6 +281,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Confirm the change saved' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"LinkedIn turned this on for everyone without asking. Your resume, your posts, your articles — all training data until you flip this switch."',
       debrief: {
@@ -304,6 +309,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Check Creative Cloud app settings for local analysis toggles' },
     ],
     debriefQs: ADOBE_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"Your art, your photos, your designs: if you’d rather Adobe didn’t analyze them, it’s one switch."',
       debrief: {
@@ -355,6 +361,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Back in Review Voice History, delete the recordings already saved' },
     ],
     debriefQs: HISTORY_DEBRIEF,
+    optOut: { action: ['cleared', 'opted-out'] },
     scoutDialog: {
       briefing: '"Two moves: stop the recording pipeline, then wipe what they already have. Alexa still works — she just stops snitching."',
       debrief: {
@@ -382,6 +389,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Review Apple Intelligence settings under Settings > Apple Intelligence & Siri' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"Apple is better than most on privacy, but Siri still phones home. One toggle and a history clear locks it down."',
       debrief: {
@@ -409,6 +417,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Also uncheck "Third-party Collaborators" data sharing' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"X feeds your posts and engagement straight into Grok. Two checkboxes control it — uncheck both."',
       debrief: {
@@ -436,6 +445,7 @@ export const FOUNDRY_MISSIONS = [
       { text: 'Consider editing or deleting posts you don\'t want in training sets' },
     ],
     debriefQs: AI_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: '"Reddit sold the whole archive. Your posts, your comments, your AMAs — all in the training set. We can limit future exposure."',
       debrief: {

@@ -10,6 +10,8 @@
 // The permission helpers stay, unused, for when push is real: flip
 // REMINDERS_DELIVERABLE then, and not before.
 
+import { streakNow } from '../state.js';
+
 const LAST_VISIT_KEY = 'reclaim_last_visit';
 const NOTIF_ASKED_KEY = 'reclaim_notif_asked';
 
@@ -56,18 +58,14 @@ export function welcomeBackNote(state, lastVisit, now = Date.now()) {
   const hoursSince = (now - lastVisit) / (1000 * 60 * 60);
   if (hoursSince < 20) return null;
 
-  const streak = state.streak?.current || 0;
+  const { current, kept, filedToday } = streakNow(state, new Date(now));
   const completedCount = Object.values(state.missions || {}).filter((m) => m.status === 'completed').length;
-  if (completedCount === 0 || streak === 0) return null;
+  if (completedCount === 0 || kept === 0) return null;
 
-  // The streak counts days with a filing: alive while the last one was yesterday or today.
-  const last = state.streak?.lastDate ? new Date(`${state.streak.lastDate}T00:00:00`) : null;
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
-  const daysAgo = last && !Number.isNaN(last.getTime()) ? Math.round((today - last) / 86400000) : null;
-  const days = `${streak}-day streak`;
-  if (daysAgo === 0) return `Your ${days} is still going, and today already counts.`;
-  if (daysAgo === 1) return `Your ${days} is still going. File one mission today to keep it.`;
+  // The same reading of the streak as the HUD and Stats (streakNow).
+  const days = `${kept}-day streak`;
+  if (current > 0 && filedToday) return `Your ${days} is still going, and today already counts.`;
+  if (current > 0) return `Your ${days} is still going. File one mission today to keep it.`;
   return `Your ${days} ended while you were away. Everything you secured still counts. One mission today starts a new one.`;
 }
 

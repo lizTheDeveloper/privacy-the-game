@@ -529,6 +529,7 @@ export const GRID_MISSIONS = [
       { text: "T-Mobile instructions, if the dashboard moves: T-Mobile's Manage privacy & notifications page", url: "https://www.t-mobile.com/support/account/manage-privacy-and-notifications" },
     ],
     debriefQs: APP_ACTION_DEBRIEF,
+    optOut: { action: ["completed"] },
     scoutDialog: {
       briefing: "\"You pay your carrier every month, and they still put you in their ad programs by default. Verizon's Custom Experience reads the sites and apps on your phone. AT&T's Personalized is on for everyone. T-Mobile shares for ads and analytics until you say no. The switches exist because the law makes them offer one. Flip them.\"",
       debrief: {

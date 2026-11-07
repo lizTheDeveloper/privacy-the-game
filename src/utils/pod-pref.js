@@ -1,8 +1,10 @@
 // The pod a player chose on "What we know about you". Stored only in this
 // browser; track() attaches it to events so the nightly job counts them there.
 // Clearing the choice stores the marker 'auto' rather than removing the key:
-// the job uses each session's latest pod value, so clearing has to be sent as
-// an event of its own ("auto" is not a published pod, so geo takes over).
+// the job uses each session's latest pod value, so clearing has to be sent
+// ("auto" is not a published pod, so geo takes over). The marker stays, and
+// every later event carries pod 'auto': track() can't tell whether an event
+// arrived, so a clear sent once could be lost and leave the old choice standing.
 export const POD_KEY = 'reclaim-city.pod';
 export const POD_AUTO = 'auto';
 
@@ -19,7 +21,7 @@ export function getChosenPod() {
   return v === POD_AUTO ? null : v;
 }
 
-// True while a cleared choice still needs to reach the job.
+// True once the player has cleared a choice (until they choose again).
 export function isPodAuto() {
   return read() === POD_AUTO;
 }
