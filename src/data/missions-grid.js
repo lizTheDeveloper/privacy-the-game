@@ -149,7 +149,7 @@ export const GRID_MISSIONS = [
     title: "Review and Delete Voice Recordings",
     briefing: "When you talk to Alexa or Google Assistant, the request is sent to a server, and the companies can keep recordings unless you change the settings. Apple says it doesn't keep Siri audio unless you opt in to Improve Siri & Dictation. In 2019, Bloomberg revealed that Amazon employs thousands of people worldwide to listen to Alexa recordings to 'improve the service.' Google and Apple had similar programs. The recordings include everything picked up by the microphone -- not just your command, but background conversations, TV audio, and anything else happening in the room. You can review what they have and delete it.",
     steps: [
-      { text: "Alexa: Open the Alexa app > More > Settings > Alexa Privacy > Manage Your Alexa Data" },
+      { text: "Alexa: Open the Alexa app > More > Alexa Privacy > Manage Your Alexa Data" },
       { text: "Alexa: Under 'Choose how long to save recordings,' select 'Don't save recordings'" },
       { text: "Alexa: Under Help improve Alexa, turn off Use of voice recordings. Then delete the recordings in Review Voice History" },
       { text: "Google: Go to myactivity.google.com > Filter by 'Voice & Audio'" },

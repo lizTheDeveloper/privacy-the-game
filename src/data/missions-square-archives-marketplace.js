@@ -491,7 +491,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     accountId: "linkedin",
     phase: "recon",
     title: "Breach Recon: LinkedIn",
-    briefing: "LinkedIn was breached in 2012 -- 117 million passwords leaked, stored with unsalted SHA-1, which means they were cracked within hours. In 2021, 700 million profiles were scraped. Your professional identity is prime material for targeted phishing.",
+    briefing: "LinkedIn was breached in 2012 -- Have I Been Pwned counts 164 million email addresses and passwords, stored as unsalted SHA-1 hashes, and most were cracked within days of the 2016 release. In 2021, attackers scraped hundreds of millions of public profiles. Your professional identity is prime material for targeted phishing.",
     steps: [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your LinkedIn" },
@@ -777,9 +777,9 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: "Privacy Review: Discord",
     briefing: `Discord's default allows anyone in a shared server to DM you -- that's how most Discord phishing starts. A DM from a "server admin" asking you to verify your account. The DM restriction is the most important privacy setting.`,
     steps: [
-      { text: 'Open Discord Settings → "Privacy & Safety"' },
-      { text: `Set 'Server Privacy Defaults" → disable "Allow direct messages from server members" for servers where you don't need it` },
-      { text: `Under "How Discord Uses Your Data" → disable everything related to personalization and data usage` },
+      { text: 'Open Discord User Settings (the cogwheel at the bottom left) → Content & Social' },
+      { text: `Under Social permissions, turn off Direct messages to stop DMs from non-friends in your servers. Discord asks whether to apply it to your existing servers, and the Social permissions drop-down sets it server by server` },
+      { text: `User Settings → Data & Privacy → turn off "Use data to improve Discord" and "Use data to personalize my Discord experience"` },
       { text: `Review "Authorized Apps" one more time -- some apps have permission to read your messages` },
     ],
     debriefQs: PRIVACY_DEBRIEF,
@@ -946,9 +946,10 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     title: 'Connected Apps: Slack',
     briefing: `Every Slack integration you've authorized has some level of access to your workspace messages. Old bots, test apps, and one-off integrations accumulate quietly. Each one is a potential data leak.`,
     steps: [
-      { text: `Open your Slack workspace in a browser → click your workspace name → "Settings & administration" → "Manage apps"` },
+      { text: `In Slack on your desktop, click your workspace name in the sidebar → Tools & settings → Manage apps, then select Installed Apps` },
       { text: "Or go to your-workspace.slack.com/apps/manage" },
-      { text: `Review every app and integration -- remove anything you don't actively use` },
+      { text: `Review every app and integration -- remove anything you don't actively use (select the app → App Details → Configuration tab → Remove App; for a Slack-built app, click the pencil icon → Remove)` },
+      { text: `No Remove option? If a Workspace Owner turned on app approval, only Workspace Owners and app managers can remove apps. Ask one of them` },
       { text: 'Pay special attention to apps with "Read messages" permissions' },
     ],
     debriefQs: PRIVACY_DEBRIEF,
@@ -1232,7 +1233,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open Amazon Advertising Preferences', url: 'https://www.amazon.com/adprefs' },
       { text: `Turn off "Interest-Based Ads from Amazon"` },
       { text: `Go to Amazon → Account → "Manage Your Data" → review what Amazon has collected` },
-      { text: `If you use Alexa: go to Amazon → Account → "Manage Your Content and Devices" → review voice recordings` },
+      { text: `If you use Alexa: Alexa app → More → Alexa Privacy → Review Alexa History, and review or delete your voice recordings there` },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {

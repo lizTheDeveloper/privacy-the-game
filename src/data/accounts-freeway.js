@@ -64,6 +64,7 @@ export const FREEWAY_ACCOUNTS = {
     district: 'freeway',
     building: 'assets/buildings/car_kia.png',
     buildingDark: 'assets/buildings/car_kia_dark.png',
+    // Kia's own privacy policy (kia.com/us/en/privacy, "Exercising Your California Privacy Rights") links this as its "online request portal"; it also takes requests at (800) 333-4542.
     securityUrl: 'https://customercare.kiausa.com',
     riskLevel: 'high',
     dataCollected: ['driving score', 'insurance data', 'location', 'diagnostics'],

@@ -506,7 +506,7 @@ export const RECLAMATION_MISSIONS = [
     scoutDialog: {
       briefing: "\"LexisNexis has your insurance claims history, address history, and sometimes criminal records. Many landlord background checks and insurance quotes pull from LexisNexis. This is one of the two most important enterprise opt-outs you can do.\"",
       debrief: {
-        "done": "\"LexisNexis opt-out submitted. This takes weeks to process -- they're not in a hurry. But they're legally required to comply.\"",
+        "done": "\"LexisNexis opt-out submitted. This takes weeks to process -- they're not in a hurry. The prescreen opt-out is your right under the Fair Credit Reporting Act, and where your state's privacy law applies, they have to answer that request too.\"",
         "already-done": "\"Already opted out. Good -- this is one most people never think to do.\"",
         "skip": "\"High priority. LexisNexis feeds data to thousands of downstream services.\"",
       },
@@ -543,7 +543,7 @@ export const RECLAMATION_MISSIONS = [
     title: "Opt Out: CoreLogic & TransUnion TLO",
     briefing: "CoreLogic (now Cotality) holds property records used in many background and tenant checks -- ownership records, and in some cases rental history. TransUnion TLO is TransUnion's skip-tracing product, separate from your credit file. Freezing your credit does NOT freeze TLO. You have to opt out separately.",
     steps: [
-      { text: 'CoreLogic (now Cotality): submit a consumer privacy request through its privacy policy' },
+      { text: 'CoreLogic (now Cotality): use the Online Privacy Portal on its privacy policy page to ask what it holds, delete it, or opt out of sale. California residents can also call 1-866-221-9291', url: 'https://www.cotality.com/legal/privacy-policy' },
       { text: "Submit a TransUnion consumer privacy request (TLO is included)", url: "https://www.transunion.com/consumer-privacy" },
       { text: "Note: TransUnion TLO is separate from your credit freeze -- opting out here does not affect your credit file or freeze" },
     ],
@@ -566,7 +566,7 @@ export const RECLAMATION_MISSIONS = [
     title: "The Deep Layer: Remaining Aggregators",
     briefing: "The rest of the wholesale layer. Verisk holds insurance claims data. The Work Number, run by Equifax, holds employment and salary records from the employers that use it. Data Axle sells consumer marketing lists. Sift scores the fraud risk of activity on the sites that use it. These are the companies nobody's heard of that have the most data.",
     steps: [
-      { text: 'Verisk / ISO ClaimSearch (insurance claims): find the consumer privacy request on Verisk’s privacy page' },
+      { text: 'Verisk / ISO ClaimSearch (insurance claims): find the consumer privacy request on Verisk’s privacy page', url: 'https://www.verisk.com/privacy-policies/' },
       { text: 'The Work Number (Equifax): request your employment data report, and freeze it if you want', url: 'https://employees.theworknumber.com/employment-data-report' },
       { text: 'Data Axle: use the consumer choices in its privacy policy', url: 'https://www.data-axle.com/privacy-policy/' },
       { text: 'Sift: read its service privacy notice for how to request or delete your data', url: 'https://sift.com/legal-and-compliance/service-privacy-notice/' },
@@ -716,7 +716,7 @@ export const RECLAMATION_MISSIONS = [
       },
     ],
     scoutDialog: {
-      briefing: "\"This is where privacy becomes a safety issue. Location data has been used to track people visiting abortion clinics, mosques, protest sites, and immigration lawyers. This isn't theoretical -- it happened. X-Mode Social sold GPS data from Muslim prayer apps to US military contractors. Near Intelligence sold Planned Parenthood visitor data to anti-abortion groups -- then filed for bankruptcy when it was exposed. Gravy Analytics was breached in 2025 and millions of people's movements were dumped online. The data comes from apps on your phone. Every app with location permission is a potential feed into this pipeline.\"",
+      briefing: "\"This is where privacy becomes a safety issue. Location data has been used to track people visiting abortion clinics, mosques, protest sites, and immigration lawyers. This isn't theoretical -- it happened. X-Mode Social sold GPS data from Muslim prayer apps to US military contractors. Location data from the broker Near Intelligence was used by an anti-abortion group to target people who visited 600 Planned Parenthood locations; Near was already in bankruptcy when Senator Wyden made that public in 2024. Gravy Analytics was breached in 2025 and millions of people's movements were dumped online. The data comes from apps on your phone. Every app with location permission is a potential feed into this pipeline.\"",
       debrief: {
         "few-apps": "\"Tight permissions. Most apps should be 'While Using' or 'Never.' You're ahead of most people on the most sensitive data category.\"",
         "more-than-expected": "\"More than expected. That's normal -- apps ask for location during setup and most people tap Allow without thinking. Time to review and tighten.\"",

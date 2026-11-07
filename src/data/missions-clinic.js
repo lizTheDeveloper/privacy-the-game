@@ -116,7 +116,7 @@ export const CLINIC_MISSIONS = [
       briefing: `"Time to cut the wires. Every third-party app connected to your fitness tracker is a pipeline carrying your biometrics somewhere you did not choose. Revoke what you do not need. Keep your data archive -- it's your copy."`,
       debrief: scoutHealth(
         `"Fitness data locked down. Your heart rate is no longer someone else's business intelligence."`,
-        `"Already tight. You're ahead of 95% of tracker users."`,
+        `"Already tight. Your heart rate stays your business."`,
         `"Some connections cut. Come back to finish the rest."`,
       ),
     },
@@ -338,7 +338,7 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: "GoodRx: sign in and look for its privacy settings to opt out of data sharing" },
       { text: "Check other pharmacy/prescription apps: Amazon Pharmacy, Cost Plus Drugs, PillPack -- review their privacy settings" },
-      { text: "If your pharmacy has an app (CVS, Walgreens, Rite Aid): check its privacy settings for 'personalized offers' or 'marketing'" },
+      { text: "If your pharmacy has an app (CVS, Walgreens): check its privacy settings for 'personalized offers' or 'marketing'" },
       { text: "Consider using your insurance's pharmacy directly instead of third-party discount apps" },
     ],
     debriefQs: HEALTH_ACTION_DEBRIEF,
