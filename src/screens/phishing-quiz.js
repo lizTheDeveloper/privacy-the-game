@@ -9,20 +9,68 @@ function esc(value) {
     .replace(/"/g, '&quot;');
 }
 
-function getQuizState(state) {
+export function getQuizState(state) {
   if (!state.phishingQuiz) {
     state.phishingQuiz = { curated: {}, streak: 0, bestStreak: 0, quizRound: 0, quizAnswers: {} };
   }
   return state.phishingQuiz;
 }
 
-function shuffleArray(arr) {
+function shuffleArray(arr, random = Math.random) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+const QUIZ_BATCH = 5;
+const MODES = {
+  curated: { messages: () => CURATED_MESSAGES, answers: 'curated' },
+  bank: { messages: () => MESSAGE_BANK, answers: 'quizAnswers' },
+};
+
+// The verdict on one message: saved with what the player typed as THE TELL, and the
+// message stays on screen with its reveal (quiz.revealing) until NEXT. False when the
+// message isn't in that set.
+export function recordQuizVerdict(state, mode, msgId, verdict, tell = '') {
+  const set = MODES[mode];
+  const msg = set?.messages().find((m) => m.id === msgId);
+  if (!msg) return false;
+  const quiz = getQuizState(state);
+  if (!quiz[set.answers]) quiz[set.answers] = {};
+  const correct = verdict === msg.answer;
+  quiz[set.answers][msgId] = { verdict, tell: String(tell || '').trim(), correct };
+  if (correct) {
+    quiz.streak = (quiz.streak || 0) + 1;
+    quiz.bestStreak = Math.max(quiz.bestStreak || 0, quiz.streak);
+  } else {
+    quiz.streak = 0;
+  }
+  quiz.revealing = { mode, id: msgId };
+  return true;
+}
+
+// NEXT: the revealed message goes away and the next one is drawn.
+export function nextQuizMessage(state) {
+  const quiz = getQuizState(state);
+  delete quiz.revealing;
+}
+
+// Quiz mode draws a batch once and keeps it (in the save) until every message in it is
+// answered, so a re-draw never swaps the message on screen.
+function currentBankMessage(quiz, random) {
+  const answered = quiz.quizAnswers || {};
+  const byId = (id) => MESSAGE_BANK.find((m) => m.id === id);
+  let pending = (Array.isArray(quiz.batch) ? quiz.batch : []).filter((id) => byId(id) && !answered[id]);
+  if (pending.length === 0) {
+    const available = MESSAGE_BANK.filter((m) => !answered[m.id]);
+    if (available.length === 0) return null;
+    quiz.batch = shuffleArray(available, random).slice(0, QUIZ_BATCH).map((m) => m.id);
+    pending = quiz.batch;
+  }
+  return byId(pending[0]);
 }
 
 function renderMessageCard(msg) {
@@ -117,15 +165,22 @@ function renderMessageCard(msg) {
   return `<div style="padding: 14px; font-size: 14px; color: var(--offwhite); line-height: 1.7;">${esc(msg.body)}</div>`;
 }
 
-function renderReveal(msg, answer, isCorrect) {
+function renderReveal(msg, record) {
+  const isCorrect = record.correct;
   const correctColor = isCorrect ? 'var(--lime)' : 'var(--magenta)';
   const correctBg = isCorrect ? 'rgba(198,255,0,0.06)' : 'rgba(255,45,155,0.06)';
   const correctBorder = isCorrect ? 'rgba(198,255,0,0.2)' : 'rgba(255,45,155,0.2)';
   const answerLabel = msg.answer === 'pretext' ? 'FAKE' : 'REAL';
+  const label = (text) => `<div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.5); letter-spacing: 2px; margin: 12px 0 6px;">${text}</div>`;
+
+  // What the player typed under THE TELL, beside the real tells.
+  const yours = record.tell
+    ? `${label('YOUR TELL')}<div data-your-tell style="font-size: 13px; color: var(--offwhite); line-height: 1.5; font-style: italic;">&ldquo;${esc(record.tell)}&rdquo;</div>`
+    : '';
 
   let tellsHtml = '';
   if (msg.tells && msg.tells.length > 0) {
-    tellsHtml = msg.tells.map(t =>
+    tellsHtml = label('THE TELLS') + msg.tells.map(t =>
       `<div style="display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px;">
         <span style="color: ${correctColor}; flex-shrink: 0;">•</span>
         <span style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.5;">${esc(t)}</span>
@@ -139,10 +194,11 @@ function renderReveal(msg, answer, isCorrect) {
   }
 
   return `
-  <div style="margin-top: 16px; padding: 16px; background: ${correctBg}; border: 1px solid ${correctBorder};">
-    <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: ${correctColor}; letter-spacing: 2px; margin-bottom: 10px;">
+  <div data-quiz-reveal="${msg.id}" role="status" style="margin-top: 16px; padding: 16px; background: ${correctBg}; border: 1px solid ${correctBorder};">
+    <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: ${correctColor}; letter-spacing: 2px;">
       ${isCorrect ? '✓ CORRECT' : '✗ WRONG'} — THIS IS ${answerLabel}
     </div>
+    ${yours}
     ${tellsHtml}
     ${verifyHtml}
   </div>`;
@@ -158,81 +214,85 @@ function getNextCuratedMessage(quiz) {
   return CURATED_MESSAGES.find(m => !quiz.curated[m.id]);
 }
 
-function getQuizBatchMessages(quiz) {
-  const answered = new Set(Object.keys(quiz.quizAnswers).map(Number));
-  const available = MESSAGE_BANK.filter(m => !answered.has(m.id));
-  if (available.length === 0) return [];
-  return shuffleArray(available).slice(0, 5);
+const btnStyle = (color, rgb) => `flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: ${color}; border-color: rgba(${rgb},0.3); background: rgba(${rgb},0.05);`;
+
+// The verdict buttons and THE TELL box for a message not yet answered.
+function verdictForm(msg, mode) {
+  const action = mode === 'bank' ? 'quiz-bank-verdict' : 'quiz-verdict';
+  const tellAttr = mode === 'bank' ? 'data-quiz-bank-tell' : 'data-quiz-tell';
+  const placeholder = mode === 'bank' ? 'What tipped you off?' : 'What made you decide?';
+  return `
+        <div style="margin-top: 20px;">
+          <div style="margin-bottom: 12px;">
+            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">THE TELL</div>
+            <input type="text" ${tellAttr}="${msg.id}" placeholder="${placeholder}" style="width: 100%; padding: 10px 14px; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); color: var(--offwhite); font-family: var(--font-body); font-size: 13px; outline: none;">
+          </div>
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <div data-action="${action}" data-msg-id="${msg.id}" data-verdict="pretext" role="button" tabindex="0" class="btn-secondary" style="${btnStyle('var(--magenta)', '255,45,155')}">FAKE</div>
+            <div data-action="${action}" data-msg-id="${msg.id}" data-verdict="genuine" role="button" tabindex="0" class="btn-secondary" style="${btnStyle('var(--lime)', '198,255,0')}">REAL</div>
+          </div>
+        </div>`;
 }
 
-export function renderPhishingQuiz(state) {
+function nextButton(mode) {
+  const action = mode === 'bank' ? 'quiz-bank-next' : 'quiz-next';
+  return `<div style="margin-top: 16px; text-align: right;"><div data-action="${action}" role="button" tabindex="0" class="btn-primary" style="display: inline-block; cursor: pointer;">NEXT →</div></div>`;
+}
+
+function bankHeader(quiz) {
+  const answers = Object.values(quiz.quizAnswers || {});
+  return `
+      <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+        <div style="font-family: var(--font-display); font-size: 9px; color: var(--amber); letter-spacing: 2px;">QUIZ MODE</div>
+        <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.4);">${answers.length} answered · ${answers.filter((a) => a.correct).length} correct</div>
+      </div>`;
+}
+
+// random: for tests (quiz mode's batch order).
+export function renderPhishingQuiz(state, { random = Math.random } = {}) {
   const quiz = getQuizState(state);
+  if (!quiz.quizAnswers) quiz.quizAnswers = {};
   const progress = getCuratedProgress(quiz);
   const curatedDone = progress.answered >= progress.total;
 
   const scoutIntro = "Real or fake? Name the specific detail that told you. The hard ones are the real messages — genuine services send alerts from domains that look fake.";
 
   let content;
+  const showing = quiz.revealing;
+  const revealSet = showing && MODES[showing.mode];
+  const revealMsg = revealSet?.messages().find((m) => m.id === showing.id);
+  const revealRecord = revealMsg && quiz[revealSet.answers]?.[revealMsg.id];
 
-  if (!curatedDone) {
+  if (revealMsg && revealRecord) {
+    // The message just answered, with its verdict, the tells and NEXT.
+    const head = showing.mode === 'bank'
+      ? bankHeader(quiz)
+      : `<div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${CURATED_MESSAGES.indexOf(revealMsg) + 1} OF ${progress.total}</div>`;
+    content = `
+      ${head}
+      ${renderMessageCard(revealMsg)}
+      ${renderReveal(revealMsg, revealRecord)}
+      ${nextButton(showing.mode)}`;
+  } else if (!curatedDone) {
     const msg = getNextCuratedMessage(quiz);
-    if (!msg) {
-      content = '<div style="padding: 32px; text-align: center; color: rgba(237,239,243,0.5);">All curated messages completed.</div>';
-    } else {
-      const existing = quiz.curated[msg.id];
-      content = `
+    content = `
       <div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${progress.answered + 1} OF ${progress.total}</div>
       ${renderMessageCard(msg)}
-      ${existing ? renderReveal(msg, existing.verdict, existing.correct) : `
-        <div style="margin-top: 20px;">
-          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-            <div data-action="quiz-verdict" data-msg-id="${msg.id}" data-verdict="pretext" class="btn-secondary" style="flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--magenta); border-color: rgba(255,45,155,0.3); background: rgba(255,45,155,0.05);">FAKE</div>
-            <div data-action="quiz-verdict" data-msg-id="${msg.id}" data-verdict="genuine" class="btn-secondary" style="flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--lime); border-color: rgba(198,255,0,0.3); background: rgba(198,255,0,0.05);">REAL</div>
-          </div>
-          <div style="margin-bottom: 12px;">
-            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">THE TELL</div>
-            <input type="text" data-quiz-tell="${msg.id}" placeholder="What made you decide?" style="width: 100%; padding: 10px 14px; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); color: var(--offwhite); font-family: var(--font-body); font-size: 13px; outline: none;">
-          </div>
-        </div>
-      `}
-      ${existing ? `<div style="margin-top: 16px; text-align: right;"><div data-action="quiz-next" class="btn-primary" style="display: inline-block; cursor: pointer;">NEXT →</div></div>` : ''}
-      `;
-    }
+      ${verdictForm(msg, 'curated')}`;
   } else {
-    const quizBatch = getQuizBatchMessages(quiz);
-    const bankAnswered = Object.keys(quiz.quizAnswers).length;
-    const bankCorrect = Object.values(quiz.quizAnswers).filter(a => a.correct).length;
-
-    if (quizBatch.length === 0) {
+    const current = currentBankMessage(quiz, random);
+    if (!current) {
+      const answers = Object.values(quiz.quizAnswers);
       content = `
       <div style="text-align: center; padding: 32px;">
         <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--lime); letter-spacing: 3px;">TRAINING COMPLETE</div>
-        <div style="font-size: 14px; color: rgba(237,239,243,0.55); margin-top: 12px;">You've answered every message in the bank. ${bankCorrect}/${bankAnswered} correct.</div>
+        <div style="font-size: 14px; color: rgba(237,239,243,0.55); margin-top: 12px;">You've answered every message in the bank. ${answers.filter((a) => a.correct).length}/${answers.length} correct.</div>
       </div>`;
     } else {
-      const currentBankMsg = quizBatch[0];
-      const bankExisting = quiz.quizAnswers[currentBankMsg.id];
-
       content = `
-      <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="font-family: var(--font-display); font-size: 9px; color: var(--amber); letter-spacing: 2px;">QUIZ MODE</div>
-        <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.4);">${bankAnswered} answered · ${bankCorrect} correct</div>
-      </div>
-      ${renderMessageCard(currentBankMsg)}
-      ${bankExisting ? renderReveal(currentBankMsg, bankExisting.verdict, bankExisting.correct) : `
-        <div style="margin-top: 20px;">
-          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-            <div data-action="quiz-bank-verdict" data-msg-id="${currentBankMsg.id}" data-verdict="pretext" class="btn-secondary" style="flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--magenta); border-color: rgba(255,45,155,0.3); background: rgba(255,45,155,0.05);">FAKE</div>
-            <div data-action="quiz-bank-verdict" data-msg-id="${currentBankMsg.id}" data-verdict="genuine" class="btn-secondary" style="flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--lime); border-color: rgba(198,255,0,0.3); background: rgba(198,255,0,0.05);">REAL</div>
-          </div>
-          <div style="margin-bottom: 12px;">
-            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">THE TELL</div>
-            <input type="text" data-quiz-bank-tell="${currentBankMsg.id}" placeholder="What tipped you off?" style="width: 100%; padding: 10px 14px; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); color: var(--offwhite); font-family: var(--font-body); font-size: 13px; outline: none;">
-          </div>
-        </div>
-      `}
-      ${bankExisting ? `<div style="margin-top: 16px; text-align: right;"><div data-action="quiz-bank-next" class="btn-primary" style="display: inline-block; cursor: pointer;">NEXT →</div></div>` : ''}
-      `;
+      ${bankHeader(quiz)}
+      ${renderMessageCard(current)}
+      ${verdictForm(current, 'bank')}`;
     }
   }
 

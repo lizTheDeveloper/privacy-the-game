@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createInitialState, toggleAccount } from '../src/state.js';
-import { renderSaints } from '../src/screens/saints.js';
+import { renderSaints, saintsOrigin } from '../src/screens/saints.js';
 import { renderBuildingInterior } from '../src/screens/building.js';
 import { lightCandle } from '../src/utils/interior-state.js';
 import { SAINTS } from '../src/data/interiors/saints.js';
@@ -98,6 +98,28 @@ describe('saints back link', () => {
     expect(renderSaints(s)).toContain('href="#/city">← CITY');
     expect(renderSaints(toggleAccount(s, 'gmail', false), { from: 'gmail' })).toContain('href="#/city"'); // not enabled
     expect(renderSaints(s, { from: '<x>' })).toContain('href="#/city"');
+  });
+  it('building → saints draws ← GMAIL, keeps it on a re-draw, and forgets it after leaving (UI sweep #3)', () => {
+    const s = toggleAccount(createInitialState(), 'gmail', true);
+    // The same sequence of routes app.js draws, through the same function it uses.
+    let from = null;
+    let last = null;
+    const draw = (hash) => {
+      const route = parseRoute(hash);
+      from = saintsOrigin(route, last, from);
+      last = route;
+      return route.screen === 'saints' ? renderSaints(s, { from }) : renderBuildingInterior(s, route.params.id);
+    };
+    expect(draw('#/building/gmail')).toContain('href="#/saints"');
+    expect(draw('#/saints')).toContain('href="#/building/gmail">← GMAIL');
+    expect(draw('#/saints')).toContain('href="#/building/gmail">← GMAIL'); // a re-draw (a candle lit)
+    draw('#/city');
+    expect(draw('#/saints')).toContain('href="#/city">← CITY');
+  });
+  it('app.js takes the back link from saintsOrigin on every draw', async () => {
+    const { readFileSync } = await import('node:fs');
+    const app = readFileSync('src/app.js', 'utf8');
+    expect(app).toMatch(/saintsFrom = saintsOrigin\(route, lastRoute, saintsFrom\);\n\s+if \(route\.screen !== 'bank-notes'\) bankForm = \{\};\n\s+lastRoute = route;/);
   });
   it('app keeps the origin in memory, never in the URL', async () => {
     const { readFileSync } = await import('node:fs');

@@ -1,5 +1,17 @@
 // The card's stats line. Breaches are what was found (email addresses only,
 // Master Keys), never "fixed"; districts with no address checks leave it out.
+// The address printed on every card: where the game is live (checked 2026-11-06).
+export const CARD_URL = 'play.multiversegames.ai/reclaim-city/';
+
+// One line under the share button saying what happened to the card.
+export function shareStatusText(result) {
+  if (!result?.ok) return 'Couldn’t make the card in this browser. Nothing was copied or saved.';
+  if (result.method === 'clipboard') return 'Copied to your clipboard. Paste it anywhere.';
+  if (result.method === 'share') return 'Sent to your share sheet.';
+  if (result.method === 'download') return `Downloaded as ${result.filename || 'an image'}.`;
+  return 'Done.';
+}
+
 export function milestoneCardLine({ accountsSecured = 0, addressesBreached = null, integrityPercent = 0 } = {}) {
   const parts = [`${accountsSecured} accounts secured`];
   if (Number.isFinite(addressesBreached)) {
@@ -52,7 +64,7 @@ export function generateMilestoneCard(districtName, stats) {
 
   ctx.fillStyle = 'rgba(237,239,243,0.4)';
   ctx.font = '400 11px "JetBrains Mono", monospace';
-  ctx.fillText('themultiverse.school/reclaim', 300, 282);
+  ctx.fillText(CARD_URL, 300, 282);
 
   return canvas;
 }
@@ -105,7 +117,7 @@ export function generateStatCard({ kicker = '', big = '', what = '', sub = '' } 
 
   ctx.fillStyle = 'rgba(237,239,243,0.4)';
   ctx.font = '400 11px "JetBrains Mono", monospace';
-  ctx.fillText('themultiverse.school/reclaim', 300, 282);
+  ctx.fillText(CARD_URL, 300, 282);
 
   return canvas;
 }
@@ -155,7 +167,7 @@ async function shareCanvas(canvas, filename) {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      return { ok: true, method: 'download' };
+      return { ok: true, method: 'download', filename };
     }
   }
 }

@@ -5,6 +5,7 @@ import { podBoard, displayPodId, findPod, yourPart, fmt, POD_MIN_PLAYERS } from 
 import { deck, splitWords } from '../components/deck.js';
 import { isCityComplete, getGhostInfo, isGhostPending } from '../utils/ghost.js';
 import { COLLECTIVE_DIALOGUE } from '../data/dialogue.js';
+import { isAnalyticsOff } from '../utils/analytics-pref.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const LABEL = 'color: rgba(0,229,255,0.4); margin-bottom: 16px;';
@@ -156,6 +157,7 @@ function statPanel(st) {
       <div style="${MUTED} margin-top: 8px;">${esc(st.what)}</div>
       ${sub}
       <button class="btn-secondary" data-action="share-stat" data-stat="${st.key}" style="margin-top: 14px;">SHARE</button>
+      <div data-share-status="${st.key}" role="status" aria-live="polite" style="${MUTED} margin-top: 8px; color: var(--cyan);"></div>
     </div>`;
 }
 
@@ -218,13 +220,24 @@ function yourPartPanel(state, podLabel) {
   </div>`;
 }
 
+// What opening this page sends, said the way it happens (app.js trackPageview, index.html):
+// a page view to our self-hosted Umami, like every screen, unless sharing is off. The
+// numbers themselves are a plain file download, not counted as a visit.
+export function pageviewLines(off = isAnalyticsOff()) {
+  if (off) return ['Sharing is off, so opening this page sent nothing to our analytics. The numbers are a plain file download.'];
+  return [
+    'Opening this page counts as a page view, like every screen in the game: our self-hosted analytics (Umami) gets the page address, the address you came from (the referrer), your screen size and language, and works out your browser, device and rough location from your connection. The numbers themselves are a plain file download, not counted as a visit.',
+    '<a href="#/stats" style="color: inherit;">Turn sharing off on Your City</a> and nothing is sent.',
+  ];
+}
+
 function footer(data) {
   const city = data.city || {};
   const lines = [];
   const when = data.asOf ? new Date(data.asOf) : null;
   if (when && !Number.isNaN(when.getTime())) lines.push(`As of ${esc(when.toLocaleString())}.`);
   lines.push('Breach rates now count email addresses only.');
-  lines.push('Loading this page doesn\'t track you.');
+  lines.push(...pageviewLines());
   lines.push(`“Players” are anonymous browser sessions. Places with fewer than ${POD_MIN_PLAYERS} players are grouped into a bigger place.`);
   const tail = [];
   if (isNum(city.ghosts)) tail.push(`${fmt(city.ghosts)} people have gone ghost`);

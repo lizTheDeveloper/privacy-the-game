@@ -61,3 +61,24 @@ describe('What we know about you', () => {
     expect(html).toMatch(/We can't load the list of places right now\./);
   });
 });
+
+// UI sweep #11: THAT'S RIGHT visibly does something.
+describe("THAT'S RIGHT", () => {
+  beforeEach(() => { globalThis.localStorage = memoryStorage(); });
+
+  it('acknowledges where the player counts and closes the question', () => {
+    const before = renderStats(createInitialState(), { whoami: WHO, collective: COLLECTIVE });
+    expect(before).toContain('data-action="whoami-confirm"');
+    const after = renderStats(createInitialState(), { whoami: WHO, collective: COLLECTIVE, whoamiConfirmed: true });
+    expect(after).toMatch(/data-whoami-confirmed[^>]*>Got it\. You count toward <b>Chicago<\/b>\./);
+    expect(after).not.toContain('data-action="whoami-confirm"');
+    // The way to change it stays.
+    expect(after).toContain('data-action="pod-pick-open"');
+  });
+
+  it('names the chosen place when the player picked one', () => {
+    setChosenPod('us-ca-oakland');
+    const after = renderStats(createInitialState(), { whoami: WHO, collective: COLLECTIVE, whoamiConfirmed: true });
+    expect(after).toMatch(/Got it\. You count toward <b>Oakland<\/b>\./);
+  });
+});

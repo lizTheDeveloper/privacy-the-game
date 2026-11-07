@@ -3,6 +3,7 @@ import { renderCityTogether, cityStats } from '../src/screens/city-together.js';
 import { createInitialState } from '../src/state.js';
 import { shouldAutoLoad } from '../src/utils/collective.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
+import { setAnalyticsOff } from '../src/utils/analytics-pref.js';
 
 function memoryStorage() {
   const m = new Map();
@@ -33,8 +34,22 @@ describe('The Whole City', () => {
     expect(html.indexOf('Seattle')).toBeLessThan(html.indexOf('Chicago'));
     expect(html).toMatch(/anonymous browser sessions/);
     expect(html).toMatch(/12 opted out/);
-    expect(html).toContain("Loading this page doesn't track you.");
+    // UI sweep #7: opening this page is a page view; the copy says so, and how to stop it.
+    expect(html).not.toContain("doesn't track you");
+    expect(html).toContain('Opening this page counts as a page view');
+    expect(html).toMatch(/href="#\/stats"[^>]*>Turn sharing off on Your City<\/a>/);
     expect(html).toMatch(/in places with enough players to count, this share has been fixed/);
+  });
+
+  it('with sharing off, says nothing was sent (UI sweep #7)', () => {
+    setAnalyticsOff(true);
+    try {
+      const html = renderCityTogether(createInitialState(), { collective: ready });
+      expect(html).toContain('Sharing is off, so opening this page sent nothing');
+      expect(html).not.toContain('counts as a page view');
+    } finally {
+      setAnalyticsOff(false);
+    }
   });
 
   it('highlights your pod and shows its numbers', () => {

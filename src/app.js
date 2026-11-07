@@ -18,11 +18,11 @@ import { keyActivationTarget } from './utils/keyboard.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { DISTRICTS } from './data/districts.js';
 import { hasInterior } from './data/interiors/index.js';
-import { generateMilestoneCard, shareMilestoneCard, shareStatCard } from './utils/milestone-card.js';
+import { generateMilestoneCard, shareMilestoneCard, shareStatCard, shareStatusText } from './utils/milestone-card.js';
 import { renderCityMap } from './screens/city-map.js';
 import { renderDistrict } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
-import { renderSaints } from './screens/saints.js';
+import { renderSaints, saintsOrigin } from './screens/saints.js';
 import { renderPrism } from './screens/prism.js';
 import { renderGovernment } from './screens/government.js';
 import { renderLeak } from './screens/leak.js';
@@ -35,6 +35,7 @@ import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-dat
 import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle, putOutCandle, isCandleLit } from './utils/interior-state.js';
 import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
+import { markLoreShown } from './utils/lore.js';
 import { renderBankNotesScreen } from './components/bank-notes.js';
 import { addBankNote, updateBankNote, removeBankNote } from './utils/bank-notes.js';
 import { applyChecklistFiling, markMapSeen, markScoutSeen, markScoutPending, newlyLitIds, setBigCheck, setHome, homeOf, setPrescreen } from './utils/broker-state.js';
@@ -48,7 +49,6 @@ import { isTap, isWidest, keepStarInView, panView, pinchView, wheelView, wheelZo
 import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
 import { STUDIO_URL } from './components/hud.js';
-import { mountClassAd } from './components/class-ad.js';
 import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
@@ -58,9 +58,10 @@ import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.
 import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
-import { renderPhishingQuiz } from './screens/phishing-quiz.js';
-import { renderGarage, renderAddForm } from './screens/garage.js';
-import { renderTimeline, renderSocialForm, renderEraQuestions, getEras } from './screens/timeline.js';
+import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage } from './screens/phishing-quiz.js';
+import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from './screens/garage.js';
+import { renderTimeline, renderSocialForm, renderEraQuestions } from './screens/timeline.js';
+import { socialProfileFromForm } from './utils/social-timeline.js';
 import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
 import { initErrorTracking, captureError } from './utils/errors.js';
 import { announceReady } from './utils/cabinet.js';
@@ -83,6 +84,8 @@ function isDesktopWide() { return !!desktopQuery?.matches; }
 let collectiveView = { status: 'idle' };
 let whoamiView = { status: 'idle' };
 let podPickerOpen = false;
+// THAT'S RIGHT on Your City was pressed (memory only; a pod change asks again).
+let whoamiConfirmed = false;
 // One line of feedback from a cancel/restore, shown only on the screen it belongs to.
 let notice = { hash: null, text: '' };
 let restoring = false;
@@ -219,10 +222,10 @@ const screens = {
   garage: () => renderGarage(state),
   timeline: () => renderTimeline(state),
   together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView, notice: currentNotice() }),
-  ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView }),
-  'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
-  'ghost-early': () => renderGhostEarly(state, { whoami: whoamiView, collective: collectiveView, notice: currentNotice() }),
-  stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, notice: currentNotice() }),
+  ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed }),
+  'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed, notice: currentNotice() }),
+  'ghost-early': () => renderGhostEarly(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed, notice: currentNotice() }),
+  stats: () => renderStats(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed, notice: currentNotice() }),
   'bank-notes': ({ from }) => renderBankNotesScreen(state, { from, ...bankForm }),
 };
 
@@ -288,9 +291,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   try {
     // The saints gallery's back link: the building it was opened from. Kept
     // in memory only, never in the URL (pageviews read the URL).
-    if (route.screen !== 'saints') saintsFrom = null;
+    saintsFrom = saintsOrigin(route, lastRoute, saintsFrom);
     if (route.screen !== 'bank-notes') bankForm = {};
-    else if (lastRoute?.screen === 'building') saintsFrom = lastRoute.params.id;
     lastRoute = route;
     const renderFn = screens[route.screen] || screens.city;
     // The seal animation and Scout's line are in this render; remember they were seen
@@ -314,6 +316,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
       const seen = markScoutSeen(state, 'bigCheck');
       if (seen !== state) setState(seen);
     }
+    // The briefing's INTEL entry was on screen: the next briefing in the district shows the next one.
+    if (route.screen === 'briefing' && markLoreShown(state, route.params.id)) setState(state);
     if (watched) {
       const seen = markSealedSeen(state, route.params.id, watched ?? []);
       if (seen !== state) setState(seen);
@@ -1018,12 +1022,6 @@ function afterMissionRecorded(mission, event) {
     setState(state);
   }
 
-  // Track which lore entries have been seen
-  if (districtId) {
-    if (!state.seenLore) state.seenLore = {};
-    if (!state.seenLore[districtId]) state.seenLore[districtId] = [];
-  }
-
   // "Change the next 3" sends one event, when the whole job is done (not per
   // burst); no counts are ever sent.
   // A custom account's missions send nothing (data/custom-missions.js).
@@ -1154,7 +1152,12 @@ async function handleShareCard(districtId) {
   } catch {
     if (preview) preview.innerHTML = '';
   }
-  await shareMilestoneCard(district.name, cardStats);
+  showShareStatus(app.querySelector('[data-share-status]'), await shareMilestoneCard(district.name, cardStats));
+}
+
+// What happened to a shared card, under its button (it was silent before).
+function showShareStatus(el, result) {
+  if (el) el.textContent = shareStatusText(result);
 }
 
 app.addEventListener('click', async (e) => {
@@ -1330,46 +1333,19 @@ app.addEventListener('click', async (e) => {
     handleShareCard(el.dataset.district);
   } else if (action === 'share-stat') {
     const stat = cityStats(collectiveData()?.city).find((st) => st.key === el.dataset.stat);
-    if (stat) shareStatCard(stat);
-  } else if (action === 'quiz-verdict') {
+    if (stat) showShareStatus(app.querySelector(`[data-share-status="${CSS.escape(stat.key)}"]`), await shareStatCard(stat));
+  } else if (action === 'quiz-verdict' || action === 'quiz-bank-verdict') {
+    // The answer is saved and the message stays up with its reveal until NEXT.
     const msgId = Number(el.dataset.msgId);
-    const verdict = el.dataset.verdict;
-    const tell = app.querySelector(`[data-quiz-tell="${msgId}"]`)?.value || '';
-    if (!state.phishingQuiz) state.phishingQuiz = { curated: {}, streak: 0, bestStreak: 0, quizRound: 0, quizAnswers: {} };
-    const { CURATED_MESSAGES } = await import('./data/phishing.js');
-    const msg = CURATED_MESSAGES.find(m => m.id === msgId);
-    if (!msg) return;
-    const correct = verdict === msg.answer;
-    state.phishingQuiz.curated[msgId] = { verdict, tell, correct };
-    if (correct) {
-      state.phishingQuiz.streak = (state.phishingQuiz.streak || 0) + 1;
-      state.phishingQuiz.bestStreak = Math.max(state.phishingQuiz.bestStreak || 0, state.phishingQuiz.streak);
-    } else {
-      state.phishingQuiz.streak = 0;
-    }
+    const bank = action === 'quiz-bank-verdict';
+    const tell = app.querySelector(`[${bank ? 'data-quiz-bank-tell' : 'data-quiz-tell'}="${msgId}"]`)?.value || '';
+    if (!recordQuizVerdict(state, bank ? 'bank' : 'curated', msgId, el.dataset.verdict, tell)) return;
     setState(state);
     renderCurrentRoute();
-  } else if (action === 'quiz-next') {
-    renderCurrentRoute();
-  } else if (action === 'quiz-bank-verdict') {
-    const msgId = Number(el.dataset.msgId);
-    const verdict = el.dataset.verdict;
-    const tell = app.querySelector(`[data-quiz-bank-tell="${msgId}"]`)?.value || '';
-    if (!state.phishingQuiz) state.phishingQuiz = { curated: {}, streak: 0, bestStreak: 0, quizRound: 0, quizAnswers: {} };
-    const { MESSAGE_BANK } = await import('./data/phishing.js');
-    const msg = MESSAGE_BANK.find(m => m.id === msgId);
-    if (!msg) return;
-    const correct = verdict === msg.answer;
-    state.phishingQuiz.quizAnswers[msgId] = { verdict, tell, correct };
-    if (correct) {
-      state.phishingQuiz.streak = (state.phishingQuiz.streak || 0) + 1;
-      state.phishingQuiz.bestStreak = Math.max(state.phishingQuiz.bestStreak || 0, state.phishingQuiz.streak);
-    } else {
-      state.phishingQuiz.streak = 0;
-    }
+    app.querySelector('[data-quiz-reveal]')?.scrollIntoView?.({ block: 'nearest' });
+  } else if (action === 'quiz-next' || action === 'quiz-bank-next') {
+    nextQuizMessage(state);
     setState(state);
-    renderCurrentRoute();
-  } else if (action === 'quiz-bank-next') {
     renderCurrentRoute();
   } else if (action === 'add-custom-account') {
     const districtId = el.dataset.district;
@@ -1408,18 +1384,33 @@ app.addEventListener('click', async (e) => {
     if (container) {
       container.innerHTML = renderAddForm();
       container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Picking a make fills THREAT ASSESSMENT from the car data; "Other" asks for its name.
+      const makeSelect = container.querySelector('#vehicle-make');
+      const other = container.querySelector('#vehicle-make-other');
+      const update = () => {
+        if (other) other.hidden = makeSelect.value !== 'Other';
+        const text = threatAssessment(makeSelect.value === 'Other' ? (other?.value.trim() || 'Other') : makeSelect.value);
+        const box = container.querySelector('#threat-preview');
+        const out = container.querySelector('#threat-text');
+        if (box && out) { out.textContent = text; box.hidden = !text; }
+      };
+      makeSelect?.addEventListener('change', () => { update(); if (makeSelect.value === 'Other') other?.focus(); });
+      other?.addEventListener('input', update);
     }
   } else if (action === 'cancel-add-vehicle') {
     const container = app.querySelector('#add-form-container');
     if (container) container.innerHTML = '';
   } else if (action === 'add-vehicle') {
-    const make = app.querySelector('#vehicle-make')?.value;
-    const model = app.querySelector('#vehicle-model')?.value?.trim();
-    const year = app.querySelector('#vehicle-year')?.value?.trim();
-    const nickname = app.querySelector('#vehicle-nickname')?.value?.trim();
-    if (!make || !model || !year) return;
+    const val = (sel) => app.querySelector(sel)?.value ?? '';
+    const result = vehicleFromForm({ make: val('#vehicle-make'), otherMake: val('#vehicle-make-other'), model: val('#vehicle-model'), year: val('#vehicle-year'), nickname: val('#vehicle-nickname') });
+    if (result.error) {
+      const msg = app.querySelector('[data-vehicle-msg]');
+      if (msg) { msg.textContent = result.error; msg.hidden = false; }
+      return;
+    }
+    const { make, year } = result.vehicle;
     if (!state.vehicles) state.vehicles = [];
-    state.vehicles.push({ make, model, year, nickname: nickname || '', addedAt: new Date().toISOString() });
+    state.vehicles.push({ ...result.vehicle, addedAt: new Date().toISOString() });
     const mfr = CAR_MANUFACTURERS.find((m) => m.makes.some((n) => n.toLowerCase() === make.toLowerCase()));
     if (mfr && state.accounts[mfr.id]) {
       state.accounts[mfr.id].enabled = true;
@@ -1427,7 +1418,8 @@ app.addEventListener('click', async (e) => {
     state.accounts.car_broker_lexisnexis = { ...state.accounts.car_broker_lexisnexis, enabled: true };
     state.accounts.car_broker_verisk = { ...state.accounts.car_broker_verisk, enabled: true };
     setState(state);
-    track('vehicle-added', { make, year });
+    // A make the game doesn't list is the player's own words: it is sent as "Other".
+    track('vehicle-added', { make: mfr ? make : 'Other', year });
     renderCurrentRoute();
   } else if (action === 'remove-vehicle') {
     const index = Number(el.dataset.index);
@@ -1451,7 +1443,7 @@ app.addEventListener('click', async (e) => {
           const eraDiv = app.querySelector('#era-questions');
           const eraContainer = app.querySelector('#era-container');
           if (year && eraDiv && eraContainer) {
-            eraContainer.innerHTML = renderEraQuestions(year);
+            eraContainer.innerHTML = renderEraQuestions(year, year === profile?.joinYear ? profile.eras : []);
             eraDiv.hidden = false;
           }
         });
@@ -1464,15 +1456,18 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'save-social-profile') {
     const platformId = el.dataset.platform;
     const yearSelect = app.querySelector('#social-join-year');
-    const joinYear = parseInt(yearSelect?.value, 10);
-    if (!joinYear) return;
-    const eras = getEras(joinYear);
-    const eraActivities = eras.map((_, i) => {
-      const checked = app.querySelector(`input[name="era-${i}"]:checked`);
-      return checked?.value || 'light';
-    });
+    const eraCount = app.querySelectorAll('#era-container [data-era]').length;
+    // An era left blank stays blank: never saved as an answer the player didn't give.
+    const values = Array.from({ length: eraCount }, (_, i) => app.querySelector(`input[name="era-${i}"]:checked`)?.value ?? null);
+    const result = socialProfileFromForm(yearSelect?.value, values);
+    if (result.error) {
+      const msg = app.querySelector('[data-social-msg]');
+      if (msg) { msg.textContent = result.error; msg.hidden = false; }
+      yearSelect?.focus();
+      return;
+    }
     if (!state.socialHistory) state.socialHistory = {};
-    state.socialHistory[platformId] = { joinYear, eras: eraActivities };
+    state.socialHistory[platformId] = result.profile;
     setState(state);
     renderCurrentRoute();
   } else if (action === 'begin-game') {
@@ -1513,6 +1508,7 @@ app.addEventListener('click', async (e) => {
     renderCurrentRoute();
   } else if (action === 'pod-pick-open') {
     podPickerOpen = true;
+    whoamiConfirmed = false;
     loadCollective();
     renderCurrentRoute();
   } else if (action === 'pod-pick') {
@@ -1525,7 +1521,9 @@ app.addEventListener('click', async (e) => {
     renderCurrentRoute();
   } else if (action === 'whoami-confirm') {
     podPickerOpen = false;
+    whoamiConfirmed = true;
     renderCurrentRoute();
+    app.querySelector('[data-whoami-confirmed]')?.scrollIntoView?.({ block: 'nearest' });
   }
 });
 
@@ -1696,7 +1694,6 @@ document.fonts?.addEventListener?.('loadingdone', () => {
 // note on the city map (utils/notifications.js), shown until the player leaves the map.
 welcomeBack = checkStreakReminder(state);
 initRouter(render);
-mountClassAd();
 mountBugReporter();
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).
 announceReady();
