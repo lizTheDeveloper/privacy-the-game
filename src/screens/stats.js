@@ -186,7 +186,15 @@ export function renderWhoamiPanel(view = {}) {
   } else if (whoPodLabel) {
     podLine = `<div style="${WHOAMI_TEXT}">You count toward <b>${whoPodLabel}</b>.</div>`;
   }
-  const buttons = `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+  // THAT'S RIGHT closes the question: Scout's "got it" names where the player counts,
+  // and only the way to change it stays.
+  const countsIn = chosen ? esc(chosen.label) : whoPodLabel;
+  const buttons = view.whoamiConfirmed
+    ? `<div data-whoami-confirmed role="status" style="${WHOAMI_TEXT} color: var(--lime);">Got it. ${countsIn ? `You count toward <b>${countsIn}</b>.` : 'Nothing changes.'}</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+      <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
+    </div>`
+    : `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
       <button class="btn-secondary" data-action="whoami-confirm">THAT'S RIGHT</button>
       <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
     </div>`;

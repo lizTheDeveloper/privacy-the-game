@@ -2,6 +2,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { getBuildingState } from '../utils/calc.js';
+import { getEras } from '../utils/social-timeline.js';
 
 function esc(v) {
   return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -15,29 +16,16 @@ const SOCIAL_PLATFORMS = [
   { id: 'linkedin', name: 'LinkedIn', maxAge: 2003 },
 ];
 
+// What the answers do (utils/social-timeline.js), said once for the form and the intro.
+export const TIMELINE_DOES = 'On your Reclaim missions, the platforms and years you posted most move to the top, and each review row shows its years and how much you posted then. Instagram and Facebook have a Memory Lane mission for each era.';
+const ERA_HELP = 'We ask this for each era of your account. The eras you posted most in go first on your Reclaim missions. Leave an era blank if you aren’t sure.';
+
 const ACTIVITY_LEVELS = [
   { value: 'none', label: 'Barely posted', description: 'A few posts, mostly lurked' },
   { value: 'light', label: 'Posted sometimes', description: 'A handful of posts per month' },
   { value: 'moderate', label: 'Pretty active', description: 'Posted regularly, shared stories/reels' },
   { value: 'heavy', label: 'Posted a LOT', description: 'Daily posts, stories, comments, the works' },
 ];
-
-function getEras(joinYear) {
-  const now = new Date().getFullYear();
-  const total = now - joinYear;
-  if (total <= 0) return [];
-  if (total <= 2) return [{ label: 'Your time on the platform', startYear: joinYear, endYear: now }];
-  if (total <= 5) return [
-    { label: 'Early days', startYear: joinYear, endYear: joinYear + Math.floor(total / 2) },
-    { label: 'Recent years', startYear: joinYear + Math.floor(total / 2) + 1, endYear: now },
-  ];
-  const chunk = Math.floor(total / 3);
-  return [
-    { label: 'The early days', startYear: joinYear, endYear: joinYear + chunk },
-    { label: 'The middle years', startYear: joinYear + chunk + 1, endYear: joinYear + chunk * 2 },
-    { label: 'Recent history', startYear: joinYear + chunk * 2 + 1, endYear: now },
-  ];
-}
 
 // The building beside a card's name: its own label says the same name (Instagram, Instagram),
 // so on a phone that label hides (tl-icon--same, style.css); a different name stays.
@@ -82,10 +70,10 @@ function renderPlatformCard(state, platform) {
         </div>
         <span data-action="edit-social-profile" data-platform="${platform.id}" style="cursor: pointer; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.35); padding: 6px 12px; border: 1px solid rgba(255,255,255,0.08);">EDIT</span>
       </div>
-      <div style="font-family: var(--font-display); font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR REVIEW SEGMENTS</div>
+      <div style="font-family: var(--font-display); font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
       ${eraRows}
       <div style="margin-top: 12px; text-align: center;">
-        <a href="#/district/square?tab=reclaim" style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
+        <a href="#/district/${esc(account.district)}?tab=reclaim" style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
       </div>
     </div>`;
   }
@@ -136,11 +124,12 @@ export function renderSocialForm(platformId) {
 
     <div id="era-questions" hidden>
       <div style="font-family: var(--font-display); font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.5); margin-bottom: 6px;">HOW ACTIVE WERE YOU?</div>
-      <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-bottom: 12px; line-height: 1.5;">We'll ask this for each era of your account. This helps us size your review segments — heavy posting years get their own missions, light years get grouped together.</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-bottom: 12px; line-height: 1.5;">${esc(ERA_HELP)}</div>
 
       <div id="era-container"></div>
     </div>
 
+    <div data-social-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-top: 16px;"></div>
     <div style="display: flex; gap: 16px; align-items: center; margin-top: 20px;">
       <span data-action="save-social-profile" data-platform="${platformId}" style="cursor: pointer; font-family: var(--font-display); font-size: 11px; font-weight: 700; color: #090B10; background: #00E5FF; padding: 14px 28px; letter-spacing: 2px; box-shadow: 0 0 20px rgba(0,229,255,0.35), 0 4px 0 #009bb3;">SAVE</span>
       <span data-action="cancel-social-profile" style="cursor: pointer; font-size: 13px; color: rgba(237,239,243,0.35);">CANCEL</span>
@@ -148,15 +137,16 @@ export function renderSocialForm(platformId) {
   </div>`;
 }
 
-export function renderEraQuestions(joinYear) {
+// answers: the saved eras when re-editing the same join year, so EDIT keeps them.
+export function renderEraQuestions(joinYear, answers = []) {
   const eras = getEras(joinYear);
   return eras.map((era, i) => `
-    <div style="margin-bottom: 16px;">
+    <div data-era="${i}" style="margin-bottom: 16px;">
       <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--cyan); margin-bottom: 4px;">${esc(era.label).toUpperCase()}</div>
       <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-bottom: 10px;">${era.startYear}–${era.endYear}</div>
       ${ACTIVITY_LEVELS.map((a) => `
         <label style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); cursor: pointer; margin-bottom: 4px;">
-          <input type="radio" name="era-${i}" value="${a.value}" style="accent-color: var(--cyan); width: 14px; height: 14px;">
+          <input type="radio" name="era-${i}" value="${a.value}"${answers?.[i] === a.value ? ' checked' : ''} style="accent-color: var(--cyan); width: 14px; height: 14px;">
           <span style="font-size: 12px; color: var(--offwhite);">${esc(a.label)}</span>
           <span style="font-size: 10px; color: rgba(237,239,243,0.3); margin-left: auto;">${esc(a.description)}</span>
         </label>
@@ -181,14 +171,14 @@ export function renderTimeline(state) {
         <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
           <div style="font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
-          <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map out your social media history so we can plan your review — one era at a time.</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>
         </div>
       </div>
     </div>
     <div style="padding: 24px;">
       ${unconfigured > 0 ? `
         <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 14px 16px; margin-bottom: 20px;">
-          <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;">Tell us when you joined each platform and how active you were. <details class="more-fold" data-fold="timeline-how" data-open-desktop><summary>MORE</summary></details><span class="more-fold-text">We'll break your review into right-sized chunks — heavy years get their own missions, quiet years get grouped together. <strong style="color: var(--cyan);">No rushing.</strong></span></div>
+          <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;">Tell us when you joined each platform and how active you were. <details class="more-fold" data-fold="timeline-how" data-open-desktop><summary>MORE</summary></details><span class="more-fold-text">${esc(TIMELINE_DOES)} <strong style="color: var(--cyan);">No rushing.</strong></span></div>
         </div>
       ` : ''}
       ${unconfigured > 0 ? `<div data-setup-note style="font-size: 11px; color: rgba(237,239,243,0.4); margin-bottom: 10px;">Tell us about your history here to plan your review.</div>` : ''}

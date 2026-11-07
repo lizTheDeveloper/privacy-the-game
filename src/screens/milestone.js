@@ -77,5 +77,6 @@ export function renderMilestone(state, districtId) {
       <button class="btn-secondary" data-action="share-card" data-district="${districtId}">SHARE CARD</button>
       ${continueLink}
     </div>
+    <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin-top: 12px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--cyan);"></div>
   </div>`;
 }

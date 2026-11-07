@@ -12,6 +12,7 @@ import { scoutSprite } from '../components/scout.js';
 import { deck, splitWords, countWords } from '../components/deck.js';
 import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
+import { briefingLore } from '../utils/lore.js';
 
 function notFound(state) {
   return `
@@ -93,7 +94,7 @@ export function renderBriefing(state, missionId, opts = {}) {
         </div>
       </div>
       <div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--cyan); margin-top: 10px;">${account.name}</div>` : '';
-  const loreData = loreEntry(districtId, state);
+  const loreData = loreEntry(state, mission.id);
   const lore = renderLoreSection(loreData);
 
   // The burst's line needs the password-manager report; until then (no numbers) the mission's own line.
@@ -312,14 +313,10 @@ function renderNoResetActions(mission, districtId, targetTab, filed) {
           <span data-action="reset-anyway" data-mission="${mission.id}" role="button" tabindex="0" style="cursor: pointer; font-size: 13px; color: var(--cyan); text-decoration: underline;">Reset it anyway</span>`;
 }
 
-// The district lore this briefing shows: the first one not yet seen.
-function loreEntry(districtId, state) {
-  const dialogue = DISTRICT_DIALOGUE[districtId];
-  if (!dialogue?.lore || Object.keys(dialogue.lore).length === 0) return null;
-  const seenLore = state.seenLore?.[districtId] || [];
-  const unseenKeys = Object.keys(dialogue.lore).filter(k => !seenLore.includes(k));
-  const key = unseenKeys.length > 0 ? unseenKeys[0] : Object.keys(dialogue.lore)[0];
-  return dialogue.lore[key] || null;
+// The district lore this briefing shows: the next one not yet seen (utils/lore.js).
+function loreEntry(state, missionId) {
+  const lore = briefingLore(state, missionId);
+  return lore ? DISTRICT_DIALOGUE[lore.districtId].lore[lore.key] || null : null;
 }
 
 const LORE_LABEL = '<div class="section-label" style="color: rgba(255,159,0,0.5); margin-bottom: 8px;">INTEL</div>';

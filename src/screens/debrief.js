@@ -164,12 +164,16 @@ function passwordScoutLine(mission, stored) {
   return null;
 }
 
-function upgradeOffer(mission, stored) {
+// Only where the upgrade mission exists: a custom account shares the 2FA question
+// but has no upgrade mission of its own.
+function upgradeOffer(state, mission, stored) {
   if (!mission.debriefQs.some((q) => q.kind === 'two-factor')) return '';
   if (!CODE_METHODS.includes(twoFactorMethod(stored))) return '';
+  const upgradeId = `${mission.accountId}-fortify-2fa-upgrade`;
+  if (!findMission(state, upgradeId)) return '';
   return `
       <div style="margin-bottom: 24px;">
-        <a href="#/mission/${mission.accountId}-fortify-2fa-upgrade/briefing" class="btn-secondary" style="display: inline-block; text-decoration: none;">UPGRADE FROM CODES &mdash; BONUS</a>
+        <a href="#/mission/${upgradeId}/briefing" class="btn-secondary" style="display: inline-block; text-decoration: none;">UPGRADE FROM CODES &mdash; BONUS</a>
       </div>`;
 }
 
@@ -333,7 +337,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
 
   const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
   const questions = completed
-    ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(mission, stored)}${progressPanel}`
+    ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(state, mission, stored)}${progressPanel}`
     : debriefForm(state, mission, recheck ? stored : null, recheck);
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';

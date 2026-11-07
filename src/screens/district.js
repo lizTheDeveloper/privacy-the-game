@@ -19,6 +19,9 @@ import { checklistFor } from '../data/broker-checklists.js';
 import { splitWords } from '../components/deck.js';
 import { renderBankNotesCard } from '../components/bank-notes.js';
 import { customMissionsFor } from '../data/custom-missions.js';
+import { CURATED_MESSAGES } from '../data/phishing.js';
+import { timelineNote, timelineRank, timelineLine } from '../utils/social-timeline.js';
+import { TIMELINE_DOES } from './timeline.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -224,6 +227,7 @@ function renderMissionRow(state, mission) {
   const skipped = record?.status === 'skipped';
   const dimmed = completed || skipped;
   const summary = completed && !notNeeded ? missionSummary(mission, record) : '';
+  const timeline = completed ? '' : timelineLine(timelineNote(state, mission));
   const noResetYet = !completed && isPasswordMission(mission) && passwordResetNeed(state, mission.accountId) === 'not-needed';
 
   let statusCell;
@@ -250,6 +254,7 @@ function renderMissionRow(state, mission) {
     <div class="mission-text" style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
+      ${timeline ? `<div data-timeline-note style="font-size: 11px; color: var(--cyan); margin-top: 2px;">${esc(timeline)}</div>` : ''}
       ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
       ${!completed && mission.replaces && isMissionDone(state.missions[mission.replaces]) ? `<div style="font-size: 11px; color: rgba(237,239,243,0.45); margin-top: 2px;">Your earlier email check still counts toward progress. This one checks the account itself.</div>` : ''}
@@ -290,7 +295,10 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
   const missions = getMissionsForDistrict(districtId).filter(
     (m) => m.phase === activeTab && isMissionInPlay(state, m),
   );
-  missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0));
+  // On Reclaim, the Social Timeline's answers put the platforms and eras the player
+  // posted most in first (utils/social-timeline.js); the sort is stable otherwise.
+  const rank = activeTab === 'reclaim' ? (m) => timelineRank(state, m) : () => 0;
+  missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0) || rank(b) - rank(a));
   if (missions.length === 0) {
     if (hasCustom) return '';
     return `
@@ -438,49 +446,51 @@ function renderPasswordManagerQuestion(state) {
     </div>`;
 }
 
-function renderQuizFacility(state, facilityId, district) {
-  const account = ACCOUNTS[facilityId];
-  if (!account) return '';
-  const buildingState = getBuildingState(state, facilityId);
-  const connection = district.facilityConnections?.[facilityId];
+// The facility badge: what its listed missions say. Nothing here is gated (every row has
+// START), so an untouched facility is READY, not locked.
+export function facilityBadge(completed, total) {
+  if (total > 0 && completed === total) return 'SECURED';
+  return completed > 0 ? `${completed}/${total}` : 'READY';
+}
+
+// The phishing quiz's badge counts right answers, not answers: a wrong answer is
+// practice, not progress. "n/12 RIGHT" until the curated set is answered; then
+// TRAINED only with every message right, else the score stands as it is.
+export function quizBadge(quiz) {
+  const total = CURATED_MESSAGES.length;
+  const records = Object.values(quiz?.curated || {});
+  const correct = records.filter((a) => a.correct).length;
+  if (records.length === 0) return 'READY';
+  if (records.length >= total && correct === total) return 'TRAINED';
+  return `${correct}/${total} RIGHT`;
+}
+
+// Scam Defense's training: the curated quiz and quiz mode (they don't count toward % SECURED).
+function renderQuizPanel(state) {
   const quiz = state.phishingQuiz || { curated: {} };
+  const total = CURATED_MESSAGES.length;
   const answered = Object.keys(quiz.curated).length;
   const correct = Object.values(quiz.curated).filter(a => a.correct).length;
-  const total = 12;
   const allDone = answered >= total;
-  const pctWidth = Math.round((answered / total) * 100);
-  const statusColor = allDone ? 'var(--lime)' : answered > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
-  const statusText = allDone ? 'SECURED' : answered > 0 ? `${answered}/${total}` : 'READY';
+  const badge = quizBadge(quiz);
+  const statusColor = badge === 'TRAINED' ? 'var(--lime)' : answered > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
   const btnLabel = allDone ? 'QUIZ MODE — KEEP PRACTICING' : answered > 0 ? 'CONTINUE TRAINING' : 'START TRAINING';
 
   return `
-  <div style="margin-bottom: 16px;">
-    ${connection ? `<div style="padding: 0 24px 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">↳ ${esc(connection)}</div>` : ''}
-    <div class="panel" style="margin: 0 16px; overflow: hidden;">
-      <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
-        ${renderBuilding(facilityId, buildingState, 40)}
-        <div style="flex: 1; min-width: 0;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId)}</div>
-          <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
-            <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
-          </div>
+      <div data-quiz-panel style="padding: 16px; text-align: center; border-top: 1px solid rgba(0,229,255,0.08);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+          <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">PHISHING TRAINING</div>
+          <div class="badge" data-quiz-badge style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${badge}</div>
         </div>
-        <div class="badge" style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${statusText}</div>
-      </div>
-      <div style="padding: 16px; text-align: center;">
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
           Real or fake? Identify phishing emails, texts, calls, and push notifications.
           ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--cyan);">${correct}/${answered} correct so far.</span>` : ''}
         </div>
         <a class="btn-primary" style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
-      </div>
-    </div>
-  </div>`;
+      </div>`;
 }
 
 function renderFacilitySection(state, facilityId, district) {
-  if (facilityId === 'scam_defense') return renderQuizFacility(state, facilityId, district);
-
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId && !m.legacy);
@@ -492,7 +502,7 @@ function renderFacilitySection(state, facilityId, district) {
 
   const pctWidth = total > 0 ? Math.round((completed / total) * 100) : 0;
   const statusColor = allDone ? 'var(--lime)' : completed > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
-  const statusText = allDone ? 'SECURED' : completed > 0 ? `${completed}/${total}` : 'LOCKED';
+  const statusText = facilityBadge(completed, total);
 
   const missionRows = missions.map((m) => {
     const record = state.missions[m.id];
@@ -544,6 +554,7 @@ function renderFacilitySection(state, facilityId, district) {
       <div>
         ${missionRows}
       </div>
+      ${facilityId === 'scam_defense' ? renderQuizPanel(state) : ''}
     </div>
   </div>`;
 }
@@ -672,7 +683,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
       <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 200px;">
           <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
-          <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. Review missions are sized to your history.` : `Map your social media history first — we'll break the review into right-sized segments based on how active you were.`}</div>
+          <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. ${esc(TIMELINE_DOES)}` : `Map your social media history first. ${esc(TIMELINE_DOES)}`}</div>
         </div>
         <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
       </div>

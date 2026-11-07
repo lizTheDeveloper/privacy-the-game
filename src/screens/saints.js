@@ -54,6 +54,14 @@ function backLink(state, from) {
   return '<a class="btn-secondary interior-back" href="#/city">← CITY</a>';
 }
 
+// The gallery's back link target, kept by app.js in memory (never in the URL) across draws:
+// the building it was opened from; kept while the gallery re-draws; gone on leaving it.
+export function saintsOrigin(route, lastRoute, current = null) {
+  if (route?.screen !== 'saints') return null;
+  if (lastRoute?.screen === 'building') return lastRoute.params?.id ?? null;
+  return current;
+}
+
 export function renderSaints(state, { from = null } = {}) {
   const saints = SAINT_ORDER.map((id) => SAINTS[id]).filter(Boolean);
   return `
