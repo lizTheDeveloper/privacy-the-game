@@ -41,6 +41,31 @@ export async function fetchWhoami(fetchImpl = fetch, nav = globalThis.navigator,
   }
 }
 
+// Whether a screen looks the player up on its own: the ghost screen (for their
+// place's ghost count) and a broker map with no home yet (the sky's quiz).
+// Never once they've turned sharing off or gone ghost (`allowed` false).
+export function shouldAutoWhoami(screen, whoamiStatus, { allowed, homeKnown }) {
+  if (!allowed || whoamiStatus !== 'idle') return false;
+  return screen === 'ghost' || (screen === 'broker-map' && !homeKnown);
+}
+
+// What this browser reports about itself, read on the device: nothing is sent.
+export function localWhoami(nav = globalThis.navigator, scr = globalThis.screen) {
+  const data = {};
+  if (nav?.language) data.language = nav.language;
+  if (scr?.width && scr?.height) data.screen = `${scr.width}x${scr.height}`;
+  if (nav?.userAgent) data.userAgent = nav.userAgent;
+  return data;
+}
+
+// The whoami view: asks api/whoami only while sharing is on (`allowed`);
+// otherwise the browser's own report, without sending anything.
+export async function lookUpWhoami({ allowed, fetchImpl = fetch, nav = globalThis.navigator, scr = globalThis.screen }) {
+  if (!allowed) return { status: 'local', data: localWhoami(nav, scr) };
+  const r = await fetchWhoami(fetchImpl, nav, scr);
+  return r.ok ? { status: 'ready', data: r.data } : { status: 'error' };
+}
+
 export function findPod(collective, id) {
   if (!collective || !id) return null;
   return collective.pods.find((p) => p.id === id) || null;

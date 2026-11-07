@@ -20,6 +20,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'MUSCULAR',
     agency: 'NSA and GCHQ',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2013,
     summary:
       'GCHQ and the NSA secretly broke into the main communications links that connect the data centres of Google and Yahoo. ' +
@@ -48,6 +49,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Optic Nerve',
     agency: 'GCHQ, with help from the NSA',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2014,
     summary:
       'GCHQ, with aid from the NSA, intercepted and stored still images of Yahoo webcam chats in bulk, "regardless of whether individual users were an intelligence target or not". ' +
@@ -75,6 +77,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Microsoft, Outlook.com and SkyDrive',
     agency: 'NSA and FBI',
     leak: 'snowden',
+    pipe: 'p-orders',
     year: 2013,
     summary:
       'Microsoft helped the NSA get around its own encryption so the NSA could intercept web chats on Outlook.com; "MS, working with the FBI, developed a surveillance capability." ' +
@@ -101,6 +104,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: '"Leaky" phone apps',
     agency: 'NSA and GCHQ',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2014,
     summary:
       'The NSA and GCHQ scoop up what smartphone apps send across the internet: address books, buddy lists, phone logs and the location data in photos posted to the mobile versions of Facebook, Flickr, LinkedIn and Twitter. ' +
@@ -130,6 +134,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Squeaky Dolphin',
     agency: 'GCHQ',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2014,
     summary:
       'GCHQ demonstrated to the NSA "broad real-time monitoring of online activity": YouTube video views, URLs "liked" on Facebook, and Blogspot/Blogger visits. ' +
@@ -157,6 +162,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'TURBINE, TURMOIL and QUANTUM',
     agency: 'NSA, with GCHQ',
     leak: 'snowden',
+    pipe: 'p-hacking',
     year: 2014,
     summary:
       'TURBINE automates the NSA\'s hacking so it can control "millions of implants" by groups "instead of individually." TURMOIL sensors watch internet traffic and alert TURBINE, which "shoots" malware at a target within a fraction of a second. ' +
@@ -184,6 +190,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Cookies as targeting selectors',
     agency: 'NSA and GCHQ',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2013,
     summary:
       'The NSA piggybacks on the tools advertisers use to track people, using Google\'s PREF cookie to pick out targets for hacking. ' +
@@ -211,6 +218,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Quantum Insert and the fake LinkedIn pages',
     agency: 'GCHQ, with NSA technology',
     leak: 'snowden',
+    pipe: 'p-hacking',
     year: 2013,
     summary:
       'GCHQ served engineers at the Belgian telecom Belgacom fake copies of their LinkedIn profiles carrying malware that turned their computers into tools for GCHQ. ' +
@@ -238,6 +246,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'XKeyscore',
     agency: 'NSA',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2013,
     summary:
       'XKeyscore lets NSA analysts search, "with no prior authorization", vast databases of emails, online chats and browsing histories; one presentation says it covers "nearly everything a typical user does on the internet". ' +
@@ -266,6 +275,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'FAIRVIEW and AT&T',
     agency: 'NSA',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2015,
     summary:
       'The NSA\'s ability to spy on internet traffic passing through the United States rests on a decades-long partnership with AT&T, which the NSA praises for its "extreme willingness to help." ' +
@@ -296,6 +306,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'The Verizon call-records order',
     agency: 'NSA and FBI',
     leak: 'snowden',
+    pipe: 'p-phone',
     year: 2013,
     summary:
       'A top-secret FISA Court order required Verizon to give the NSA, "on an ongoing, daily basis", the records of all telephone calls in its systems, within the US and abroad. ' +
@@ -324,6 +335,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Tempora',
     agency: 'GCHQ, sharing with the NSA',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2013,
     summary:
       'GCHQ taps the fibre-optic cables that carry the world\'s phone calls and internet traffic and stores what it takes for up to 30 days: phone calls, email content, Facebook entries and browsing histories. ' +
@@ -352,6 +364,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'The Great SIM Heist (Gemalto)',
     agency: 'NSA and GCHQ',
     leak: 'snowden',
+    pipe: 'p-hacking',
     year: 2015,
     summary:
       'A joint NSA and GCHQ unit hacked Gemalto, the world\'s largest maker of SIM cards, and stole the encryption keys that protect cellphone calls and data. ' +
@@ -379,6 +392,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Address books and buddy lists',
     agency: 'NSA',
     leak: 'snowden',
+    pipe: 'p-cables',
     year: 2013,
     summary:
       'The NSA intercepts email address books and instant-messaging buddy lists in bulk as they cross global data links, mostly when phones and computers sync contacts with Yahoo, Facebook and Google. ' +
@@ -407,6 +421,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'CO-TRAVELER cellphone location tracking',
     agency: 'NSA',
     leak: 'snowden',
+    pipe: 'p-phone',
     year: 2013,
     summary:
       'The NSA gathers nearly five billion records a day on the whereabouts of cellphones around the world by tapping the cables that connect mobile networks, which carry US phones as well as foreign ones. ' +
@@ -435,6 +450,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Dishfire',
     agency: 'NSA, shared with GCHQ',
     leak: 'snowden',
+    pipe: 'p-phone',
     year: 2014,
     summary:
       'The NSA collects almost 200 million text messages a day from across the globe and mines them for location, contact networks and credit card details. ' +
@@ -463,6 +479,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'iSpy: the NSA\'s smartphone teams',
     agency: 'NSA and GCHQ',
     leak: 'snowden',
+    pipe: 'p-hacking',
     year: 2013,
     summary:
       'The NSA set up task forces to break into Apple\'s iPhone and iOS and Google\'s Android, and GCHQ assigned a team to crack the BlackBerry. ' +
@@ -488,6 +505,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'The NSA ANT catalog',
     agency: 'NSA (Tailored Access Operations)',
     leak: 'reporting',
+    pipe: 'p-hacking',
     year: 2013,
     summary:
       'A 50-page NSA catalog lists back doors into routers, firewalls, computers and hard drives from Cisco, Huawei, Juniper, Dell, Western Digital, Seagate and Samsung. ' +
@@ -514,6 +532,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
     title: 'Routers bugged in the mail',
     agency: 'NSA',
     leak: 'snowden',
+    pipe: 'p-hacking',
     year: 2014,
     summary:
       'The NSA routinely intercepts routers, servers and other network devices being exported from the US, implants backdoor surveillance tools, repackages them with a factory seal and sends them on. ' +

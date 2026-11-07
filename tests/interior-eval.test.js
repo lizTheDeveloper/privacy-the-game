@@ -4,8 +4,9 @@ const toggleOn = (s, id) => toggleAccount(s, id, true);
 import { getInterior } from '../src/data/interiors/index.js';
 import { MISSIONS } from '../src/data/missions.js';
 import { applyRecheck } from '../src/utils/debrief.js';
+import { allControllableSealed } from '../src/utils/interior-state.js';
 import {
-  freshness, recordDate, currentTwoFactor, entryState, checkupRows, sealedCount, isFullySealed,
+  freshness, recordDate, currentTwoFactor, entryState, checkupRows, sealedCount,
 } from '../src/utils/interior.js';
 
 const NOW = new Date('2026-10-20T00:00:00Z');
@@ -42,7 +43,7 @@ describe('entryState on gmail', () => {
       expect(entryState(s, 'gmail', e).state).toBe(e.rule === 'beyond' ? 'beyond' : 'not-checked');
     }
     expect(sealedCount(s, 'gmail')).toEqual({ sealed: 0, total: 0 });
-    expect(isFullySealed(s, 'gmail')).toBe(false);
+    expect(allControllableSealed(s, 'gmail')).toBe(false);
   });
 
   it('sms: phone line and mail slot open; authenticator: phone sealed with note, mail open; passkey both sealed', () => {
@@ -103,12 +104,14 @@ describe('entryState on gmail', () => {
     expect(entryState(s, 'gmail', byRule('password-unique')).state).toBe('sealed');
   });
 
-  it('isFullySealed ignores not-checked and beyond', () => {
+  // The building's count (sealedCount) leaves out not-checked and beyond; FULLY
+  // SEALED (allControllableSealed) needs every door in reach checked and sealed.
+  it('the sealed count ignores not-checked and beyond; one seal is not fully sealed', () => {
     let s = file(createInitialState(), 'gmail-fortify-password', { action: 'reset-password' });
     expect(sealedCount(s, 'gmail')).toEqual({ sealed: 1, total: 1 });
-    expect(isFullySealed(s, 'gmail')).toBe(true);
+    expect(allControllableSealed(s, 'gmail')).toBe(false);
     s = file(s, 'gmail-fortify-2fa', { method: 'sms' });
-    expect(isFullySealed(s, 'gmail')).toBe(false);
+    expect(sealedCount(s, 'gmail').sealed).toBeLessThan(sealedCount(s, 'gmail').total);
   });
 });
 

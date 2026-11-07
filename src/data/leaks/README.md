@@ -14,6 +14,7 @@ account, and every badge has its own page of sources at `#/leak/<id>`.
   title: 'MUSCULAR',           // the page heading
   agency: 'NSA and GCHQ',      // who did it, named (never an omni-"they")
   leak: 'snowden',             // 'snowden' | 'vault7' | 'foia' | 'lawsuit' | 'reporting' | 'court'
+  pipe: 'p-cables',            // the government map's pipe (PIPES in src/utils/gov-graph.js), chosen from the summary and sources
   year: 2013,                  // the year it became public
   summary: '…',                // 2–4 plain sentences, see Copy
   accounts: ['gmail', 'yahoo'],// ids from src/data/accounts.js (accounts.js, accounts-*.js)

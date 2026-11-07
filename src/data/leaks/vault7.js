@@ -26,6 +26,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Vault 7: Year Zero',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       "On 7 March 2017 WikiLeaks published \"Year Zero\": 8,761 documents and files from the CIA's Center for Cyber Intelligence, with \"weaponized\" exploits against Apple's iPhone, Google's Android, Microsoft's Windows and Samsung TVs, \"which are turned into covert microphones\". " +
@@ -59,6 +60,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Weeping Angel',
     agency: 'CIA and MI5',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'Weeping Angel is a CIA implant for Samsung F Series smart TVs, built from "Extending", a tool from Britain\'s MI5, in joint workshops between the two agencies. ' +
@@ -91,6 +93,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Cherry Blossom',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'Cherry Blossom is CIA firmware for home and office Wi-Fi routers and access points, built with SRI International. ' +
@@ -121,6 +124,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Dark Matter',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       "Dark Matter is a set of CIA tools that infect Apple Mac firmware, so the infection survives a reinstall of the operating system. " +
@@ -150,6 +154,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: "The CIA's Mobile Devices Branch",
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       "The CIA's Mobile Devices Branch built attacks to remotely hack and control popular smartphones. " +
@@ -174,6 +179,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Messages taken before encryption',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'WikiLeaks named WhatsApp, Signal and Telegram: the CIA hacks the phone the app runs on and collects "audio and message traffic before encryption is applied". ' +
@@ -202,6 +208,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'HighRise',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'HighRise is a CIA app for Android 4.0 to 4.3 that intercepts SMS text messages and passes them over the internet to a CIA listening post. ' +
@@ -230,6 +237,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Scribbles',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'Scribbles hides "Web beacon"-style tags in Microsoft Office documents "likely to be copied by Insiders, Whistleblowers, Journalists or others". ' +
@@ -260,6 +268,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Athena',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'Athena is CIA malware for every version of Microsoft Windows from XP to Windows 10, built with Siege Technologies, a New Hampshire company. ' +
@@ -289,6 +298,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Grasshopper',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'Grasshopper is the CIA\'s kit for building custom malware for Microsoft Windows. ' +
@@ -319,6 +329,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'AfterMidnight and Assassin',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'AfterMidnight and Assassin are CIA malware frameworks for Microsoft Windows. ' +
@@ -348,6 +359,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'ELSA',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'ELSA is CIA malware that tracks where a Windows laptop goes. ' +
@@ -376,6 +388,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'CouchPotato',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'CouchPotato is a CIA tool for collecting RTSP/H.264 video streams, the formats IP surveillance cameras stream over a network or the internet. ' +
@@ -405,6 +418,7 @@ export const LEAKS_VAULT7 = Object.freeze([
     title: 'Vehicle control systems',
     agency: 'CIA',
     leak: 'vault7',
+    pipe: 'p-hacking',
     year: 2017,
     summary:
       'In October 2014 the CIA\'s Embedded Devices Branch listed "Vehicle Systems" among its potential mission areas. ' +

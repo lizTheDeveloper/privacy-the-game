@@ -14,6 +14,7 @@ const PRISM_ENTRY = Object.freeze({
   title: 'PRISM',
   agency: 'NSA and FBI',
   leak: 'prism',
+  pipe: 'p-orders',
   year: 2013,
   summary: PRISM_COPY.what,
   accounts: Object.freeze(PRISM_PROVIDERS.flatMap((p) => p.accounts)),

@@ -197,6 +197,7 @@ function makeManufacturerMissions(accountId) {
       { text: 'Submit the request — save your confirmation number' },
     ],
     debriefQs: CAR_OPTOUT_DEBRIEF,
+    optOut: { action: ['opted-out'] },
     scoutDialog: {
       briefing: `"They made it hard to find on purpose. But the law says they have to honor it. File the request and save the confirmation."`,
       debrief: {
@@ -238,6 +239,7 @@ function makeManufacturerMissions(accountId) {
         { text: 'Turn off any data-sharing setting you don’t want, and confirm the change is saved' },
       ],
       debriefQs: APP_CHECK_DEBRIEF,
+      optOut: { action: ['disabled'] },
       scoutDialog: {
         briefing: app.scout,
         debrief: {
@@ -298,6 +300,7 @@ const BROKER_MISSIONS = [
       { text: 'Submit an opt-out or deletion request' },
     ],
     debriefQs: BROKER_DEBRIEF,
+    optOut: { action: ['filed-optout'] },
     scoutDialog: {
       briefing: '"LexisNexis is the middleman. Your car maker sends data here, and insurance companies buy it. Cut the middleman."',
       debrief: {
@@ -321,6 +324,7 @@ const BROKER_MISSIONS = [
       { text: 'File an opt-out or deletion request' },
     ],
     debriefQs: BROKER_DEBRIEF,
+    optOut: { action: ['filed-optout'] },
     scoutDialog: {
       briefing: '"Verisk is the other big broker. Same drill — find out what they have, then shut it down."',
       debrief: {

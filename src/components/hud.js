@@ -1,6 +1,7 @@
 import { calcIntegrity, calcExposure } from '../utils/calc.js';
 import { isCabinetMode } from '../utils/cabinet.js';
 import { bugButtonHtml } from './bug-reporter.js';
+import { displayStreak } from '../state.js';
 
 // Link home to the studio. The utm tags let the studio site count visits from the game.
 export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=';
@@ -8,7 +9,7 @@ export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&u
 export function renderHud(state) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
-  const streak = state.streak.current;
+  const streak = displayStreak(state);
   // Web cabinet (campus iframe): no real-money asks.
   const supportBlock = isCabinetMode() ? '' : `<div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
         <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-block;">SUPPORT</a>

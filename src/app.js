@@ -3,7 +3,7 @@ import { sendRestore, clearConfirmed } from './utils/restore-send.js';
 import { track, trackNow, trackPageview, trackThenStop, waitForTracker } from './utils/analytics.js';
 import { restoreEvents, deletedKinds } from './utils/restore.js';
 import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
-import { fetchCollective, fetchWhoami, shouldAutoLoad } from './utils/collective.js';
+import { fetchCollective, lookUpWhoami, shouldAutoWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { localDay, hasSavedState, loadState, saveState, updateMission, updateStreak, streakAfterFiling, toggleAccount, markMissionStarted } from './state.js';
@@ -164,12 +164,16 @@ function guessAllowed() {
   return !isAnalyticsOff() && !hasGoneGhost();
 }
 
+// With sharing off or gone ghost nothing is sent: the view is the browser's own report.
 function loadWhoami() {
   if (whoamiView.status === 'loading') return;
-  whoamiView = { status: 'loading' };
-  renderCurrentRoute();
-  fetchWhoami().then((r) => {
-    whoamiView = r.ok ? { status: 'ready', data: r.data } : { status: 'error' };
+  const allowed = guessAllowed();
+  if (allowed) {
+    whoamiView = { status: 'loading' };
+    renderCurrentRoute();
+  }
+  lookUpWhoami({ allowed }).then((view) => {
+    whoamiView = view;
     renderCurrentRoute();
   });
 }
@@ -283,9 +287,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   if (shouldAutoLoad(route.screen, collectiveView.status, ['ghost', 'ghost-done', 'ghost-early'])) loadCollective();
   // Your City needs the published file's date to tell a pending deletion from one that went through.
   if ((getGhostInfo()?.early || getOptedOutAt()) && shouldAutoLoad(route.screen, collectiveView.status, ['stats'])) loadCollective();
-  if (route.screen === 'ghost' && whoamiView.status === 'idle') loadWhoami();
-  // The sky's quiz starts from a guess, only for players who haven't turned sharing off or gone ghost.
-  if (route.screen === 'broker-map' && whoamiView.status === 'idle' && homeOf(state) === null && guessAllowed()) loadWhoami();
+  // The ghost screen's count and the sky's quiz start from a guess, only for players who haven't turned sharing off or gone ghost.
+  if (shouldAutoWhoami(route.screen, whoamiView.status, { allowed: guessAllowed(), homeKnown: homeOf(state) !== null })) loadWhoami();
   // A screen visit is what a pageview counts: arriving, not a re-draw.
   if (tracksPageview(cause)) startScreenVisit(route);
   try {

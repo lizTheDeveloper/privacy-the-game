@@ -216,7 +216,7 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
       junk: r.burst.junk > 0 ? 'yes' : 'no',
       junk_count: r.burst.junk > 0 ? r.burst.junk : undefined,
     };
-    next = updateMission(next, mission.id, { status: allDone ? 'completed' : undefined, lastBurstAt: now, ...last });
+    next = updateMission(next, mission.id, { status: allDone ? 'completed' : undefined, ...last });
     // One event for the whole job, when it's done — not one per burst — so the
     // count of actions matches what restore would resend.
     return { state: next, event: allDone ? { status: 'completed' } : null };
@@ -230,10 +230,6 @@ export function fileDebrief(state, mission, answers, now = new Date().toISOStrin
   if (r.pmFlagged) next = { ...next, pmFlagged: r.pmFlagged };
   if (r.pm) next = { ...next, ...r.pm, pmChanged: Math.min(next.pmChanged || 0, r.pm.pmFlaggedCount - r.pm.pmThrowaway) };
   return { state: reopenStaleNotNeeded(next), event: { status: r.record.status } };
-}
-
-export function applyDebrief(state, mission, answers) {
-  return fileDebrief(state, mission, answers)?.state ?? null;
 }
 
 // Re-checking a completed mission: the answers are checked again so the

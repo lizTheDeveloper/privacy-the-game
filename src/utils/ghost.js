@@ -1,5 +1,6 @@
 import { DISTRICTS } from '../data/districts.js';
 import { calcDistrictProgress } from './calc.js';
+import { announceSharingChange } from './analytics-pref.js';
 
 export const GHOST_KEY = 'reclaim-city.gone-ghost';
 
@@ -55,6 +56,7 @@ export function markGoneGhost({ silent = false, early = false, nonce = null } = 
   } catch {
     // Storage blocked: the analytics switch still turns off.
   }
+  announceSharingChange();
 }
 
 export function clearGhost() {
@@ -63,6 +65,7 @@ export function clearGhost() {
   } catch {
     // Storage blocked: nothing was stored.
   }
+  announceSharingChange();
 }
 
 // The browser clock and the server's asOf can disagree; only a file published

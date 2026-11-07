@@ -5,7 +5,7 @@ import { renderDistrict } from '../src/screens/district.js';
 import { renderCityMap } from '../src/screens/city-map.js';
 import { createInitialState, updateMission } from '../src/state.js';
 import { PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, COLLECTIVE_DIALOGUE } from '../src/data/dialogue.js';
-import { applyDebrief, recordNotNeeded } from '../src/utils/debrief.js';
+import { fileDebrief, recordNotNeeded } from '../src/utils/debrief.js';
 import { MISSIONS } from '../src/data/missions.js';
 
 const set = (s, id, rec) => updateMission(s, id, rec);
@@ -114,19 +114,19 @@ describe('password manager report debrief', () => {
   });
 });
 
-describe('applyDebrief and recordNotNeeded', () => {
+describe('fileDebrief (the game\'s filing path) and recordNotNeeded', () => {
   it('stores pmFlagged and reopens a no-longer-true "no reset needed"', () => {
     let s = { ...clean(s0), passwordManager: 'bitwarden' };
     s = recordNotNeeded(s, 'gmail-fortify-password');
     expect(s.missions['gmail-fortify-password'].status).toBe('not-needed');
-    s = applyDebrief(s, byId('password_manager-recon-report'), { flagged_count: '5', throwaway_count: '0', flagged: ['gmail'] });
+    s = fileDebrief(s, byId('password_manager-recon-report'), { flagged_count: '5', throwaway_count: '0', flagged: ['gmail'] }).state;
     expect(s.pmFlagged).toEqual(['gmail']);
     expect(s.missions['password_manager-recon-report'].status).toBe('completed');
     expect(s.missions['gmail-fortify-password'].status).toBeUndefined();
   });
 
   it('returns null for an incomplete form', () => {
-    expect(applyDebrief(s0, byId('gmail-fortify-2fa'), { method: 'none' })).toBeNull();
+    expect(fileDebrief(s0, byId('gmail-fortify-2fa'), { method: 'none' })).toBeNull();
   });
 
   it('recordNotNeeded only applies when no reset is needed', () => {

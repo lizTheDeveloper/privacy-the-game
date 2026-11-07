@@ -300,6 +300,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "BeenVerified: Go to their opt-out FAQ, follow the steps to search and remove", url: "https://www.beenverified.com/faq/opt-out/" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"Three brokers, three web forms, three minutes each. Spokeo, Whitepages, BeenVerified. These are the highest-traffic people-search sites -- removing yourself here has the biggest impact per minute of effort.\"",
       debrief: {
@@ -322,6 +323,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "FastPeopleSearch: Go to removal, find your listing, click remove", url: "https://www.fastpeoplesearch.com/removal" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"Second wave. Intelius, TruePeopleSearch, FastPeopleSearch. Skip tracers and private investigators use these. Each one you remove narrows the field of places someone can look you up for free.\"",
       debrief: {
@@ -345,6 +347,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'PeopleFinder: use the opt-out link on its site' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"The long tail. These individually get less traffic but collectively they're a big surface. Every one you remove is one fewer copy of your personal information floating around for anyone to find. Radaris's site is just a court notice now -- one fewer form for you.\"",
       debrief: {
@@ -369,6 +372,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Google Results About You: Request removal of personal info from search results", url: "https://support.google.com/websearch/contact/content_removal_form" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"MyLife publishes a public 'reputation score' for you that anyone can see -- get it removed. And if you live in California, DROP: one request, and California's Delete Act requires the registered data brokers to process it. Nothing else in data broker defense reaches that far.\"",
       debrief: {
@@ -397,6 +401,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "SearchPeopleFree: Submit opt-out", url: "https://www.searchpeoplefree.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"These are the second-tier brokers. Fewer visitors than Spokeo, but they list people all the same. Look yourself up on each one -- if you're there, take it down. Every one you remove shrinks the footprint.\"",
       debrief: {
@@ -421,6 +426,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'Usatrace: use the opt-out link on its site' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"PeopleWhiz runs a dozen mirror sites under different names — one opt-out nukes them all. The rest are phone-lookup sites that serve up your number to robocallers and scammers.\"",
       debrief: {
@@ -442,6 +448,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'FindPeopleSearch: its domain is parked now (checked October 2026), so there’s nothing left to remove there' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"RocketReach is the one recruiters and salespeople use. Your work email and phone number are the product. Filing the opt-out cuts the B2B pipeline.\"",
       debrief: {
@@ -495,6 +502,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Submit the request -- processing takes several weeks" },
     ],
     debriefQs: DEFENSE_DEBRIEF,
+    optOut: { defense_done: ["done", "already-done"] },
     scoutDialog: {
       briefing: "\"LexisNexis has your insurance claims history, address history, and sometimes criminal records. Many landlord background checks and insurance quotes pull from LexisNexis. This is one of the two most important enterprise opt-outs you can do.\"",
       debrief: {
@@ -517,6 +525,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Submit the form -- they may follow up with identity verification" },
     ],
     debriefQs: DEFENSE_DEBRIEF,
+    optOut: { defense_done: ["done", "already-done"] },
     scoutDialog: {
       briefing: "\"Thomson Reuters CLEAR is one of the tools law enforcement and private investigators use to find people. They may limit who gets records deleted. Send the request anyway.\"",
       debrief: {
@@ -539,6 +548,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Note: TransUnion TLO is separate from your credit freeze -- opting out here does not affect your credit file or freeze" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"CoreLogic holds property records on homes you've owned, and its data feeds many tenant and background checks. TransUnion TLO is their skip-tracing product -- it's a separate database from your credit file. Freezing your credit at TransUnion does NOT freeze TLO. You have to opt out separately. Most people don't know this.\"",
       debrief: {
@@ -564,6 +574,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'Tracers (debt collectors and PIs): find the consumer privacy request on its site' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"The deep layer. The Work Number may hold your salary history, and lenders and landlords check it. Verisk holds insurance claims. Sift scores your activity on the sites that use it. Data Axle sells marketing lists. Utility-connection records show when you moved. This is the infrastructure of the surveillance economy. Every form you submit rips another wire out of the machine.\"",
       debrief: {
@@ -617,6 +628,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Install or switch to a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"One bulk tool and one signpost. DAA WebChoices tries to opt this browser out of about a hundred ad companies in one run -- it works by cookies, so a browser that blocks third-party cookies can make it fail, and it'll tell you which. The NAI page doesn't do a bulk opt-out any more -- it points you to each member's own opt-out, and to a Global Privacy Control extension. Both are industry self-regulation, not law. Global Privacy Control has law behind it: it tells websites you visit not to sell or share your data, and businesses covered by laws like California's must honor it. And disabling your advertising ID breaks the link between your apps and your real identity. This is the most efficient mission in the whole district.\"",
       debrief: {
@@ -639,6 +651,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Apple: Review App Tracking Transparency settings", url: "https://support.apple.com/en-us/102420" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"Every 'personalized experience' toggle is a euphemism for 'we watch what you do and tell advertisers about it.' You can turn most of them off without the service noticeably degrading. They just won't admit that on the settings page.\"",
       debrief: {
@@ -663,6 +676,7 @@ export const RECLAMATION_MISSIONS = [
       { text: "Opt out of Epsilon (its email lists were breached in 2011)", url: "https://legal.epsilon.com/us/consumer-information" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"LiveRamp is the company that connects your real name to your browser cookies -- they're the reason ads follow you across devices. Acxiom has been building consumer profiles since before the internet existed. They started with direct mail in the 1960s. These companies are invisible by design. Nobody opts out of a company they've never heard of. That's the business model. Until now.\"",
       debrief: {
@@ -748,6 +762,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'Opt out of Gravy Analytics (it now does business as Unacast) -- use its Opt Out & Do Not Sell form. An FTC order also limits its use of sensitive location data', url: 'https://gravyanalytics.com/opt-out-do-not-sell' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"These companies buy your GPS data from apps, package it into movement profiles, and sell it. SafeGraph to businesses. X-Mode to US military contractors. Near Intelligence to anti-abortion groups. Most hide their opt-outs behind email addresses instead of web forms. They're betting you won't bother. Prove them wrong.\"",
       debrief: {
@@ -771,6 +786,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'Also file with the California Privacy Protection Agency (CPPA)', url: 'https://cppa.ca.gov/webapplications/complaint' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
+    optOut: { optout_result: ["all-submitted", "some-submitted"] },
     scoutDialog: {
       briefing: "\"When there is no opt-out page, that does not mean no legal obligation to delete your data. Having no web form is a bet that you won't send a letter. Make them lose that bet. The FTC has brought cases against several location data brokers since 2024, and its orders restrict selling sensitive location data and cover the location data they'd already collected. Your request matters even when it's ignored -- it becomes evidence in the next enforcement case. Your letter is part of the paper trail that makes lawsuits and regulations possible.\"",
       debrief: {

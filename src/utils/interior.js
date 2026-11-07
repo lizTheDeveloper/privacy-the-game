@@ -231,8 +231,3 @@ export function sealedCount(state, accountId) {
   }
   return { sealed, total: sealed + open };
 }
-
-export function isFullySealed(state, accountId) {
-  const { sealed, total } = sealedCount(state, accountId);
-  return total > 0 && sealed === total;
-}

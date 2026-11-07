@@ -242,6 +242,7 @@ export const CLINIC_MISSIONS = [
       { text: "Confirm the request in the email they send." },
     ],
     debriefQs: GENETIC_DEBRIEF,
+    optOut: { genetic_action: ["opted-out"] },
     scoutDialog: {
       briefing: `"23andMe changed hands in 2025, and your DNA went with it. The new owner says it honors deletion. Whether to delete is your call -- it's permanent either way."`,
       debrief: {
@@ -266,6 +267,7 @@ export const CLINIC_MISSIONS = [
       { text: "Check if you uploaded your DNA to any other database (FamilyTreeDNA, LivingDNA, Promethease). Review and restrict each one." },
     ],
     debriefQs: GENETIC_DEBRIEF,
+    optOut: { genetic_action: ["opted-out"] },
     scoutDialog: {
       briefing: `"23andMe sold access to your DNA to GlaxoSmithKline for 300 million dollars. That is what your genome was worth in bulk. AncestryDNA and MyHeritage have their own research programs. And GEDmatch -- the genealogy tool -- was used to catch the Golden State Killer by matching a distant relative's DNA. If you uploaded your DNA anywhere, review what you consented to."`,
       debrief: {

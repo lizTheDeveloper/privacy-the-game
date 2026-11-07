@@ -167,13 +167,6 @@ export function applyChecklistFiling(state, missionId, status, lineIds, day) {
   return status === 'completed' ? recordChecklist(state, missionId, lineIds, day, { first: true }) : state;
 }
 
-export function setResidency(state, value) {
-  const next = { ...state };
-  if (RESIDENCY.includes(value)) next.caResident = value;
-  else delete next.caResident;
-  return next;
-}
-
 export function setHome(state, value) {
   const next = { ...state };
   if (validHome(value)) {

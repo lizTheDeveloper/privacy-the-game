@@ -5,7 +5,7 @@ import {
 } from '../../src/components/constellation.js';
 import { shortName, nearestStar, zoomViewBox } from '../../src/utils/broker-view.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
-import { setResidency } from '../../src/utils/broker-state.js';
+import { setHome } from '../../src/utils/broker-state.js';
 
 const mini = JSON.parse(readFileSync('tests/fixtures/broker-map-mini.json', 'utf8'));
 const realMap = JSON.parse(readFileSync('src/data/broker-map.json', 'utf8'));
@@ -184,14 +184,14 @@ describe('constellationSvg', () => {
     // three sit too close together at this zoom since the sky stopped being a circle (2026-10-29).
     const names = labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: few, px: 328 })).map((l) => l.text);
     expect(names).toEqual(expect.arrayContaining(['Spokeo', 'Whitepages', 'BeenVerified']));
-    const crowd = brokerLighting(realMap, setResidency({ brokerFiled: { 'people_search-reclaim-stragglers': { since: d, lines: { drop: d } } } }, 'yes'), '2026-10-24');
+    const crowd = brokerLighting(realMap, setHome({ brokerFiled: { 'people_search-reclaim-stragglers': { since: d, lines: { drop: d } } } }, 'US-CA'), '2026-10-24');
     expect(labelsOf(constellationSvg({ map: realMap, layout: realLayout, lighting: crowd, px: 288 })).every((l) => l.cls === 'hub-label')).toBe(true);
   });
 
   it('no two labels stack into one name on a phone with DROP lit, wherever the view is', () => {
     // Babel Street and Experian Information Solutions once stacked 2px apart and read as one name.
     // The sky was re-laid (2026-10-29), so check every hub's phone view (328px wide), not one pair.
-    const lit = brokerLighting(realMap, setResidency({ brokerFiled: { 'people_search-reclaim-stragglers': { since: '2026-10-20', lines: { drop: '2026-10-20' } } } }, 'yes'), '2026-10-24');
+    const lit = brokerLighting(realMap, setHome({ brokerFiled: { 'people_search-reclaim-stragglers': { since: '2026-10-20', lines: { drop: '2026-10-20' } } } }, 'US-CA'), '2026-10-24');
     const hubs = realMap.brokers.filter((b) => b.hub).map((b) => realLayout.stars.find((st) => st[0] === b.id));
     let checked = 0;
     for (const [, hx, hy] of hubs) {

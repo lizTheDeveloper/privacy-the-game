@@ -11,7 +11,7 @@ export const ORIGINS = Object.freeze([
   { id: 'o-carrier', label: 'Your phone carrier', note: 'Call records and where your phone is' },
 ]);
 
-// The pipes, each a kind of collection. An entry joins a pipe by its id (PIPE_OF) or its leak kind.
+// The pipes, each a kind of collection. Every leak entry names its own (`pipe` in src/data/leaks).
 export const PIPES = Object.freeze([
   { id: 'p-orders', label: 'Orders to companies', note: 'PRISM / downstream, court and agency orders', origins: ['o-accounts'] },
   { id: 'p-cables', label: 'Cable taps', note: 'Upstream, XKeyscore, MUSCULAR, Tempora', origins: ['o-cables', 'o-accounts'] },
@@ -19,28 +19,13 @@ export const PIPES = Object.freeze([
   { id: 'p-buying', label: 'Buying your data', note: 'Location and data brokers: a purchase, no warrant', origins: ['o-apps', 'o-devices'] },
   { id: 'p-phone', label: 'Phone records', note: 'Carrier call records and location', origins: ['o-carrier'] },
   { id: 'p-police', label: 'Police tech', note: 'Doorbell cameras, cell-site simulators, plate readers', origins: ['o-devices', 'o-carrier'] },
+  { id: 'p-kept', label: 'Kept by the company', note: 'Ring staff watched customers\' videos, Tesla staff shared car-camera images, Amazon kept Alexa recordings for years', origins: ['o-devices'] },
 ]);
+const PIPE_IDS = new Set(PIPES.map((p) => p.id));
 
-// Which pipe an entry belongs to: by id, then by keywords in its id, then by its leak kind.
-const PIPE_BY_ID = Object.freeze({
-  prism: 'p-orders', 'microsoft-encryption': 'p-orders', 'section-215': 'p-phone', 'verizon-order': 'p-phone',
-  hemisphere: 'p-phone', fairview: 'p-cables', stormbrew: 'p-cables', blarney: 'p-cables', oakstar: 'p-cables',
-  upstream: 'p-cables', xkeyscore: 'p-cables', muscular: 'p-cables', tempora: 'p-cables', mystic: 'p-phone',
-});
-const KEYWORDS = [
-  [/ring|alexa|stingray|cell-site|atlas|plate|geofence|tower/, 'p-police'],
-  [/carrier|call|phone-records|bounty|carpenter|clapper|jewel|hepting|gemalto|sim/, 'p-phone'],
-  [/venntel|babel|fog|broker|weather|accuweather|x-mode|gravy|kochava|location|vizio|onstar|gm-|lexisnexis|verisk|data-sale/, 'p-buying'],
-  [/weeping|cherry|dark-matter|android|ios|highrise|scribbles|windows|vehicle|car|couch|before-encryption|vault/, 'p-hacking'],
-  [/optic|leaky|squeaky|turmoil|cookie|xkeys|upstream|cable/, 'p-cables'],
-];
-const BY_LEAK = Object.freeze({ vault7: 'p-hacking', foia: 'p-buying', snowden: 'p-orders', prism: 'p-orders' });
-
+// The entry's pipe, as its data names it; null for none (not drawn, never guessed).
 export function pipeOf(entry) {
-  if (!entry?.id) return 'p-orders';
-  if (Object.hasOwn(PIPE_BY_ID, entry.id)) return PIPE_BY_ID[entry.id];
-  for (const [re, pipe] of KEYWORDS) if (re.test(entry.id)) return pipe;
-  return BY_LEAK[entry.leak] ?? 'p-orders';
+  return PIPE_IDS.has(entry?.pipe) ? entry.pipe : null;
 }
 
 // Agency rows, by kind, so the map reads as groups rather than a crowd.
@@ -71,6 +56,7 @@ export function buildGovGraph({ entries = [], agencies = [], channels = [] } = {
   const entriesByPipe = Object.fromEntries(PIPES.map((p) => [p.id, []]));
   for (const e of entries) {
     const pipe = pipeOf(e);
+    if (!pipe) continue;
     entriesByPipe[pipe].push(e);
     for (const to of arr(e.flow?.to)) if (known.has(to)) edge(pipe, to, 'takes', e.id);
     for (const to of arr(e.flow?.sharedWith)) if (known.has(to) && known.get(to).kind !== 'oversight') edge(arr(e.flow?.to)[0], to, 'shares', e.id);

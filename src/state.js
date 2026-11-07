@@ -61,10 +61,10 @@ export function loadState(storage = defaultStorage()) {
       captureError(new Error('loadState: save had no streak object'), { operation: 'loadState', repaired: 'streak' });
       parsed.streak = { current: 0, best: 0, lastDate: null };
     }
+    // A missing account (the repair above, or one a later release added) gets
+    // the new-city default: Freeway car accounts stay off until a vehicle is added.
     for (const [id, a] of Object.entries(DEFAULT_ACCOUNTS)) {
-      if (!parsed.accounts[id]) {
-        parsed.accounts[id] = { enabled: true, name: a.name, district: a.district };
-      }
+      if (!parsed.accounts[id]) parsed.accounts[id] = structuredClone(a);
     }
     return cleanBrokerState(migrateBrokenAnswers(parsed));
   } catch (error) {
@@ -181,6 +181,25 @@ export function updateStreak(state) {
   // moves backwards, so the same real day can't count twice.
   if (offsets.some((d) => d > 0 && d <= AHEAD_TOLERANCE_DAYS)) return state;
   return set(1);
+}
+
+// The streak as it stands on `now`. updateStreak runs only on a filing, so the
+// stored count outlives a missed day; every screen reads this instead.
+// current: the stored count while the last filing was today or yesterday (or
+// a day or two ahead, as updateStreak allows), else 0. filedToday: the last
+// filing already counts for today (an old save whose UTC day may be yesterday
+// is treated as yesterday, as updateStreak does).
+export function streakNow(state, now = new Date()) {
+  const kept = state?.streak?.current || 0;
+  const offsets = kept ? lastDayOffsets(state, now, dayValue(localDay(now))) : null;
+  if (!offsets) return { current: 0, kept, filedToday: false };
+  const yesterday = offsets.includes(-1);
+  const filedToday = !yesterday && offsets.some((d) => d >= 0 && d <= AHEAD_TOLERANCE_DAYS);
+  return { current: yesterday || filedToday ? kept : 0, kept, filedToday };
+}
+
+export function displayStreak(state, now = new Date()) {
+  return streakNow(state, now).current;
 }
 
 // After a debrief is filed: a skipped filing doesn't extend the streak.
