@@ -237,7 +237,7 @@ describe('The Freeway', () => {
     car_honda: ['Honda', 'https://privacyportal.onetrust.com/webform/50eb4a6d-ca54-42d6-9746-67aa2da0e52f/6ec559a6-cf6f-48b2-b98e-543b3bcd65a6'],
     car_ford: ['Ford', 'https://privacyportal.onetrust.com/webform/1d20b685-0942-4b4d-a0af-b799c97f5cf6/2e4928b6-d77a-4f76-9518-1bfb9721669d'],
     car_hyundai: ['Hyundai', 'https://owners.hyundaiusa.com/us/en/privacy/data-request/new-request'],
-    car_kia: ['Kia', 'https://customercare.kiausa.com'],
+    car_kia: ['Kia', 'https://customercare.kiausa.com/PrivacyManagement'],
     car_nissan: ['Nissan', 'https://privacyportal.onetrust.com/webform/00db3d80-61f2-406b-9665-493b342a269d/57adada6-a5f9-4204-85a3-5e5162bca5c8'],
     car_subaru: ['Subaru', 'https://privacyportal.onetrust.com/webform/1d87978c-8b58-46ba-83c1-acbc9aa41e6a/fb603d38-a944-4a5c-90e0-3b0aabb3052a'],
     car_tesla: ['Tesla', 'https://www.tesla.com/contactus?issue=dataPrivacyRequest'],
