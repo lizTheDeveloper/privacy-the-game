@@ -28,7 +28,7 @@
     "https://coveryourtracks.eff.org/": "curl 200",
     "https://cppa.ca.gov/data_broker_registry/": "browser 200: Data Broker Registry - California Privacy Protection Agency (CPPA) (2026-11-01, star card California block)",
     "https://cppa.ca.gov/webapplications/complaint": "curl 200",
-    "https://customercare.kiausa.com": "curl 200",
+    "https://customercare.kiausa.com/PrivacyManagement": "playwright 200, 2026-11-09 (Kia privacy-rights request form; the site root is the Customer Care home)",
     "https://discord.com/channels/@me": "curl 200",
     "https://dnsleaktest.com": "curl 200; browser: \"DNS leak test\" (named in step text, checked 2026-10-08)",
     "https://drive.google.com": "curl 200 (redirects to https://accounts.google.com/v3/signin/identifier)",
