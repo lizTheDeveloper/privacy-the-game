@@ -72,7 +72,7 @@ export const PERIMETER_MISSIONS = [
     title: "Remove SMS from High-Value Accounts",
     briefing: "Even with a carrier PIN, SMS is the weakest two-factor method. The real fix is making your phone number irrelevant to account security. If your important accounts use an authenticator app instead of SMS codes, a successful SIM swap no longer delivers their sign-in codes. Any account that still uses your number for codes or recovery stays exposed, so remove it there too.",
     steps: [
-      { text: "Google: Open myaccount.google.com/signinoptions/two-step-verification → under \"How you sign in,\" remove your phone number as a verification method. Keep Google Authenticator or your security key.", url: "https://myaccount.google.com/signinoptions/two-step-verification" },
+      { text: "Google: Open myaccount.google.com/security → under \"How you sign in to Google,\" open 2-Step Verification and remove your phone number as a verification method. Keep Google Authenticator or your security key.", url: "https://myaccount.google.com/security" },
       { text: "Microsoft: Open account.live.com/proofs/manage → remove \"Text a code to my phone\" as a sign-in method. Keep the Microsoft Authenticator app.", url: "https://account.live.com/proofs/manage" },
       { text: "Apple: If you use Trusted Phone Numbers, make sure you also have trusted devices as alternatives (iPhone, iPad, or Mac signed into iCloud)." },
       { text: "Banks: log into your primary bank and look in its security settings: if your bank offers an authenticator app or passkey, switch to it from text codes." },
