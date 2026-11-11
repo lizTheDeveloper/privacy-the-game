@@ -1,0 +1,41 @@
+{
+  "id": "sagestream",
+  "name": "SageStream LLC",
+  "aliases": [
+    "SageStream",
+    "sagestreamllc.com",
+    "LexisNexis Risk Solutions SageStream"
+  ],
+  "parent": "lexisnexis",
+  "kind": [
+    "financial",
+    "risk-identity"
+  ],
+  "registries": {
+    "CA": null,
+    "VT": "2026",
+    "TX": null,
+    "OR": null
+  },
+  "website": "https://www.sagestreamllc.com",
+  "sells": [
+    "supplementary credit scores and FCRA consumer reports",
+    "auto lending, credit card, and wireless account risk verification"
+  ],
+  "optOut": {
+    "method": "web-form",
+    "url": "https://optout.lexisnexis.com/",
+    "status": "verified",
+    "verifiedAt": "2026-10-19",
+    "notes": "SageStream LLC was acquired by LexisNexis Risk Solutions and redirects consumer privacy and opt-out requests from https://www.sagestreamllc.com/ to the LexisNexis Risk Solutions Consumer Center (https://consumer.risk.lexisnexis.com/) and official US privacy opt-out web form at https://optout.lexisnexis.com/, as documented in its Vermont Data Broker Registry filing."
+  },
+  "size": {
+    "known": false,
+    "signals": []
+  },
+  "sources": [
+    "registry-vt-2026-10-19",
+    "pol-sagestream-consumer-center",
+    "pol-sagestream-lexisnexis-optout"
+  ]
+}
