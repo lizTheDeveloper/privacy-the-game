@@ -1,0 +1,36 @@
+{
+  "id": "lexisnexis",
+  "name": "LexisNexis",
+  "aliases": [
+    "LexisNexis Risk Solutions",
+    "lexisnexis.com",
+    "optout.lexisnexis.com"
+  ],
+  "parent": null,
+  "kind": [
+    "risk-identity",
+    "people-search",
+    "financial"
+  ],
+  "sells": [
+    "consumer identity verification and fraud risk scoring",
+    "public records aggregation and background screening",
+    "insurance claims and CLUE underwriting reports"
+  ],
+  "optOut": {
+    "method": "web-form",
+    "url": "https://optout.lexisnexis.com/",
+    "status": "verified",
+    "verifiedAt": "2026-10-19",
+    "notes": "LexisNexis provides a dedicated self-service web form at https://optout.lexisnexis.com/ for US consumers to submit 'Do Not Sell or Share My Personal Information' and information suppression requests across LexisNexis public-records and risk products, as documented in its Vermont Data Broker Registry filing and US Privacy Policy (https://www.lexisnexis.com/en-us/terms/privacy-policy.page)."
+  },
+  "size": {
+    "known": false,
+    "signals": []
+  },
+  "sources": [
+    "registry-vt-2026-10-19",
+    "pol-lexisnexis-optout",
+    "pol-lexisnexis-privacy"
+  ]
+}
