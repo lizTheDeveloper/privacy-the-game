@@ -1,0 +1,35 @@
+{
+  "id": "safety",
+  "name": "Safety Holdings Inc.",
+  "aliases": [
+    "SambaSafety",
+    "sambasafety.com",
+    "safetyholdingsinc.com"
+  ],
+  "parent": null,
+  "kind": [
+    "automotive",
+    "risk-identity"
+  ],
+  "sells": [
+    "motor vehicle records (MVRs)",
+    "continuous driver risk monitoring",
+    "commercial driver compliance and telematics risk scoring"
+  ],
+  "optOut": {
+    "method": "none",
+    "url": "https://www.sambasafety.com/privacy-policy/",
+    "status": "verified",
+    "verifiedAt": "2026-10-19",
+    "notes": "Safety Holdings Inc. (d/b/a SambaSafety, VT Data Broker Registry #236039) explicitly declares IspersonalinformationOptOut=False in its Vermont filing and is absent from the CA, TX, and OR registries. As an FCRA/DPPA consumer reporting agency supplying motor vehicle records (MVRs) to insurers and employers, it offers no public opt-out route; its consumer portal (safetyholdingsinc.com / forms.sambasafety.com/232555830633961) covers FCRA file disclosures and accuracy disputes only and requires uploading a government driver's license photo."
+  },
+  "size": {
+    "known": false,
+    "signals": []
+  },
+  "sources": [
+    "registry-vt-2026-10-19",
+    "pol-sambasafety-privacy",
+    "pol-sambasafety-consumer-portal"
+  ]
+}
