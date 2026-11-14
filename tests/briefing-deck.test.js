@@ -21,11 +21,13 @@ const deckOf = (html) => html.match(/<div class="deck[^"]*"[^>]*data-deck[\s\S]*
 const slidesOf = (html) => deckOf(html).split(/<section class="slide[ "]/).slice(1).map((s) => s.slice(s.indexOf('>') + 1, s.lastIndexOf('</section>')));
 
 // A slide's body: its words minus labels, step numbers, text behind a closed <details>, the
-// walkthrough's buttons and its closed "Stuck?" help (components/walkthrough.js).
+// walkthrough's buttons, its closed Help panel (components/walkthrough.js) and the label
+// over a step's answer buttons (a form label, like a section label).
 const body = (slide) => slide
   .replace(/<details[\s\S]*?<\/details>/g, ' ')
   .replace(/<div class="walk-help"[^>]*hidden>[\s\S]*?<\/div>/g, ' ')
   .replace(/<button[\s\S]*?<\/button>/g, ' ')
+  .replace(/<legend>[^<]*<\/legend>/g, ' ')
   .replace(/<div class="walk-progress-label">[^<]*<\/div>/g, ' ')
   .replace(/<div class="section-label[^"]*"[^>]*>[^<]*<\/div>/g, ' ')
   .replace(/<div data-step-num[^>]*>[^<]*<\/div>/g, ' ');

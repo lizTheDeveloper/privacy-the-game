@@ -11,7 +11,7 @@ import {
   markStep, progressFor, progressLabel, alreadyOption, canSayAlready, markAlready, missionsInProgress,
 } from '../src/utils/reading.js';
 import { recordSignal, readingOffer, markOffered } from '../src/utils/reading-signals.js';
-import { pathChips, stuckHelp } from '../src/components/walkthrough.js';
+import { pathChips, stuckHelp, helpPanel } from '../src/components/walkthrough.js';
 
 const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const byId = (id) => MISSIONS.find((m) => m.id === id);
@@ -173,11 +173,26 @@ describe('the walkthrough', () => {
     expect(pathChips('No arrows here')).toBeNull();
   });
 
-  it('Stuck? names the place to search for and says skipping is fine', () => {
+  it('Help names the place to search for, and leaves skipping to its button', () => {
     const help = stuckHelp({ text: 'Open the app → Settings → Ad preferences → turn off everything you do not want shared' });
     expect(help[0]).toContain('“Ad preferences”');
-    expect(help.at(-1)).toMatch(/OK to skip/);
+    expect(help.join(' ')).not.toMatch(/skip/i);
     expect(stuckHelp({ text: 'x', help: 'Own help' })).toEqual(['Own help']);
+  });
+
+  it('Help says where a step with no link happens, and how to do a typing step', () => {
+    const help = stuckHelp({ text: 'Enter your Gmail address' }, { site: 'https://haveibeenpwned.com' });
+    expect(help[0]).toMatch(/haveibeenpwned\.com/);
+    expect(help.join(' ')).toMatch(/empty box/);
+    const html = helpPanel({ mission: { id: 'm' }, step: { text: 'Enter your Gmail address' }, key: 'k', site: 'https://haveibeenpwned.com' });
+    expect(html).toContain('OPEN HAVEIBEENPWNED.COM AGAIN');
+    expect(html).toContain('data-action="step-skip"');
+    expect(html).toContain('SKIP THIS STEP FOR NOW');
+  });
+
+  it('a results-reading step gets a plain line, never an empty panel', () => {
+    expect(stuckHelp({ text: 'Read the results — note how many breaches (if any)' }).join(' ')).toMatch(/Scroll down/);
+    expect(stuckHelp({ text: 'Wait a day' }).length).toBeGreaterThan(0);
   });
 });
 
