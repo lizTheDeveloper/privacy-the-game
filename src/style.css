@@ -724,3 +724,50 @@ img { image-rendering: pixelated; }
 .mission-progress { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); margin-top: 3px; }
 .mission-progress .walk-bar { height: 3px; margin-top: 3px; max-width: 160px; }
 @media (prefers-reduced-motion: reduce) { .walk-bar span { transition: none; } }
+
+/* ── Focus layout: the short briefing and one-step-at-a-time step mode (screens/briefing.js) ── */
+.focus-col { width: 100%; max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; box-sizing: border-box; }
+.focus-crumb { display: flex; gap: 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; margin-bottom: 14px; color: rgba(237,239,243,0.45); text-transform: uppercase; }
+.focus-crumb a { color: rgba(237,239,243,0.55); text-decoration: none; }
+.focus-title { font-family: var(--font-display); font-weight: 800; letter-spacing: 1px; line-height: 1.3; margin: 0 0 14px; }
+.focus-title-top { display: block; font-size: 15px; color: rgba(237,239,243,0.7); }
+.focus-title-main { display: block; font-size: 26px; color: var(--cyan); text-shadow: 0 0 15px rgba(0,229,255,0.3); }
+.focus-lead { font-size: 21px; line-height: 1.45; color: var(--offwhite); margin: 0 0 6px; }
+.focus-why { font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.8); }
+.focus-scout { display: flex; gap: 12px; align-items: flex-start; margin: 16px 0; }
+.focus-scout img { image-rendering: pixelated; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3)); }
+.focus-scout-line { font-size: 14px; line-height: 1.55; color: rgba(237,239,243,0.7); font-style: italic; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 10px 12px; }
+.focus-meta { font-family: var(--font-mono); font-size: 13px; color: var(--cyan); margin: 8px 0 4px; }
+.focus-steps-peek { margin: 4px 0 16px; }
+.focus-steps-peek > summary { cursor: pointer; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); min-height: 44px; display: flex; align-items: center; }
+.focus-steps-peek ol { margin: 4px 0 0; padding-left: 22px; font-size: 15px; line-height: 1.55; color: rgba(237,239,243,0.85); display: flex; flex-direction: column; gap: 8px; }
+.focus-one-step { margin: 12px 0 16px; }
+.focus-actions { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin: 20px 0 8px; }
+.focus-actions--quiet { align-items: flex-start; gap: 4px; margin-top: 8px; }
+.focus-go { width: 100%; text-align: center; text-decoration: none; padding: 18px 20px; font-size: 13px; box-sizing: border-box; display: block; }
+.focus-actions .btn-secondary { padding: 14px 20px; font-size: 11px; }
+.focus-notnow { align-self: center; font-size: 13px; color: rgba(237,239,243,0.45); text-decoration: none; padding: 10px; }
+.focus-tools { margin-top: 28px; padding-top: 16px; border-top: 1px solid rgba(0,229,255,0.1); }
+.focus-lore { margin-top: 18px; font-size: 13px; color: rgba(237,239,243,0.55); }
+.focus-lore > summary { cursor: pointer; font-family: var(--font-mono); font-size: 11px; color: rgba(255,159,0,0.75); min-height: 40px; display: flex; align-items: center; }
+.focus-mission { font-family: var(--font-display); font-size: 14px; letter-spacing: 1px; color: rgba(237,239,243,0.7); margin: 0 0 14px; }
+.focus-card { background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.35); border-left: 3px solid var(--cyan); padding: 18px 16px; margin: 4px 0 16px; display: flex; flex-direction: column; gap: 14px; }
+.focus-card.is-done { border-left-color: var(--lime); background: rgba(198,255,0,0.05); }
+.focus-card-head { font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--cyan); }
+.focus-card.is-done .focus-card-head { color: var(--lime); }
+.focus-step-text { font-size: 21px; line-height: 1.45; color: var(--offwhite); overflow-wrap: anywhere; }
+.focus-open { display: block; text-align: center; text-decoration: none; padding: 14px; font-size: 11px; overflow-wrap: anywhere; }
+.focus-note { font-size: 14px; line-height: 1.6; color: rgba(237,239,243,0.8); }
+.focus-note > summary { cursor: pointer; font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: rgba(0,229,255,0.75); text-transform: uppercase; letter-spacing: 1px; min-height: 40px; display: flex; align-items: center; }
+.focus-note p { margin: 4px 0 0; }
+.focus-row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.focus-all { list-style: none; padding-left: 0 !important; }
+.focus-all li { display: flex; gap: 10px; align-items: flex-start; }
+.focus-all li.is-done span { opacity: 0.5; text-decoration: line-through; }
+.focus-all li.is-current span { color: var(--cyan); }
+.focus-all .walk-check { width: 32px; height: 32px; font-size: 12px; }
+.focus-all li.is-done .walk-check { background: var(--lime); border-color: var(--lime); color: var(--midnight); }
+.focus-actions--quiet .walk-link { min-height: 36px; }
+.brief-steps-mode .walk-progress { margin-bottom: 10px; }
+.focus-bonus { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px; margin: 8px 0; }
+.focus-recon-note { font-size: 14px; color: var(--offwhite); line-height: 1.6; margin: 10px 0; border-left: 2px solid var(--magenta); padding-left: 10px; }

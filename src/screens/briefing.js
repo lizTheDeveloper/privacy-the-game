@@ -14,7 +14,7 @@ import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
-import { walkStepRow, walkProgress, gearAsk, missionTrail } from '../components/walkthrough.js';
+import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, stuckHelp } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
 import { isPlaying } from '../utils/focus-music.js';
@@ -101,6 +101,17 @@ export function renderBriefing(state, missionId, opts = {}) {
   // The burst's line needs the password-manager report; until then (no numbers) the mission's own line.
   const scoutLine = noReset ? noResetScoutLine(state, mission) : (mission.id === PM_BURST_ID && pmBurstBriefingLine(state)) || reopenedLine(state, mission) || (level === 'simplest' && mission.simple?.scout) || mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.';
   const scoutFeeling = noReset ? 'happy' : undefined;
+
+  // Short and Simplest: one screen with the plain line and one START. Once started, a mission
+  // with several steps is shown one step at a time (Liz 2026-11-13: "still hard to use").
+  // Full intel keeps the long briefing below; a password reset that isn't needed keeps its panel.
+  const bankPanelHtml = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
+  // What the long briefing's header carries besides the title: the bonus tag, the password
+  // manager's flag, recon's notes for this reset, the password progress panel.
+  const extras = `${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
+  const page = { extras, state, mission, districtId, district, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, marks, allSteps, bankPanelHtml, loreData, account, goUrl };
+  if (!noReset && missionStepList.length > 1 && started && !opts.peek) return stepModePage(page);
+  if (!noReset && (level !== 'full' || opts.peek)) return compactBriefingPage({ ...page, started });
 
   const header = `
         ${missionTrail(started ? 'steps' : 'brief', progress)}
@@ -385,4 +396,163 @@ function readingTools(state, level, say, playing = isPlaying()) {
               <button class="walk-link" data-action="focus-music" aria-pressed="${playing}">&#9835; Focus music${playing ? ' (on)' : ''}</button>
             </div>
           </div>`;
+}
+
+// ---- The compact briefing and step mode --------------------------------------------------
+
+const attrEsc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'the page'; } };
+
+function pageShell(state, { districtId, district, targetTab, mission }, body, cls = '') {
+  return `
+  <div class="brief brief-focus ${cls} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
+    ${renderHud(state)}
+    <div class="focus-col">
+      <div class="focus-crumb">
+        <a href="#/district/${districtId}${targetTab}">${district?.name || districtId}</a>
+        <span>/</span>
+        <span>${mission.phase}</span>
+      </div>
+      ${body}
+    </div>
+  </div>`;
+}
+
+function focusTitle(titleTop, titleBottom) {
+  return `<h1 class="focus-title">${titleTop ? `<span class="focus-title-top">${titleTop}</span>` : ''}<span class="focus-title-main">${titleBottom}</span></h1>`;
+}
+
+// Scout's line, small, beside the sprite.
+function scoutBubble(line) {
+  return `<div class="focus-scout"><img src="assets/characters/scout_0.png" data-scout="briefing" alt="Scout" width="48" height="48"><div class="focus-scout-line">${line}</div></div>`;
+}
+
+// Reading level, Read it to me and Focus music, quietly at the bottom.
+function readingBar(state, level, say) {
+  const playing = isPlaying();
+  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
+  const offer = readingOffer(state);
+  const offerHtml = offer
+    ? `<div class="read-ask read-offer" data-read-offer="${offer}"><span>${OFFER_LINES[offer].line}</span>
+        <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
+    : '';
+  const ask = !offer && !readLevelChosen(state) ? '<div class="read-ask" data-read-ask>How much do you want to read? You can change this any time.</div>' : '';
+  return `
+      <div class="read-tools focus-tools" data-read-tools>
+        ${offerHtml}${ask}
+        <div class="read-row">
+          <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
+        </div>
+        <div class="read-row">
+          <button class="walk-link" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this out loud">&#128266; Read it to me</button>
+          <button class="walk-link" data-action="focus-music" aria-pressed="${playing}">&#9835; Focus music${playing ? ' (on)' : ''}</button>
+        </div>
+      </div>`;
+}
+
+function compactBriefingPage(p) {
+  const { state, mission, districtId, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, allSteps, bankPanelHtml, loreData, started, goUrl } = p;
+  const n = missionStepList.length;
+  const many = n > 1;
+  // The steps, each with its own site, so the briefing always has somewhere to go.
+  const stepList = missionStepList.map((st) => `<li>${pathText(st.text)}${st.url ? ` <a href="${st.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">${hostOf(st.url)} &#8599;</a>` : ''}</li>`).join('');
+  // One step: it is shown, and GO DO IT works as it always has. Several: START opens step mode.
+  const primary = started && !many
+    ? `<a class="btn-primary focus-go" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">I DID IT &#10003;</a>`
+    : many
+      ? `<button class="btn-primary focus-go" data-action="${started ? 'show-steps' : 'start-mission'}" data-mission="${mission.id}">${started ? `BACK TO STEP ${Math.max(1, progress.current + 1)}` : 'START'} &#9654;</button>`
+      : goUrl
+        ? `<button class="btn-primary focus-go" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`
+        : `<button class="btn-primary focus-go" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`;
+  const body = `
+      ${missionTrail(started ? 'steps' : 'brief', progress)}
+      ${focusTitle(titleTop, titleBottom)}
+      <p class="focus-lead" data-intel>${intel}</p>
+      ${why ? `<details class="brief-why" data-why><summary>Why it matters</summary><div class="focus-why">${why}</div></details>` : ''}
+      ${p.extras}
+      ${scoutBubble(scoutLine)}
+      ${many ? `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>
+      <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
+      ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
+      ${gearAsk(state, gearQuestions(allSteps))}
+      ${bankPanelHtml}
+      <div class="focus-actions">
+        ${primary}
+        ${canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
+        <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
+      </div>
+      ${readingBar(state, level, plainText(`${intel} ${scoutLine}`))}
+      ${renderLoreSection(loreData)}`;
+  return pageShell(state, p, body);
+}
+
+// "Settings → Health → Data Access" as chips when it is a plain path, else the words.
+function pathText(text) {
+  const path = pathChips(text);
+  return path ? `${path.lead}${path.lead ? '<span class="walk-chip-sep"> → </span>' : ''}<span class="walk-path">${path.chips}</span>` : text;
+}
+
+// No step has a link of its own: the account's own security page (what GO DO IT opened).
+function accountSite(mission, steps, goUrl) {
+  if (!goUrl || steps.some((st) => st.url)) return '';
+  return `<a class="btn-secondary focus-open" href="${goUrl}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">OPEN ${hostOf(goUrl).toUpperCase()} &#8599;</a>`;
+}
+
+function stepCardText(mission, step) {
+  const link = step.url
+    ? `<a class="btn-secondary focus-open" href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">OPEN ${hostOf(step.url).toUpperCase()} &#8599;</a>`
+    : '';
+  const notes = (step.note || []).map((n) => `<details class="focus-note"><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
+  return `<div class="focus-step-text">${pathText(step.text)}</div>${link}${notes}`;
+}
+
+function stepModePage(p) {
+  const { state, mission, titleTop, titleBottom, level, missionStepList, progress, marks, allSteps, bankPanelHtml } = p;
+  const { total, current } = progress;
+  const allDone = current === -1;
+  const step = allDone ? null : missionStepList[current];
+  const key = step ? stepKeyOf(step) : '';
+  const say = step ? plainText(step.text).replace(/→/g, ', then ') : '';
+  const card = allDone
+    ? `
+      <div class="focus-card is-done" data-step-card>
+        <div class="focus-card-head">ALL ${total} STEPS DONE &#10003;${progress.skipped ? ` <span>(${progress.skipped} skipped)</span>` : ''}</div>
+        <p class="focus-step-text">Nice work. Now tell Scout what you found.</p>
+        <a class="btn-primary focus-go" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">REPORT BACK &#9654;</a>
+        <button class="walk-link" data-action="step-back" data-mission="${mission.id}">&#8592; Back to the last step</button>
+      </div>`
+    : `
+      <div class="focus-card" data-step-card data-step-key="${key}">
+        <div class="focus-card-head">STEP ${current + 1} OF ${total}</div>
+        ${stepCardText(mission, step)}
+        ${accountSite(mission, missionStepList, p.goUrl)}
+        <button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003;</button>
+        <div class="focus-row">
+          ${progress.handled ? `<button class="walk-link" data-action="step-back" data-mission="${mission.id}">&#8592; Back</button>` : ''}
+          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Stuck?</button>
+          <button class="walk-link" data-action="step-skip" data-mission="${mission.id}" data-step="${key}">Skip</button>
+          <button class="walk-link" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this step out loud">&#128266; Read it to me</button>
+        </div>
+        <div class="walk-help" id="stuck-${key}" hidden>${stuckHelp(step).map((l) => `<p>${l}</p>`).join('')}</div>
+      </div>`;
+  const list = missionStepList.map((st, i) => {
+    const m = marks[stepKeyOf(st)];
+    const cls = m === 'done' ? 'is-done' : m === 'skipped' ? 'is-skipped' : i === current ? 'is-current' : '';
+    return `<li class="${cls}"><button class="walk-check" data-action="step-toggle" data-mission="${mission.id}" data-step="${stepKeyOf(st)}" aria-pressed="${m === 'done'}" aria-label="${m === 'done' ? `Step ${i + 1} done. Tap to undo.` : `Mark step ${i + 1} done`}">${m === 'done' ? '&#10003;' : m === 'skipped' ? '&#8631;' : i + 1}</button><span>${plainText(st.text)}${st.url ? ` <a href="${st.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">${hostOf(st.url)} &#8599;</a>` : ''}</span></li>`;
+  }).join('');
+  const body = `
+      ${missionTrail('steps', progress)}
+      <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
+      ${gearAsk(state, gearQuestions(allSteps))}
+      ${walkProgress(progress, { bare: true })}
+      ${card}
+      ${p.extras}
+      ${bankPanelHtml}
+      <details class="focus-steps-peek"><summary>All steps (${progress.handled}/${total})</summary><ol class="focus-all">${list}</ol></details>
+      <div class="focus-actions focus-actions--quiet">
+        ${allDone ? '' : `<a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a>`}
+        <button class="walk-link" data-action="show-briefing" data-mission="${mission.id}">Read the briefing again</button>
+      </div>
+      ${readingBar(state, level, say)}`;
+  return pageShell(state, p, body, 'brief-steps-mode');
 }

@@ -180,7 +180,8 @@ describe('fix 9 (Liz): the password manager report is core for players with a ma
     s = set(s, PM, { status: 'completed', action: 'flagged', flagged: ['gmail'] });
     const brief = renderBriefing(s, 'gmail-fortify-password');
     expect(brief).toContain('Flagged by your password manager');
-    expect(brief).toContain('data-action="go-do-it"');
+    // The normal way in (START on a mission with several steps, 7.14.1).
+    expect(brief).toMatch(/data-action="(?:go-do-it|start-mission)"/);
     expect(brief).not.toContain('NO RESET NEEDED');
     expect(renderDistrict(s, 'master-keys', 'fortify')).toContain('Flagged by your password manager');
     expect(renderBriefing(s, 'yahoo-fortify-password')).not.toContain('Flagged by your password manager');

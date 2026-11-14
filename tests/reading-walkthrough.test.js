@@ -130,16 +130,17 @@ describe('the walkthrough', () => {
     expect(progressFor(s, MULTI.id, st).current).toBe(0);
   });
 
-  it('the briefing says "STEP n OF N", lights the next step and dims the done ones', () => {
+  it('a started mission shows the next step on its own card, and the list dims the done ones', () => {
     const st = steps();
     const s = markStep(fresh(), MULTI.id, stepKey(st[0]), 'done');
     const html = renderBriefing(s, MULTI.id);
+    expect(html).toMatch(new RegExp(`data-step-card data-step-key="${stepKey(st[1])}"`));
     expect(html).toContain(`STEP 2 OF ${st.length}`);
-    expect(html).toMatch(new RegExp(`data-step-key="${stepKey(st[0])}" class="walk-step is-done"`));
-    expect(html).toMatch(new RegExp(`data-step-key="${stepKey(st[1])}" class="walk-step is-current"`));
-    expect((html.match(/class="walk-step is-current"/g) || []).length).toBe(1);
     expect(html).toContain('data-action="step-done"');
     expect(html).toContain('data-action="step-stuck"');
+    expect(html).toContain('data-action="step-back"');
+    expect(html).toMatch(/<li class="is-done"><button class="walk-check"/);
+    expect((html.match(/<li class="is-current">/g) || []).length).toBe(1);
   });
 
   it('a ticked step counts as started: the briefing offers I DID IT', () => {
@@ -151,7 +152,9 @@ describe('the walkthrough', () => {
   it('when every step is handled it says so', () => {
     let s = fresh();
     for (const st of steps()) s = markStep(s, MULTI.id, stepKey(st), 'done');
-    expect(renderBriefing(s, MULTI.id)).toContain(`ALL ${steps().length} STEPS HANDLED`);
+    const html = renderBriefing(s, MULTI.id);
+    expect(html).toContain(`ALL ${steps().length} STEPS DONE`);
+    expect(html).toMatch(/REPORT BACK/);
   });
 
   it('the mission trail shows where the player is: read, steps, report', () => {

@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.15.0 (2026-11-13): One step at a time
+
+7.14.0 still asked too much at once (Liz: "still hard to use"). Screenshots of a new player's path showed a 4-step mission spread over 8 phone slides, two counters that disagreed ("3 of 8" and "STEP 1 OF 4"), and three buttons that all meant "next" on one screen.
+
+- **The briefing is one short screen** (Short and Simplest): the plain line, Why it matters, Scout's line, "4 steps · about 2 min", See the steps (each with its link), and one **START**. The reading switch, Read it to me and Focus music sit quietly at the bottom.
+- **Then one step at a time:** a big card with the step, its **OPEN** link, its notes folded under it (no more slides of their own), one **DONE**, and Back, Stuck?, Skip and Read it to me. When every step is done: **REPORT BACK**. All steps, Read the briefing again and Finished already? are a tap away.
+- **Full intel** keeps the long briefing and its phone slides.
+- **Focus music** now plays Cultures of the Belt's calm tracks, one after another, from the same portal. It never starts on its own: only a tap on Focus music plays it.
+
 ## 7.14.0 (2026-11-13): Easier to read, easier to follow
 
 Most US adults read at literacy Level 2 or 3, and many lose their place in a task with several steps. This release makes the missions plainer for everyone without talking down to strong readers.
