@@ -77,6 +77,8 @@ describe('device filtering', () => {
     expect(gearTag({ text: 'Android: Settings → Google' })).toEqual({ group: 'phone', option: 'android' });
     expect(gearTag({ text: 'Any tracker: check apps' })).toBeNull();
     expect(gearTag({ text: 'Open Settings' })).toBeNull();
+    // No label, but it starts with the device (seen live: shown to a Garmin player).
+    expect(gearTag({ text: 'Fitbit accounts are now Google accounts, so also review…' })).toEqual({ group: 'tracker', option: 'fitbit' });
   });
 
   it('asks only when a mission has steps for two or more options', () => {
@@ -217,6 +219,7 @@ describe('"I already have this"', () => {
     const html = renderDebrief(markAlready(fresh(), withAlready.id), withAlready.id);
     expect(html).toMatch(new RegExp(`name="q_${question}" value="${value}" checked`));
     expect(html).toContain('Picked because you said you already have this');
+    expect(norm(html)).toContain('Already done 3 Report back');
     expect(renderDebrief(fresh(), withAlready.id)).not.toMatch(new RegExp(`value="${value}" checked`));
   });
 

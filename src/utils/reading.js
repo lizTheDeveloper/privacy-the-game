@@ -96,14 +96,14 @@ export const GEAR_GROUPS = {
   },
 };
 
-// The device a step is for, from its "Label:" opening; null for a step for everyone.
+// The device a step is for, from its "Label:" opening or its first word; null for a step for everyone.
 export function gearTag(step) {
   const t = plainText(step?.text || '');
-  const head = t.match(/^([^:]{1,40}):\s/);
-  if (!head) return null;
+  // "Fitbit: open…" or a step that starts with the device ("Fitbit accounts are now…").
+  const head = t.match(/^([^:]{1,40}):\s/)?.[1] ?? t;
   for (const [group, g] of Object.entries(GEAR_GROUPS)) {
     for (const [option, o] of Object.entries(g.options)) {
-      if (o.match.test(head[1])) return { group, option };
+      if (o.match.test(head)) return { group, option };
     }
   }
   return null;

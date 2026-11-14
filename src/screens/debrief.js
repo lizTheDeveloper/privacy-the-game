@@ -376,7 +376,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
       <a href="#/mission/${mission.id}/briefing" style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); text-decoration: none;">&#8592; ${mission.title}</a>
     </div>
     <div style="flex: 1; padding: 24px;">
-      ${recheck ? '' : missionTrail(completed ? 'filed' : 'report', progressFor(state, mission.id, visibleSteps(mission, state)))}
+      ${recheck ? '' : missionTrail(completed ? 'filed' : 'report', progressFor(state, mission.id, visibleSteps(mission, state)), { already: saidAlready(state, mission.id) && !progressFor(state, mission.id, visibleSteps(mission, state)).handled })}
       <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px;">
         <div style="flex-shrink: 0;">
           ${debriefScout(state, mission, stored)}

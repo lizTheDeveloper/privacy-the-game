@@ -37,11 +37,18 @@ export function fkGrade(text) {
   return 0.39 * (ws.length / sentences) + 11.8 * (syl / ws.length) - 15.59;
 }
 
-// A step that asks for more than one action: "do X, then Y", "X; Y", or two sentences.
-// A menu path (Settings → Privacy → Ads) is one action and is shown as chips instead.
+// A step that asks for a second action: a second sentence, a "; " or a "then" that starts
+// with a doing word ("Open the app. Tap Delete.", "Download it, then revoke the apps").
+// A sentence that only explains is not a second action, and a menu path
+// (Settings → Privacy → Ads) is one action, shown as chips. "Same address as…? Then…" and
+// "If …, then …" are a choice, not a second action.
+const DOING = 'open|tap|click|go|turn|select|set|delete|remove|check|review|enter|type|change|add|find|look|save|download|sign|log|choose|pick|scroll|search|copy|paste|write|print|request|submit|fill|create|confirm|disable|enable|toggle|revoke|end|unlink|archive|hide|clear|pause|use|install|call|email|ask|repeat|visit|filter|read|note|verify|switch';
+const SECOND_ACTION = new RegExp(`(?:[.!?]\\s+|;\\s+|,?\\s+(?:and\\s+)?then\\s+)(?:${DOING})\\b`, 'i');
 export function isCompoundStep(text) {
   const t = plainText(text);
-  return /\b(and then|then)\b/i.test(t) || /;\s/.test(t) || /[a-z0-9)][.!?]\s+[A-Z]/.test(t);
+  if (/^(same address|if |no account|signed in\?)/i.test(t)) return false;
+  // An aside in brackets ("(or on iPhone: Settings → your name, then scroll down)") is not a second step.
+  return SECOND_ACTION.test(t.replace(/\([^)]*\)/g, ''));
 }
 
 // The words of `text` that are not in the allowed set (lower-cased). Quoted on-screen

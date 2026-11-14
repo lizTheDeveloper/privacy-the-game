@@ -105,8 +105,9 @@ export function gearAsk(state, questions) {
 
 // Where the player is in the whole mission: read it, do the steps, report back.
 // stage: 'brief' | 'steps' | 'report' | 'filed'.
-export function missionTrail(stage, p) {
-  const steps = p && p.total > 1 ? `Steps ${p.handled}/${p.total}` : 'Do it';
+// already: the player said "I already have this", so there were no steps to do.
+export function missionTrail(stage, p, { already = false } = {}) {
+  const steps = already ? 'Already done' : p && p.total > 1 ? `Steps ${p.handled}/${p.total}` : 'Do it';
   const items = [
     ['brief', 'Read'],
     ['steps', steps],
