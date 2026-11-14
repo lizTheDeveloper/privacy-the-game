@@ -1,4 +1,6 @@
 import { ACCOUNTS } from './accounts.js';
+import { MISSION_LEADS } from './mission-leads.js';
+import { MISSION_SIMPLE } from './mission-simple.js';
 import { VAULT_CAPITOL_MISSIONS } from './missions-vault-capitol.js';
 import { MISSIONS_SQUARE_ARCHIVES_MARKETPLACE } from './missions-square-archives-marketplace.js';
 import { MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS } from './missions-marketplace-cheap.js';
@@ -1224,7 +1226,17 @@ function withReplacements(list) {
   });
 }
 
-export const MISSIONS = withReplacements([
+// The plain lead line and the Simplest version (utils/reading.js) live beside the missions,
+// so they can be read and checked in one place (tests/readability.test.js).
+function withReadingCopy(list) {
+  for (const m of list) {
+    if (MISSION_LEADS[m.id]) m.lead = MISSION_LEADS[m.id];
+    if (MISSION_SIMPLE[m.id]) m.simple = MISSION_SIMPLE[m.id];
+  }
+  return list;
+}
+
+export const MISSIONS = withReadingCopy(withReplacements([
   ...CHAPTER_1_MISSIONS,
   ...VAULT_CAPITOL_MISSIONS,
   ...MISSIONS_SQUARE_ARCHIVES_MARKETPLACE,
@@ -1238,7 +1250,7 @@ export const MISSIONS = withReplacements([
   ...TRAIL_MISSIONS,
   ...OSINT_SIEVE_MISSIONS,
   ...PASSWORD_MISSIONS,
-]);
+]));
 
 // A mission's district: its account's, or its own for a mission that belongs
 // to no account (the password-manager report).

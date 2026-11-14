@@ -17,6 +17,7 @@ import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, prog
 import { walkStepRow, walkProgress, gearAsk, missionTrail } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
+import { isPlaying } from '../utils/focus-music.js';
 
 function notFound(state) {
   return `
@@ -98,7 +99,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const lore = renderLoreSection(loreData);
 
   // The burst's line needs the password-manager report; until then (no numbers) the mission's own line.
-  const scoutLine = noReset ? noResetScoutLine(state, mission) : (mission.id === PM_BURST_ID && pmBurstBriefingLine(state)) || reopenedLine(state, mission) || mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.';
+  const scoutLine = noReset ? noResetScoutLine(state, mission) : (mission.id === PM_BURST_ID && pmBurstBriefingLine(state)) || reopenedLine(state, mission) || (level === 'simplest' && mission.simple?.scout) || mission.scoutDialog?.briefing || 'Follow the steps above and report back when you\u2019re done.';
   const scoutFeeling = noReset ? 'happy' : undefined;
 
   const header = `
@@ -365,7 +366,7 @@ function whyHtml(why) {
 
 // How much to read, and Read it to me. The first time, Scout asks; after that it is a quiet
 // switch. Nothing about the choice leaves this browser (utils/reading.js).
-function readingTools(state, level, say) {
+function readingTools(state, level, say, playing = isPlaying()) {
   const offer = readingOffer(state);
   const ask = offer
     ? `<div class="read-ask read-offer" data-read-offer="${offer}"><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> <span>${OFFER_LINES[offer].line}</span>
@@ -381,6 +382,7 @@ function readingTools(state, level, say) {
             <div class="read-row">
               <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
               <button class="walk-link" data-action="read-aloud" data-say="${attr}" aria-label="Read the briefing out loud">&#128266; Read it to me</button>
+              <button class="walk-link" data-action="focus-music" aria-pressed="${playing}">&#9835; Focus music${playing ? ' (on)' : ''}</button>
             </div>
           </div>`;
 }

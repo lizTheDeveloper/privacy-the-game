@@ -3,7 +3,8 @@ const CACHE_NAME = 'reclaim-city-v2';
 // API answers (/whoami, collective.json) describe the visitor or tonight's
 // numbers and must always come from the network. Never intercept them.
 function shouldIntercept(url) {
-  return !url.pathname.includes('/api/');
+  // Audio is fetched in ranges (206), which the cache can't store: the browser handles it.
+  return !url.pathname.includes('/api/') && !/\.(mp3|m4a|ogg)$/i.test(url.pathname);
 }
 
 const SHELL = [

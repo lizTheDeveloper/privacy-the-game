@@ -55,6 +55,8 @@ import { renderDebrief, debriefReaction } from './screens/debrief.js';
 import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
 import { speak, stopSpeaking } from './utils/read-aloud.js';
+import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
+import { stepKey } from './utils/reading.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
@@ -317,6 +319,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     if (tracksPageview(cause)) handFolds = new Map();
     applyOpenDesktop(app, isDesktopWide(), handFolds);
     initDecks(app, decksBefore);
+    syncNowPlaying(route);
     // The Big Check's line is drawn once the data is in; then it's seen.
     if (route.screen === 'big-check' && bigCheckScout && brokerDataStatus() === 'ready') {
       const seen = markScoutSeen(state, 'bigCheck');
@@ -1249,6 +1252,11 @@ app.addEventListener('click', async (e) => {
       setState(next);
       renderCurrentRoute();
     }
+  } else if (action === 'focus-music') {
+    // Nothing is sent: the loop is a file in the game, played by the browser.
+    if (isPlaying()) pauseMusic();
+    else await playMusic();
+    renderCurrentRoute();
   } else if (action === 'read-aloud') {
     // The browser's own voice: nothing is sent anywhere.
     if (speak(el.dataset.say)) setState(recordSignal(state, 'readAloud'));
@@ -1769,3 +1777,28 @@ function focusCurrentStep() {
 app.addEventListener('toggle', (e) => {
   if (e.target?.matches?.('details[data-why]') && e.target.open) setState(recordSignal(state, 'why'));
 }, true);
+
+// While focus music plays, the phone's lock screen shows the mission's next step, and its "next"
+// button ticks that step (utils/focus-music.js). Elsewhere in the game it just says Reclaim City.
+function syncNowPlaying(route) {
+  if (!isPlaying()) return;
+  const mission = (route.screen === 'briefing' || route.screen === 'debrief') ? findMission(state, route.params.id) : null;
+  if (!mission) {
+    showNowPlaying({ title: 'Focus music', artist: 'Reclaim City' }, { onPlay: () => playMusic(), onPause: () => pauseMusic() });
+    return;
+  }
+  const steps = visibleSteps(mission, state);
+  const progress = progressFor(state, mission.id, steps);
+  const next = steps[progress.current];
+  const text = nowPlayingText({ missionTitle: mission.title, progress, stepText: next ? next.text.replace(/<[^>]*>/g, '').replace(/→/g, '›') : '' });
+  showNowPlaying(text, {
+    onNext: next ? () => {
+      let s = markStep(state, mission.id, stepKey(next), 'done');
+      if (!s.startedMissions?.[mission.id]) s = markMissionStarted(s, mission.id);
+      setState(s);
+      renderCurrentRoute();
+    } : null,
+    onPlay: () => playMusic(),
+    onPause: () => { pauseMusic(); renderCurrentRoute(); },
+  });
+}

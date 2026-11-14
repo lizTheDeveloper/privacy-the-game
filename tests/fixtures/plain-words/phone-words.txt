@@ -65,3 +65,5 @@ website
 wifi
 yahoo
 2fa
+address
+page

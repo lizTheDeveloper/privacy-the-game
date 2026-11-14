@@ -1,0 +1,6 @@
+{
+  "_why": "A ratchet: these numbers may only go down. Lower them when copy gets plainer (tests/readability.test.js). Measured 2026-11-13 before the literacy campaign: briefing grade median 8.51, p90 11.89; 317 steps that ask for more than one action.",
+  "briefingGradeMedian": 8.51,
+  "briefingGradeP90": 11.89,
+  "compoundSteps": 317
+}
