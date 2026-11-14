@@ -1,6 +1,7 @@
 import { ACCOUNTS } from './accounts.js';
 import { MISSION_LEADS } from './mission-leads.js';
 import { MISSION_SIMPLE } from './mission-simple.js';
+import { stepKey } from '../utils/step-key.js';
 import { VAULT_CAPITOL_MISSIONS } from './missions-vault-capitol.js';
 import { MISSIONS_SQUARE_ARCHIVES_MARKETPLACE } from './missions-square-archives-marketplace.js';
 import { MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS } from './missions-marketplace-cheap.js';
@@ -1238,7 +1239,11 @@ function withReplacements(list) {
 function withReadingCopy(list) {
   for (const m of list) {
     if (MISSION_LEADS[m.id]) m.lead = MISSION_LEADS[m.id];
-    if (MISSION_SIMPLE[m.id]) m.simple = MISSION_SIMPLE[m.id];
+    if (MISSION_SIMPLE[m.id]) {
+      m.simple = MISSION_SIMPLE[m.id];
+      // A Simplest step that stands for one of the mission's steps shares its tick.
+      for (const st of m.simple.steps) if (Number.isInteger(st.of) && m.steps[st.of]) st.key = stepKey(m.steps[st.of]);
+    }
   }
   return list;
 }

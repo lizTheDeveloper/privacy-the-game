@@ -135,38 +135,36 @@ export function setGear(state, group, value) {
 
 // --- The steps ---------------------------------------------------------------------------
 
-// A step's key: from its words, so a saved tick survives a step moving, and a step whose
-// words change starts unticked (it may now ask for something else).
-export function stepKey(step) {
-  const t = plainText(step?.text || '');
-  let h = 5381;
-  for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
-  return h.toString(36);
-}
+export { stepKey } from './step-key.js';
+import { stepKey } from './step-key.js';
 
 // The steps this player sees, in order: the Simplest ones where the mission has them, minus
 // steps for devices the player said they don't have.
 export function visibleSteps(mission, state, level = readLevel(state)) {
   const all = level === 'simplest' && mission.simple?.steps?.length ? mission.simple.steps : missionSteps(mission, state) || [];
-  const asked = new Set(gearQuestions(all).map((q) => q.group));
+  const asked = Object.fromEntries(gearQuestions(all).map((q) => [q.group, q.options]));
   return all.filter((st) => {
     const tag = gearTag(st);
-    if (!tag || !asked.has(tag.group)) return true;
+    if (!tag || !asked[tag.group]) return true;
     const choice = gearChoice(state, tag.group);
-    return !choice || choice === 'all' || choice === tag.option;
+    // A remembered answer this mission has no steps for (an Apple Watch, here only Fitbit and
+    // Garmin): show them all rather than none.
+    if (!choice || choice === 'all' || !asked[tag.group].includes(choice)) return true;
+    return choice === tag.option;
   });
 }
 
 // --- Progress ----------------------------------------------------------------------------
 
 export function stepMarks(state, missionId) {
-  return state?.stepProgress?.[missionId]?.marks || {};
+  const marks = state?.stepProgress?.[missionId]?.marks;
+  return marks && typeof marks === 'object' ? marks : {};
 }
 
 // mark: 'done', 'skipped', or null to clear.
 export function markStep(state, missionId, key, mark, now = new Date().toISOString()) {
   const prev = state.stepProgress?.[missionId] || {};
-  const marks = { ...prev.marks };
+  const marks = { ...stepMarks(state, missionId) };
   if (mark === 'done' || mark === 'skipped') marks[key] = mark;
   else delete marks[key];
   return { ...state, stepProgress: { ...state.stepProgress, [missionId]: { ...prev, marks, at: now } } };
@@ -197,7 +195,8 @@ export function progressLabel(p) {
 // The missions the player has ticked at least one step of and not filed, newest first.
 export function missionsInProgress(state, isFiled) {
   return Object.entries(state?.stepProgress || {})
-    .filter(([id, p]) => Object.keys(p.marks || {}).length && !isFiled(state.missions?.[id]))
+    .filter(([id, p]) => p && typeof p === 'object' && p.marks && typeof p.marks === 'object'
+      && Object.keys(p.marks).length && !isFiled(state.missions?.[id]))
     .sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)))
     .map(([id]) => id);
 }

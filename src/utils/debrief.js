@@ -179,7 +179,8 @@ function pmBurstSteps(mission, state) {
       && !isMissionDone(state.missions?.[`${id}-fortify-password`]))
     .map((id) => ACCOUNTS[id].name);
   if (inCity.length) {
-    steps.push({ text: `Start with the ones that are in the city too: ${inCity.join(', ')} — and file each one’s Password Reset mission as you go` });
+    // Its words change as resets are filed: a fixed key keeps its tick (utils/step-key.js).
+    steps.push({ key: 'pm-burst-in-city', text: `Start with the ones that are in the city too: ${inCity.join(', ')} — and file each one’s Password Reset mission as you go` });
   }
   steps.push({ text: 'Change the next 3, in this order: 1) email accounts, 2) bank, payment and money apps, 3) anything you use to sign in to other things (Apple, Google, Microsoft or Facebook logins), 4) shopping with saved cards, 5) social, 6) the rest' });
   steps.push({ text: 'Within your manager, do compromised or leaked passwords before reused ones, and reused before weak' });

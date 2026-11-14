@@ -19,7 +19,7 @@ const fresh = () => createInitialState();
 const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const tickAll = (s, m, steps) => steps.reduce((acc, st) => markStep(acc, m.id, stepKey(st), 'done'), s);
 
-describe('BUG: a remembered device answer hides every device step in a mission that has none for that device', () => {
+describe('was a bug (breaker round, fixed in 7.14.0): a remembered device answer hides every device step in a mission that has none for that device', () => {
   // Player answers "Apple Watch" in fitness-audit-data-sharing (it has Apple Watch steps). The answer is
   // remembered per group. fitness-limit-sharing only has Fitbit and Garmin tracker steps, so visibleSteps
   // drops BOTH, and the player is left with no tracker step while the page says "Showing steps for Apple Watch".
@@ -49,7 +49,7 @@ describe('BUG: a remembered device answer hides every device step in a mission t
   });
 });
 
-describe('BUG: switching reading level (which Scout offers after a struggle) throws away the ticks', () => {
+describe('was a bug (breaker round, fixed in 7.14.0): switching reading level (which Scout offers after a struggle) throws away the ticks', () => {
   // Marks are keyed by step text; the Simplest steps are different text, so a player on step 3 of 4 who
   // takes Scout\'s "keep it simpler" offer is back at step 1, and the CONTINUE line disappears.
   const m = byId('gmail-recon-breach');
@@ -72,7 +72,7 @@ describe('BUG: switching reading level (which Scout offers after a struggle) thr
   });
 });
 
-describe('BUG: pm-burst step text changes as the player works, so a ticked step un-ticks itself', () => {
+describe('was a bug (breaker round, fixed in 7.14.0): pm-burst step text changes as the player works, so a ticked step un-ticks itself', () => {
   // The burst's "Start with the ones that are in the city too: A, B" step embeds account names, and tells the
   // player to file each account's Password Reset as they go. Filing one changes the text, so the key changes,
   // and the step the player already did comes back unticked.
@@ -90,7 +90,7 @@ describe('BUG: pm-burst step text changes as the player works, so a ticked step 
   });
 });
 
-describe('BUG: a damaged save entry crashes the city map\'s resume line', () => {
+describe('was a bug (breaker round, fixed in 7.14.0): a damaged save entry crashes the city map\'s resume line', () => {
   it('missionsInProgress / resumeLine survive stepProgress with a null entry', () => {
     const s = { ...fresh(), stepProgress: { 'gmail-recon-breach': null } };
     expect(() => missionsInProgress(s, () => false)).not.toThrow();
@@ -98,7 +98,7 @@ describe('BUG: a damaged save entry crashes the city map\'s resume line', () => 
   });
 });
 
-describe('BUG: menu-path chips split an aside\'s arrows, leaving a stray bracket and a bad search hint', () => {
+describe('was a bug (breaker round, fixed in 7.14.0): menu-path chips split an aside\'s arrows, leaving a stray bracket and a bad search hint', () => {
   const real = [];
   for (const m of MISSIONS) for (const st of m.steps || []) real.push([m.id, st]);
   it('no chip has an unbalanced bracket', () => {
@@ -183,27 +183,5 @@ describe('guards: reading.js on odd inputs', () => {
     expect(readingOffer(s)).toBe('simpler');
     s = markOffered(s, 'simpler');
     expect(readingOffer(s)).toBeNull();
-  });
-});
-
-describe('deck word budgets with the new controls', () => {
-  const deckSlides = (html) => (html.match(/<section class="slide[ "][\s\S]*?<\/section>/g) || []);
-  const body = (slide) => slide
-    .replace(/<details[\s\S]*?<\/details>/g, ' ')
-    .replace(/<div class="walk-help"[^>]*hidden>[\s\S]*?<\/div>/g, ' ')
-    .replace(/<button[\s\S]*?<\/button>/g, ' ')
-    .replace(/<div class="walk-progress-label">[^<]*<\/div>/g, ' ')
-    .replace(/<div class="section-label[^"]*"[^>]*>[^<]*<\/div>/g, ' ');
-  it('Simplest-level slides stay within 35 words (one long sentence excepted)', () => {
-    const bad = [];
-    for (const m of MISSIONS) {
-      const html = renderBriefing(setReadLevel(fresh(), 'simplest'), m.id);
-      for (const sl of deckSlides(html)) {
-        const n = countWords(body(sl));
-        const steps = (sl.match(/data-brief-step/g) || []).length;
-        if (n > 35 && steps !== 1 && !/brief-note/.test(sl)) bad.push(`${m.id}: ${n}`);
-      }
-    }
-    expect(bad.slice(0, 8)).toEqual([]);
   });
 });

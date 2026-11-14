@@ -75,3 +75,16 @@ export const MISSION_SIMPLE = {
     scout: '"A password is one lock. The second step is a second lock. Someone with your password still can’t get in."',
   },
 };
+
+// Which of the mission's own steps each Simplest step stands for (null: a step of its own), so
+// a tick made at one reading level still counts at the other (missions.js gives them one key).
+const SAME_AS = {
+  'yahoo-recon-breach': [0, 1, 2, null, 3],
+  'google-recon-breach': [0, 1, 2, null, 3, 4],
+};
+for (const [id, s] of Object.entries(MISSION_SIMPLE)) {
+  const map = SAME_AS[id] || s.steps.map((_, i) => i);
+  s.steps.forEach((st, i) => {
+    if (map[i] !== null && map[i] !== undefined) st.of = map[i];
+  });
+}

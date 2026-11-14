@@ -90,6 +90,8 @@ describe('Simplest', () => {
       expect(m.simple, id).toBe(s);
       const urls = new Set(s.steps.map((st) => st.url).filter(Boolean));
       for (const st of m.steps) if (st.url) expect(urls.has(st.url), `${id} lost ${st.url}`).toBe(true);
+      // A Simplest step standing for one of the mission's steps keeps that step's link.
+      for (const st of s.steps) if (Number.isInteger(st.of) && m.steps[st.of].url) expect(st.url, `${id}: ${st.text}`).toBe(m.steps[st.of].url);
     }
   });
 

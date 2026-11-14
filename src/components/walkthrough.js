@@ -11,13 +11,32 @@ const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').rep
 // Only plain text is split (a step with markup in it is left as it is).
 export function pathChips(text) {
   if (!text.includes('→') || /</.test(text)) return null;
-  const parts = text.split(/\s*→\s*/);
+  const parts = splitOutsideBrackets(text);
   if (parts.length < 2) return null;
   const [lead, ...rest] = parts;
-  // An aside's arrows "(or on iPhone: Settings → your name)" stay as words.
-  if ((lead.match(/\(/g) || []).length > (lead.match(/\)/g) || []).length) return null;
   const chips = rest.map((p, i) => `<span class="walk-chip" data-path-chip="${i}">${p}</span>`).join('<span class="walk-chip-sep"> → </span>');
   return { lead, chips, last: rest.at(-1) };
+}
+
+// Split at the arrows that aren't inside brackets: an aside's arrows ("(iOS 18 and later:
+// Settings → Apps → Health)") stay as words inside the chip they belong to.
+function splitOutsideBrackets(text) {
+  const parts = [];
+  let depth = 0;
+  let cur = '';
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '(') depth++;
+    if (c === ')') depth = Math.max(0, depth - 1);
+    if (c === '→' && depth === 0) {
+      parts.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += c;
+  }
+  parts.push(cur.trim());
+  return parts;
 }
 
 // The words "Stuck?" opens for a step: the step's own help, else what usually helps.
@@ -27,7 +46,7 @@ export function stuckHelp(step) {
   const path = pathChips(step.text);
   if (path) {
     // The place to search for: the last short stop on the path ("Ads", not "turn off anything you don't use").
-    const stops = step.text.split(/\s*→\s*/).slice(1).map((s) => plainText(s));
+    const stops = splitOutsideBrackets(step.text).slice(1).map((s) => plainText(s));
     const target = [...stops].reverse().find((s) => s.split(/\s+/).length <= 4) || '';
     lines.push(target
       ? `Can’t find “${target}”? Menus move around between phones and updates. Look for a search box at the top of the app or of Settings, and type “${target}”.`
@@ -91,8 +110,12 @@ export function gearAsk(state, questions) {
     const g = GEAR_GROUPS[group];
     const choice = gearChoice(state, group);
     if (choice) {
+      const change = `<button class="walk-link" data-action="gear-reset" data-group="${group}">Change</button>`;
+      if (choice !== 'all' && !options.includes(choice)) {
+        return `<div class="walk-gear-set" data-gear-set="${group}">No steps here just for <strong>${g.options[choice]?.label}</strong>, so all of them are shown. ${change}</div>`;
+      }
       const shown = choice === 'all' ? 'all devices' : g.options[choice]?.label;
-      return `<div class="walk-gear-set" data-gear-set="${group}">Showing steps for <strong>${shown}</strong>. <button class="walk-link" data-action="gear-reset" data-group="${group}">Change</button></div>`;
+      return `<div class="walk-gear-set" data-gear-set="${group}">Showing steps for <strong>${shown}</strong>. ${change}</div>`;
     }
     const chips = options.map((o) => `<button class="walk-gear-chip" data-action="gear-pick" data-group="${group}" data-value="${o}">${g.options[o].label}</button>`).join('');
     return `
