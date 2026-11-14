@@ -24,7 +24,7 @@
 //  - FTC, Data Brokers (May 2014): brokers buy transaction-level purchase data
 //    from retailers (what, how much, when, how you paid); one models the
 //    purchase history of 190 million consumers from 2,600+ merchants.
-import { pwQuestion, activityQuestion, pmStep, reportInApp, scout, recon } from './missions-recon-accounts.js';
+import { pwQuestion, activityQuestion, pmSteps, reportInApp, scout, recon } from './missions-recon-accounts.js';
 
 const PASSWORD_DEBRIEF = [
   {
@@ -83,8 +83,9 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     title: 'Account Recon: Temu',
     briefing: 'Temu’s own privacy policy says it shares your personal information for targeted advertising, and that this “may be considered a ‘sale’” under US state privacy laws. It also lists “data providers” among the places it gets information about you. Arkansas, Nebraska and Kentucky have sued Temu’s parent companies, alleging the app collects far more from your phone than a store needs. Temu denies it. Start with what you can see: the password, the orders, and what the app can reach.',
     steps: [
-      pmStep('Temu'),
-      { text: 'In the Temu app or on its website, open Your orders. Anything you didn’t order? Then check your saved addresses and payment methods.' },
+      ...pmSteps('Temu'),
+      { text: 'In the Temu app or on its website, open Your orders. Anything you didn’t order?' },
+      { text: 'Check your saved addresses and payment methods.' },
       PERMISSIONS_STEP('Temu'),
     ],
     debriefQs: [
@@ -128,7 +129,8 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     briefing: 'Temu shares your data with advertising partners so its ads can follow you, and its own policy says that may count as selling it. You can turn that off. While you’re there, cut the marketing notifications that keep pulling you back in. If you don’t really shop there anymore, the strongest move is deleting the account: data that isn’t there can’t be shared.',
     steps: [
       { text: 'Open Temu’s personalized advertising page while signed in', url: 'https://www.temu.com/bgp_personalized_advertising.html' },
-      { text: 'Switch off “Allow Temu to share my data to personalize my ad experience.” Not signed in? Turn it off in every browser and on every device you use with Temu.' },
+      { text: 'Switch off “Allow Temu to share my data to personalize my ad experience.”' },
+      { text: 'Not signed in? Turn it off in every browser and on every device you use with Temu.' },
       { text: 'In the app’s settings, open Notifications and turn off the promotional ones.' },
       { text: 'Not a regular shopper? Temu’s policy says you can delete your account from the app’s Settings. Do that instead of keeping it “just in case.”' },
       { text: 'Read what Temu says it collects and who it shares it with', url: 'https://www.temu.com/privacy-and-cookie-policy.html' },
@@ -152,8 +154,9 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     title: 'Account Recon: Shein',
     briefing: 'In 2018 attackers took names, email addresses, hashed passwords and card data from 39 million SHEIN accounts. The company said 6.42 million people were affected and that it was notifying all of them. New York’s Attorney General found more than 32.5 million accounts were never told. The company paid $1.9 million in 2022. If you had Shein in 2018, the password from back then is out there. Check whether you’re still using it.',
     steps: [
-      pmStep('Shein'),
-      { text: 'In the Shein app or on its website, open My Orders. Anything you didn’t order? Then check your address book and saved payment methods.' },
+      ...pmSteps('Shein'),
+      { text: 'In the Shein app or on its website, open My Orders. Anything you didn’t order?' },
+      { text: 'Check your address book and saved payment methods.' },
       PERMISSIONS_STEP('SHEIN'),
     ],
     debriefQs: [
@@ -196,7 +199,9 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     title: 'The Real Price Tag: Shein',
     briefing: 'Shein’s US privacy notice offers a “Do Not Sell or Share My Personal Information” opt-out, which tells you sharing for ads is happening unless you use it. In 2025 France fined Shein €150 million for setting advertising cookies before visitors agreed, and still setting them after they clicked “Refuse all.” So use the opt-out, then ask Shein what it actually holds on you.',
     steps: [
-      { text: 'On Shein’s website, scroll to the very bottom and click “Do Not Sell or Share My Personal Information” (it may say “Manage Cookies”). In the app it’s in the Settings menu. Turn the sharing off.' },
+      { text: 'On Shein’s website, scroll to the very bottom' },
+      { text: 'Click “Do Not Sell or Share My Personal Information” (it may say “Manage Cookies”).' },
+      { text: 'In the app it’s in the Settings menu. Turn the sharing off.' },
       { text: 'Open Shein’s Privacy Center while signed in, and request a copy of your data. Seeing the list is the point.', url: 'https://us.shein.com/user/privacy-center' },
       { text: 'Not a regular shopper? Use the same Privacy Center to ask Shein to delete your account and data.' },
       { text: 'Read where Shein says your data comes from and who gets it', url: 'https://us.shein.com/Consumer-Privacy-Notice-s-101.html' },

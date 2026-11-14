@@ -2,6 +2,21 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.14.0 (2026-11-13): Easier to read, easier to follow
+
+Most US adults read at literacy Level 2 or 3, and many lose their place in a task with several steps. This release makes the missions plainer for everyone without talking down to strong readers.
+
+- **Every mission opens with one plain line** saying what it does for you ("Find out which apps can read your fitness tracker info."). The full briefing is one tap away under **Why it matters**. Three reading levels: **Short** (the default), **Full intel** (the briefing as before) and **Simplest**. Scout asks once; the switch stays on every briefing.
+- **Simplest** is written with the ten hundred most used English words (the Up-Goer Five list), plus the words on your own phone screen (password, app, settings…), account names and on-screen labels in quotes. It covers the email leak checks, the Gmail sign-in check and Gmail two-step sign-in, the missions new players meet first.
+- **Step by step.** Tick each step off, or skip it. The briefing says **STEP 2 OF 5** with a bar, and lights the next step with **DONE**, **Stuck?** and **Read it to me**. Ticks are saved, so after a trip to your phone's Settings you come back to where you were. **GO DO IT** on a mission with several steps now keeps the steps on screen; it used to jump to the report, which never showed steps 2 to 5.
+- **Where you are in a mission**: Read › Steps n/N › Report back, on the briefing and the report. Mission rows say **CONTINUE** and **Step 3 of 5**, and Scout on the city map offers to pick up where you left off.
+- **Only your steps.** The first mission with steps for different phones, trackers, phone companies, computers or cameras asks which you have, then shows only those (Show all is always there, and Change).
+- **Menu paths as chips** (Settings › Health › Data Access). **Stuck?** names the menu item to search for and says skipping is fine.
+- **I ALREADY HAVE THIS** on fortify and reclaim missions (and any with an "already" answer) goes straight to the report with that answer picked.
+- **One action per step**: 71 steps that asked for two or more things are split (same words, same order), and the password manager check is two steps. A readability ratchet in the tests keeps briefings' reading grade and multi-action steps from creeping back up.
+- **Read it to me** uses your browser's own voice. **Focus music** (off until you tap it) plays a calm loop; while it plays, your phone's lock screen shows the step you're on, and its next button ticks it.
+- **All of this stays on your device.** Your reading level, your devices, your ticks, skips, Stuck? and Read it to me are never sent; Scout uses them only to offer, once, fewer words or the full intel. The one thing sent is the existing mission-started, the first time a tick starts a mission.
+
 ## 7.13.3 (2026-11-06): Test sweep
 
 - **Privacy promises are tested by what the app does, not by what its source says.** A new harness (`tests/helpers/app-harness.mjs`) boots the real `app.js` in node and watches every way out: Umami, `fetch` and `sendBeacon`. The password manager's per-category counts, re-checks, saints' candles, bank notes, custom accounts' missions, where you live, the sky ladder and `api/whoami` with sharing off are now checked through the real click handlers. The source greps they replace passed with a leak routed through a renamed helper, and with `api/whoami` sent while sharing was off.

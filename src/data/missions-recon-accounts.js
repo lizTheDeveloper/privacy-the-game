@@ -77,7 +77,11 @@ function changedSinceQuestion(service, since) {
   };
 }
 
-export const pmStep = (what) => ({ text: `Open your password manager’s security report and search for ${what}. Note whether it says leaked, compromised or reused.` });
+// The password manager check, one action a step: search, then read what it says.
+export const pmSteps = (what) => [
+  { text: `Open your password manager’s security report and search for ${what}` },
+  { text: 'Note whether it says leaked, compromised or reused.' },
+];
 
 // Scout, in his understated voice. Every line is true whatever else the
 // player answered: the line shown is the most severe answer's (scoutBySeverity).
@@ -114,7 +118,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password Recon: Facebook',
     briefing: 'Facebook’s best-known leak is a 2021 dataset of 509 million phone numbers tied to names. It was matched by phone number, so an email search almost never finds it, and Have I Been Pwned’s website no longer searches phone numbers. That dataset is why Facebook-themed scam texts work. Whether your Facebook password is safe is a question for your password manager.',
     steps: [
-      pmStep('Facebook'),
+      ...pmSteps('Facebook'),
       { text: 'In your Have I Been Pwned results from The Master Keys, look for “Facebook Marketplace” (2023) or “Facebook” (the 2021 scrape). Most people who were in the scrape won’t see it there, because it was matched by phone number.' },
       { text: 'Open Facebook → Accounts Center → Password and security → Security Checkup, and follow it.', url: 'https://accountscenter.facebook.com/password_and_security' },
     ],
@@ -138,10 +142,13 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Bank',
     briefing: 'The breach check in The Master Keys looked at your email address. This one looks at the bank itself: whether its password is leaked or reused, and whether anything moved that you didn’t move. A compromised bank login is not a nuisance. It is money, and getting it back takes weeks.',
     steps: [
-      pmStep('your bank'),
-      { text: 'Go to your bank’s site or app yourself. Type the address or open the app; don’t use a link from an email or text.' },
-      { text: 'Open recent transactions for the last 60 days. Look for small test charges and transfers you didn’t make. (In the US, Regulation E gives you 60 days from the statement to report unauthorized electronic transfers.)' },
-      { text: 'Open payees, Zelle recipients and linked external accounts. Delete anyone you don’t know.' },
+      ...pmSteps('your bank'),
+      { text: 'Go to your bank’s site or app yourself.' },
+      { text: 'Type the address or open the app; don’t use a link from an email or text.' },
+      { text: 'Open recent transactions for the last 60 days.' },
+      { text: 'Look for small test charges and transfers you didn’t make. (In the US, Regulation E gives you 60 days from the statement to report unauthorized electronic transfers.)' },
+      { text: 'Open payees, Zelle recipients and linked external accounts.' },
+      { text: 'Delete anyone you don’t know.' },
       { text: 'If your bank has a sign-in history or devices page, open it too. Many banks show trusted devices or alerts instead of a history.' },
     ],
     debriefQs: [
@@ -159,8 +166,9 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Credit Card',
     briefing: 'Your card portal holds your card number, billing address and credit limit. The breach check in The Master Keys looked at your email address, not this account. This one checks the card account itself: its password, and the charges, people and addresses on it.',
     steps: [
-      pmStep('your card issuer'),
-      { text: 'In the card issuer’s app or site, open the last 60 days of charges. Look for small “test” charges ($1–$5) from merchants you don’t know.' },
+      ...pmSteps('your card issuer'),
+      { text: 'In the card issuer’s app or site, open the last 60 days of charges.' },
+      { text: 'Look for small “test” charges ($1–$5) from merchants you don’t know.' },
       { text: 'Check authorized users, and the cards-on-file or recurring merchants list if your issuer shows one.' },
       { text: 'Check that the mailing address and phone number on file are yours.' },
     ],
@@ -179,7 +187,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: PayPal',
     briefing: 'In late 2022 about 35,000 PayPal accounts were accessed with passwords reused from other sites. That’s the risk here: not a PayPal breach, but a password that also lives somewhere else. PayPal connects to your bank and cards, so check the password and what the account has been doing.',
     steps: [
-      pmStep('PayPal'),
+      ...pmSteps('PayPal'),
       { text: 'On the PayPal website: Settings → Security → Manage your logins. Remove devices you don’t know. (The PayPal app doesn’t have this page.)', url: 'https://www.paypal.com/myaccount/security/devices/manage' },
       { text: 'Settings → Payments → Automatic payments (some accounts call it “Subscriptions and saved businesses”). Cancel any you don’t recognize.' },
       { text: 'Activity: look through the last 60 days.' },
@@ -199,7 +207,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Venmo',
     briefing: 'Venmo connects to your bank account or debit card, and sending money is a tap. The breach check in The Master Keys looked at your email address. This one checks Venmo itself: its password, the devices it remembers, and the payments.',
     steps: [
-      pmStep('Venmo'),
+      ...pmSteps('Venmo'),
       { text: 'In your Venmo settings, open Remembered devices and remove any you don’t recognize.' },
       { text: 'Look through your transactions for anything you didn’t send or request.' },
       { text: 'While you’re in Venmo’s privacy settings, note who can see your payments and your friends list. The privacy mission deals with it.' },
@@ -219,7 +227,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Cash App',
     briefing: 'In 2022 a former employee of Block, Cash App’s parent company, downloaded data on 8.2 million users. That breach isn’t in Have I Been Pwned’s list; Block notified affected customers directly. Your email check can’t tell you about it. The account can: its devices and its activity.',
     steps: [
-      pmStep('Cash App'),
+      ...pmSteps('Cash App'),
       { text: 'In Cash App, tap your profile icon → Your Devices. If any device isn’t yours, tap Log out all other devices.' },
       { text: 'Open the Activity tab and look through the last 60 days.' },
     ],
@@ -238,9 +246,10 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Crypto Exchange',
     briefing: 'Crypto sent from your account is usually gone for good: there are no chargebacks. The breach check in The Master Keys looked at your email address. This one checks the exchange itself: its password, who is signed in, where withdrawals can go, and which API keys exist.',
     steps: [
-      pmStep('your exchange'),
+      ...pmSteps('your exchange'),
       { text: 'Look at who is signed in. Coinbase: the account activity page lists Active sessions and Confirmed devices. Kraken: your name → Security → Overview → Active sessions. Other exchanges: look in the security settings.' },
-      { text: 'Check the withdrawal-address allowlist and API keys. Delete any you didn’t create.' },
+      { text: 'Check the withdrawal-address allowlist and API keys.' },
+      { text: 'Delete any you didn’t create.' },
       { text: 'Look through your transaction history for sends you didn’t make.' },
     ],
     debriefQs: [
@@ -258,7 +267,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password & Activity Recon: Investment Account',
     briefing: 'Your brokerage or retirement account may hold more than your bank account, behind a password you set at signup. Account takeovers there can work by changing the beneficiary, the linked bank or the mailing address. This check looks at those, and at the password.',
     steps: [
-      pmStep('your brokerage'),
+      ...pmSteps('your brokerage'),
       { text: 'Open your brokerage’s own security page and look at recent logins or devices. Schwab: Profile → Security Settings → Previous Login. Robinhood: Security and privacy → Devices. Vanguard app: Profile → Login & security / Device management. Fidelity: Security Center.' },
       { text: 'Check beneficiaries, linked bank accounts and the mailing address.' },
       { text: 'Robinhood customers: your Have I Been Pwned results may show “Robinhood” (2021). Robinhood said that breach exposed email addresses, and names for some customers.' },
@@ -280,10 +289,11 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Claims Recon: Healthcare',
     briefing: 'Medical identity theft shows up as care you never got: a visit, a prescription, equipment billed in your name. Your insurer’s claims list is where it appears. In the US, providers and insurers must report breaches affecting 500 or more people to HHS, which lists them publicly.',
     steps: [
-      { text: 'Sign in to your insurer’s site or app (not a patient portal). Open claims or Explanation of Benefits (EOBs) for the last 12 months.' },
+      { text: 'Sign in to your insurer’s site or app (not a patient portal).' },
+      { text: 'Open claims or Explanation of Benefits (EOBs) for the last 12 months.' },
       { text: 'Look for visits, prescriptions or equipment you never got.' },
       { text: 'Search your insurer and your main hospital or clinic on the HHS breach portal.', url: 'https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf' },
-      pmStep('your insurer or patient portal'),
+      ...pmSteps('your insurer or patient portal'),
     ],
     debriefQs: [
       activityQuestion('Any claim or prescription you didn’t get?'),
@@ -314,7 +324,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'Have I Been Pwned lists one Instagram breach: “Instagram”, a January 2026 scrape of 6.2 million email addresses, with phone numbers and usernames. It had no passwords. So the check here is whether your address is on that list, and what your password manager says about the password.',
     steps: [
       { text: 'In your Have I Been Pwned results from The Master Keys, look for “Instagram”.' },
-      pmStep('Instagram'),
+      ...pmSteps('Instagram'),
     ],
     debriefQs: [
       serviceQuestion('Is “Instagram” in your results?', false),
@@ -335,7 +345,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'Have I Been Pwned lists two Twitter breaches: “Twitter (200M)”, a 2021 scrape of email addresses, and “Twitter”, from January 2022, with email addresses and phone numbers. Neither included passwords. They tie your address to your account, which is what phishing needs.',
     steps: [
       { text: 'In your Have I Been Pwned results from The Master Keys, look for “Twitter (200M)” or “Twitter”.' },
-      pmStep('X or Twitter'),
+      ...pmSteps('X or Twitter'),
     ],
     debriefQs: [
       serviceQuestion('Is “Twitter (200M)” or “Twitter” in your results?', false),
@@ -356,7 +366,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'LinkedIn’s 2012 breach, listed on Have I Been Pwned as “LinkedIn”, included 164 million passwords, stored as unsalted SHA-1 hashes, which are easy to crack. “LinkedIn Scraped Data (2021)” is a different list with no passwords in it.',
     steps: [
       { text: 'In your Have I Been Pwned results from The Master Keys, look for “LinkedIn” (2012). “LinkedIn Scraped Data (2021)” had no passwords, so it doesn’t count here.' },
-      pmStep('LinkedIn'),
+      ...pmSteps('LinkedIn'),
     ],
     debriefQs: [
       serviceQuestion('Is “LinkedIn” (the 2012 breach) in your results?', true),
@@ -377,7 +387,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password Recon: Discord',
     briefing: 'Discord isn’t in Have I Been Pwned’s breach list. The real risks are a reused password and a stolen login token, which is why the token mission exists. This one is about the password.',
     steps: [
-      pmStep('Discord'),
+      ...pmSteps('Discord'),
       { text: 'Discord → User Settings → Authorized Apps. Deauthorize anything you don’t use.' },
     ],
     debriefQs: [pwQuestion('Discord')],
@@ -390,8 +400,9 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Password Recon: Reddit',
     briefing: 'Reddit’s 2018 breach (a backup of early accounts from 2007) isn’t in Have I Been Pwned’s list, so an email check says nothing about it. Your password manager can say whether the Reddit password is leaked or reused, and resetting the password signs out your other sessions.',
     steps: [
-      pmStep('Reddit'),
-      { text: 'Reddit’s help describes an account activity page that shows recent IP addresses and can log out all your sessions. Reddit doesn’t give the menu path, so look for it in your account settings. Check the email address on the account too.' },
+      ...pmSteps('Reddit'),
+      { text: 'Reddit’s help describes an account activity page that shows recent IP addresses and can log out all your sessions. Reddit doesn’t give the menu path, so look for it in your account settings.' },
+      { text: 'Check the email address on the account too.' },
     ],
     debriefQs: [
       pwQuestion('Reddit'),
@@ -411,8 +422,10 @@ export const RECON_ACCOUNT_MISSIONS = [
     briefing: 'Dropbox’s 2012 breach, listed on Have I Been Pwned as “Dropbox”, included 68 million passwords stored as hashes. Dropbox made affected users who hadn’t changed their password since 2012 reset it in 2016. A password from that era that you reused anywhere else is still a risk.',
     steps: [
       { text: 'In your Have I Been Pwned results from The Master Keys, look for “Dropbox”.' },
-      pmStep('Dropbox'),
-      { text: 'Dropbox → Settings → Security. Review web browsers, devices and linked apps. Remove anything you don’t know.' },
+      ...pmSteps('Dropbox'),
+      { text: 'Dropbox → Settings → Security.' },
+      { text: 'Review web browsers, devices and linked apps.' },
+      { text: 'Remove anything you don’t know.' },
     ],
     debriefQs: [
       serviceQuestion('Is “Dropbox” in your results?', true),
@@ -435,10 +448,11 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Account Recon: Amazon',
     briefing: 'Amazon isn’t in Have I Been Pwned’s breach list, so the email check says nothing about it. A taken-over Amazon account shows itself in orders, addresses and saved cards. That’s what this checks, along with the password.',
     steps: [
-      pmStep('Amazon'),
+      ...pmSteps('Amazon'),
       { text: 'Open Your Orders. Anything you didn’t order?', url: 'https://www.amazon.com/your-orders/orders' },
       { text: 'In Your Account, check your saved addresses and Your Payments. Any address or card you don’t know?' },
-      { text: 'Open Login & security. Check that the email and phone number are yours.' },
+      { text: 'Open Login & security.' },
+      { text: 'Check that the email and phone number are yours.' },
     ],
     debriefQs: [
       pwQuestion('Amazon'),
@@ -455,7 +469,7 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Account Recon: eBay',
     briefing: 'eBay’s 2014 breach (145 million names, addresses, birth dates and encrypted passwords) is real, but it isn’t in Have I Been Pwned’s list. If you had eBay before 2014, treat that data as out there. This checks the password and the account’s own activity.',
     steps: [
-      pmStep('eBay'),
+      ...pmSteps('eBay'),
       { text: 'In eBay’s Sign in and security settings, review any devices or activity it lists, and anything you don’t recognize.' },
       { text: 'Check your purchase history and addresses.' },
     ],
@@ -474,8 +488,10 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Account Recon: Uber',
     briefing: 'Uber’s 2016 breach (57 million accounts; the license numbers taken were drivers’) isn’t in Have I Been Pwned’s list. A taken-over rider account shows up as trips and orders you didn’t take, paid with your card.',
     steps: [
-      pmStep('Uber'),
-      { text: 'Sign in at riders.uber.com and look through your trips. Any you didn’t take? Check Uber Eats orders too.', url: 'https://riders.uber.com' },
+      ...pmSteps('Uber'),
+      { text: 'Sign in at riders.uber.com', url: 'https://riders.uber.com' },
+      { text: 'Look through your trips. Any you didn’t take?' },
+      { text: 'Check Uber Eats orders too.' },
       { text: 'Open Wallet. Any payment method you don’t know?' },
     ],
     debriefQs: [

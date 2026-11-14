@@ -9,6 +9,7 @@ import { ACCOUNTS } from '../src/data/accounts.js';
 import { DISTRICT_DIALOGUE } from '../src/data/dialogue.js';
 import { missionDistrict } from '../src/data/missions.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../src/utils/bursts.js';
+import { setReadLevel } from '../src/utils/reading.js';
 
 const state = createInitialState();
 // The page as read in order, without the "More intel" summary.
@@ -17,9 +18,13 @@ const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim
 const deckOf = (html) => html.match(/<div class="deck[^"]*"[^>]*data-deck[\s\S]*?<\/div><div class="deck-controls"/)?.[0] ?? '';
 const slidesOf = (html) => deckOf(html).split(/<section class="slide[ "]/).slice(1).map((s) => s.slice(s.indexOf('>') + 1, s.lastIndexOf('</section>')));
 
-// A slide's body: its words minus labels, step numbers and text behind a closed <details>.
+// A slide's body: its words minus labels, step numbers, text behind a closed <details>, the
+// walkthrough's buttons and its closed "Stuck?" help (components/walkthrough.js).
 const body = (slide) => slide
   .replace(/<details[\s\S]*?<\/details>/g, ' ')
+  .replace(/<div class="walk-help"[^>]*hidden>[\s\S]*?<\/div>/g, ' ')
+  .replace(/<button[\s\S]*?<\/button>/g, ' ')
+  .replace(/<div class="walk-progress-label">[^<]*<\/div>/g, ' ')
   .replace(/<div class="section-label[^"]*"[^>]*>[^<]*<\/div>/g, ' ')
   .replace(/<div data-step-num[^>]*>[^<]*<\/div>/g, ' ');
 
@@ -144,9 +149,9 @@ describe('briefings are slides on phones', () => {
     expect(order.every((x, k) => x > -1 && (k === 0 || x > order[k - 1]))).toBe(true);
   });
 
-  it('long intel: two more slides, then More intel behind a details', () => {
+  it('long intel: two more slides, then More intel behind a details (Full intel level)', () => {
     const m = MISSIONS.find((x) => splitWords(x.briefing, 35).length > 4);
-    const html = renderBriefing(state, m.id);
+    const html = renderBriefing(setReadLevel(state, 'full'), m.id);
     expect(deckOf(html)).toMatch(/<details class="brief-more" data-open-desktop><summary>More intel<\/summary>/);
   });
 

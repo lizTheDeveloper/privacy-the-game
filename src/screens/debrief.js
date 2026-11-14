@@ -15,6 +15,8 @@ import { renderBrokerChecklist } from '../components/broker-checklist.js';
 import { checklistFor } from '../data/broker-checklists.js';
 import { isChecklistPending } from '../utils/broker-lighting.js';
 import { feelingForDebrief, twoFactorHugDue } from '../utils/scout-feelings.js';
+import { alreadyOption, saidAlready, visibleSteps, progressFor } from '../utils/reading.js';
+import { missionTrail } from '../components/walkthrough.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -76,11 +78,16 @@ function numberInput(q, value) {
 // `given` is a stored answer to show again (re-check); it wins over a pre-fill.
 // recheck: leave out the answers that would un-file it (skip / later).
 function questionGroup(q, state, mission, shown = false, given = undefined, recheck = false) {
-  const pre = mission ? prefillAnswer(q, mission, state) : undefined;
+  // "I already have this" on the briefing picks the report's "already" answer.
+  const already = mission && saidAlready(state, mission.id) ? alreadyOption(mission) : null;
+  const alreadyPre = already?.question === q.id ? already.value : undefined;
+  const pre = alreadyPre ?? (mission ? prefillAnswer(q, mission, state) : undefined);
   const has = given !== undefined && given !== null;
   const isPicked = (v) => (has ? (Array.isArray(given) ? given.includes(v) : given === v) : pre !== undefined && v === pre);
   const typed = has && q.type === 'number' && /^\d+$/.test(String(given)) ? String(given) : undefined;
-  const preNote = q.prefill === 'same-address'
+  const preNote = alreadyPre !== undefined
+    ? 'Picked because you said you already have this. Change it if that’s not right.'
+    : q.prefill === 'same-address'
     ? 'Filled in from your breach check. Change it if that’s wrong.'
     : 'Filled in from your password manager report. Change it if the report says something else.';
   return `
@@ -294,8 +301,9 @@ export function debriefReaction(state, mission) {
 // Re-check: the stored answers come back as the starting point.
 function debriefForm(state, mission, given = null, recheck = false) {
   const pre = {};
+  const already = saidAlready(state, mission.id) ? alreadyOption(mission) : null;
   for (const q of mission.debriefQs) {
-    const v = given?.[q.id] ?? prefillAnswer(q, mission, state);
+    const v = given?.[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
     if (v !== undefined) pre[q.id] = v;
   }
   const shown = new Set(visibleQuestions(mission, pre).map((q) => q.id));
@@ -368,12 +376,13 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
       <a href="#/mission/${mission.id}/briefing" style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); text-decoration: none;">&#8592; ${mission.title}</a>
     </div>
     <div style="flex: 1; padding: 24px;">
+      ${recheck ? '' : missionTrail(completed ? 'filed' : 'report', progressFor(state, mission.id, visibleSteps(mission, state)), { already: saidAlready(state, mission.id) && !progressFor(state, mission.id, visibleSteps(mission, state)).handled })}
       <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px;">
         <div style="flex-shrink: 0;">
           ${debriefScout(state, mission, stored)}
         </div>
         <div style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; flex: 1;">
-          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? 'Report filed. Good work, agent.' : recheck ? 'Still true? Confirm each answer, or change it.' : 'Welcome back, agent. What did you find?'}</div>
+          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? 'Report filed. Good work, agent.' : recheck ? 'Still true? Confirm each answer, or change it.' : saidAlready(state, mission.id) ? 'Already done? Nice. Tell me what you have, and it counts.' : 'Welcome back, agent. What did you find?'}</div>
           <div data-scout-line style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; font-style: italic; margin-top: 8px;">${scoutLineOnce(scoutLine, mission.scoutDialog?.briefing)}</div>
         </div>
       </div>

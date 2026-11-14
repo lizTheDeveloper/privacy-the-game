@@ -106,7 +106,8 @@ export const CLINIC_MISSIONS = [
     title: "Lock Down Fitness Data",
     briefing: "Now that you know who has access, cut the connections that should not exist. Disable third-party data sharing, revoke app permissions you do not recognize, and set data retention to the minimum your tracker allows. Download your data before restricting access, so you have your own copy.",
     steps: [
-      { text: "Fitbit: download your data first (Fitbit accounts are now Google accounts, so it comes from Google Takeout), then revoke third-party apps in the Fitbit app → your profile → Manage connected apps", url: "https://takeout.google.com" },
+      { text: "Fitbit: download your data first (Fitbit accounts are now Google accounts, so it comes from Google Takeout)", url: "https://takeout.google.com" },
+      { text: "Fitbit: Revoke third-party apps in the Fitbit app → your profile → Manage connected apps" },
       { text: "Apple Health: Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → tap each app → turn off any categories you do not want shared" },
       { text: "Garmin: Garmin Connect settings → Profile & Privacy → set sharing to the minimum", url: "https://connect.garmin.com/app/settings" },
       { text: "Check for connected apps like Strava, MyFitnessPal, insurance apps -- revoke access from any you do not actively use" },
@@ -182,7 +183,8 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: 'Make a list of every therapy or mental-health app you’ve used' },
       { text: 'For each one, search “<app> FTC” and “<app> data breach”' },
-      { text: 'In each app you still use, request a copy of your data. Delete the account for any you’ve stopped using' },
+      { text: 'In each app you still use, request a copy of your data.' },
+      { text: 'Delete the account for any you’ve stopped using' },
       { text: 'BetterHelp customers: the FTC sent refunds automatically in 2024 and 2025. There was no claim form. (The FTC refund page has since been removed.)' },
     ],
     debriefQs: THERAPY_APPS_DEBRIEF,
@@ -210,8 +212,10 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: "MyFitnessPal: use the delete-account option in your account settings. Do not just uninstall the app." },
       { text: "Check haveibeenpwned.com to see if your email was in the MyFitnessPal breach or other health app breaches", url: "https://haveibeenpwned.com" },
-      { text: "List any health apps you installed, tried once, and forgot about. Search your email for signup confirmations." },
-      { text: "Delete the accounts on each one -- Settings > Account > Delete. Request data deletion where available." },
+      { text: "List any health apps you installed, tried once, and forgot about." },
+      { text: "Search your email for signup confirmations." },
+      { text: "Delete the accounts on each one -- Settings > Account > Delete." },
+      { text: "Request data deletion where available." },
     ],
     debriefQs: HEALTH_ACTION_DEBRIEF,
     scoutDialog: {
@@ -236,7 +240,8 @@ export const CLINIC_MISSIONS = [
     briefing: "23andMe went bankrupt in 2025 and was bought by TTAM Research Institute in July 2025. Your DNA data moved with it. TTAM says it honors deletion, so deleting is still your choice and still permanent. Your DNA profile is the most permanent piece of personal data that exists: unlike a password, you cannot change your genome. During the bankruptcy, the California Attorney General urged customers to consider deleting their data.",
     steps: [
       { text: "Sign in to your 23andMe account" },
-      { text: "Go to Settings → 23andMe Data → View, then scroll to Delete Data" },
+      { text: "Go to Settings → 23andMe Data → View" },
+      { text: "Scroll to Delete Data" },
       { text: "Click 'Submit Request' -- 23andMe deletes your account and data, except what its lab must keep by law: your genetic information, date of birth and sex (lab regulations such as CLIA)" },
       { text: "Also: in Settings → Preferences, turn off biobanking so your physical saliva sample isn't kept. This is separate from data deletion." },
       { text: "Confirm the request in the email they send." },
@@ -264,7 +269,8 @@ export const CLINIC_MISSIONS = [
       { text: "AncestryDNA: in your account's DNA settings, find the research consent and withdraw it" },
       { text: "MyHeritage: in your account's DNA settings, review and restrict data sharing" },
       { text: "GEDmatch: If you uploaded your DNA, review your privacy settings -- law enforcement access requires your opt-in", url: "https://www.gedmatch.com" },
-      { text: "Check if you uploaded your DNA to any other database (FamilyTreeDNA, LivingDNA, Promethease). Review and restrict each one." },
+      { text: "Check if you uploaded your DNA to any other database (FamilyTreeDNA, LivingDNA, Promethease)" },
+      { text: "Review and restrict each one." },
     ],
     debriefQs: GENETIC_DEBRIEF,
     optOut: { genetic_action: ["opted-out"] },
@@ -387,7 +393,8 @@ export const CLINIC_MISSIONS = [
     title: "Review Health Data Permissions",
     briefing: "Apple Health and Android's Health Connect are hubs that many apps connect to. An app you let read a kind of health data can read it whatever app wrote it. So a calorie counter you allowed to read heart rate gets your watch's heart rate too. Review every app connected to your health data hub and revoke access from anything that does not need it. Be especially careful with apps that request write AND read access -- read access to your entire health profile is the real prize.",
     steps: [
-      { text: "iPhone: Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → review every app. Remove any you no longer use." },
+      { text: "iPhone: Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → review every app" },
+      { text: "iPhone: Remove any you no longer use." },
       { text: 'Android: open Health Connect (Android 14 and later: Settings → Security and privacy → Privacy controls → Health Connect, or search Settings for it; Android 13 and earlier: the Health Connect app) → App permissions → review each app', url: 'https://support.google.com/android/answer/12201230' },
       { text: "For each app: ask 'does this app need access to ALL my health data, or just the data it creates?'" },
       { text: "Revoke access from apps you tried once and forgot. Each one is an open pipeline." },
