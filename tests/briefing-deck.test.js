@@ -9,6 +9,7 @@ import { ACCOUNTS } from '../src/data/accounts.js';
 import { DISTRICT_DIALOGUE } from '../src/data/dialogue.js';
 import { missionDistrict } from '../src/data/missions.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../src/utils/bursts.js';
+import { setReadLevel } from '../src/utils/reading.js';
 
 const state = createInitialState();
 // The page as read in order, without the "More intel" summary.
@@ -148,9 +149,9 @@ describe('briefings are slides on phones', () => {
     expect(order.every((x, k) => x > -1 && (k === 0 || x > order[k - 1]))).toBe(true);
   });
 
-  it('long intel: two more slides, then More intel behind a details', () => {
+  it('long intel: two more slides, then More intel behind a details (Full intel level)', () => {
     const m = MISSIONS.find((x) => splitWords(x.briefing, 35).length > 4);
-    const html = renderBriefing(state, m.id);
+    const html = renderBriefing(setReadLevel(state, 'full'), m.id);
     expect(deckOf(html)).toMatch(/<details class="brief-more" data-open-desktop><summary>More intel<\/summary>/);
   });
 

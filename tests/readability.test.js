@@ -4,7 +4,7 @@ import { MISSIONS } from '../src/data/missions.js';
 import { ACCOUNTS } from '../src/data/accounts.js';
 import { MISSION_LEADS } from '../src/data/mission-leads.js';
 import { MISSION_SIMPLE } from '../src/data/mission-simple.js';
-import { fkGrade, isCompoundStep, words, wordsOutside, plainText } from '../src/utils/readability.js';
+import { fkGrade, fkGradeWithoutNames, isCompoundStep, words, wordsOutside, plainText } from '../src/utils/readability.js';
 
 // Most US adults read at literacy Level 2 or 3 (Liz, 2026-11-13). These keep the copy honest.
 
@@ -57,12 +57,18 @@ describe('the ratchet: copy only gets plainer', () => {
 });
 
 describe('plain leads', () => {
-  it('every lead is one short plain sentence with no numbers and no omni-"they"', () => {
+  it('every mission a player can open has one', () => {
+    const missing = live.filter((m) => !MISSION_LEADS[m.id]).map((m) => m.id);
+    expect(missing).toEqual([]);
+  });
+
+  it('every lead is one short plain sentence (grade 6, names aside), no numbers, no omni-"they"', () => {
     for (const [id, lead] of Object.entries(MISSION_LEADS)) {
       expect(MISSIONS.some((m) => m.id === id), `${id}: no such mission`).toBe(true);
       expect(words(lead).length, `${id}: ${lead}`).toBeLessThanOrEqual(16);
-      expect(fkGrade(lead), `${id}: ${lead}`).toBeLessThanOrEqual(6);
-      expect(lead, id).not.toMatch(/\d/);
+      expect(fkGradeWithoutNames(lead), `${id}: ${lead}`).toBeLessThanOrEqual(6);
+      // No figures (a brand like 23andMe is a name, not a number).
+      expect(lead, id).not.toMatch(/\b\d[\d,.]*\b/);
       expect(lead, id).not.toMatch(/\bthey\b/i);
       expect(lead, id).toMatch(/[.!?]$/);
     }

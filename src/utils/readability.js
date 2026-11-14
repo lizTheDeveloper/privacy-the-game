@@ -71,3 +71,13 @@ function knownWord(w, allowed) {
   ];
   return bases.some((b) => b && b !== w && allowed.has(b));
 }
+
+// The grade of a sentence with its names taken out (Microsoft, ProtonMail, Login.gov): the
+// player reads those off their own screen, so they shouldn't make a line count as harder.
+export function fkGradeWithoutNames(text) {
+  const masked = plainText(text)
+    .replace(/\b[\w-]+\.(gov|com|org|me|io)\b/gi, 'it')
+    .replace(/\b[a-z]+[A-Z][\w’'-]*/g, 'it')
+    .replace(/(^|[^.!?]\s)([A-Z][\w’'&-]*(\s[A-Z][\w’'&-]*)*)/g, (m, pre) => `${pre}it`);
+  return fkGrade(masked);
+}
