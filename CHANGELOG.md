@@ -2,6 +2,11 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.16.0 (2026-11-14): Answer on the step, plain Help
+
+- **Say what you found on the step where you see it.** Step 3 of the Gmail leak check says "Read the results — note how many breaches", and the place to say so was two screens later. Now that step shows the report's answers as big buttons: No breaches found, Found in 1–2, Found in 3+, Couldn’t check. Pick one that says you were in a leak and "Did any of those include the password?" appears on the same card. The report starts with your answers picked and says "You picked this on the step." This covers all 44 email leak checks and sign-in/device checks, and the "Same address as your Gmail?" steps. Your answers stay on this device until you file the report.
+- **"Stuck?" is now "Help"**, and it talks about the step in front of you: where it happens ("You do this on haveibeenpwned.com", with a button to open it again), and what to do ("Find the empty box on the page. Tap it and type."; "The answer is on the page you have open. Scroll down."; "Look for a button or switch with the same words as this step."). The out-of-place "It’s OK to skip a step" line is gone; Help ends with a **SKIP THIS STEP FOR NOW** button instead, and Skip moved off the card's main row into it.
+
 ## 7.15.0 (2026-11-13): One step at a time
 
 7.14.0 still asked too much at once (Liz: "still hard to use"). Screenshots of a new player's path showed a 4-step mission spread over 8 phone slides, two counters that disagreed ("3 of 8" and "STEP 1 OF 4"), and three buttons that all meant "next" on one screen.

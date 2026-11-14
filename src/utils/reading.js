@@ -170,6 +170,21 @@ export function markStep(state, missionId, key, mark, now = new Date().toISOStri
   return { ...state, stepProgress: { ...state.stepProgress, [missionId]: { ...prev, marks, at: now } } };
 }
 
+// Answers picked on a step card (a step's `ask`). Kept beside the ticks, on this device
+// only; the report starts from them, and only filing the report sends anything.
+export function stepAnswers(state, missionId) {
+  const a = state?.stepProgress?.[missionId]?.answers;
+  return a && typeof a === 'object' && !Array.isArray(a) ? a : {};
+}
+
+export function setStepAnswer(state, missionId, questionId, value, now = new Date().toISOString()) {
+  const prev = state.stepProgress?.[missionId] || {};
+  const answers = { ...stepAnswers(state, missionId) };
+  if (value === null || value === undefined) delete answers[questionId];
+  else answers[questionId] = value;
+  return { ...state, stepProgress: { ...state.stepProgress, [missionId]: { ...prev, answers, at: now } } };
+}
+
 // Where the player is: how many steps are handled, and which one is next (-1 when all are).
 export function progressFor(state, missionId, steps) {
   const marks = stepMarks(state, missionId);

@@ -15,7 +15,7 @@ import { renderBrokerChecklist } from '../components/broker-checklist.js';
 import { checklistFor } from '../data/broker-checklists.js';
 import { isChecklistPending } from '../utils/broker-lighting.js';
 import { feelingForDebrief, twoFactorHugDue } from '../utils/scout-feelings.js';
-import { alreadyOption, saidAlready, visibleSteps, progressFor } from '../utils/reading.js';
+import { alreadyOption, saidAlready, visibleSteps, progressFor, stepAnswers } from '../utils/reading.js';
 import { missionTrail } from '../components/walkthrough.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
@@ -81,11 +81,16 @@ function questionGroup(q, state, mission, shown = false, given = undefined, rech
   // "I already have this" on the briefing picks the report's "already" answer.
   const already = mission && saidAlready(state, mission.id) ? alreadyOption(mission) : null;
   const alreadyPre = already?.question === q.id ? already.value : undefined;
-  const pre = alreadyPre ?? (mission ? prefillAnswer(q, mission, state) : undefined);
+  // An answer picked on a step card (screens/briefing.js stepAsk) comes first.
+  const stepPre = mission ? stepAnswers(state, mission.id)[q.id] : undefined;
+  const onStep = stepPre !== undefined && questionOptions(q, state).some((o) => o.value === stepPre);
+  const pre = (onStep ? stepPre : undefined) ?? alreadyPre ?? (mission ? prefillAnswer(q, mission, state) : undefined);
   const has = given !== undefined && given !== null;
   const isPicked = (v) => (has ? (Array.isArray(given) ? given.includes(v) : given === v) : pre !== undefined && v === pre);
   const typed = has && q.type === 'number' && /^\d+$/.test(String(given)) ? String(given) : undefined;
-  const preNote = alreadyPre !== undefined
+  const preNote = onStep
+    ? 'You picked this on the step. Change it if that’s not right.'
+    : alreadyPre !== undefined
     ? 'Picked because you said you already have this. Change it if that’s not right.'
     : q.prefill === 'same-address'
     ? 'Filled in from your breach check. Change it if that’s wrong.'
@@ -303,7 +308,7 @@ function debriefForm(state, mission, given = null, recheck = false) {
   const pre = {};
   const already = saidAlready(state, mission.id) ? alreadyOption(mission) : null;
   for (const q of mission.debriefQs) {
-    const v = given?.[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
+    const v = given?.[q.id] ?? stepAnswers(state, mission.id)[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
     if (v !== undefined) pre[q.id] = v;
   }
   const shown = new Set(visibleQuestions(mission, pre).map((q) => q.id));

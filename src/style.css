@@ -760,6 +760,16 @@ img { image-rendering: pixelated; }
 .focus-note { font-size: 14px; line-height: 1.6; color: rgba(237,239,243,0.8); }
 .focus-note > summary { cursor: pointer; font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: rgba(0,229,255,0.75); text-transform: uppercase; letter-spacing: 1px; min-height: 40px; display: flex; align-items: center; }
 .focus-note p { margin: 4px 0 0; }
+.focus-ask { display: flex; flex-direction: column; gap: 14px; padding: 14px 12px; border: 1px solid rgba(0,229,255,0.35); background: rgba(0,229,255,0.05); }
+.focus-ask-q { border: 0; margin: 0; padding: 0; min-width: 0; }
+.focus-ask-q > legend { padding: 0; margin-bottom: 10px; font-size: 16px; font-weight: 700; color: var(--offwhite); line-height: 1.4; }
+.focus-ask-hint { margin: -4px 0 10px; font-size: 13px; line-height: 1.5; color: rgba(237,239,243,0.65); }
+.focus-ask-opts { display: flex; flex-direction: column; gap: 8px; }
+.focus-ask-opt { text-align: left; min-height: 48px; padding: 12px 14px; font-size: 15px; line-height: 1.4; color: var(--offwhite); background: rgba(9,11,16,0.6); border: 1px solid rgba(237,239,243,0.2); cursor: pointer; font-family: inherit; }
+.focus-ask-opt.is-picked { border-color: var(--lime); background: rgba(198,255,0,0.1); color: var(--lime); font-weight: 700; }
+.focus-ask-note { margin: 0; font-size: 13px; color: var(--lime); }
+.walk-help .walk-again, .walk-help .walk-skip { display: block; width: 100%; text-align: center; text-decoration: none; margin: 4px 0 8px; padding: 12px; box-sizing: border-box; }
+.walk-help-small { font-size: 12px; color: rgba(237,239,243,0.55); }
 .focus-row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
 .focus-all { list-style: none; padding-left: 0 !important; }
 .focus-all li { display: flex; gap: 10px; align-items: flex-start; }

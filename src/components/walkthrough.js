@@ -1,5 +1,5 @@
 // The mission's steps as a walkthrough: each step can be ticked or skipped, the next one is
-// lit with DONE and "Stuck?", menu paths (Settings → Privacy → Ads) are chips, and a bar says
+// lit with DONE and Help, menu paths (Settings → Privacy → Ads) are chips, and a bar says
 // how far along the player is. See utils/reading.js for the why.
 
 import { plainText } from '../utils/readability.js';
@@ -40,25 +40,61 @@ function splitOutsideBrackets(text) {
 }
 
 // The words "Stuck?" opens for a step: the step's own help, else what usually helps.
-export function stuckHelp(step) {
+const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
+
+// What to try when a step won't work: a few short lines about THIS step, in plain words.
+// `site` is the page the step happens on when it has no link of its own.
+// No line says "skip": the panel's own button does that (helpPanel).
+export function stuckHelp(step, { site } = {}) {
   if (step.help) return [step.help];
   const lines = [];
+  // The doing word: past a device label ("Samsung:") and a lead-in ("Separately,", "Also").
+  const text = plainText(step.text).replace(/^[A-Z][\w&/ .-]{0,24}:\s+/, '').replace(/^(Separately|Also|Then|Next|Now),?\s+/i, '');
+  if (!step.url && site && hostOf(site)) lines.push(`You do this on ${hostOf(site)}. Not open? Tap the button below.`);
   const path = pathChips(step.text);
   if (path) {
     // The place to search for: the last short stop on the path ("Ads", not "turn off anything you don't use").
     const stops = splitOutsideBrackets(step.text).slice(1).map((s) => plainText(s));
     const target = [...stops].reverse().find((s) => s.split(/\s+/).length <= 4) || '';
     lines.push(target
-      ? `Can’t find “${target}”? Menus move around between phones and updates. Look for a search box at the top of the app or of Settings, and type “${target}”.`
-      : 'Can’t find it? Menus move around between phones and updates. Look for a search box at the top of the app or of Settings.');
+      ? `Can’t see “${target}”? Look for a search box at the top. Type “${target}” in it.`
+      : 'Can’t see it? Look for a search box at the top of the page or of Settings.');
   }
-  if (step.url) lines.push('The link opens the right page. If it asks you to sign in, sign in first, then look again.');
-  lines.push('It’s OK to skip a step. Your other steps still count, and you can come back to this one.');
+  const label = text.match(/["“]([^"”]{2,40})["”]/)?.[1];
+  if (/^(Enter|Type)\b/i.test(text)) lines.push('Find the empty box on the page. Tap it and type. Then tap the button next to it.');
+  else if (step.url) lines.push('Tap the OPEN button. A new page opens. If it asks you to sign in, sign in first.');
+  else if (/^(Note|Read|Look|Review|Check|Scroll|Flag)\b/i.test(text) || /results/i.test(text)) {
+    lines.push('The answer is on the page you have open. Scroll down to see all of it.');
+  } else if (/^(Open|Go)\b/i.test(text) && !site) {
+    lines.push('Find the app on your phone or computer. Can’t see it? Swipe down on your home screen and type its name.');
+  } else if (/^(Find|Search)\b/i.test(text)) {
+    lines.push('Use the search box at the top of the page or app.');
+  } else if (/^(Tap|Click|Turn|Toggle|Enable|Disable|Switch|Select|Pick|Remove|Delete|Log|Sign|Change|Set|Untick|Uncheck|Add|Save)\b/i.test(text) && !path) {
+    lines.push('Look for a button or switch with the same words as this step. Tap it.');
+  }
+  if (label && !path) lines.push(`Look for the words “${label}” on the screen.`);
+  if (step.ask) lines.push('Then pick what you found, right here on this card.');
+  if (!lines.length) lines.push('Read it one more time, slowly, or tap Read it to me. Do what you can.');
   return lines;
 }
 
+// The Help panel: the lines, the page again (when the step has no link of its own), and
+// a plain way out. Skipping is an action, not advice.
+export function helpPanel({ mission, step, key, site }) {
+  const again = !step.url && site && hostOf(site)
+    ? `<a class="btn-secondary walk-again" href="${attr(site)}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">OPEN ${hostOf(site).toUpperCase()} AGAIN &#8599;</a>`
+    : '';
+  return `
+        <div class="walk-help" id="stuck-${key}" hidden>
+          ${stuckHelp(step, { site }).map((l) => `<p>${l}</p>`).join('')}
+          ${again}
+          <button class="btn-secondary walk-skip" data-action="step-skip" data-mission="${mission.id}" data-step="${key}">SKIP THIS STEP FOR NOW</button>
+          <p class="walk-help-small">You can come back to it. The other steps still count.</p>
+        </div>`;
+}
+
 // One step. `current` lights it with its buttons; `mark` is 'done', 'skipped' or undefined.
-export function walkStepRow({ mission, step, index, mark, current, notes = step.note, stepNote }) {
+export function walkStepRow({ mission, step, index, mark, current, notes = step.note, stepNote, site, ask = '' }) {
   const key = stepKey(step);
   const num = String(index + 1).padStart(2, '0');
   const path = pathChips(step.text);
@@ -76,17 +112,13 @@ export function walkStepRow({ mission, step, index, mark, current, notes = step.
   const help = current ? `
         <div class="walk-actions">
           <button class="btn-primary walk-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003; NEXT</button>
-          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Stuck?</button>
+          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Help</button>
           <button class="walk-link" data-action="read-aloud" data-say="${attr(say)}" aria-label="Read this step out loud">&#128266; Read it to me</button>
-        </div>
-        <div class="walk-help" id="stuck-${key}" hidden>
-          ${stuckHelp(step).map((l) => `<p>${l}</p>`).join('')}
-          <button class="btn-secondary walk-skip" data-action="step-skip" data-mission="${mission.id}" data-step="${key}">SKIP THIS STEP</button>
-        </div>` : '';
+        </div>${helpPanel({ mission, step, key, site })}` : '';
   return `
     <div data-brief-step data-step-key="${key}" class="walk-step ${state}" style="display: flex; gap: 14px; align-items: flex-start;">
       <button data-step-num class="walk-check" data-action="step-toggle" data-mission="${mission.id}" data-step="${key}" aria-pressed="${mark === 'done'}" aria-label="${checkLabel}">${mark === 'done' ? '&#10003;' : mark === 'skipped' ? '&#8631;' : num}</button>
-      <div class="walk-body" style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}${mark === 'skipped' ? ' <span class="walk-tag">skipped</span>' : ''}${note}${help}</div>
+      <div class="walk-body" style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}${mark === 'skipped' ? ' <span class="walk-tag">skipped</span>' : ''}${note}${current ? ask : ''}${help}</div>
     </div>`;
 }
 

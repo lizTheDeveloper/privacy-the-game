@@ -1236,13 +1236,46 @@ function withReplacements(list) {
 
 // The plain lead line and the Simplest version (utils/reading.js) live beside the missions,
 // so they can be read and checked in one place (tests/readability.test.js).
+// The step where the player sees the answer to a report question gets that question
+// (`ask`), so the answer goes in right there, not on a later screen.
+// - An email breach check: the results step after "Enter your … address" (or that step
+//   itself when the next one is another check). "Same address as …?" sits on its own step.
+// - A sign-in / device check: its last step, the "look for ones you don't know" step.
+// A step can name its own `ask`; `ask: false` keeps a question off every step.
+const BREACH_RESULT_SKIP = /^(Separately|Also)\b/;
+export function askSteps(m) {
+  const ids = new Set((m.debriefQs || []).map((q) => q.id));
+  const asks = new Map();
+  if (m.steps.some((st) => 'ask' in st)) return asks;
+  if (/-recon-breach$/.test(m.id) && ids.has('finding')) {
+    const enter = m.steps.findIndex((st) => /^(Enter|Type)\b/.test(st.text));
+    if (enter !== -1) {
+      const next = m.steps[enter + 1];
+      asks.set(next && !BREACH_RESULT_SKIP.test(next.text) ? enter + 1 : enter, 'finding');
+    }
+  } else if (/-recon-(login|devices|sessions)$/.test(m.id) && ids.has('finding')) {
+    // The last step about strangers ("don't recognize", "unfamiliar"), else the last step.
+    const look = m.steps.map((st, i) => (/recogni[sz]e|unfamiliar|suspicious/i.test(st.text) ? i : -1)).filter((i) => i !== -1).at(-1);
+    asks.set(look ?? m.steps.length - 1, 'finding');
+  }
+  const same = m.steps.findIndex((st) => /^Same address as/.test(st.text));
+  if (same !== -1 && ids.has('same_address')) asks.set(same, 'same_address');
+  return asks;
+}
+
 function withReadingCopy(list) {
   for (const m of list) {
     if (MISSION_LEADS[m.id]) m.lead = MISSION_LEADS[m.id];
+    // A copy of the step, so a shared step object (PWNED_PASSWORD_STEP) is never changed.
+    for (const [i, qid] of askSteps(m)) m.steps[i] = { ...m.steps[i], ask: qid };
     if (MISSION_SIMPLE[m.id]) {
       m.simple = MISSION_SIMPLE[m.id];
-      // A Simplest step that stands for one of the mission's steps shares its tick.
-      for (const st of m.simple.steps) if (Number.isInteger(st.of) && m.steps[st.of]) st.key = stepKey(m.steps[st.of]);
+      // A Simplest step that stands for one of the mission's steps shares its tick and its question.
+      for (const st of m.simple.steps) {
+        if (!Number.isInteger(st.of) || !m.steps[st.of]) continue;
+        st.key = stepKey(m.steps[st.of]);
+        if (m.steps[st.of].ask) st.ask = m.steps[st.of].ask;
+      }
     }
   }
   return list;

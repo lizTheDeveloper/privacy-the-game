@@ -4,7 +4,7 @@ import { DISTRICTS } from '../data/districts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
 import { missionDistrict } from '../data/missions.js';
-import { missionSteps } from '../utils/debrief.js';
+import { missionSteps, questionOptions, showIfMatches } from '../utils/debrief.js';
 import { isPasswordMission, passwordResetNeed, notNeededReasons, emailBreachRecord, isPmFlagged, passwordReconNotes, reopenReasonLine, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
@@ -13,8 +13,8 @@ import { deck, splitWords, countWords } from '../components/deck.js';
 import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
-import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
-import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, stuckHelp } from '../components/walkthrough.js';
+import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
 import { isPlaying } from '../utils/focus-music.js';
@@ -74,11 +74,13 @@ export function renderBriefing(state, missionId, opts = {}) {
   const titleBottom = colon > -1 ? mission.title.slice(colon + 1).trim() : mission.title;
 
   // A step's row; `notes` lets a phone slide carry only the first note (the rest get slides).
-  // The next step to do is lit with DONE, Stuck? and Read it to me (components/walkthrough.js).
+  // The next step to do is lit with DONE, Help and Read it to me (components/walkthrough.js).
   const stepRow = (step, i, notes = step.note) => walkStepRow({
     mission, step, index: i, notes, stepNote,
     mark: marks[stepKeyOf(step)],
     current: !noReset && i === progress.current && missionStepList.length > 1,
+    site: stepSite(missionStepList, i, account),
+    ask: stepAsk(state, mission, step),
   });
   const stepRows = missionStepList.map((step, i) => stepRow(step, i));
   const steps = stepRows.join('');
@@ -498,6 +500,38 @@ function accountSite(mission, steps, goUrl) {
   return `<a class="btn-secondary focus-open" href="${goUrl}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">OPEN ${hostOf(goUrl).toUpperCase()} &#8599;</a>`;
 }
 
+// The page a step happens on: its own link, else the last link before it, else the
+// account's security page ("Enter your Gmail address" happens on haveibeenpwned.com).
+function stepSite(steps, i, account) {
+  return steps[i]?.url || [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || account?.securityUrl || '';
+}
+
+// A step's report question, right on the step: what the player sees there goes in here
+// (data/missions.js askSteps). A follow-up ("did the leak include passwords?") shows
+// once its answer calls for it. Kept on this device; the report starts from it.
+function stepAsk(state, mission, step) {
+  if (!step?.ask) return '';
+  const qs = mission.debriefQs || [];
+  const q = qs.find((x) => x.id === step.ask);
+  if (!q || q.multi || q.type === 'number') return '';
+  const answers = stepAnswers(state, mission.id);
+  const follow = qs.filter((f) => f.showIf?.question === q.id && !f.multi && f.type !== 'number' && showIfMatches(f.showIf, answers[q.id]));
+  const group = (g, first) => `
+        <fieldset class="focus-ask-q" data-ask-q="${g.id}">
+          <legend>${first ? 'What did you see? Tap one.' : g.label}</legend>
+          ${!first && g.hint ? `<p class="focus-ask-hint">${g.hint}</p>` : ''}
+          <div class="focus-ask-opts">${questionOptions(g, state).map((o) => {
+            const on = answers[g.id] === o.value;
+            return `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${g.id}" data-value="${attrEsc(o.value)}" aria-pressed="${on}">${on ? '&#10003; ' : ''}${o.text}</button>`;
+          }).join('')}</div>
+        </fieldset>`;
+  return `
+      <div class="focus-ask" data-step-ask="${q.id}">
+        ${group(q, true)}${follow.map((f) => group(f, false)).join('')}
+        ${answers[q.id] !== undefined ? '<p class="focus-ask-note">Saved for your report. Now tap DONE.</p>' : ''}
+      </div>`;
+}
+
 function stepCardText(mission, step) {
   const link = step.url
     ? `<a class="btn-secondary focus-open" href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">OPEN ${hostOf(step.url).toUpperCase()} &#8599;</a>`
@@ -526,14 +560,13 @@ function stepModePage(p) {
         <div class="focus-card-head">STEP ${current + 1} OF ${total}</div>
         ${stepCardText(mission, step)}
         ${accountSite(mission, missionStepList, p.goUrl)}
+        ${stepAsk(state, mission, step)}
         <button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003;</button>
         <div class="focus-row">
           ${progress.handled ? `<button class="walk-link" data-action="step-back" data-mission="${mission.id}">&#8592; Back</button>` : ''}
-          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Stuck?</button>
-          <button class="walk-link" data-action="step-skip" data-mission="${mission.id}" data-step="${key}">Skip</button>
+          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Help</button>
           <button class="walk-link" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this step out loud">&#128266; Read it to me</button>
-        </div>
-        <div class="walk-help" id="stuck-${key}" hidden>${stuckHelp(step).map((l) => `<p>${l}</p>`).join('')}</div>
+        </div>${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}
       </div>`;
   const list = missionStepList.map((st, i) => {
     const m = marks[stepKeyOf(st)];

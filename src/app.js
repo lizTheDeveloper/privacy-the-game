@@ -52,7 +52,7 @@ import { STUDIO_URL } from './components/hud.js';
 import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
-import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor } from './utils/reading.js';
+import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
 import { speak, stopSpeaking } from './utils/read-aloud.js';
 import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
@@ -1306,6 +1306,14 @@ app.addEventListener('click', async (e) => {
     briefingPeek = action === 'show-briefing' ? el.dataset.mission : null;
     renderCurrentRoute();
     window.scrollTo?.(0, 0);
+  } else if (action === 'step-answer') {
+    // An answer picked on the step card: kept here, never sent; the report starts from it.
+    // Tapping the picked one again un-picks it.
+    const { mission: mid, question: qid, value } = el.dataset;
+    const same = stepAnswers(state, mid)[qid] === value;
+    setState(setStepAnswer(state, mid, qid, same ? null : value));
+    renderCurrentRoute();
+    app.querySelector(`[data-action="step-answer"][data-question="${CSS.escape(qid)}"][aria-pressed="true"]`)?.focus?.({ preventScroll: true });
   } else if (action === 'step-stuck') {
     const help = app.querySelector(`#stuck-${CSS.escape(el.dataset.step)}`);
     if (help) {
