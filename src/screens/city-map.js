@@ -1,4 +1,6 @@
 import { DISTRICTS } from '../data/districts.js';
+import { missionsInProgress, visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
+import { findMission } from '../data/custom-missions.js';
 import { MISSIONS } from '../data/missions.js';
 import { calcDistrictProgress, calcIntegrity, isCoreMission } from '../utils/calc.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
@@ -408,6 +410,10 @@ function renderCityScout(state, feeling, lastVisit) {
   }
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
   const next = nextAvailableMission(state);
+
+  // Half-way through a mission's steps: that comes first, so nobody loses their place.
+  const resume = resumeLine(state);
+  if (resume) return say(resume.text, { actionText: 'CONTINUE', actionHref: `#/mission/${resume.id}/briefing` });
 
   const pacing = returnPacingLine(state);
   if (pacing) return say(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
@@ -861,4 +867,17 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   </div>
   <div class="city-scout">${renderWelcomeBack(welcomeBack, 'scout')}${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
 </div>`;
+}
+
+// "You were on step 3 of 5 of Lock Down Fitness Data." for the newest mission with ticked steps.
+export function resumeLine(state) {
+  for (const id of missionsInProgress(state, (rec) => Boolean(rec?.status))) {
+    const m = findMission(state, id);
+    if (!m) continue;
+    const p = progressFor(state, id, visibleSteps(m, state));
+    if (!p.handled) continue;
+    const where = p.current === -1 ? 'All its steps are done — just file the report.' : `You were on ${progressLabel(p).toLowerCase()}.`;
+    return { id, text: `Pick up where you left off: <span style="color: var(--cyan); font-weight: 600;">${m.title}</span>. ${where}` };
+  }
+  return null;
 }

@@ -1,4 +1,5 @@
 import { prismTag, prismMark } from '../components/prism-tag.js';
+import { visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
@@ -229,6 +230,9 @@ function renderMissionRow(state, mission) {
   const summary = completed && !notNeeded ? missionSummary(mission, record) : '';
   const timeline = completed ? '' : timelineLine(timelineNote(state, mission));
   const noResetYet = !completed && isPasswordMission(mission) && passwordResetNeed(state, mission.accountId) === 'not-needed';
+  // How far along the steps are (utils/reading.js), for a mission not filed yet.
+  const steps = completed ? null : progressFor(state, mission.id, visibleSteps(mission, state));
+  const stepsStarted = Boolean(steps?.handled);
 
   let statusCell;
   if (notNeeded && passwordResetNeed(state, mission.accountId) === 'not-needed') {
@@ -245,7 +249,7 @@ function renderMissionRow(state, mission) {
       <div class="badge" style="letter-spacing: 1px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">SKIPPED</div>
       <a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">START</a>`;
   } else {
-    statusCell = `<a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">START</a>`;
+    statusCell = `<a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
   }
 
   return `
@@ -254,6 +258,7 @@ function renderMissionRow(state, mission) {
     <div class="mission-text" style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
+      ${stepsStarted ? missionProgressLine(steps) : ''}
       ${timeline ? `<div data-timeline-note style="font-size: 11px; color: var(--cyan); margin-top: 2px;">${esc(timeline)}</div>` : ''}
       ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
@@ -522,7 +527,8 @@ function renderFacilitySection(state, facilityId, district) {
     } else if (skipped) {
       action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">RETRY</a>`;
     } else {
-      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">START</a>`;
+      const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
+      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">${begun ? 'CONTINUE' : 'START'}</a>`;
     }
 
     return `
@@ -731,4 +737,10 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
     ${content}
     ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}
   </div>`;
+}
+
+// "Step 3 of 5" and a thin bar under a mission the player has started ticking off.
+export function missionProgressLine(p) {
+  const pct = Math.round((p.handled / p.total) * 100);
+  return `<div class="mission-progress" data-mission-progress>${progressLabel(p)}<div class="walk-bar" aria-hidden="true"><span style="width: ${pct}%;"></span></div></div>`;
 }

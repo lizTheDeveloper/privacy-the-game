@@ -1,0 +1,67 @@
+# Words people see on their own phone and computer screens every day. The Simplest
+# reading level may use these on top of the ten hundred most common words
+# (ten-hundred.txt, the Up-Goer Five list from splasho.com/upgoer5, after xkcd 1133).
+# They have to stay: the screen says "Password", not "secret word to get in".
+# Keep this list short. A word goes here only if it is printed on a real button,
+# menu or sign-in screen the player will look at.
+account
+accounts
+app
+apps
+browser
+button
+click
+code
+codes
+computer
+connected
+contacts
+copy
+delete
+device
+devices
+download
+email
+emails
+enter
+facebook
+gmail
+google
+icloud
+instagram
+iphone
+android
+apple
+internet
+link
+links
+log
+login
+menu
+microsoft
+online
+outlook
+paste
+password
+passwords
+phone
+photos
+privacy
+profile
+screen
+search
+security
+settings
+setup
+share
+sign
+signed
+site
+tap
+text
+texts
+update
+website
+wifi
+yahoo
+2fa

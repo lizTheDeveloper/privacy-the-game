@@ -52,6 +52,9 @@ import { STUDIO_URL } from './components/hud.js';
 import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
+import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor } from './utils/reading.js';
+import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
+import { speak, stopSpeaking } from './utils/read-aloud.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
@@ -1217,7 +1220,14 @@ app.addEventListener('click', async (e) => {
     if (el.dataset.url) window.open(el.dataset.url, '_blank', 'noopener');
     // A custom account's missions stay in this browser (data/custom-missions.js): no event.
     if (!isCustomMission(el.dataset.mission)) track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
-    cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
+    // More than one step: stay on the steps, so the player can tick them off as they go and
+    // finds "Step 2 of 5" when they come back (the report screen doesn't show the steps).
+    if (mission && visibleSteps(mission, state).length > 1) {
+      renderCurrentRoute();
+      focusCurrentStep();
+    } else {
+      cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
+    }
   } else if (action === 'start-mission') {
     // Nothing to open: the steps are right here. Remember the start and draw the briefing again, which
     // now offers I DID IT under the same steps.
@@ -1226,6 +1236,52 @@ app.addEventListener('click', async (e) => {
     if (!isCustomMission(el.dataset.mission)) track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     renderCurrentRoute();
     app.querySelector('[data-action="i-did-it"]')?.focus({ preventScroll: true });
+  } else if (action === 'read-level') {
+    // Local only: how much someone likes to read stays on this phone (utils/reading.js).
+    setState(setReadLevel(state, el.dataset.level));
+    renderCurrentRoute();
+    app.querySelector(`[data-action="read-level"][data-level="${CSS.escape(el.dataset.level)}"]`)?.focus({ preventScroll: true });
+  } else if (action === 'read-offer') {
+    const offer = OFFER_LINES[el.dataset.offer];
+    if (offer) {
+      let next = markOffered(state, el.dataset.offer);
+      if (el.dataset.answer === 'yes') next = setReadLevel(next, offer.level);
+      setState(next);
+      renderCurrentRoute();
+    }
+  } else if (action === 'read-aloud') {
+    // The browser's own voice: nothing is sent anywhere.
+    if (speak(el.dataset.say)) setState(recordSignal(state, 'readAloud'));
+  } else if (action === 'gear-pick' || action === 'gear-reset') {
+    // Local only: which phone or tracker someone has never leaves this browser.
+    const next = action === 'gear-pick' ? setGear(state, el.dataset.group, el.dataset.value) : { ...state, gear: { ...state.gear, [el.dataset.group]: undefined } };
+    setState(next);
+    renderCurrentRoute();
+    app.querySelector('[data-walk-progress], [data-gear-ask], [data-gear-set]')?.focus?.({ preventScroll: true });
+  } else if (action === 'step-done' || action === 'step-toggle' || action === 'step-skip') {
+    const id = el.dataset.mission;
+    const key = el.dataset.step;
+    const was = stepMarks(state, id)[key];
+    const mark = action === 'step-done' ? 'done' : action === 'step-skip' ? 'skipped' : was ? null : 'done';
+    let next = markStep(state, id, key, mark);
+    if (!next.startedMissions?.[id]) next = markMissionStarted(next, id);
+    if (action === 'step-skip') next = recordSignal(next, 'skip');
+    setState(next);
+    stopSpeaking();
+    renderCurrentRoute();
+    focusCurrentStep();
+  } else if (action === 'step-stuck') {
+    const help = app.querySelector(`#stuck-${CSS.escape(el.dataset.step)}`);
+    if (help) {
+      const open = help.hidden;
+      help.hidden = !open;
+      el.setAttribute('aria-expanded', String(open));
+      if (open) setState(recordSignal(state, 'stuck'));
+    }
+  } else if (action === 'already-have') {
+    // Straight to the report with its "already" answer picked (screens/debrief.js).
+    setState(markAlready(state, el.dataset.mission));
+    cheerThenGo(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'i-did-it') {
     // A plain link without JS; here Scout cheers first.
     e.preventDefault();
@@ -1700,3 +1756,16 @@ initRouter(render);
 mountBugReporter();
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).
 announceReady();
+
+// After a step is ticked: put the next one (or, at the end, I DID IT) in view and in focus.
+function focusCurrentStep() {
+  const next = app.querySelector('.walk-step.is-current .walk-done') || app.querySelector('[data-action="i-did-it"]');
+  const row = next?.closest('.walk-step') || next;
+  row?.scrollIntoView?.({ block: 'center', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  next?.focus({ preventScroll: true });
+}
+
+// Opening "Why it matters" is a sign someone wants the full intel (utils/reading-signals.js).
+app.addEventListener('toggle', (e) => {
+  if (e.target?.matches?.('details[data-why]') && e.target.open) setState(recordSignal(state, 'why'));
+}, true);

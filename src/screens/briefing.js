@@ -13,6 +13,10 @@ import { deck, splitWords, countWords } from '../components/deck.js';
 import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
+import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { walkStepRow, walkProgress, gearAsk, missionTrail } from '../components/walkthrough.js';
+import { plainText } from '../utils/readability.js';
+import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
 
 function notFound(state) {
   return `
@@ -41,7 +45,13 @@ export function renderBriefing(state, missionId, opts = {}) {
   const account = ACCOUNTS[mission.accountId];
   const districtId = missionDistrict(mission) || '';
   const district = DISTRICTS.find((d) => d.id === districtId);
-  const missionStepList = missionSteps(mission, state);
+  const level = readLevel(state);
+  const { intel, why } = intelFor(mission, level);
+  const allSteps = level === 'simplest' && mission.simple?.steps?.length ? mission.simple.steps : missionSteps(mission, state);
+  const missionStepList = visibleSteps(mission, state, level);
+  const progress = progressFor(state, mission.id, missionStepList);
+  const marks = stepMarks(state, mission.id);
+  const started = Boolean(state.startedMissions?.[mission.id]) || progress.handled > 0;
   // Where GO DO IT sends the player: the first step's link, else the account's security page. With
   // neither (the steps happen in an app, or in results the player already has), there is nothing to
   // open: the button is START, which keeps the steps on screen (Liz 2026-10-31: a "#" opened a second
@@ -51,7 +61,8 @@ export function renderBriefing(state, missionId, opts = {}) {
   // "it doesn't link you anywhere"). Their addresses stay in that panel (class bank-note-panel,
   // private to error reports), never in GO DO IT's data-url.
   const bankNotesHere = missionUsesBankNotes(mission);
-  const goUrl = missionStepList.find((s) => s.url)?.url || account?.securityUrl || '';
+  // Once a step is ticked, GO DO IT AGAIN opens the next step's link when it has one.
+  const goUrl = missionStepList[progress.current]?.url || missionStepList.find((s) => s.url)?.url || account?.securityUrl || '';
   const noReset = isPasswordMission(mission) && !opts.resetAnyway
     && passwordResetNeed(state, mission.accountId) === 'not-needed';
   const noResetFiled = noReset && state.missions[mission.id]?.status === 'not-needed';
@@ -62,23 +73,12 @@ export function renderBriefing(state, missionId, opts = {}) {
   const titleBottom = colon > -1 ? mission.title.slice(colon + 1).trim() : mission.title;
 
   // A step's row; `notes` lets a phone slide carry only the first note (the rest get slides).
-  const stepRow = (step, i, notes = step.note) => {
-    const num = String(i + 1).padStart(2, '0');
-    const body = step.url
-      ? `<a href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" style="color: var(--cyan); font-weight: 600;">${step.text}</a>`
-      : step.text;
-    // A step that needs its reasons on screen (the Pwned Passwords check asks
-    // for a real password, so it says why, who, and why that's safe).
-    const note = notes?.length ? `
-        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
-          ${notes.map((n) => stepNote(n)).join('')}
-        </div>` : '';
-    return `
-    <div data-brief-step style="display: flex; gap: 14px; align-items: flex-start;">
-      <div data-step-num style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--cyan); width: 28px; text-align: center; flex-shrink: 0; text-shadow: 0 0 8px rgba(0,229,255,0.4);">${num}</div>
-      <div style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}${note}</div>
-    </div>`;
-  };
+  // The next step to do is lit with DONE, Stuck? and Read it to me (components/walkthrough.js).
+  const stepRow = (step, i, notes = step.note) => walkStepRow({
+    mission, step, index: i, notes, stepNote,
+    mark: marks[stepKeyOf(step)],
+    current: !noReset && i === progress.current && missionStepList.length > 1,
+  });
   const stepRows = missionStepList.map((step, i) => stepRow(step, i));
   const steps = stepRows.join('');
 
@@ -102,6 +102,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const scoutFeeling = noReset ? 'happy' : undefined;
 
   const header = `
+        ${missionTrail(started ? 'steps' : 'brief', progress)}
         <div style="font-family: var(--font-display); font-size: 26px; font-weight: 800; line-height: 1.4; letter-spacing: 1px; margin-bottom: 14px; color: var(--offwhite);">
           ${titleTop ? `${titleTop}<br>` : ''}<span style="color: var(--cyan); text-shadow: 0 0 15px rgba(0,229,255,0.3);">${titleBottom}</span>
         </div>
@@ -117,21 +118,30 @@ export function renderBriefing(state, missionId, opts = {}) {
 
         ${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
 
+  // How much to read (Scout asks the first time), and Read it to me.
+  const sayIntel = plainText(`${intel} ${scoutLine}`);
+  const intelTools = readingTools(state, level, sayIntel);
+  // The device questions and how far along the steps are.
+  const gearHtml = noReset ? '' : gearAsk(state, gearQuestions(allSteps));
+  const progressHtml = !noReset && missionStepList.length > 1 ? walkProgress(progress) : '';
+  const movePanelTop = `${gearHtml}${progressHtml}`;
+
   const actions = `
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-          ${noReset ? renderNoResetActions(mission, districtId, targetTab, noResetFiled) : state.startedMissions?.[mission.id]
+          ${noReset ? renderNoResetActions(mission, districtId, targetTab, noResetFiled) : started
             ? `<a class="btn-primary" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}" style="text-decoration: none;">I DID IT &#10003;</a>
           ${goUrl ? `<button class="btn-secondary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT AGAIN</button>` : ''}`
             : goUrl
               ? `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`
               : `<button class="btn-primary" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`}
+          ${!noReset && canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
           ${noResetFiled ? '' : `<a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>`}
         </div>`;
 
   // A briefing that fits one phone screen stays as it is; a longer one is slides on a phone.
   const stepWords = missionStepList.reduce((n, st) => n + countWords(st.text) + (st.note || []).reduce((k, x) => k + countWords(`${x.label} ${x.text}`), 0), 0);
-  const slides = countWords(mission.briefing) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS
-    ? briefingSlides({ header, briefing: mission.briefing, stepRows, stepRow, missionStepList, noResetPanel: noReset ? renderNoResetPanel(state, mission) : '', scoutLine, scoutFeeling, preview, loreData })
+  const slides = countWords(intel) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS
+    ? briefingSlides({ header, briefing: intel, why, intelTools, gearHtml, progressHtml, stepRows, stepRow, missionStepList, noResetPanel: noReset ? renderNoResetPanel(state, mission) : '', scoutLine, scoutFeeling, preview, loreData })
     : null;
 
   const bankPanel = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
@@ -140,12 +150,15 @@ export function renderBriefing(state, missionId, opts = {}) {
         <div style="margin-top: 20px;">${actions}</div>` : `${header}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
-          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${mission.briefing}</div>
+          <div data-intel style="font-size: ${why ? 15 : 14}px; color: rgba(237,239,243,${why ? 0.9 : 0.75}); line-height: 1.7;">${intel}</div>
+          ${whyHtml(why)}
+          ${intelTools}
         </div>
 
         ${noReset ? renderNoResetPanel(state, mission) : `
         <div class="panel panel--active" style="padding: 20px; margin-bottom: 28px;">
           <div class="section-label" style="color: var(--cyan); margin-bottom: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.3);">YOUR MOVE</div>
+          ${movePanelTop}
           <div style="display: flex; flex-direction: column; gap: 14px;">
             ${steps}
           </div>
@@ -181,6 +194,7 @@ ${main}
 
 // The whole briefing (intel, steps, Scout) within this many words fits a phone's first screen.
 const SHORT_WORDS = 60;
+const MOVE_LABEL = '<div class="section-label" style="color: var(--cyan); margin-bottom: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.3);">YOUR MOVE</div>';
 const SLIDE_WORDS = 35;
 // Scout and the closing slides: on a desktop the sidebar has them, so the whole section hides.
 const PHONE_ONLY = 'slide--phone';
@@ -189,10 +203,11 @@ const MORE_INTEL_AFTER = 3; // intel slides before the rest goes behind "More in
 // The slides, in order: title + first intel; up to two more intel; Scout; the steps; THIS
 // LIBERATES + lore. At 900px and up they stack: the intel and step slides join into the
 // panels they always were (style.css), and the Scout and last slides hide (the sidebar has them).
-function briefingSlides({ header, briefing, stepRows, stepRow, missionStepList, noResetPanel, scoutLine, scoutFeeling, preview, loreData }) {
+function briefingSlides({ header, briefing, why = '', intelTools = '', gearHtml = '', progressHtml = '', stepRows, stepRow, missionStepList, noResetPanel, scoutLine, scoutFeeling, preview, loreData }) {
   const slides = [];
   // Slide 1's title and badges come out of its word budget.
-  const firstBudget = Math.max(1, SLIDE_WORDS - countWords(header));
+  // The reading switch sits under the title on a phone, so the intel's first words follow it.
+  const firstBudget = Math.max(1, SLIDE_WORDS - countWords(header) - countWords(intelTools.replace(/<button[\s\S]*?<\/button>/g, ' ')));
   const [first = '', ...after] = splitWords(briefing, firstBudget);
   const rest = splitWords(after.join(''), SLIDE_WORDS);
   const shown = rest.slice(0, MORE_INTEL_AFTER - 1);
@@ -202,11 +217,12 @@ function briefingSlides({ header, briefing, stepRows, stepRow, missionStepList, 
     const pos = `${i === 0 ? ' is-first' : ''}${i === intel.length - 1 ? ' is-last' : ''}`;
     // Later intel slides repeat the label on a phone from style.css, so the text reads on unbroken.
     const label = i === 0 ? '<div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>' : '';
-    const moreHtml = i === intel.length - 1 && more
+    const last = i === intel.length - 1;
+    const moreHtml = `${last && more
       ? `<details class="brief-more" data-open-desktop><summary>More intel</summary><div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${more}</div></details>`
-      : '';
+      : ''}${last ? whyHtml(why) : ''}`;
     const panel = `<div class="panel brief-intel${pos}">${label}<div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;" data-chunk>${chunk}</div>${moreHtml}</div>`;
-    slides.push({ html: i === 0 ? `${header}${panel}` : panel });
+    slides.push({ html: i === 0 ? `${header}${intelTools}${panel}` : panel });
   });
 
   // Scout, phone only (the sidebar shows the line on a desktop).
@@ -234,7 +250,7 @@ function briefingSlides({ header, briefing, stepRows, stepRow, missionStepList, 
         words = SLIDE_WORDS + 1;
         return;
       }
-      const n = countWords(row) - 1; // not its number
+      const n = countWords(st.text); // its words, not its buttons or Stuck? help
       if (words + n > SLIDE_WORDS || groups.at(-1)?.alone) {
         groups.push({ rows: [row] });
         words = n;
@@ -243,9 +259,11 @@ function briefingSlides({ header, briefing, stepRows, stepRow, missionStepList, 
         words += n;
       }
     });
+    // On a phone the device question is a slide of its own, just before the steps.
+    if (gearHtml) slides.push({ html: `<div class="panel panel--active brief-steps is-first">${MOVE_LABEL}${gearHtml}</div>` });
     groups.forEach((g, i) => {
-      const pos = `${i === 0 ? ' is-first' : ''}${i === groups.length - 1 ? ' is-last' : ''}`;
-      const label = i === 0 ? '<div class="section-label" style="color: var(--cyan); margin-bottom: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.3);">YOUR MOVE</div>' : '';
+      const pos = `${i === 0 && !gearHtml ? ' is-first' : ''}${i === groups.length - 1 ? ' is-last' : ''}`;
+      const label = i === 0 ? `${gearHtml ? '' : MOVE_LABEL}${progressHtml}` : '';
       slides.push({ html: g.note
         ? `<div class="panel panel--active brief-steps brief-note${pos}">${g.note}</div>`
         : `<div class="panel panel--active brief-steps${pos}">${label}<div style="display: flex; flex-direction: column; gap: 14px;">${g.rows.join('')}</div></div>` });
@@ -337,4 +355,32 @@ function renderLoreSection(lore) {
 function loreSlides(lore) {
   if (!lore) return [];
   return splitWords(lore.text, SLIDE_WORDS).map((chunk, i) => `<div class="brief-last brief-lore">${i === 0 ? `${LORE_LABEL}${loreTitle(lore)}` : ''}${loreText(chunk, ' data-chunk')}</div>`);
+}
+
+// The full intel behind one tap, for the Short and Simplest levels.
+function whyHtml(why) {
+  if (!why) return '';
+  return `<details class="brief-why" data-why><summary>Why it matters</summary><div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${why}</div></details>`;
+}
+
+// How much to read, and Read it to me. The first time, Scout asks; after that it is a quiet
+// switch. Nothing about the choice leaves this browser (utils/reading.js).
+function readingTools(state, level, say) {
+  const offer = readingOffer(state);
+  const ask = offer
+    ? `<div class="read-ask read-offer" data-read-offer="${offer}"><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> <span>${OFFER_LINES[offer].line}</span>
+        <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
+    : readLevelChosen(state)
+    ? ''
+    : '<div class="read-ask" data-read-ask><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> How much do you want to read? You can change this any time.</div>';
+  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
+  const attr = String(say).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return `
+          <div class="read-tools" data-read-tools>
+            ${ask}
+            <div class="read-row">
+              <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
+              <button class="walk-link" data-action="read-aloud" data-say="${attr}" aria-label="Read the briefing out loud">&#128266; Read it to me</button>
+            </div>
+          </div>`;
 }
