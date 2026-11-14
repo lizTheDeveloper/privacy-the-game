@@ -11,7 +11,9 @@ import { missionDistrict } from '../src/data/missions.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../src/utils/bursts.js';
 import { setReadLevel } from '../src/utils/reading.js';
 
-const state = createInitialState();
+// The phone slide deck is the Full intel level's layout (Short and Simplest are one short
+// screen, then one step at a time: screens/briefing.js).
+const state = setReadLevel(createInitialState(), 'full');
 // The page as read in order, without the "More intel" summary.
 const read = (html) => norm(html.replace(/<summary>[^<]*<\/summary>/g, ' '));
 const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();

@@ -96,6 +96,8 @@ let notice = { hash: null, text: '' };
 let restoring = false;
 // "Reset it anyway" on a password recon showed is fine (until the page reloads).
 let resetAnywayMission = null;
+// A started mission shows one step at a time; "Read the briefing again" peeks at the briefing.
+let briefingPeek = null;
 // The last route drawn, and the building #/saints was opened from (memory only).
 let lastRoute = null;
 let saintsFrom = null;
@@ -222,7 +224,7 @@ const screens = {
     if (brokerDataStatus() === 'idle') loadBrokerMapData();
     return renderBigCheck(state, { status: brokerDataStatus(), data: brokerDataStatus() === 'ready' ? brokerData() : null, today: localDay(), scoutLine: bigCheckScout });
   },
-  briefing: ({ id }) => renderBriefing(state, id, { resetAnyway: resetAnywayMission === id }),
+  briefing: ({ id }) => renderBriefing(state, id, { resetAnyway: resetAnywayMission === id, peek: briefingPeek === id }),
   debrief: ({ id }) => renderDebrief(state, id),
   recheck: ({ id }) => renderDebrief(state, id, { recheck: true }),
   milestone: ({ districtId }) => renderMilestone(state, districtId),
@@ -299,6 +301,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
   try {
     // The saints gallery's back link: the building it was opened from. Kept
     // in memory only, never in the URL (pageviews read the URL).
+    if (route.screen !== 'briefing' || route.params?.id !== briefingPeek) briefingPeek = null;
     saintsFrom = saintsOrigin(route, lastRoute, saintsFrom);
     if (route.screen !== 'bank-notes') bankForm = {};
     lastRoute = route;
@@ -1237,8 +1240,10 @@ app.addEventListener('click', async (e) => {
     const mission = findMission(state, el.dataset.mission);
     setState(markMissionStarted(state, el.dataset.mission));
     if (!isCustomMission(el.dataset.mission)) track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
+    briefingPeek = null;
     renderCurrentRoute();
-    app.querySelector('[data-action="i-did-it"]')?.focus({ preventScroll: true });
+    window.scrollTo?.(0, 0);
+    (app.querySelector('[data-step-card] .focus-done') || app.querySelector('[data-action="i-did-it"]'))?.focus({ preventScroll: true });
   } else if (action === 'read-level') {
     // Local only: how much someone likes to read stays on this phone (utils/reading.js).
     setState(setReadLevel(state, el.dataset.level));
@@ -1283,6 +1288,24 @@ app.addEventListener('click', async (e) => {
     stopSpeaking();
     renderCurrentRoute();
     focusCurrentStep();
+  } else if (action === 'step-back') {
+    // Back one step: the last one handled before the current step is open again.
+    const mission = findMission(state, el.dataset.mission);
+    if (mission) {
+      const steps = visibleSteps(mission, state);
+      const marks = stepMarks(state, mission.id);
+      const p = progressFor(state, mission.id, steps);
+      const upTo = p.current === -1 ? steps.length : p.current;
+      const prev = [...steps.slice(0, upTo)].reverse().find((st) => marks[stepKey(st)]);
+      if (prev) setState(markStep(state, mission.id, stepKey(prev), null));
+      stopSpeaking();
+      renderCurrentRoute();
+      focusCurrentStep();
+    }
+  } else if (action === 'show-briefing' || action === 'show-steps') {
+    briefingPeek = action === 'show-briefing' ? el.dataset.mission : null;
+    renderCurrentRoute();
+    window.scrollTo?.(0, 0);
   } else if (action === 'step-stuck') {
     const help = app.querySelector(`#stuck-${CSS.escape(el.dataset.step)}`);
     if (help) {
@@ -1772,7 +1795,7 @@ announceReady();
 
 // After a step is ticked: put the next one (or, at the end, I DID IT) in view and in focus.
 function focusCurrentStep() {
-  const next = app.querySelector('.walk-step.is-current .walk-done') || app.querySelector('[data-action="i-did-it"]');
+  const next = app.querySelector('[data-step-card] .focus-done') || app.querySelector('[data-step-card] .focus-go') || app.querySelector('.walk-step.is-current .walk-done') || app.querySelector('[data-action="i-did-it"]');
   const row = next?.closest('.walk-step') || next;
   row?.scrollIntoView?.({ block: 'center', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   next?.focus({ preventScroll: true });

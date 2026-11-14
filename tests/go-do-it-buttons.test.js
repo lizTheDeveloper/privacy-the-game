@@ -30,13 +30,14 @@ describe('GO DO IT never opens nothing', () => {
     expect(fresh).toContain('START &#9654;');
     expect(fresh).not.toContain('data-action="go-do-it"');
     const again = renderBriefing({ ...s, startedMissions: { 'instagram-recon-service': '2026-10-31T00:00:00Z' } }, 'instagram-recon-service');
-    expect(again).toContain('I DID IT');
+    // Started: one step at a time, with a way to report back and no GO DO IT AGAIN.
+    expect(again).toContain('data-action="i-did-it"');
     expect(again).not.toContain('GO DO IT AGAIN');
   });
 
-  it('a mission with a site still opens it', () => {
+  it('a mission with a site still opens it (GO DO IT for one step; each step’s own link for several)', () => {
     const withUrl = MISSIONS.find((m) => (m.steps ?? []).some((st) => st.url));
-    expect(renderBriefing(createInitialState(), withUrl.id)).toMatch(/data-action="go-do-it"[^>]*data-url="https?:/);
+    expect(renderBriefing(createInitialState(), withUrl.id)).toMatch(/<a href="https?:[^"]+"[^>]*data-action="mission-step"|data-action="go-do-it"[^>]*data-url="https?:/);
   });
 
   it('START records the start and re-draws the briefing; it never leaves for the debrief', () => {

@@ -147,7 +147,7 @@ describe('briefing: no reset needed', () => {
 
   it('reset anyway is the normal flow', () => {
     const html = renderBriefing(clean(s0), 'gmail-fortify-password', { resetAnyway: true });
-    expect(html).toContain('data-action="go-do-it"');
+    expect(html).toMatch(/data-action="(?:go-do-it|start-mission)"/);
     expect(html).not.toContain('data-action="password-not-needed"');
   });
 
@@ -163,7 +163,7 @@ describe('briefing: no reset needed', () => {
     for (const s of [s0, set(s0, 'gmail-recon-breach', { status: 'completed', finding: '3plus-breaches', password_exposed: 'yes' })]) {
       const html = renderBriefing(s, 'gmail-fortify-password');
       expect(html).not.toContain('NO RESET NEEDED');
-      expect(html).toContain('data-action="go-do-it"');
+      expect(html).toMatch(/data-action="(?:go-do-it|start-mission)"/);
     }
   });
 

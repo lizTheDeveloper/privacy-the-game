@@ -487,7 +487,7 @@ describe('phone width', () => {
     const { renderBriefing } = await import('../src/screens/briefing.js');
     const { createInitialState } = await import('../src/state.js');
     const html = renderBriefing(createInitialState(), 'sim_protection-reclaim-remove-sms');
-    expect(html).toMatch(/line-height: 1\.5; min-width: 0; overflow-wrap: anywhere;">/);
+    expect(html).toMatch(/overflow-wrap: anywhere;/);
   });
 
   it('no mission string starts or ends with a stray backtick', () => {

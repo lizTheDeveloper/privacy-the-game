@@ -91,7 +91,8 @@ export function walkStepRow({ mission, step, index, mark, current, notes = step.
 }
 
 // "STEP 2 OF 5" and a bar; "ALL 5 STEPS HANDLED" at the end.
-export function walkProgress(p) {
+// bare: just the bar (step mode's card says which step it is).
+export function walkProgress(p, { bare = false } = {}) {
   if (p.total < 2) return '';
   const pct = Math.round((p.handled / p.total) * 100);
   const label = p.current === -1
@@ -99,7 +100,7 @@ export function walkProgress(p) {
     : `STEP ${p.current + 1} OF ${p.total}`;
   return `
     <div class="walk-progress" data-walk-progress>
-      <div class="walk-progress-label">${label}</div>
+      ${bare ? '' : `<div class="walk-progress-label">${label}</div>`}
       <div class="walk-bar" role="progressbar" aria-label="Steps handled" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.handled}"><span style="width: ${pct}%;"></span></div>
     </div>`;
 }
