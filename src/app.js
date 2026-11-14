@@ -1272,7 +1272,12 @@ app.addEventListener('click', async (e) => {
     const was = stepMarks(state, id)[key];
     const mark = action === 'step-done' ? 'done' : action === 'step-skip' ? 'skipped' : was ? null : 'done';
     let next = markStep(state, id, key, mark);
-    if (!next.startedMissions?.[id]) next = markMissionStarted(next, id);
+    // The first tick starts the mission, like opening a step's link: that start is the one
+    // thing sent (mission-started, as before). Which steps, skips and Stuck? never are.
+    if (!next.startedMissions?.[id]) {
+      next = markMissionStarted(next, id);
+      if (!isCustomMission(id)) track('mission-started', { mission: id, phase: findMission(state, id)?.phase });
+    }
     if (action === 'step-skip') next = recordSignal(next, 'skip');
     setState(next);
     stopSpeaking();

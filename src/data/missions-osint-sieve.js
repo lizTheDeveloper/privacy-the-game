@@ -59,7 +59,8 @@ export const OSINT_SIEVE_MISSIONS = [
     title: 'OSINT Sieve: Behavioral Patterns',
     briefing: "Your posting habits reveal your life's rhythm. An investigator looks at WHEN you post to determine your timezone and daily routine — morning posts reveal when you wake up, gaps reveal your work hours, late-night posts show when you sleep. They look at WHERE you post from — the same café tagged three times a week, the gym selfie with the gym name visible, the office building in the background of your lunch photo. Repeated locations build a map of your daily life. Let's see what pattern your posts paint.",
     steps: [
-      { text: "Open your most active social media account. Look at your last 20 posts. What times were they posted? Do they reveal your timezone? Your work schedule? When you sleep?" },
+      { text: "Open your most active social media account" },
+      { text: "Look at your last 20 posts. What times were they posted? Do they reveal your timezone? Your work schedule? When you sleep?" },
       { text: "Check location tags and check-ins from the last 6 months. Do any locations repeat? Your gym, your coffee shop, your office, your kids' school?" },
       { text: "Look at gym selfies or workout posts. Is the gym name or location visible? Your regular workout time?" },
       { text: "Search your posts for food/restaurant photos. Do they reveal your neighborhood or regular spots?" },
@@ -152,7 +153,8 @@ export const OSINT_SIEVE_MISSIONS = [
     briefing: "The trail you leave without thinking about it. An Amazon list you made public, or shared, can show your name and city (Amazon makes new lists private unless you choose otherwise). Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
     steps: [
       { text: "Check your Amazon lists: go to Your Lists and look at each list's privacy setting. Any you made public or shared? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },
-      { text: 'Check Venmo privacy settings: Settings > Privacy > make transactions private. Review past public transactions.', url: 'https://account.venmo.com/settings/privacy' },
+      { text: 'Check Venmo privacy settings: Settings > Privacy > make transactions private', url: 'https://account.venmo.com/settings/privacy' },
+      { text: 'Check Venmo privacy settings: Review past public transactions.' },
       { text: 'If you use Strava or a fitness tracker: check your privacy controls and map visibility. Does a public route start or end at your home?', url: 'https://www.strava.com/settings/privacy' },
       { text: "Search your recent screenshots — any showing WiFi network names? An SSID can be looked up on WiGLE to find your physical location.", url: "https://wigle.net/" },
       { text: "Check unboxing or haul videos you've posted. Any delivery labels, packaging with your address, or mail visible in the background?" },

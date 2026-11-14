@@ -91,7 +91,8 @@ export const FOUNDRY_MISSIONS = [
     briefing: "Meta uses your public Facebook posts, Instagram photos, comments, and Meta AI conversations to train their AI models. In the US, there is no toggle to opt out — but you can limit exposure by making accounts private and avoiding Meta AI. EU/UK users have a 'Right to object' form in the Privacy Centre.",
     steps: [
       { text: 'Open Meta’s Privacy Center', url: 'https://www.facebook.com/privacy/center/' },
-      { text: 'US: there’s no opt-out. Check which of your Facebook and Instagram posts are Public, because those are what Meta trains on. Avoid putting personal details into Meta AI chats' },
+      { text: 'US: there’s no opt-out. Check which of your Facebook and Instagram posts are Public, because those are what Meta trains on.' },
+      { text: 'US: Avoid putting personal details into Meta AI chats' },
       { text: 'EU/UK: in the Privacy Center, use the “right to object” form. Since May 27, 2025 an objection only covers future data' },
     ],
     debriefQs: META_AI_DEBRIEF,

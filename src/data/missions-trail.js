@@ -69,7 +69,10 @@ export const TRAIL_MISSIONS = [
     briefing: "Every photo your phone takes embeds invisible metadata called EXIF data: the GPS coordinates where the photo was taken, the exact date and time, your device model, and camera settings. One photo of your living room reveals your home address. One photo at a coffee shop reveals your daily routine. Most people have thousands of geotagged photos in their camera roll right now, and many have been shared without stripping this data.",
     steps: [
       { text: "iPhone: Open the Photos app, pick any recent photo, tap the (i) info button at the bottom. You'll see a map showing exactly where the photo was taken, the date, time, and camera details." },
-      { text: "Android: Open Google Photos, pick a photo, swipe up or tap the three-dot menu > Details. Look for the Location section and the map pin." },
+      { text: "Android: Open Google Photos" },
+      { text: "Android: Pick a photo" },
+      { text: "Android: Swipe up or tap the three-dot menu > Details" },
+      { text: "Android: Look for the Location section and the map pin." },
       { text: "Desktop: Right-click any photo file > Properties (Windows) or Get Info (Mac). On Windows, go to the Details tab and look for GPS Latitude/Longitude. On Mac, click 'More Info' in the Inspector." },
       { text: "Notice how precise the GPS is -- it's usually accurate to within a few meters. That's your home, your workplace, your gym, your therapist's office." },
     ],
@@ -143,7 +146,8 @@ export const TRAIL_MISSIONS = [
     title: "Audit Your Loyalty Cards",
     briefing: "Every loyalty card, rewards program, and store membership is a data pipeline. Your drugstore knows your prescriptions. Your grocery store knows your diet. Your airline knows your travel patterns. Your coffee shop knows your daily schedule. Each company sells this data to brokers, advertisers, and in some cases insurance companies. The 'discount' is the price of your data -- and it's usually worth far more to them than the 50 cents you saved on toothpaste.",
     steps: [
-      { text: "Make a list of every loyalty/rewards program you're enrolled in. Check your wallet (physical cards), your phone (Apple Wallet, Google Pay, store apps), and your email (search for 'rewards,' 'points,' 'member')." },
+      { text: "Make a list of every loyalty/rewards program you're enrolled in" },
+      { text: "Check your wallet (physical cards), your phone (Apple Wallet, Google Pay, store apps), and your email (search for 'rewards,' 'points,' 'member')." },
       { text: "Common ones people forget: drugstore (CVS ExtraCare, Walgreens myWalgreens), grocery (Kroger Plus, Safeway Club, Costco), gas stations, airline miles, hotel points, coffee (Starbucks Rewards), retail (Target Circle, Best Buy, Sephora)." },
       { text: "For each one, consider: when did you last actually use the rewards? Is the discount worth the data they're collecting?" },
     ],

@@ -652,7 +652,8 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Proton shows every signed-in session, and can keep a log of sign-ins. The log is off unless you turned it on, so the session list is where to look today.',
     steps: [
       { text: 'Open your Proton account → Settings → All settings → Security and privacy', url: 'https://account.proton.me' },
-      { text: 'Under Session management, look for sessions you don’t recognize. Revoke any you don’t, or use Revoke all other sessions' },
+      { text: 'Under Session management, look for sessions you don’t recognize.' },
+      { text: 'Revoke any you don’t, or use Revoke all other sessions' },
       { text: 'Under Security logs: if logging is off, turn it on. It only records sign-ins from now on, so nothing will show yet' },
     ],
     debriefQs: LOGIN_DEBRIEF,
@@ -674,7 +675,9 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Proton uses zero-knowledge encryption — they can’t read your mail even if compelled. But that means a lost or compromised password is catastrophic. Make it strong and backed up.',
     steps: [
       { text: 'Sign in to your Proton account → Settings → All settings', url: 'https://account.proton.me' },
-      { text: 'Select Account and password, then click the pencil button next to your password and enter your current one' },
+      { text: 'Select Account and password' },
+      { text: 'Click the pencil button next to your password' },
+      { text: 'Enter your current one' },
       { text: 'Set a strong, unique password and store it in a password manager' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -890,7 +893,8 @@ const CHAPTER_1_MISSIONS = [
     steps: [
       sameAddressStep('gmail', 'login check'),
       { text: 'Open Google Security (Security & sign-in)', url: 'https://myaccount.google.com/security' },
-      { text: 'Under Your devices, tap Manage all devices. Sign out of any you don’t recognize' },
+      { text: 'Under Your devices, tap Manage all devices.' },
+      { text: 'Sign out of any you don’t recognize' },
       { text: 'Under Recent security events, tap Review security events' },
       { text: 'Open your connected apps and remove any you don’t use', url: 'https://myaccount.google.com/linkedapps' },
     ],
@@ -1130,7 +1134,8 @@ const CHAPTER_1_MISSIONS = [
     steps: [
       { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
       { text: 'Tap Password and security → Where you’re logged in' },
-      { text: 'Review each session. Select any you don’t recognize → Log out' },
+      { text: 'Review each session.' },
+      { text: 'Select any you don’t recognize → Log out' },
     ],
     debriefQs: LOGIN_DEBRIEF,
     scoutDialog: {
@@ -1151,7 +1156,8 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Your Facebook password protects your social identity and every app using Facebook Login. Because Facebook is a common SSO provider, a compromised Facebook password can cascade to dozens of other services.',
     steps: [
       { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
-      { text: 'Select Password and security → Change password, then pick your Facebook account' },
+      { text: 'Select Password and security → Change password' },
+      { text: 'Pick your Facebook account' },
       { text: 'Set a new, unique password' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
@@ -1173,7 +1179,8 @@ const CHAPTER_1_MISSIONS = [
     briefing: 'Facebook supports authenticator apps, security keys, and SMS for two-factor authentication. An authenticator app is recommended — SMS can be intercepted via SIM swapping, which is a known attack vector on social media accounts.',
     steps: [
       { text: 'Open Accounts Center (Facebook → Settings & privacy → Settings → Accounts Center)', url: 'https://accountscenter.facebook.com/password_and_security' },
-      { text: 'Select Password and security → Two-factor authentication, then pick your Facebook account' },
+      { text: 'Select Password and security → Two-factor authentication' },
+      { text: 'Pick your Facebook account' },
       { text: 'Set up with an authenticator app (not SMS)' },
     ],
     debriefQs: TWO_FA_METHOD_DEBRIEF,

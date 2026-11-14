@@ -734,7 +734,8 @@ export const RECLAMATION_MISSIONS = [
     briefing: "The most effective defense against location data brokers is restricting which apps can see your GPS. Set everything to \"While Using\" or \"Never\" except navigation apps. Apps set to \"Always\" broadcast your coordinates around the clock -- that data enters the ad bidstream and can be bought by anyone.",
     steps: [
       { text: "Open Settings → Privacy & Security → Location Services on your phone" },
-      { text: "Review every app. Set most to \"While Using\" or \"Never\"" },
+      { text: "Review every app." },
+      { text: "Set most to \"While Using\" or \"Never\"" },
       { text: "Only maps and ride-sharing should be \"While Using.\" Nothing should be \"Always\" unless you have a specific reason" },
       { text: "Deny location entirely to games, calculators, flashlights, shopping apps, and social media" },
     ],

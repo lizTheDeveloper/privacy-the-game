@@ -248,19 +248,9 @@ describe('reading signals stay on this phone', () => {
     expect(renderBriefing(s, MULTI.id)).toContain('data-read-offer="full"');
   });
 
-  it('none of the reading, device or step handlers sends anything to analytics', () => {
-    const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
-    const start = app.indexOf("} else if (action === 'read-level') {");
-    const end = app.indexOf("} else if (action === 'i-did-it') {", start);
-    expect(start).toBeGreaterThan(-1);
-    const block = app.slice(start, end);
-    expect(block).toContain("action === 'step-done'");
-    expect(block).not.toMatch(/\btrack\(/);
-    expect(block).not.toMatch(/captureError|fetch\(/);
-    // The signals module itself imports nothing that can send.
+  it('the signals module imports nothing that can send (the handlers are driven in tests/app/reading-local-only.test.js)', () => {
     const signals = readFileSync(new URL('../src/utils/reading-signals.js', import.meta.url), 'utf8');
     const imports = signals.split('\n').filter((l) => /^import /.test(l)).join('\n');
     expect(imports).not.toMatch(/analytics|errors|collective/);
-    expect(signals).not.toMatch(/fetch\(|track\(/);
   });
 });
