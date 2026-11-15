@@ -506,29 +506,56 @@ function stepSite(steps, i, account) {
   return steps[i]?.url || [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || account?.securityUrl || '';
 }
 
-// A step's report question, right on the step: what the player sees there goes in here
-// (data/missions.js askSteps). A follow-up ("did the leak include passwords?") shows
-// once its answer calls for it. Kept on this device; the report starts from it.
+// A step's report question, right on the step, in as few words as it can be:
+// Yes / No first, and "How many?" only after a Yes (Liz: "fewer words — yes and no,
+// if so how many?"). Each tap stores a real report answer (data/missions.js askSteps);
+// the "yes" before "how many" is kept as `<question>:yes` and never reaches the report.
+const SHORT_ASKS = {
+  breach: { label: 'Were you in any leaks?', none: 'no-breaches', more: 'How many?', some: [['1-2-breaches', '1 or 2'], ['3plus-breaches', '3 or more']] },
+  login: { label: 'Any you don’t know?', none: 'no-breaches', more: 'Are you sure it wasn’t you?', some: [['1-2-breaches', 'Not sure'], ['3plus-breaches', 'Sure. It wasn’t me']] },
+};
+const SHORT_FOLLOW = { password_exposed: 'Did a leak have your password in it?' };
+// "Yes — passwords were in the leaked data" → "Yes".
+const shortText = (t) => t.split(' — ')[0].replace(/^Couldn’t check right now$/, 'Couldn’t check');
+
 function stepAsk(state, mission, step) {
   if (!step?.ask) return '';
   const qs = mission.debriefQs || [];
   const q = qs.find((x) => x.id === step.ask);
   if (!q || q.multi || q.type === 'number') return '';
   const answers = stepAnswers(state, mission.id);
-  const follow = qs.filter((f) => f.showIf?.question === q.id && !f.multi && f.type !== 'number' && showIfMatches(f.showIf, answers[q.id]));
-  const group = (g, first) => `
-        <fieldset class="focus-ask-q" data-ask-q="${g.id}">
-          <legend>${first ? 'What did you see? Tap one.' : g.label}</legend>
-          ${!first && g.hint ? `<p class="focus-ask-hint">${g.hint}</p>` : ''}
-          <div class="focus-ask-opts">${questionOptions(g, state).map((o) => {
-            const on = answers[g.id] === o.value;
-            return `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${g.id}" data-value="${attrEsc(o.value)}" aria-pressed="${on}">${on ? '&#10003; ' : ''}${o.text}</button>`;
-          }).join('')}</div>
+  const btn = (qid, value, text, on) => `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${qid}" data-value="${attrEsc(value)}" aria-pressed="${on}">${on ? '&#10003; ' : ''}${text}</button>`;
+  const group = (id, label, buttons, hint = '') => `
+        <fieldset class="focus-ask-q" data-ask-q="${id}">
+          <legend>${label}</legend>${hint ? `<p class="focus-ask-hint">${hint}</p>` : ''}
+          <div class="focus-ask-opts">${buttons.join('')}</div>
         </fieldset>`;
+  const kind = q.id !== 'finding' ? null : /-recon-breach$/.test(mission.id) ? 'breach' : 'login';
+  const spec = SHORT_ASKS[kind];
+  const valid = (v) => q.options.some((o) => o.value === v);
+  const parts = [];
+  if (spec && spec.some.every(([v]) => valid(v)) && valid(spec.none)) {
+    const a = answers[q.id];
+    const yes = answers[`${q.id}:yes`] === 'yes' || spec.some.some(([v]) => v === a);
+    const skip = q.options.find((o) => o.severity === 'skip');
+    parts.push(group(q.id, spec.label, [
+      btn(`${q.id}:yes`, 'yes', 'Yes', yes),
+      btn(q.id, spec.none, 'No', a === spec.none),
+      ...(skip ? [btn(q.id, skip.value, 'Couldn’t check', a === skip.value)] : []),
+    ]));
+    if (yes) parts.push(group(`${q.id}-how`, spec.more, spec.some.map(([v, t]) => btn(q.id, v, t, a === v))));
+  } else {
+    parts.push(group(q.id, q.label, questionOptions(q, state).map((o) => btn(q.id, o.value, shortText(o.text), answers[q.id] === o.value))));
+  }
+  const follow = qs.filter((f) => f.showIf?.question === q.id && !f.multi && f.type !== 'number' && showIfMatches(f.showIf, answers[q.id]));
+  for (const f of follow) {
+    parts.push(group(f.id, SHORT_FOLLOW[f.id] || f.label, questionOptions(f, state).map((o) => btn(f.id, o.value, shortText(o.text), answers[f.id] === o.value)),
+      f.id === 'password_exposed' ? 'Look for “Passwords” in the list.' : ''));
+  }
+  const done = answers[q.id] !== undefined && follow.every((f) => answers[f.id] !== undefined);
   return `
-      <div class="focus-ask" data-step-ask="${q.id}">
-        ${group(q, true)}${follow.map((f) => group(f, false)).join('')}
-        ${answers[q.id] !== undefined ? '<p class="focus-ask-note">Saved for your report. Now tap DONE.</p>' : ''}
+      <div class="focus-ask" data-step-ask="${q.id}">${parts.join('')}
+        ${done ? '<p class="focus-ask-note">Saved. Now tap DONE.</p>' : ''}
       </div>`;
 }
 

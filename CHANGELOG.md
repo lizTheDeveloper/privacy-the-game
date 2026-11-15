@@ -2,6 +2,10 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.16.1 (2026-11-14): Fewer words on the step
+
+- The question on a results step is now **Yes / No** first: "Were you in any leaks?" Yes, No, Couldn’t check. Only a Yes brings **"How many?"** (1 or 2, 3 or more), then "Did a leak have your password in it?" Yes, No, Not sure. Sign-in checks ask "Any you don’t know?" the same way. Answers on the card drop their long tails ("Yes — passwords were in the leaked data" is just "Yes"); the report keeps its full wording.
+
 ## 7.16.0 (2026-11-14): Answer on the step, plain Help
 
 - **Say what you found on the step where you see it.** Step 3 of the Gmail leak check says "Read the results — note how many breaches", and the place to say so was two screens later. Now that step shows the report's answers as big buttons: No breaches found, Found in 1–2, Found in 3+, Couldn’t check. Pick one that says you were in a leak and "Did any of those include the password?" appears on the same card. The report starts with your answers picked and says "You picked this on the step." This covers all 44 email leak checks and sign-in/device checks, and the "Same address as your Gmail?" steps. Your answers stay on this device until you file the report.
