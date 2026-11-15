@@ -12,6 +12,7 @@ import { FOUNDRY_MISSIONS } from './missions-foundry.js';
 import { GRID_MISSIONS } from './missions-grid.js';
 import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
+import { FIELD_MISSIONS } from './missions-field.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
 import { PWNED_PASSWORD_STEP } from './pwned-passwords-step.js';
 import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF, PASSWORD_MISSIONS } from './missions-passwords.js';
@@ -1293,6 +1294,7 @@ export const MISSIONS = withReadingCopy(withReplacements([
   ...GRID_MISSIONS,
   ...CLINIC_MISSIONS,
   ...TRAIL_MISSIONS,
+  ...FIELD_MISSIONS,
   ...OSINT_SIEVE_MISSIONS,
   ...PASSWORD_MISSIONS,
 ]));

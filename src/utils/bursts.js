@@ -9,6 +9,7 @@
 //    state.passwordBurst = { ids, startedAt }.
 // Every number here stays in this browser: none of it is ever tracked.
 import { MISSIONS, missionDistrict } from '../data/missions.js';
+import { activeDistricts } from './opt-in.js';
 import { DISTRICTS } from '../data/districts.js';
 import { isMissionDone } from './mission-status.js';
 import { isPasswordMission, passwordResetNeed, resetNeedSources } from './password-need.js';
@@ -65,7 +66,7 @@ export function passwordProgressLines(state) {
     if (game.left > 0) progress += `, and ${game.left} ${plural(game.left, 'account here needs', 'accounts here need')} a new password`;
     lines.push(progress);
     if (n.left > 0 && usedCategories(state)) {
-      lines.push(`${openCategoryCount(state)} of ${DISTRICTS.length} categories still open.`);
+      lines.push(`${openCategoryCount(state)} of ${activeDistricts(state).length} categories still open.`);
     }
     return lines;
   }

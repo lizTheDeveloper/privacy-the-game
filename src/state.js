@@ -1,5 +1,6 @@
 import { captureError } from './utils/errors.js';
 import { ACCOUNTS } from './data/accounts.js';
+import { OPT_IN_DISTRICTS } from './data/districts.js';
 import { migrateBrokenAnswers } from './utils/migrate-answers.js';
 import { cleanBrokerState } from './utils/broker-state.js';
 
@@ -19,7 +20,8 @@ const STORAGE_KEY = 'reclaim-city-state';
 const DEFAULT_ACCOUNTS = Object.fromEntries(
   Object.entries(ACCOUNTS).map(([id, a]) => [
     id,
-    { enabled: a.district !== 'freeway', name: a.name, district: a.district },
+    // Freeway turns on per car (the garage); an opt-in district (The Field) when the player turns it on.
+    { enabled: a.district !== 'freeway' && !OPT_IN_DISTRICTS.has(a.district), name: a.name, district: a.district },
   ]),
 );
 

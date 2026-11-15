@@ -522,6 +522,40 @@ export const DISTRICT_DIALOGUE = {
     ],
   },
 
+  // The Field (chapter 13, opt-in): Field Opsec. No numbers here on purpose: every
+  // figure Scout says in a late district must already be in its missions.
+  'field': {
+    intro: `The rest of the city is about everyday privacy. This district is for when somebody is actually looking for you: a doxxer with a grudge, a company's investigator, the police, a government. You don't have to be a genius to be safe here. You have to follow the checklist, and practise it before the day you need it. Welcome to The Field.`,
+    progress: {
+      25: [
+        `A quarter of The Field. You know who's after you now, and that changes every other choice.`,
+        `25%. Most people skip the boring setup. You didn't.`,
+      ],
+      50: [
+        `Halfway. Your lines are quieter and your devices hold up better if somebody grabs them.`,
+        `50%. The setup is the easy half. The other half is doing it when you're scared.`,
+      ],
+      75: [
+        `Three-quarters. You've said the script out loud. You know what you'd do in the first minutes.`,
+        `75%. Your crew knows the plan too. A plan only you know is a plan that dies with your phone.`,
+      ],
+      100: [
+        `The Field is yours. Threat model done, lines quiet, devices locked, the door script rehearsed, the burn plan written, the crew briefed. Keep doing the drills.`,
+        `District done. Nobody can promise you safety. What you have now is a head start, and that's what the work needs.`,
+      ],
+    },
+    debrief: {
+      skip: [
+        `That's fine. Just don't wait for the day you need it. That's the one day you won't have time to set it up.`,
+        `Noted. Come back to it on a calm day. Calm days are when this gets done.`,
+      ],
+    },
+    lore: {
+      four_levers: { title: 'The Four Levers', text: `Whoever wants to stop you pulls one of four levers: technical (break into your devices), legal (get your records from a company), physical (stop you at a border or a door) and social (lean on the people around you). Most pull more than one, one after another. Knowing the chain is what turns reacting into being ready.` },
+      three_tiers: { title: 'Low, Mid, State', text: `The Field sorts adversaries into three tiers. Low: doxxers, stalkers and harassers with a search engine and a grudge. Mid: company investigators, local police, immigration agents and funded harassment campaigns. State: intelligence services, federal law enforcement with subpoena power, and governments that work outside their own laws.` },
+      drills: { title: 'Why the Drills Matter', text: `Knowing what to do at a calm desk is not the same as doing it scared at a border or a door. The first minutes of a stop or a search decide most of what follows, and the only way to get those minutes right is to have practised them out loud.` },
+    },
+  },
   'trail': {
     intro: `The other districts were about accounts someone could break into. Nobody broke into anything here. You took photos, bought groceries, browsed the web and paid with a card, and each of those left a trace. A photo of your living room can carry the GPS coordinates of your living room. Your loyalty card knows your diet. Your browser's setup, its fonts and screen size and timezone, can pick you out with no cookie at all: in EFF's 2010 study, 83% of browsers were unique. Welcome to The Trail. Most of it can be thinned out.`,
     progress: {

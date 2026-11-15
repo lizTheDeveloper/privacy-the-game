@@ -2,7 +2,10 @@
 // first and keeps the full briefing under "Why it matters" (utils/reading.js). Grade 6 or
 // lower, 16 words or fewer, no numbers, and no claim the briefing doesn't make
 // (tests/readability.test.js).
+import { FIELD_LEADS } from './missions-field.js';
+
 export const MISSION_LEADS = {
+  ...FIELD_LEADS,
   "gmail-recon-breach": "Find out if your Gmail address or password has leaked.",
   "gmail-recon-login": "See if anyone else has signed in to your Gmail.",
   "gmail-fortify-password": "Give Gmail a new password you use nowhere else.",

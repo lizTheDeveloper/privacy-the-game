@@ -47,4 +47,10 @@ export const QUICK_QUESTS = [
     description: 'Your address, phone number, or relatives listed on people-search sites.',
     targetDistrict: 'reclamation',
   },
+  {
+    id: 'work-target',
+    title: 'My work makes me a target',
+    description: 'You report, organize, run a clinic or a mutual aid network, and someone with more power wants to stop you.',
+    targetDistrict: 'field',
+  },
 ];

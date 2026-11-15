@@ -139,4 +139,26 @@ export const DISTRICTS = [
     facilityOrder: ['photo_metadata', 'loyalty_programs', 'payment_trail', 'browser_fingerprint'],
     facilityIntro: 'The other districts were about accounts someone could hack into. This one is about the data you scatter just by existing -- photos with GPS coordinates, loyalty cards tracking every purchase, credit card transactions sold to brokers, and a browser that is as unique as your fingerprint. Nobody hacked you. You just left a trail.',
   },
+  {
+    // Field Opsec (The Multiverse School's course), for people whose work puts
+    // them in someone's way: journalists, organizers, clinic workers, legal
+    // observers, mutual aid. OPT-IN: its buildings start switched off, so it
+    // never counts toward city-complete, integrity or the lights until a player
+    // turns it on (see OPT_IN_DISTRICTS in state.js and the panel in district.js).
+    id: 'field',
+    pmCategory: 'the accounts you use for this work',
+    name: 'The Field',
+    chapter: 13,
+    description: 'Field opsec — for when your work makes you a target',
+    flavor: 'You don\'t need to be a genius to be safe. You need to follow the checklist.',
+    type: 'facility',
+    optIn: true,
+    optInQuestion: 'Does your work put you in someone\'s way?',
+    optInWho: 'Journalists, organizers, clinic workers, legal observers, mutual aid coordinators: anyone whose work makes someone with more power want to stop them.',
+    facilityOrder: ['who_is_after_you', 'quiet_lines', 'the_meet', 'the_crossing', 'hostile_ground', 'lockdown', 'the_door', 'burn_protocol', 'the_crew'],
+    facilityIntro: 'The rest of the city is about everyday privacy. The Field is for when someone is actually looking for you. Every building here is a procedure from the Field Opsec course: what to do, why, and the mistake experienced people still make.',
+  },
 ];
+
+// Districts a player turns on themselves. Their buildings start off.
+export const OPT_IN_DISTRICTS = new Set(DISTRICTS.filter((d) => d.optIn).map((d) => d.id));

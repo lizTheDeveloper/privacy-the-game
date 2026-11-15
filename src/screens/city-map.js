@@ -1,4 +1,5 @@
 import { DISTRICTS } from '../data/districts.js';
+import { activeDistricts } from '../utils/opt-in.js';
 import { missionsInProgress, visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
 import { findMission } from '../data/custom-missions.js';
 import { MISSIONS } from '../data/missions.js';
@@ -815,7 +816,8 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   const placed = data ? backdropPods(data, displayPodId(data, whoami?.status === 'ready' ? whoami.data : null), BACKDROP_SLOTS) : null;
   const hasPods = Boolean(placed && placed.length);
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
-  const progress = DISTRICTS.map((d) => calcDistrictProgress(state, d.id).percent);
+  const active = activeDistricts(state);
+  const progress = active.map((d) => calcDistrictProgress(state, d.id).percent);
   const securedCount = progress.filter((p) => p >= 100).length;
   const avg = progress.reduce((sum, p) => sum + p, 0) / progress.length / 100;
   const hazeMagenta = (0.22 * (1 - avg)).toFixed(3);
@@ -834,10 +836,10 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   ${renderStreams()}
   <div class="city-hud">${renderHud(state)}${renderWelcomeBack(welcomeBack, 'top')}</div>
   <div class="city-readout">
-    <span class="city-readout__dot ${securedCount === DISTRICTS.length ? 'is-secured' : ''}"></span>
+    <span class="city-readout__dot ${securedCount === active.length ? 'is-secured' : ''}"></span>
     <span>SECTOR MAP <b>LIVE</b></span>
     <span class="sep">//</span>
-    <span>DISTRICTS <b>${DISTRICTS.length}</b></span>
+    <span>DISTRICTS <b>${active.length}</b></span>
     <span class="sep">//</span>
     <span>SECURED <b>${securedCount}</b></span>
   </div>

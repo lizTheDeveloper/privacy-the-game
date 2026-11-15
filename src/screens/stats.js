@@ -48,7 +48,7 @@ function districtRow(state, district) {
   const accent = progress.percent === 100 ? '#C6FF00' : progress.percent > 0 ? '#00E5FF' : 'rgba(237,239,243,0.5)';
   const nameColor = locked ? 'rgba(237,239,243,0.3)' : accent;
   const bar = locked
-    ? `<div style="flex: 1; display: flex; align-items: center; height: 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: rgba(237,239,243,0.2);">LOCKED CONTENT</div>`
+    ? `<div style="flex: 1; display: flex; align-items: center; height: 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: rgba(237,239,243,0.2);">${district.optIn ? 'OPTIONAL · TURN IT ON IN THE DISTRICT' : 'LOCKED CONTENT'}</div>`
     : `<div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"><div style="width: ${progress.percent}%; height: 100%; background: linear-gradient(90deg, #00E5FF, #C6FF00); box-shadow: 0 0 6px rgba(0,229,255,0.2);"></div></div>`;
   return `
   <a href="#/district/${district.id}" style="display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit;">

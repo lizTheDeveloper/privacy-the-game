@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { activeDistricts } from '../src/utils/opt-in.js';
 
 vi.mock('../src/utils/analytics.js', () => ({
   track: vi.fn(), trackNow: vi.fn(), trackThenStop: vi.fn(), waitForTracker: vi.fn(),
@@ -146,8 +147,11 @@ describe('14b: per-category changes count toward the manager’s total', () => {
   it('the headline says how many categories are still open, once the player has used them', () => {
     expect(passwordProgressLines(counted)).toHaveLength(2);
     const s = act(counted, 'vault', 'clear');
-    expect(openCategoryCount(s)).toBe(DISTRICTS.length - 1);
-    expect(passwordProgressLines(s)[2]).toBe(`${DISTRICTS.length - 1} of ${DISTRICTS.length} categories still open.`);
+    // Counted over the player's districts: an opt-in one (The Field) that's off isn't theirs yet.
+    const n = activeDistricts(s).length;
+    expect(n).toBe(DISTRICTS.length - 1);
+    expect(openCategoryCount(s)).toBe(n - 1);
+    expect(passwordProgressLines(s)[2]).toBe(`${n - 1} of ${n} categories still open.`);
   });
 });
 

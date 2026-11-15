@@ -3,7 +3,9 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { renderHud } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE } from '../data/dialogue.js';
-import { missionDistrict } from '../data/missions.js';
+import { missionDistrict, MISSIONS } from '../data/missions.js';
+import { isMissionDoneIn } from '../utils/mission-status.js';
+import { esc } from './stats.js';
 import { missionSteps, questionOptions, showIfMatches } from '../utils/debrief.js';
 import { isPasswordMission, passwordResetNeed, notNeededReasons, emailBreachRecord, isPmFlagged, passwordReconNotes, reopenReasonLine, PM_MISSION_ID } from '../utils/password-need.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
@@ -110,7 +112,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const bankPanelHtml = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   // What the long briefing's header carries besides the title: the bonus tag, the password
   // manager's flag, recon's notes for this reset, the password progress panel.
-  const extras = `${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
+  const extras = `${sharesNote(state, mission)}${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
   const page = { extras, state, mission, districtId, district, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, marks, allSteps, bankPanelHtml, loreData, account, goUrl };
   if (!noReset && missionStepList.length > 1 && started && !opts.peek) return stepModePage(page);
   if (!noReset && (level !== 'full' || opts.peek)) return compactBriefingPage({ ...page, started });
@@ -127,6 +129,7 @@ export function renderBriefing(state, missionId, opts = {}) {
           <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~${mission.estimatedMinutes} MIN</div>
           ${noReset ? NO_RESET_BADGE : ''}
         </div>
+        ${sharesNote(state, mission)}
         ${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE : ''}
         ${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note style="font-size: 13px; color: var(--offwhite); line-height: 1.6; margin: -12px 0 20px; border-left: 2px solid var(--magenta); padding-left: 10px;">${n}</div>`).join('') : ''}
 
@@ -301,6 +304,22 @@ function stepNote(n, { num = '', chunk = n.text, first = true } = {}) {
 }
 
 const BRIEFING_SCOUT = 'margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));';
+
+// A Field mission whose job another district already does (`shares`): link to it
+// rather than teach it twice. A shared mission you've done shows a tick.
+function sharesNote(state, mission) {
+  const shared = (mission.shares || []).map((id) => MISSIONS.find((m) => m.id === id)).filter(Boolean);
+  if (!shared.length) return '';
+  const rows = shared.map((m) => {
+    const done = isMissionDoneIn(state, m);
+    const where = DISTRICTS.find((d) => d.id === missionDistrict(m))?.name || '';
+    return `<li><a href="#/mission/${m.id}/briefing" style="color: var(--cyan);">${done ? '&#10003; ' : ''}${esc(m.title)}</a> <span style="color: rgba(237,239,243,0.4);">(${esc(where)})</span></li>`;
+  }).join('');
+  return `<div data-shares style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
+    <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">ALREADY IN RECLAIM CITY &mdash; PART OF THIS JOB</div>
+    <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6;">${rows}</ul>
+  </div>`;
+}
 
 // The briefing's big Scout. app.js swaps it for goDoIt when the player heads out.
 export function briefingScout(feeling) {

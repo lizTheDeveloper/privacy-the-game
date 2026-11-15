@@ -4,6 +4,7 @@
 // state.pmByDistrict[districtId] = { flagged, changed, clear }.
 // Every number here stays in this browser: none of it is ever tracked.
 import { DISTRICTS } from '../data/districts.js';
+import { activeDistricts } from './opt-in.js';
 import { BURST_SIZE, hasManager } from './pm-numbers.js';
 
 const MAX = 9999;
@@ -97,7 +98,7 @@ export function categoryAsk(state, districtId) {
 // Districts the player hasn't closed yet (for the headline), and whether
 // they've used the asks at all.
 export function openCategoryCount(state) {
-  return DISTRICTS.filter((d) => !categoryEntry(state, d.id).clear).length;
+  return activeDistricts(state).filter((d) => !categoryEntry(state, d.id).clear).length;
 }
 
 export function usedCategories(state) {
