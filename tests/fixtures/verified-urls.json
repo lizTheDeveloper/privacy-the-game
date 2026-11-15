@@ -138,6 +138,7 @@
     "https://www.healthcare.gov/login/": "curl 200",
     "https://www.icloud.com/find": "curl 200; browser: \"Find Devices - Apple iCloud\" (named in step text, checked 2026-10-07)",
     "https://www.identitytheft.gov/": "curl 200",
+    "https://www.immigrationadvocates.org/legaldirectory/": "curl 200 (2026-11-15, The Field). Without www. it 404s.",
     "https://www.innovis.com/personal/securityFreeze": "curl 200",
     "https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin": "curl 200",
     "https://www.irs.gov/payments/online-account-for-individuals": "curl 200",
