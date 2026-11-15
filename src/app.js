@@ -1309,9 +1309,16 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'step-answer') {
     // An answer picked on the step card: kept here, never sent; the report starts from it.
     // Tapping the picked one again un-picks it.
+    // "Yes" before "How many?" is `<question>:yes`; picking No or Couldn't check clears it.
     const { mission: mid, question: qid, value } = el.dataset;
     const same = stepAnswers(state, mid)[qid] === value;
-    setState(setStepAnswer(state, mid, qid, same ? null : value));
+    let next = setStepAnswer(state, mid, qid, same ? null : value);
+    if (qid.endsWith(':yes')) {
+      const base = qid.slice(0, -4);
+      if (same) next = setStepAnswer(next, mid, base, null);
+      else if (!/breach/.test(stepAnswers(next, mid)[base] || '') || stepAnswers(next, mid)[base] === 'no-breaches') next = setStepAnswer(next, mid, base, null);
+    } else if (!same) next = setStepAnswer(next, mid, `${qid}:yes`, null);
+    setState(next);
     renderCurrentRoute();
     app.querySelector(`[data-action="step-answer"][data-question="${CSS.escape(qid)}"][aria-pressed="true"]`)?.focus?.({ preventScroll: true });
   } else if (action === 'step-stuck') {

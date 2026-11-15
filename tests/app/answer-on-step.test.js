@@ -28,7 +28,16 @@ describe('answer on the step', () => {
     const html = renderBriefing(onStep3(), GMAIL.id);
     expect(html).toContain('STEP 3 OF 4');
     expect(html).toContain('data-step-ask="finding"');
-    for (const o of GMAIL.debriefQs[0].options) expect(html).toContain(`data-value="${o.value}"`);
+    // Few words: Yes / No / Couldn't check first; "How many?" waits for a Yes.
+    expect(html).toContain('Were you in any leaks?');
+    expect(html).toContain('data-question="finding:yes" data-value="yes"');
+    expect(html).toContain('data-value="no-breaches"');
+    expect(html).toContain('data-value="skip"');
+    expect(html).not.toContain('How many?');
+    const yes = renderBriefing(setStepAnswer(onStep3(), GMAIL.id, 'finding:yes', 'yes'), GMAIL.id);
+    expect(yes).toContain('How many?');
+    expect(yes).toContain('data-value="1-2-breaches"');
+    expect(yes).toContain('data-value="3plus-breaches"');
     // The password follow-up waits for a "found in breaches" answer.
     expect(html).not.toContain('data-ask-q="password_exposed"');
   });
@@ -57,6 +66,11 @@ describe('answer on the step', () => {
     expect(h.state().stepProgress[GMAIL.id].answers).toEqual({ finding: '1-2-breaches' });
     await h.click('step-answer', { mission: GMAIL.id, question: 'finding', value: '1-2-breaches' });
     expect(h.state().stepProgress[GMAIL.id].answers).toEqual({});
+    await h.click('step-answer', { mission: GMAIL.id, question: 'finding:yes', value: 'yes' });
+    await h.click('step-answer', { mission: GMAIL.id, question: 'finding', value: '3plus-breaches' });
+    expect(h.state().stepProgress[GMAIL.id].answers.finding).toBe('3plus-breaches');
+    await h.click('step-answer', { mission: GMAIL.id, question: 'finding', value: 'no-breaches' });
+    expect(h.state().stepProgress[GMAIL.id].answers).toEqual({ finding: 'no-breaches' });
     expect(h.egress()).toEqual([]);
   });
 
