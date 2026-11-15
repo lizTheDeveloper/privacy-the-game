@@ -23,6 +23,7 @@ import { customMissionsFor } from '../data/custom-missions.js';
 import { CURATED_MESSAGES } from '../data/phishing.js';
 import { timelineNote, timelineRank, timelineLine } from '../utils/social-timeline.js';
 import { TIMELINE_DOES } from './timeline.js';
+import { isDistrictOn } from '../utils/opt-in.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -591,6 +592,27 @@ const MAP_WAY_IN = `
       </a>
     </div>`;
 
+// An opt-in district (The Field) that's off: who it's for, and one button. Nothing
+// in it counts toward the city until it's on, and turning it off keeps progress.
+function renderOptInPanel(district) {
+  return `
+  <div style="padding: 12px 24px 24px;">
+    <div class="panel" style="padding: 28px; max-width: 640px; margin: 0 auto;">
+      <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">${esc(district.optInQuestion.toUpperCase())}</div>
+      <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; margin-top: 12px;">${esc(district.optInWho)}</div>
+      <div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.6; margin-top: 10px;">The Field is optional. Until you turn it on, it never counts toward your city. You can turn it off again and keep your progress.</div>
+      <div style="margin-top: 18px;"><button class="btn-primary" data-action="district-opt-in" data-district="${esc(district.id)}">TURN ON ${esc(district.name.toUpperCase())}</button></div>
+    </div>
+  </div>`;
+}
+
+function renderOptOutLink(district) {
+  return `
+  <div style="padding: 0 24px 24px; text-align: center;">
+    <button class="btn-secondary" style="font-size: 9px;" data-action="district-opt-out" data-district="${esc(district.id)}">TURN OFF ${esc(district.name.toUpperCase())} (KEEPS YOUR PROGRESS)</button>
+  </div>`;
+}
+
 function renderFacilityDistrict(state, district, reaction) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictProgress(state, district.id);
@@ -637,10 +659,12 @@ function renderFacilityDistrict(state, district, reaction) {
     <div style="padding: 16px 24px 8px;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; max-width: 640px;">${esc(district.facilityIntro)}</div>
     </div>` : ''}
+    ${district.optIn && !isDistrictOn(state, district.id) ? renderOptInPanel(district) : `
     <div style="padding: 8px 0 24px;">
       ${facilities}
     </div>
     ${progress.percent >= 100 ? renderAlliesSection(district.id) : ''}
+    ${district.optIn ? renderOptOutLink(district) : ''}`}
   </div>`;
 }
 

@@ -7,6 +7,7 @@ import { GRID_ACCOUNTS } from './accounts-grid.js';
 import { FOUNDRY_ACCOUNTS } from './accounts-foundry.js';
 import { CLINIC_ACCOUNTS } from './accounts-clinic.js';
 import { TRAIL_ACCOUNTS } from './accounts-trail.js';
+import { FIELD_ACCOUNTS } from './accounts-field.js';
 
 const BASE_ACCOUNTS = {
   // Chapter 1: The Master Keys
@@ -238,4 +239,5 @@ export const ACCOUNTS = {
   ...GRID_ACCOUNTS,
   ...CLINIC_ACCOUNTS,
   ...TRAIL_ACCOUNTS,
+  ...FIELD_ACCOUNTS,
 };

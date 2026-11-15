@@ -6,6 +6,7 @@ import { GHOST_DIALOGUE, RESTORE_DIALOGUE } from './data/dialogue.js';
 import { fetchCollective, lookUpWhoami, shouldAutoWhoami, shouldAutoLoad } from './utils/collective.js';
 import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
+import { setDistrictOn } from './utils/opt-in.js';
 import { localDay, hasSavedState, loadState, saveState, updateMission, updateStreak, streakAfterFiling, toggleAccount, markMissionStarted } from './state.js';
 import { calcDistrictProgress, calcIntegrity, districtBreachedAddresses } from './utils/calc.js';
 import { missionDistrict } from './data/missions.js';
@@ -1397,6 +1398,10 @@ app.addEventListener('click', async (e) => {
       if (msg) msg.hidden = false;
       app.querySelector(`#pm-cat-num-${CSS.escape(districtId)}`)?.focus();
     }
+  } else if (action === 'district-opt-in' || action === 'district-opt-out') {
+    // An opt-in district (The Field). Off keeps every record: turning it back on restores progress.
+    setState(setDistrictOn(state, el.dataset.district, action === 'district-opt-in'));
+    renderCurrentRoute();
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
     renderCurrentRoute();

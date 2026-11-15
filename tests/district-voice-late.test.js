@@ -6,7 +6,7 @@ import { renderDistrict } from '../src/screens/district.js';
 import { createInitialState } from '../src/state.js';
 
 // The five districts added after Scout's first eight (feature map row 22).
-const LATE = ['foundry', 'freeway', 'grid', 'clinic', 'trail'];
+const LATE = ['foundry', 'freeway', 'grid', 'clinic', 'trail', 'field'];
 
 // Everything a district's missions say: the fact base Scout may draw on.
 const missionText = (id) => JSON.stringify(getMissionsForDistrict(id).map((m) => [m.briefing, m.steps, m.scoutDialog]));
@@ -43,7 +43,7 @@ describe("Scout's voice reaches every district", () => {
   });
 
   it('a facility district shows Scout, then its facility intro once Scout is dismissed', () => {
-    for (const id of ['grid', 'clinic', 'trail']) {
+    for (const id of ['grid', 'clinic', 'trail', 'field']) {
       const fresh = renderDistrict(createInitialState(), id);
       expect(fresh, id).toContain('data-action="dismiss-intro"');
       const seen = renderDistrict({ ...createInitialState(), seenIntros: { [id]: true } }, id);
