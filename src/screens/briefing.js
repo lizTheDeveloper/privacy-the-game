@@ -308,7 +308,7 @@ function stepNote(n, { num = '', chunk = n.text, first = true } = {}) {
 const BRIEFING_SCOUT = 'margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));';
 
 // A Field mission comes from Field Opsec course playbooks (`playbooks`). Point at
-// the full checklist in the course's kit, and at the class for anyone not in it.
+// the full checklist in the course's kit (free, open to anyone), and at the class.
 // New tab, no referrer: the school never learns which mission sent you.
 export function fieldCourseNote(mission) {
   const ids = (mission.playbooks || []).filter((id) => FIELD_PLAYBOOK_TITLES[id]);
@@ -318,7 +318,7 @@ export function fieldCourseNote(mission) {
   return `<div data-field-course style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
     <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">FULL CHECKLIST &mdash; FIELD OPSEC KIT</div>
     <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6;">${rows}</ul>
-    <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 6px;">For Field Opsec students. Not in the class? <a href="${FIELD_CLASS_URL}" ${ext}>Join it &#8599;</a></div>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 6px;">Free, no account. Want to practice it with people? <a href="${FIELD_CLASS_URL}" ${ext}>Take the class &#8599;</a></div>
   </div>`;
 }
 
