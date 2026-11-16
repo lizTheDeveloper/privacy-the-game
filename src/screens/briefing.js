@@ -18,6 +18,7 @@ import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
 import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
+import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
 import { isPlaying } from '../utils/focus-music.js';
 
@@ -112,7 +113,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const bankPanelHtml = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   // What the long briefing's header carries besides the title: the bonus tag, the password
   // manager's flag, recon's notes for this reset, the password progress panel.
-  const extras = `${sharesNote(state, mission)}${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
+  const extras = `${sharesNote(state, mission)}${fieldCourseNote(mission)}${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
   const page = { extras, state, mission, districtId, district, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, marks, allSteps, bankPanelHtml, loreData, account, goUrl };
   if (!noReset && missionStepList.length > 1 && started && !opts.peek) return stepModePage(page);
   if (!noReset && (level !== 'full' || opts.peek)) return compactBriefingPage({ ...page, started });
@@ -130,6 +131,7 @@ export function renderBriefing(state, missionId, opts = {}) {
           ${noReset ? NO_RESET_BADGE : ''}
         </div>
         ${sharesNote(state, mission)}
+        ${fieldCourseNote(mission)}
         ${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE : ''}
         ${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note style="font-size: 13px; color: var(--offwhite); line-height: 1.6; margin: -12px 0 20px; border-left: 2px solid var(--magenta); padding-left: 10px;">${n}</div>`).join('') : ''}
 
@@ -304,6 +306,21 @@ function stepNote(n, { num = '', chunk = n.text, first = true } = {}) {
 }
 
 const BRIEFING_SCOUT = 'margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));';
+
+// A Field mission comes from Field Opsec course playbooks (`playbooks`). Point at
+// the full checklist in the course's kit, and at the class for anyone not in it.
+// New tab, no referrer: the school never learns which mission sent you.
+export function fieldCourseNote(mission) {
+  const ids = (mission.playbooks || []).filter((id) => FIELD_PLAYBOOK_TITLES[id]);
+  if (!ids.length) return '';
+  const ext = 'target="_blank" rel="noopener noreferrer" style="color: var(--cyan);"';
+  const rows = ids.map((id) => `<li><a href="${FIELD_KIT_URL}#p${id}" ${ext}>${esc(FIELD_PLAYBOOK_TITLES[id])} &#8599;</a></li>`).join('');
+  return `<div data-field-course style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
+    <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">FULL CHECKLIST &mdash; FIELD OPSEC KIT</div>
+    <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6;">${rows}</ul>
+    <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 6px;">For Field Opsec students. Not in the class? <a href="${FIELD_CLASS_URL}" ${ext}>Join it &#8599;</a></div>
+  </div>`;
+}
 
 // A Field mission whose job another district already does (`shares`): link to it
 // rather than teach it twice. A shared mission you've done shows a tick.

@@ -2,6 +2,11 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.17.0 (2026-11-15): The Field, and the way back to the course
+
+- **The Field (chapter 13)** is an opt-in district for people whose work makes them a target: journalists, organizers, clinic workers, legal observers, mutual aid. Nine buildings, 74 missions, built from The Multiverse School's Field Opsec playbooks (shipped in #519).
+- **Every Field mission now links its full checklist.** The briefing has a "Full checklist — Field Opsec Kit" box that lists the playbooks the mission comes from, each linking to that playbook's bench in the course's kit, with a "Join it" link for anyone not in the class. The links open in a new tab and send no referrer, so the school never learns which mission sent you. Missions outside The Field don't show the box.
+
 ## 7.16.1 (2026-11-14): Fewer words on the step
 
 - The question on a results step is now **Yes / No** first: "Were you in any leaks?" Yes, No, Couldn’t check. Only a Yes brings **"How many?"** (1 or 2, 3 or more), then "Did a leak have your password in it?" Yes, No, Not sure. Sign-in checks ask "Any you don’t know?" the same way. Answers on the card drop their long tails ("Yes — passwords were in the leaked data" is just "Yes"); the report keeps its full wording.
