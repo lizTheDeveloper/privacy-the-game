@@ -2,6 +2,12 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.16.2 (2026-11-17): Mission links checked
+
+- **Kia:** "Open Kia's privacy request form" now opens the privacy-rights request form (customercare.kiausa.com/PrivacyManagement), not the Customer Care home page. This covers Kia's audit, opt-out and delete missions.
+- **Spokeo:** the one long step is now three that match the page: search your name on spokeo.com and copy the web address of the page about you; paste it with your email on the opt-out page and tap "Opt Out"; tap the link in the email Spokeo sends. The opt-out page has no search box or "Remove this listing" button.
+- **Google recovery email** (Wire the Recovery Path): "Ways we can verify it's you" is now "How you sign in to Google," then Recovery email.
+
 ## 7.16.1 (2026-11-14): Fewer words on the step
 
 - The question on a results step is now **Yes / No** first: "Were you in any leaks?" Yes, No, Couldn’t check. Only a Yes brings **"How many?"** (1 or 2, 3 or more), then "Did a leak have your password in it?" Yes, No, Not sure. Sign-in checks ask "Any you don’t know?" the same way. Answers on the card drop their long tails ("Yes — passwords were in the leaked data" is just "Yes"); the report keeps its full wording.

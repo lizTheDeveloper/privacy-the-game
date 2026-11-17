@@ -295,7 +295,9 @@ export const RECLAMATION_MISSIONS = [
     title: "The Big Purge: Web Form Brokers",
     briefing: "These three brokers all have simple web form opt-outs: search for your listing, paste the URL or enter your email, click remove. Each one takes 2-3 minutes. Most removals process within 24-72 hours.",
     steps: [
-      { text: "Spokeo: search your name on spokeo.com and copy your listing's URL, paste it into the opt-out page with your email, click \"Opt Out\", then click the link in the confirmation email", url: "https://www.spokeo.com/optout" },
+      { text: "Spokeo: search your name on spokeo.com and copy the web address of the page about you", url: "https://www.spokeo.com" },
+      { text: "Spokeo: on the opt-out page, paste that web address with your email and tap “Opt Out”", url: "https://www.spokeo.com/optout" },
+      { text: "Spokeo: tap the link in the email Spokeo sends you" },
       { text: "Whitepages: Go to suppression requests, search your name, find your listing, request removal", url: "https://www.whitepages.com/suppression-requests" },
       { text: "BeenVerified: Go to their opt-out FAQ, follow the steps to search and remove", url: "https://www.beenverified.com/faq/opt-out/" },
     ],
