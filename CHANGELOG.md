@@ -2,6 +2,10 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.16.3 (2026-11-17): City buttons on phones
+
+- On phones the city map's button row (QUICK QUEST, STATS, LOOK UP, PRISM, WHO GETS IT, WHOLE CITY) was squeezed into a thin strip down the left edge, and the strip pushed the city down and left a big empty gap. The desktop width cap from 7.10.1 was never lifted for phones. The buttons now wrap across the full width under the sector readout, with the city right below them.
+
 ## 7.16.2 (2026-11-17): Mission links checked
 
 - **Kia:** "Open Kia's privacy request form" now opens the privacy-rights request form (customercare.kiausa.com/PrivacyManagement), not the Customer Care home page. This covers Kia's audit, opt-out and delete missions.
