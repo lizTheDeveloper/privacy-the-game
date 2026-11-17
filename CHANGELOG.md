@@ -2,10 +2,20 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
-## 7.17.0 (2026-11-15): The Field, and the way back to the course
+## 7.17.0 (2026-11-17): The Field, and the way back to the course
 
 - **The Field (chapter 13)** is an opt-in district for people whose work makes them a target: journalists, organizers, clinic workers, legal observers, mutual aid. Nine buildings, 74 missions, built from The Multiverse School's Field Opsec playbooks (shipped in #519).
 - **Every Field mission now links its full checklist.** The briefing has a "Full checklist — Field Opsec Kit" box that lists the playbooks the mission comes from, each linking to that playbook's bench in the course's kit, The kit is free and needs no account; a "Take the class" link sits underneath. The links open in a new tab and send no referrer, so the school never learns which mission sent you. Missions outside The Field don't show the box.
+
+## 7.16.3 (2026-11-17): City buttons on phones
+
+- On phones the city map's button row (QUICK QUEST, STATS, LOOK UP, PRISM, WHO GETS IT, WHOLE CITY) was squeezed into a thin strip down the left edge, and the strip pushed the city down and left a big empty gap. The desktop width cap from 7.10.1 was never lifted for phones. The buttons now wrap across the full width under the sector readout, with the city right below them.
+
+## 7.16.2 (2026-11-17): Mission links checked
+
+- **Kia:** "Open Kia's privacy request form" now opens the privacy-rights request form (customercare.kiausa.com/PrivacyManagement), not the Customer Care home page. This covers Kia's audit, opt-out and delete missions.
+- **Spokeo:** the one long step is now three that match the page: search your name on spokeo.com and copy the web address of the page about you; paste it with your email on the opt-out page and tap "Opt Out"; tap the link in the email Spokeo sends. The opt-out page has no search box or "Remove this listing" button.
+- **Google recovery email** (Wire the Recovery Path): "Ways we can verify it's you" is now "How you sign in to Google," then Recovery email.
 
 ## 7.16.1 (2026-11-14): Fewer words on the step
 
