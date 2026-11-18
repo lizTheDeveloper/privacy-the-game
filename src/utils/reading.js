@@ -40,6 +40,16 @@ export function readLevelChosen(state) {
   return READ_LEVELS.includes(l) || (typeof l === 'string' && Object.hasOwn(LEGACY_LEVELS, l));
 }
 
+// Read it to me, as a switch (Liz 2026-11-18): on, Scout reads each mission screen as it comes.
+// Kept on this phone with the reading level; never sent.
+export function readAloudOn(state) {
+  return state?.reading?.aloud === true;
+}
+
+export function setReadAloud(state, on) {
+  return { ...state, reading: { ...state.reading, aloud: Boolean(on) } };
+}
+
 export function setReadLevel(state, level) {
   if (!READ_LEVELS.includes(level)) return state;
   return { ...state, reading: { ...state.reading, level } };
