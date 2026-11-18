@@ -25,7 +25,7 @@ export function pwQuestion(service) {
     id: 'pw_status',
     prefill: 'pm-report',
     label: `What does your password manager say about your ${service} password?`,
-    hint: `Use the report from “Check your password manager’s security report”. Search it for ${service}.`,
+    hint: `Use the report from “Check the passwords saved on your phone or computer”. Search it for ${service}.`,
     options: [
       { value: 'pw-leaked', text: 'Listed as leaked or compromised', severity: 'crit' },
       { value: 'pw-reused', text: 'Listed as reused', severity: 'crit' },
@@ -79,7 +79,7 @@ function changedSinceQuestion(service, since) {
 
 // The password manager check, one action a step: search, then read what it says.
 export const pmSteps = (what) => [
-  { text: `Open your password manager’s security report and search for ${what}` },
+  { text: `Open the security report where your passwords are saved (your phone, browser or password manager) and search for ${what}` },
   { text: 'Note whether it says leaked, compromised or reused.' },
 ];
 

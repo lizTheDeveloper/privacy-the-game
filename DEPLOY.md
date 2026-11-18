@@ -83,3 +83,21 @@ Framing is allowed by play-portal's nginx, which sends
 `Content-Security-Policy: frame-ancestors 'self' https://campus.themultiverse.school` for
 `/reclaim-city/` only. Deploy the play-portal change with this one or campus's iframe is refused.
 A frame that blocks storage plays without saving.
+
+## Scout's voice ("Read it to me")
+
+Scout reads in a recorded ElevenLabs voice (`collective/service/voice.js`). The service only voices lines on `collective/voice-lines.json`, which is built from the game's own text. After changing any mission, step or dialogue text:
+
+```sh
+node scripts/voice-lines.mjs        # tests/voice-lines.test.js fails until you do
+```
+
+Every game deploy also syncs the list (the service rereads it within a minute):
+
+```sh
+rsync -az collective/voice-lines.json games:/opt/reclaim-city-collective/voice/voice-lines.json
+```
+
+A line is recorded the first time a player asks for it and kept in `/opt/reclaim-city-collective/voice-cache/`. `VOICE_DAILY_CHARS` (default 150,000) caps new recording per day; past it, and for any line not on the list, the game reads with the browser's own voice. The key is `ELEVENLABS_API_KEY` in `/opt/reclaim-city-collective/voice.env` (root, 600).
+
+Updating the service itself: `rsync -az --exclude node_modules --exclude test collective/service/ games:/opt/reclaim-city-collective/service/` then `ssh games 'cd /opt/reclaim-city-collective/service && docker compose up -d --build'`.

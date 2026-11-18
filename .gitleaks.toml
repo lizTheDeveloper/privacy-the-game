@@ -1,0 +1,8 @@
+# Repo gitleaks config: the default rules, plus one generated file whose 16-hex line ids sit
+# next to words like "LinkedIn" and "key" and so read as secrets. It holds only game text.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Scout's voice lines (scripts/voice-lines.mjs): hash ids beside game text"
+paths = ['''collective/voice-lines\.json''']

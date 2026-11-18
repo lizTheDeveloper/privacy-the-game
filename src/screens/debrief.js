@@ -1,3 +1,5 @@
+import { readLevel } from '../utils/reading.js';
+import { topTools } from '../components/top-tools.js';
 import { missionDistrict } from '../data/missions.js';
 import { findMission } from '../data/custom-missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
@@ -331,6 +333,14 @@ function recheckUnavailable(state, mission) {
   </div>`;
 }
 
+// What Scout says first on the report screen (also on the list of lines he has recorded).
+export const DEBRIEF_GREETINGS = {
+  filed: 'Report filed. Good work, agent.',
+  recheck: 'Still true? Confirm each answer, or change it.',
+  already: 'Already done? Nice. Tell me what you have, and it counts.',
+  welcome: 'Welcome back, agent. What did you find?',
+};
+
 export function renderDebrief(state, missionId, { recheck = false } = {}) {
   const mission = findMission(state, missionId);
   if (!mission) return notFound(state);
@@ -354,6 +364,9 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
     : debriefForm(state, mission, recheck ? stored : null, recheck);
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
+  const greeting = completed ? DEBRIEF_GREETINGS.filed : recheck ? DEBRIEF_GREETINGS.recheck : saidAlready(state, mission.id) ? DEBRIEF_GREETINGS.already : DEBRIEF_GREETINGS.welcome;
+  // Read it to me (in Scout's voice): his lines, then each question and its answers.
+  const sayLines = [greeting, scoutLine, ...(completed ? [] : visibleQuestions(mission, recheck ? stored : {}).flatMap((q) => [q.label, ...(q.options || []).map((o) => o.text)]))];
   const footer = completed
     ? `
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
@@ -374,7 +387,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
       .debrief-opt:hover { border-color: rgba(0,229,255,0.5); box-shadow: 0 0 12px rgba(0,229,255,0.12); background: rgba(0,229,255,0.04); }
       .debrief-opt input[type="radio"] { accent-color: var(--cyan); }
     </style>
-    ${renderHud(state)}
+    ${renderHud(state, { tools: topTools(state, readLevel(state), sayLines) })}
     <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">${recheck ? 'RE-CHECK' : 'MISSION DEBRIEF'}</div>
       <div style="flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,229,255,0.2), transparent);"></div>
@@ -387,7 +400,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
           ${debriefScout(state, mission, stored)}
         </div>
         <div style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; flex: 1;">
-          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${completed ? 'Report filed. Good work, agent.' : recheck ? 'Still true? Confirm each answer, or change it.' : saidAlready(state, mission.id) ? 'Already done? Nice. Tell me what you have, and it counts.' : 'Welcome back, agent. What did you find?'}</div>
+          <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6;">${greeting}</div>
           <div data-scout-line style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; font-style: italic; margin-top: 8px;">${scoutLineOnce(scoutLine, mission.scoutDialog?.briefing)}</div>
         </div>
       </div>

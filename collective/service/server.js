@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { podForGeo } from './pods.js';
 import { lookupGeo as defaultLookupGeo, getClientInfo } from './client-info.js';
+import { createVoice } from './voice.js';
 
 const ALLOWED_ORIGINS = new Set([
   'https://multiversestudios.xyz', 'https://multiversegames.ai',
@@ -19,6 +20,7 @@ function send(res, status, body, headers = {}) {
 export function createServer({
   readCollective = () => readFile(COLLECTIVE_FILE, 'utf8'),
   lookupGeo = defaultLookupGeo,
+  voice = createVoice(),
 } = {}) {
   // No logging anywhere in this handler: whoami answers are about a person.
   const server = http.createServer((req, res) => {
@@ -66,6 +68,15 @@ export function createServer({
       } catch { /* no published pods tonight: pod stays null */ }
       const language = (url.searchParams.get('lang') || '').slice(0, 35) || null;
       return send(res, 200, { ...NO_GEO, ...geo, ...info, language, pod }, { ...cors, 'Cache-Control': 'no-store' });
+    }
+
+    // Scout's voice (voice.js). Like whoami, nothing about the request is logged.
+    const v = /^\/voice\/([0-9a-f]{16})\.mp3$/.exec(url.pathname);
+    if (v) {
+      const r = await voice.clip(v[1]);
+      if (r.status !== 200) return send(res, r.status, { error: r.status === 404 ? 'not found' : 'unavailable' }, { ...cors, 'Cache-Control': 'no-store' });
+      res.writeHead(200, { ...cors, 'Content-Type': 'audio/mpeg', 'Content-Length': r.body.length, 'Cache-Control': 'public, max-age=31536000, immutable' });
+      return res.end(req.method === 'HEAD' ? undefined : r.body);
     }
 
     return send(res, 404, { error: 'not found' }, cors);
