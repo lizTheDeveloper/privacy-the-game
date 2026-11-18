@@ -1,4 +1,4 @@
-# rc-collective: serves collective.json and /whoami for Reclaim City.
+# rc-collective: serves collective.json, /whoami and Scout's voice (/voice/<id>.mp3) for Reclaim City.
 # Traefik route: ops/multiverse-games-hel1/traefik-dynamic/reclaim-city-collective.yml (monorepo).
 services:
   rc-collective:
@@ -9,9 +9,18 @@ services:
     environment:
       - COLLECTIVE_FILE=/data/collective.json
       - GEO_PATH=/geo/GeoLite2-City.mmdb
+      - VOICE_LINES_FILE=/voice/voice-lines.json
+      - VOICE_CACHE_DIR=/voice-cache
+    # ELEVENLABS_API_KEY (and optionally VOICE_DAILY_CHARS). Root-only file on the server.
+    env_file:
+      - /opt/reclaim-city-collective/voice.env
     volumes:
       - /opt/reclaim-city-collective/public:/data:ro
       - /opt/reclaim-city-collective/geo:/geo:ro
+      # The list of lines Scout may say (collective/voice-lines.json, synced on every game deploy).
+      - /opt/reclaim-city-collective/voice:/voice:ro
+      # Recorded lines, kept (owned by uid 1000, the image's node user).
+      - /opt/reclaim-city-collective/voice-cache:/voice-cache
     networks: [coolify]
     logging:
       driver: none

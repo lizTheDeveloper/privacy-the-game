@@ -16,11 +16,10 @@ import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { topTools } from '../components/top-tools.js';
 import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
-import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
-import { isPlaying } from '../utils/focus-music.js';
 import { wasOpened } from '../utils/opened-steps.js';
 
 function notFound(state) {
@@ -139,7 +138,7 @@ export function renderBriefing(state, missionId, opts = {}) {
         ${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
 
   // How much to read (Scout asks the first time), and Read it to me.
-  const sayIntel = plainText(`${intel} ${scoutLine}`);
+  const sayIntel = [intel, scoutLine];
   const intelTools = '';
   // The device questions and how far along the steps are.
   const gearHtml = noReset ? '' : passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps));
@@ -414,30 +413,6 @@ function whyHtml(why) {
   return `<details class="brief-why" data-why><summary>Why it matters</summary><div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${why}</div></details>`;
 }
 
-// How much to read, Read it to me and Focus music: in the top bar on every mission screen (Liz
-// 2026-11-17). The first time, Scout asks how much to read just under them; after that it is a
-// quiet switch. Nothing about the choice leaves this browser (utils/reading.js).
-// say: what Read it to me reads (the intel on a briefing, the step on a step screen).
-function topTools(state, level, say) {
-  const playing = isPlaying();
-  const offer = readingOffer(state);
-  const ask = offer
-    ? `<div class="read-ask read-offer" data-read-offer="${offer}"><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> <span>${OFFER_LINES[offer].line}</span>
-        <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
-    : readLevelChosen(state)
-    ? ''
-    : '<div class="read-ask" data-read-ask>How much do you want to read? Change it here any time.</div>';
-  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
-  return `<div class="read-tools top-tools" data-read-tools>
-        <div class="top-tools-row">
-          <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
-          <button class="top-tool" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read it to me"><span aria-hidden="true">&#128266;</span> <span class="tt-long">Read it to me</span><span class="tt-short" aria-hidden="true">Read</span></button>
-          <button class="top-tool" data-action="focus-music" aria-pressed="${playing}" aria-label="Focus music${playing ? ' (on)' : ''}"><span aria-hidden="true">&#9835;</span> <span class="tt-long">Focus music${playing ? ' (on)' : ''}</span><span class="tt-short" aria-hidden="true">Music</span></button>
-        </div>
-        ${ask}
-      </div>`;
-}
-
 // ---- The compact briefing and step mode --------------------------------------------------
 
 const attrEsc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -511,7 +486,7 @@ function compactBriefingPage(p) {
       </div>
       ${renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
-  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, plainText(`${intel} ${scoutLine}`)));
+  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine]));
 }
 
 // "Settings → Health → Data Access" as chips when it is a plain path, else the words.
@@ -629,7 +604,8 @@ function stepModePage(p) {
   const opened = Boolean(step && (!step.url || wasOpened(mission.id, key) || marks[key] === 'done'));
   const simpleCard = simple && step ? { opened, where: simpleWhere(missionStepList, current) } : null;
   const showDone = !simple || opened;
-  const say = step ? plainText(step.text).replace(/→/g, ', then ') : '';
+  // Read it to me: the step, and any note shown open on its card (the password check's "Is this safe?").
+  const say = step ? [step.text, ...(step.note || []).filter((n) => n.open).flatMap((n) => [n.label, n.text])] : [];
   const card = allDone
     ? `
       <div class="focus-card is-done" data-step-card>

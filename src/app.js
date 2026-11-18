@@ -1265,8 +1265,11 @@ app.addEventListener('click', async (e) => {
     else await playMusic();
     renderCurrentRoute();
   } else if (action === 'read-aloud') {
-    // The browser's own voice: nothing is sent anywhere.
-    if (speak(el.dataset.say)) setState(recordSignal(state, 'readAloud'));
+    // Scout's recorded voice, line by line, else the browser's own (utils/read-aloud.js). The
+    // lines are the game's own words: nothing about the player is sent.
+    let lines = null;
+    try { lines = JSON.parse(el.dataset.sayLines || 'null'); } catch { lines = null; }
+    if (speak(Array.isArray(lines) ? lines : el.dataset.say)) setState(recordSignal(state, 'readAloud'));
   } else if (action === 'gear-pick' || action === 'gear-reset') {
     // Local only: which phone or tracker someone has never leaves this browser.
     const next = action === 'gear-pick' ? setGear(state, el.dataset.group, el.dataset.value) : { ...state, gear: { ...state.gear, [el.dataset.group]: undefined } };
