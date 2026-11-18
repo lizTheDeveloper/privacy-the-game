@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { renderBriefing } from '../src/screens/briefing.js';
 import { createInitialState, markMissionStarted } from '../src/state.js';
-import { setReadLevel } from '../src/utils/reading.js';
+import { setReadLevel, visibleSteps, stepKey } from '../src/utils/reading.js';
+import { findMission } from '../src/data/custom-missions.js';
+import { markOpened, clearOpened } from '../src/utils/opened-steps.js';
 
 const MISSION = 'gmail-recon-breach';
 
@@ -23,9 +25,17 @@ describe('starting a mission is remembered (mobile: the other site opens in anot
     expect(html).toContain('data-action="go-do-it"');
   });
 
-  it('a started mission shows one step at a time: its site, DONE, and a way to report back', () => {
-    const html = renderBriefing(markMissionStarted(createInitialState(), MISSION), MISSION);
+  it('a started mission shows one step at a time: its site, DONE once it is open, and a way to report back', () => {
+    clearOpened();
+    const s = markMissionStarted(createInitialState(), MISSION);
+    const first = visibleSteps(findMission(s, MISSION), s)[0];
+    let html = renderBriefing(s, MISSION);
     expect(html).toContain('data-step-card');
+    if (first.url) {
+      expect(html).not.toContain('data-action="step-done"');
+      markOpened(MISSION, stepKey(first));
+      html = renderBriefing(s, MISSION);
+    }
     expect(html).toMatch(/class="simple-count">Step 1 of \d[\s\S]*data-step-card[\s\S]*data-action="mission-step"[\s\S]*data-action="step-done"/);
     expect(html).toMatch(new RegExp(`href="#/mission/${MISSION}/debrief"[^>]*data-action="i-did-it"`));
   });

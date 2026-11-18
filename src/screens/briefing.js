@@ -522,7 +522,7 @@ function compactBriefingPage(p) {
       ${p.extras}
       ${scoutBubble(scoutLine)}
       ${many ? `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>
-      ${simple ? '' : `<details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>`}
+      <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
       ${gearAsk(state, gearQuestions(allSteps))}
       ${bankPanelHtml}
@@ -688,6 +688,7 @@ function stepModePage(p) {
       ${card}
       ${p.extras}
       ${bankPanelHtml}
+      ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}
       ${readingBar(state, level, say, { noRead: true })}`;
     return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top);
   }

@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.20.0 (2026-11-17): Short and Simplest are one level, Simple
+
+Liz: "merge simple + simplest into a single view." The reading levels are now **Simple** (the default) and **Full intel**.
+
+- **Simple** is the old Simplest screen for everyone: one step at a time, the big ‹ Back, "Step 2 of 4", OPEN THE WEBSITE before DONE, and the ten-hundred-word copy where a mission has it (the plain lead where it doesn't). Mission screens are 8–25 words shorter than Short was, and START sits higher.
+- Simple keeps "See the steps" on the briefing and one "Finished already? Report back" on the step screen, so nobody who has already done the job is stuck tapping through.
+- A save that chose Short now reads as Simple. Junk or prototype-key levels (`constructor`, `__proto__`) fall back to Simple too.
+- Scout's "fewer words?" offer is now only made to Full intel readers.
+
 ## 7.19.0 (2026-11-17): Each thing said once, and the buttons you need on screen
 
 From a phone audit of every screen (iPhone size, Short): information shown twice, and key buttons below the first screen.

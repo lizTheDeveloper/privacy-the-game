@@ -135,9 +135,10 @@ describe('guards: reading.js on odd inputs', () => {
     }
     expect(resumeLine(old)).toBeNull();
   });
-  it('GUARD: junk reading level falls back to short', () => {
-    expect(readLevel({ reading: { level: '__proto__' } })).toBe('short');
-    expect(readLevel({ reading: 'x' })).toBe('short');
+  it('GUARD: junk reading level falls back to Simple', () => {
+    expect(readLevel({ reading: { level: '__proto__' } })).toBe('simplest');
+    expect(readLevel({ reading: 'x' })).toBe('simplest');
+    expect(readLevel({ reading: { level: 'constructor' } })).toBe('simplest');
   });
   it('GUARD: resumeLine skips a mission id that no longer exists', () => {
     const s = markStep(fresh(), 'gone-mission', 'k', 'done');
@@ -178,7 +179,7 @@ describe('guards: reading.js on odd inputs', () => {
     expect(html).toMatch(new RegExp(`value="${opt.value}"[^>]*checked|checked[^>]*value="${opt.value}"`));
   });
   it('GUARD: the offer is made once and a "no" is remembered', () => {
-    let s = fresh();
+    let s = setReadLevel(fresh(), 'full');
     for (let i = 0; i < 3; i++) s = recordSignal(s, 'skip');
     expect(readingOffer(s)).toBe('simpler');
     s = markOffered(s, 'simpler');

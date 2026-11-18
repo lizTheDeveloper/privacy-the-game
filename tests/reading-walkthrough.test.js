@@ -27,8 +27,10 @@ describe('reading levels', () => {
     for (const [id, v] of Object.entries(saved)) Object.assign(byId(id), v);
   });
 
-  it('Short is the default; Full shows the intel as it always was', () => {
-    expect(readLevel(fresh())).toBe('short');
+  it('Simple is the default (Short and Simplest merged); Full shows the intel as it always was', () => {
+    expect(readLevel(fresh())).toBe('simplest');
+    // A save from before the merge that chose Short reads as Simple.
+    expect(readLevel({ reading: { level: 'short' } })).toBe('simplest');
     const m = { briefing: 'Long intel. Second sentence.', lead: 'Plain line.' };
     expect(intelFor(m, 'short')).toEqual({ intel: 'Plain line.', why: m.briefing });
     expect(intelFor(m, 'full')).toEqual({ intel: m.briefing, why: '' });
@@ -59,7 +61,7 @@ describe('reading levels', () => {
   it('Scout asks how much to read until the player picks, and the switch stays', () => {
     const html = renderBriefing(fresh(), MULTI.id);
     expect(html).toContain('data-read-ask');
-    expect(html).toMatch(/data-action="read-level" data-level="short" aria-pressed="true"/);
+    expect(html).toMatch(/data-action="read-level" data-level="simplest" aria-pressed="true"/);
     const picked = renderBriefing(setReadLevel(fresh(), 'full'), MULTI.id);
     expect(picked).not.toContain('data-read-ask');
     expect(picked).toMatch(/data-level="full" aria-pressed="true"/);
@@ -130,9 +132,9 @@ describe('the walkthrough', () => {
     expect(progressFor(s, MULTI.id, st).current).toBe(0);
   });
 
-  it('a started mission shows the next step on its own card, and the list dims the done ones', () => {
+  it('a started mission shows the next step on its own card, and Full intel’s list dims the done ones', () => {
     const st = steps();
-    const s = markStep(fresh(), MULTI.id, stepKey(st[0]), 'done');
+    const s = markStep(setReadLevel(fresh(), 'full'), MULTI.id, stepKey(st[0]), 'done');
     const html = renderBriefing(s, MULTI.id);
     expect(html).toMatch(new RegExp(`data-step-card data-step-key="${stepKey(st[1])}"`));
     expect(html).toContain(`Step 2 of ${st.length}`);
@@ -255,8 +257,8 @@ describe('"I already have this"', () => {
 });
 
 describe('reading signals stay on this phone', () => {
-  it('Scout offers fewer words after three struggles, once', () => {
-    let s = fresh();
+  it('Scout offers fewer words after three struggles, once (to a Full intel reader)', () => {
+    let s = setReadLevel(fresh(), 'full');
     s = recordSignal(recordSignal(s, 'stuck'), 'skip');
     expect(readingOffer(s)).toBeNull();
     s = recordSignal(s, 'readAloud');

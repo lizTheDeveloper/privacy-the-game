@@ -3,9 +3,10 @@
 // Liz (2026-11-13): most Americans read at literacy Level 2 or 3 and multi-step tasks lose a
 // lot of people. Don't talk down to strong readers; make the steps easy to follow for
 // everyone else. So:
-// - Short is the default: a one-line plain lead, with the full intel one tap away under
-//   "Why it matters". Full shows the intel as it always was. Simplest uses the ten hundred
-//   most common words (plus phone words) where a mission has that version.
+// - Simple is the default: a one-line plain lead, with the full intel one tap away under
+//   "Why it matters", in the ten hundred most common words (plus phone words) where a mission
+//   has that version. Full shows the intel as it always was. (Short and Simplest were merged
+//   into Simple on 2026-11-17.)
 // - Steps that only apply to one kind of phone or device are shown only to players who have
 //   it, once they've said which (asked at the first mission that needs it, then remembered).
 // - Each step can be ticked off or skipped, and the ticks are saved, so a player who goes off
@@ -15,17 +16,25 @@
 import { missionSteps } from './debrief.js';
 import { plainText } from './readability.js';
 
-export const READ_LEVELS = ['short', 'full', 'simplest'];
-export const READ_LEVEL_LABELS = { short: 'Short', full: 'Full intel', simplest: 'Simplest' };
+// Two levels (Liz 2026-11-17: "merge simple and simplest into a single view"). Simple is the
+// old Simplest screen (one thing at a time, phone-app Back, OPEN before DONE) with the
+// ten-hundred-word copy where a mission has it and the plain lead where it doesn't. The id stays
+// 'simplest' so saves and the screens keep working; a save that says 'short' (the old default)
+// reads as Simple.
+export const READ_LEVELS = ['simplest', 'full'];
+export const READ_LEVEL_LABELS = { simplest: 'Simple', full: 'Full intel' };
+const LEGACY_LEVELS = { short: 'simplest' };
 
 export function readLevel(state) {
   const l = state?.reading?.level;
-  return READ_LEVELS.includes(l) ? l : 'short';
+  if (READ_LEVELS.includes(l)) return l;
+  return (typeof l === 'string' && Object.hasOwn(LEGACY_LEVELS, l)) ? LEGACY_LEVELS[l] : 'simplest';
 }
 
 // Has the player picked a level yet (Scout asks once)?
 export function readLevelChosen(state) {
-  return READ_LEVELS.includes(state?.reading?.level);
+  const l = state?.reading?.level;
+  return READ_LEVELS.includes(l) || (typeof l === 'string' && Object.hasOwn(LEGACY_LEVELS, l));
 }
 
 export function setReadLevel(state, level) {

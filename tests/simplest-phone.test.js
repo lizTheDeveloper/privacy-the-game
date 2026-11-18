@@ -48,7 +48,7 @@ describe('Simplest step screens', () => {
     expect(html).toContain('Step 1 of');
     expect(html).not.toContain('focus-steps-peek');
     expect(html).not.toContain('mission-trail');
-    expect(html).not.toContain('Finished already?');
+    expect((html.match(/Finished already\? Report back/g) || []).length).toBe(1); // the one shortcut to the report
     expect((html.match(/data-action="read-aloud"/g) || []).length).toBe(1);
     expect(html).toContain('brief-simple'); // the score bar and Support step aside (style.css)
   });
@@ -60,9 +60,9 @@ describe('Simplest step screens', () => {
   });
 });
 
-describe('the other reading levels keep their step screen', () => {
-  it('Short shows DONE without opening the site, and keeps its list and links', () => {
-    const html = renderBriefing(started('short'), ID);
+describe('Full intel keeps its step screen', () => {
+  it('shows DONE without opening the site, and keeps its list and links', () => {
+    const html = renderBriefing(started('full'), ID);
     expect(html).toMatch(doneButton);
     expect(html).toContain('focus-steps-peek');
     expect(html).not.toContain('brief-simple');
