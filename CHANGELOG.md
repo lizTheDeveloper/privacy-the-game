@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.22.0 (2026-11-17): Scout reads it to you, in his own voice
+
+Liz: "can you also get Scout to read everything to you."
+
+- **Read it to me is Scout's voice** (ElevenLabs "David – Space Adventurer Pirate"), line by line: the briefing and Scout's line, each step (with its open "Is this safe?" note), and now the **report screen** too, which gets the same top-bar row (Scout's greeting and line, each question and its answers).
+- Lines come from the game's own server (`api/voice/<id>.mp3`) and are kept by the browser. The server records a line the first time anyone asks for it and keeps it. It only voices lines on `collective/voice-lines.json` (5,155 lines, built from the game's own words by `scripts/voice-lines.mjs`), so nothing a player typed or chose is ever sent to ElevenLabs; a daily cap (150k characters) bounds spending.
+- Any line not on the list (lines with the player's own numbers in them, account names in a list) or not recordable right now is read by the browser's voice, and Scout carries on with the next.
+- Menu paths are read as "Settings, then Privacy" instead of "Settings greater-than Privacy".
+- Two Recon steps still named the password check's old title; they now say "Check the passwords saved on your phone or computer".
+
 ## 7.21.0 (2026-11-17): The password check is its own mission; reading controls at the top
 
 Liz: "It takes people to the Have I Been Pwned passwords page. That's a whole separate mission… focus on passwords saved in their browser or on their phone, because those managers can tell you the number."
