@@ -6,6 +6,27 @@ import { nextAvailableMission } from './city-map.js';
 import { notMineButton } from './briefing.js';
 import { missionsInProgress, visibleSteps, progressFor, intelFor } from '../utils/reading.js';
 import { esc } from './stats.js';
+import { fillBar } from '../components/fill-bar.js';
+import { confetti } from '../components/celebrate.js';
+import { missionDistrict } from '../data/missions.js';
+import { DISTRICTS } from '../data/districts.js';
+import { calcDistrictProgress } from '../utils/calc.js';
+
+// Good news gets confetti (Liz 2026-11-18: "a little bit more celebration when things are good").
+const GOOD = new Set(['happy', 'proud', 'hug']);
+
+// The district's bar, filling from where it was: security as a process, one mission at a time.
+function districtBar(state, districtId) {
+  const district = DISTRICTS.find((d) => d.id === districtId);
+  if (!district) return '';
+  const p = calcDistrictProgress(state, districtId);
+  if (!p.total) return '';
+  return `<div class="next-progress" data-next-progress>
+      <div class="fill-title">YOUR PROGRESS IN ${esc(district.name.toUpperCase())}</div>
+      ${fillBar({ key: `district:${districtId}`, done: p.completed, total: p.total, size: 'big', label: `${p.percent}% secured` })}
+      <p class="fill-caption">${p.completed >= p.total ? 'All done here. You took it back.' : 'Security is a process. Every mission fills this a little more.'}</p>
+    </div>`;
+}
 
 // Simple mode's "What's next" (Liz 2026-11-18: "it just dumps you in the master keys and you're
 // suddenly in recon again … make it really clear for the simple mode what we're doing next …
@@ -45,15 +66,18 @@ function nextCard(state, up, first) {
   const href = `#/mission/${mission.id}/briefing`;
   const steps = visibleSteps(mission, state, 'simplest').length;
   const label = kind === 'resume' ? 'KEEP GOING' : first ? 'YOUR FIRST MISSION' : 'NEXT';
+  // Bars, not numbers (Liz 2026-11-18): how far along, or how long it is.
   const meta = kind === 'resume'
-    ? (progress.current === -1 ? 'You did all the steps. Now tell Scout what you found.' : `You were on step ${progress.current + 1} of ${progress.total}.`)
-    : `${steps > 1 ? `${steps} steps · ` : ''}about ${mission.estimatedMinutes} min`;
+    ? (progress.current === -1
+      ? 'You did all the steps. Now tell Scout what you found.'
+      : `${fillBar({ key: `steps:${mission.id}`, done: progress.handled, total: progress.total, size: 'big', label: `Step ${progress.current + 1} of ${progress.total}` })}Pick up where you left off.`)
+    : `${steps > 1 ? fillBar({ key: `steps:${mission.id}`, done: 0, total: steps, label: `${steps} steps` }) : ''}About ${mission.estimatedMinutes} min`;
   const go = kind === 'resume' ? 'KEEP GOING' : 'START';
   return `<section class="next-card" data-next-card="${kind}" data-mission="${mission.id}">
       <div class="next-label">${label}</div>
       <h1 class="focus-title"><span class="focus-title-main">${simpleTitle(mission)}</span></h1>
       <p class="focus-lead">${intelFor(mission, 'simplest').intel}</p>
-      <p class="next-meta">${meta}</p>
+      <div class="next-meta">${meta}</div>
       <div class="focus-actions">
         <a class="btn-primary focus-go" href="${href}">${go} &#9654;</a>
         ${kind === 'next' ? notMineButton(state, mission, '#/next') : ''}
@@ -64,8 +88,10 @@ function nextCard(state, up, first) {
 export function renderNext(state, { filed = null, notMine = null } = {}) {
   const up = nextUp(state);
   const anyDone = Object.values(state.missions || {}).some((m) => m?.status);
+  const good = Boolean(filed && GOOD.has(filed.reaction?.feeling));
   const sent = filed && state.missions?.[filed.id]?.status
-    ? `<div class="next-sent" data-next-sent>
+    ? `<div class="next-sent" data-next-sent${good ? ' data-celebrate' : ''}>
+        ${good ? `${confetti()}<div class="next-cheer celebrate-pop">Nice work!</div>` : ''}
         <div class="next-sent-head">&#10003; Sent to Scout</div>
         ${filed.reaction ? renderScout(filed.reaction.line, { feeling: filed.reaction.feeling }) : ''}
       </div>`
@@ -82,6 +108,7 @@ export function renderNext(state, { filed = null, notMine = null } = {}) {
     ${renderHud(state, { nextLink: false })}
     <div class="focus-col">
       ${sent}${dropped}
+      ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '')}
       ${nextCard(state, up, !anyDone && !sent)}
       <p class="next-saved">Your progress is saved on this phone. You can stop and come back any time. This page will show you what's next.</p>
       <a class="focus-notnow next-city" href="#/city">See the whole city</a>

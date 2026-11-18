@@ -54,19 +54,23 @@ export const BROWSER_HELP = [
 
 // Where each place keeps passwords, and how to open it. `manager` is the password check's answer.
 export const PLACES = {
+  // steps: what to do, in order (a numbered list, all the same size: Liz 2026-11-18, gray small
+  // text read as optional). alt: only if that doesn't work, shown in its own labeled box.
   iphone: {
     mine: 'My iPhone',
     manager: 'apple',
     name: 'the Passwords app on your iPhone',
     short: 'your iPhone',
-    look: ['Open the Passwords app on your iPhone. It has a key on it.', 'No Passwords app? Open Settings, then tap “Passwords”.'],
+    steps: ['Open the Passwords app on your iPhone. It has a key on it.'],
+    alt: 'No Passwords app? Open Settings, then tap “Passwords”.',
   },
   android: {
     mine: 'My Android phone',
     manager: 'google',
     name: 'Google Password Manager on your phone',
     short: 'your Android phone',
-    look: ['Open this page on your phone. Sign in to Google if it asks.', 'Samsung phone? Also look in Settings, then “Security and privacy”, then “Samsung Pass”.'],
+    steps: ['Tap the button below to open Google’s password page.', 'Sign in to Google if it asks.'],
+    alt: 'Samsung phone? Also look in Settings, then “Security and privacy”, then “Samsung Pass”.',
     url: 'https://passwords.google.com',
   },
   chrome: {
@@ -74,28 +78,29 @@ export const PLACES = {
     manager: 'google',
     name: 'Chrome on your computer',
     short: 'Chrome on your computer',
-    look: ['In Chrome, click the three dots (⋮) at the top right, then “Settings”.', 'Type “passwords” in the search box at the top. Then click “Google Password Manager”.'],
+    steps: ['In Chrome, click the three dots (⋮) at the top right.', 'Click “Settings”.', 'Type “passwords” in the search box at the top.', 'Click “Google Password Manager”.'],
   },
   safari: {
     mine: 'My Mac',
     manager: 'apple',
     name: 'the Passwords app on your Mac',
     short: 'your Mac',
-    look: ['On your Mac, open the Passwords app. Search for “Passwords” if you can’t find it.', 'Older Mac? In Safari, click “Safari” at the top, then “Settings”, then “Passwords”.'],
+    steps: ['On your Mac, open the Passwords app. Search for “Passwords” if you can’t find it.'],
+    alt: 'Older Mac with no Passwords app? In Safari, click “Safari” at the top, then “Settings”, then “Passwords”.',
   },
   edge: {
     mine: 'Edge on my computer',
     manager: 'edge',
     name: 'Edge on your computer',
     short: 'Edge on your computer',
-    look: ['In Edge, click the three dots (⋯) at the top right, then “Settings”.', 'Type “passwords” in the search box. Then click “Passwords”.'],
+    steps: ['In Edge, click the three dots (⋯) at the top right.', 'Click “Settings”.', 'Type “passwords” in the search box.', 'Click “Passwords”.'],
   },
   firefox: {
     mine: 'Firefox on my computer',
     manager: 'firefox',
     name: 'Firefox on your computer',
     short: 'Firefox on your computer',
-    look: ['In Firefox, click the three lines (☰) at the top right, then “Passwords”.'],
+    steps: ['In Firefox, click the three lines (☰) at the top right.', 'Click “Passwords”.'],
   },
 };
 

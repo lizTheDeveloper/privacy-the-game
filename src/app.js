@@ -1949,7 +1949,13 @@ announceReady();
 function focusCurrentStep() {
   const next = app.querySelector('[data-step-card] .focus-done') || app.querySelector('[data-step-card] .focus-go') || app.querySelector('.walk-step.is-current .walk-done') || app.querySelector('[data-action="i-did-it"]');
   const row = next?.closest('.walk-step') || next;
-  row?.scrollIntoView?.({ block: 'center', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const behavior = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  // Step mode: the new step is read from its top, with its bar in view so it's seen filling
+  // (Liz 2026-11-18: "we need to see a bar fill").
+  const bar = app.querySelector('.brief-steps-mode [data-walk-progress]');
+  const top = bar?.getBoundingClientRect?.().top;
+  if (typeof top === 'number' && (top < 0 || top > window.innerHeight * 0.4)) window.scrollBy?.({ top: top - 12, behavior });
+  else if (!bar) row?.scrollIntoView?.({ block: 'center', behavior });
   next?.focus({ preventScroll: true });
 }
 

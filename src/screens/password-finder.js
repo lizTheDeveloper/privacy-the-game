@@ -10,8 +10,13 @@ const hostOf = (url) => new URL(url).host;
 const managerName = (v) => PASSWORD_MANAGERS.find((pm) => pm.value === v)?.text || v;
 const attr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+// Each browser's own icon on its button, so it can be picked by how it looks (Liz 2026-11-18).
+// From the @browser-logos packages, kept in the game (assets/browsers/).
+export const BROWSER_ICONS = { chrome: 'assets/browsers/chrome.png', safari: 'assets/browsers/safari.png', edge: 'assets/browsers/edge.png', firefox: 'assets/browsers/firefox.png' };
+
 function choice(key, value, text, cls = 'finder-opt') {
-  return `<button type="button" class="${cls}" data-action="finder-answer" data-key="${key}" data-value="${attr(value)}">${text}</button>`;
+  const icon = key === 'browser' && BROWSER_ICONS[value] ? `<img class="finder-icon" src="${BROWSER_ICONS[value]}" alt="" width="32" height="32">` : '';
+  return `<button type="button" class="${cls}${icon ? ' has-icon' : ''}" data-action="finder-answer" data-key="${key}" data-value="${attr(value)}">${icon}<span>${text}</span></button>`;
 }
 
 function askCard(card) {
@@ -29,9 +34,12 @@ function lookCard(card) {
       <p class="simple-tab-hint"><span class="on-touch">It opens a new page. When you’re done there, tap <b>Back</b> to come back here.</span><span class="on-mouse">It opens in a new tab. When you’re done there, come back to this tab.</span></p>`
     : '';
   return `<div class="next-label">LET’S LOOK</div>
-      <h1 class="finder-q">Look in ${place.name}.</h1>
-      ${place.look.map((t, i) => `<p class="finder-look${i ? ' finder-look--alt' : ''}">${t}</p>`).join('')}
+      <h1 class="finder-q">${BROWSER_ICONS[card.place] ? `<img class="finder-icon finder-icon--head" src="${BROWSER_ICONS[card.place]}" alt="" width="36" height="36">` : ''}Look in ${place.name}.</h1>
+      ${place.steps.length > 1
+    ? `<ol class="finder-steps">${place.steps.map((t) => `<li>${t}</li>`).join('')}</ol>`
+    : `<p class="finder-look">${place.steps[0]}</p>`}
       ${open}
+      ${place.alt ? `<div class="finder-alt"><strong>If that doesn’t work:</strong> ${place.alt}</div>` : ''}
       <h2 class="finder-q finder-q--small">Do you see your accounts there, like your email?</h2>
       <div class="finder-opts">${SAW.map(([v, t]) => choice(card.key, v, t)).join('')}</div>`;
 }
