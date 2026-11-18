@@ -6,7 +6,9 @@ import { displayStreak } from '../state.js';
 // Link home to the studio. The utm tags let the studio site count visits from the game.
 export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=';
 
-export function renderHud(state) {
+// tools: the mission screens' reading controls (Simple / Full intel, Read it to me, Focus
+// music), a row of their own in the top bar (Liz 2026-11-17: "put them at the top").
+export function renderHud(state, { tools = '' } = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
   const streak = displayStreak(state);
@@ -16,7 +18,7 @@ export function renderHud(state) {
         <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
       </div>`;
   return `
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
+  <div${tools ? ' class="hud-bar hud-bar--tools"' : ''} style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;${tools ? ' flex-wrap: wrap; row-gap: 8px;' : ''} background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
     <div>
       <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">RECLAIM CITY</div>
       <div style="font-family: var(--font-mono); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-top: 1px;">TAKE BACK YOUR DATA</div>
@@ -37,6 +39,7 @@ export function renderHud(state) {
       </div>
       ${bugButtonHtml()}
       ${supportBlock}
-    </div>
+    </div>${tools ? `
+    <div class="hud-tools">${tools}</div>` : ''}
   </div>`;
 }

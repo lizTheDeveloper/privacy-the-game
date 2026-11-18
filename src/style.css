@@ -823,3 +823,16 @@ img { image-rendering: pixelated; }
 .stats-page .hud-stat { display: none !important; }
 /* "LIBERATED" at 56px is wider than a phone; it was cut to "LIBERATE". */
 @media (max-width: 480px) { .milestone-word { font-size: 38px !important; letter-spacing: 2px !important; } }
+
+/* ---------- Reading controls in the top bar (Liz 2026-11-17) ----------
+   Simple / Full intel, Read it to me and Focus music sit in a row of their own under the title,
+   on every mission screen, instead of at the bottom of the page. */
+.hud-tools { flex: 1 0 100%; }
+.top-tools { margin: 0; padding: 0; border: 0; }
+.top-tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.top-tools .read-levels { display: inline-flex; }
+.top-tools .read-level { min-height: 40px; }
+.top-tool { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid rgba(237,239,243,0.18); border-radius: 10px; background: rgba(255,255,255,0.04); color: rgba(237,239,243,0.85); font: inherit; font-size: 14px; cursor: pointer; }
+.top-tool[aria-pressed="true"] { border-color: rgba(0,229,255,0.5); color: var(--cyan); }
+.top-tools .read-ask { margin: 8px 0 0; font-size: 13px; }
+@media (max-width: 480px) { .top-tool { font-size: 13px; padding: 0 10px; } }
