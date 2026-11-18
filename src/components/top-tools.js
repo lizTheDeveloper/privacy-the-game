@@ -1,7 +1,7 @@
 // The reading controls in the top bar of the mission screens (briefing, steps, report).
 import { isPlaying } from '../utils/focus-music.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
-import { readLevelChosen, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { readLevelChosen, READ_LEVELS, READ_LEVEL_LABELS, READ_LEVEL_SHORT } from '../utils/reading.js';
 import { plainText } from '../utils/readability.js';
 
 const attrEsc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -21,8 +21,8 @@ export function topTools(state, level, say) {
         <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
     : readLevelChosen(state)
     ? ''
-    : '<div class="read-ask" data-read-ask>How much do you want to read? Change it here any time.</div>';
-  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
+    : '<div class="read-ask" data-read-ask>Simple mode or Advanced mode? Change it here any time.</div>';
+  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}" aria-label="${READ_LEVEL_LABELS[l]}"><span class="tt-long">${READ_LEVEL_LABELS[l]}</span><span class="tt-short" aria-hidden="true">${READ_LEVEL_SHORT[l]}</span></button>`).join('');
   return `<div class="read-tools top-tools" data-read-tools>
         <div class="top-tools-row">
           <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>

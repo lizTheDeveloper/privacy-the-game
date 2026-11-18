@@ -22,6 +22,7 @@ import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
 import { notMineLabel } from '../data/not-mine.js';
+import { stepReportAnswers } from '../utils/step-report.js';
 
 function notFound(state) {
   return `
@@ -529,7 +530,7 @@ const SHORT_FOLLOW = { password_exposed: 'Did a leak have your password in it?' 
 // "Yes — passwords were in the leaked data" → "Yes".
 const shortText = (t) => t.split(' — ')[0].replace(/^Couldn’t check right now$/, 'Couldn’t check');
 
-function stepAsk(state, mission, step) {
+function stepAsk(state, mission, step, sends = false) {
   if (!step?.ask) return '';
   const qs = mission.debriefQs || [];
   const q = qs.find((x) => x.id === step.ask);
@@ -566,7 +567,7 @@ function stepAsk(state, mission, step) {
   const done = answers[q.id] !== undefined && follow.every((f) => answers[f.id] !== undefined);
   return `
       <div class="focus-ask" data-step-ask="${q.id}">${parts.join('')}
-        ${done ? '<p class="focus-ask-note">Saved. Now tap DONE.</p>' : ''}
+        ${done ? `<p class="focus-ask-note">${sends ? 'Saved. Tap DONE to send it to Scout.' : 'Saved. Now tap DONE.'}</p>` : ''}
       </div>`;
 }
 
@@ -581,14 +582,18 @@ function stepCardText(mission, step, simple = null) {
   // Simplest names the site underneath in plain lower case, as the phone's address bar shows it.
   const link = !step.url ? ''
     : !simple ? open('btn-secondary focus-open', namesSite(step) ? 'OPEN &#8599;' : `OPEN ${hostOf(step.url).toUpperCase()} &#8599;`)
-    : big ? open('btn-primary focus-go focus-open simple-open', `OPEN THE WEBSITE &#8599;<span class="simple-host">${hostOf(step.url)}</span>`)
+    : big ? open('btn-primary focus-go focus-open simple-open', `OPEN THE WEBSITE &#8599;<span class="simple-host">${hostOf(step.url)}</span>`) + BACK_HINT
     : open('simple-pill simple-again', '<span aria-hidden="true">&#8599;</span> Open the website again');
   const where = simple?.where && !step.url
-    ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>`
+    ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>${BACK_HINT}`
     : '';
   const notes = (step.note || []).map((n) => `<details class="focus-note"${n.open ? ' open' : ''}><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
   return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${link}${notes}`;
 }
+
+// The site opens in a new tab, which on a phone looks like leaving the game; say how to get
+// back (Liz 2026-11-18). Phones: Back closes the new tab and comes back here. Computers: the tab.
+const BACK_HINT = `<p class="simple-tab-hint" data-tab-hint><span class="on-touch">It opens a new page. When you’re done there, tap <b>Back</b> to come back here.</span><span class="on-mouse">It opens in a new tab. When you’re done there, come back to this tab.</span></p>`;
 
 // "Open haveibeenpwned.com": the step's words already name the site its button opens.
 function namesSite(step) {
@@ -616,20 +621,26 @@ function stepModePage(p) {
   const showDone = !simple || opened;
   // Read it to me: the step, and any note shown open on its card (the password check's "Is this safe?").
   const say = step ? [step.text, ...(step.note || []).filter((n) => n.open).flatMap((n) => [n.label, n.text])] : [];
+  // The step cards already asked everything the report asks: the last DONE sends it to Scout.
+  const report = stepReportAnswers(state, mission);
+  const sends = Boolean(report && (allDone || progress.handled === total - 1));
   const card = allDone
     ? `
       <div class="focus-card is-done" data-step-card>
         <div class="focus-card-head">ALL ${total} STEPS DONE &#10003;${progress.skipped ? ` <span>(${progress.skipped} skipped)</span>` : ''}</div>
-        <p class="focus-step-text">Nice work. Now tell Scout what you found.</p>
-        <a class="btn-primary focus-go" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">REPORT BACK &#9654;</a>
+        ${sends
+          ? `<p class="focus-step-text">Nice work. Scout has your answers.</p>
+        <button class="btn-primary focus-go" data-action="file-from-steps" data-mission="${mission.id}">SEND IT TO SCOUT &#9654;</button>`
+          : `<p class="focus-step-text">Nice work. Now tell Scout what you found.</p>
+        <a class="btn-primary focus-go" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">REPORT BACK &#9654;</a>`}
         ${simple ? '' : `<button class="walk-link" data-action="step-back" data-mission="${mission.id}">&#8592; Back to the last step</button>`}
       </div>`
     : `
       <div class="focus-card" data-step-card data-step-key="${key}">
         ${stepCardText(mission, step, simpleCard)}
         ${accountSite(mission, missionStepList, p.goUrl)}
-        ${showDone ? stepAsk(state, mission, step) : ''}
-        ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003;</button>` : ''}
+        ${showDone ? stepAsk(state, mission, step, sends) : ''}
+        ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}
         <div class="simple-pills">
           <button class="simple-pill" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}"><span aria-hidden="true">?</span> Help</button>
         </div>${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}

@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.24.0 (2026-11-18): Simple mode and Advanced mode; the steps already told Scout
+
+Liz: "when they click the start button, we should say simple mode, advanced mode … change the support to support us, and then put a tiny dollar icon, and then next to support, put simple mode."
+
+- **PLAY asks "How do you want to play?"**: Simple mode (fewer words, one step at a time) or Advanced mode (all the details). "Full intel" is now **Advanced mode** everywhere.
+- **The top bar** says **$ Support us** (a tiny circled dollar sign), with the other mode beside it: "Simple mode" when you're in Advanced, "Advanced mode" when you're in Simple. Mission screens keep the full Simple / Advanced switch in their own row.
+- **No asking twice.** When the step cards already asked everything the report asks (Gmail's "Were you in any leaks?" → No), the last button says **DONE ✓ SEND TO SCOUT** and files the report. If the report has more to ask (a leak was found, so "was a password in it?"), REPORT BACK opens it as before.
+- **How to get back.** Under a Simple step's OPEN THE WEBSITE: "It opens a new page. When you're done there, tap Back to come back here." (Computers: "come back to this tab".) It always opened a new tab, but on a phone a new tab looks like leaving the game.
+
 ## 7.23.0 (2026-11-18): "I don't have Gmail" on the Simple briefing
 
 Liz: "there's no button that says I don't have Gmail … use I don't have Gmail as really big words, but use the secondary button so that it's not as big and blue."
