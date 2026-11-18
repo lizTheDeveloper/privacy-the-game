@@ -213,6 +213,9 @@
       .welcome-back--scout { display: none; }
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
+      /* Scout starts you out: right under the top bar, before the buttons and the map (Liz 2026-11-17). */
+      .city-hud { order: -2; }
+      .city-scout { order: -1; }
       .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
       .city-readout { position: relative; top: auto; left: auto; padding: 8px 14px 0; flex-wrap: wrap; row-gap: 4px; }
       .city-skyline { position: relative; height: 420px; margin-top: -60px; }
@@ -358,7 +361,7 @@
         <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
       </div>
       <button type="button" class="hud-bug" data-bug-report aria-label="Report a bug" title="Report a bug">🐞</button>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+      <div class="hud-support" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
         <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-block;">SUPPORT</a>
         <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
       </div>

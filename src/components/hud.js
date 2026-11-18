@@ -11,7 +11,7 @@ export function renderHud(state) {
   const exposure = calcExposure(state);
   const streak = displayStreak(state);
   // Web cabinet (campus iframe): no real-money asks.
-  const supportBlock = isCabinetMode() ? '' : `<div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+  const supportBlock = isCabinetMode() ? '' : `<div class="hud-support" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
         <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-block;">SUPPORT</a>
         <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
       </div>`;

@@ -7,6 +7,17 @@ Reclaim City's releases. Versions before 7.13.0 are described in their pull requ
 - **The Field (chapter 13)** is an opt-in district for people whose work makes them a target: journalists, organizers, clinic workers, legal observers, mutual aid. Nine buildings, 74 missions, built from The Multiverse School's Field Opsec playbooks (shipped in #519).
 - **Every Field mission now links its full checklist.** The briefing has a "Full checklist — Field Opsec Kit" box that lists the playbooks the mission comes from, each linking to that playbook's bench in the course's kit, The kit is free and needs no account; a "Take the class" link sits underneath. The links open in a new tab and send no referrer, so the school never learns which mission sent you. Missions outside The Field don't show the box.
 
+## 7.17.0 (2026-11-17): Simplest works like a phone app; Scout starts you out
+
+Liz on her phone: Simplest still had too many words, DONE sat there before you'd been anywhere, "the box at the top" sent people looking at the top of the game, and Back was tiny text.
+
+- **Simplest step screens.** A big **‹ Back** at the top left (to the step before, or the briefing from step 1) and "Step 2 of 4" in words on the right. Gone from these screens: the score bar, Support, the Read / Steps / Report back trail, the second list of steps, "Finished already?", "Read the briefing again", and the second Read it to me.
+- **OPEN first, then DONE.** A step with a website shows one bright button, **OPEN THE WEBSITE ↗**, with the site's address underneath as the phone's address bar shows it. DONE appears once you've opened it, and OPEN becomes a quiet "Open the website again". What you opened is remembered for this visit only, on this device.
+- **Every step says where it happens.** A step that happens on a site opened earlier shows "🌐 On haveibeenpwned.com ↗" above the words (tap it to go back there). The email check now says: "On that website, type your Gmail email address in the “Email address” box, and tap “Check”", the box and button as Have I Been Pwned labels them.
+- **Help and Read it to me** are big buttons, not small links.
+- **Scout starts you out.** On phones Scout's line and NEXT MISSION come first on the city map, right under the top bar, before the buttons and the map.
+- Short and Full intel are unchanged.
+
 ## 7.16.3 (2026-11-17): City buttons on phones
 
 - On phones the city map's button row (QUICK QUEST, STATS, LOOK UP, PRISM, WHO GETS IT, WHOLE CITY) was squeezed into a thin strip down the left edge, and the strip pushed the city down and left a big empty gap. The desktop width cap from 7.10.1 was never lifted for phones. The buttons now wrap across the full width under the sector readout, with the city right below them.

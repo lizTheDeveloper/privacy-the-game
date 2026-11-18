@@ -781,3 +781,23 @@ img { image-rendering: pixelated; }
 .brief-steps-mode .walk-progress { margin-bottom: 10px; }
 .focus-bonus { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px; margin: 8px 0; }
 .focus-recon-note { font-size: 14px; color: var(--offwhite); line-height: 1.6; margin: 10px 0; border-left: 2px solid var(--magenta); padding-left: 10px; }
+
+/* ---------- Simplest: phone-app conventions (Liz 2026-11-17) ----------
+   A big Back at the top left, where you are on the right, one bright button at a time,
+   and nothing that isn't about the step: no score bar, no second list of steps. */
+.brief-simple .hud-stat, .brief-simple .hud-support { display: none !important; } /* the HUD's inline styles */
+.simple-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
+.simple-back { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 18px 0 12px; font-family: inherit; font-size: 18px; font-weight: 600; color: var(--offwhite); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; text-decoration: none; cursor: pointer; }
+.simple-back span { font-size: 30px; line-height: 1; margin-top: -4px; color: var(--cyan); }
+.simple-count { font-size: 17px; font-weight: 600; color: rgba(237,239,243,0.8); }
+.brief-simple .focus-step-text { font-size: 24px; line-height: 1.4; }
+.brief-simple .focus-go { font-size: 18px; padding: 20px; }
+.brief-simple .focus-card { gap: 18px; }
+.simple-where { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px; font-size: 15px; color: var(--cyan); background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4); border-radius: 20px; text-decoration: none; overflow-wrap: anywhere; }
+.simple-where b { color: var(--offwhite); font-weight: 600; }
+.simple-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.simple-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; font-family: inherit; font-size: 17px; color: var(--offwhite); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; cursor: pointer; }
+.simple-pill span { color: var(--cyan); font-weight: 700; }
+.simple-open { overflow-wrap: normal; }
+.simple-host { display: block; margin-top: 6px; font-family: var(--font-body, system-ui, sans-serif); font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; opacity: 0.75; }
+.simple-again { align-self: flex-start; text-decoration: none; }

@@ -58,6 +58,7 @@ import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.
 import { speak, stopSpeaking } from './utils/read-aloud.js';
 import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
 import { stepKey } from './utils/reading.js';
+import { markOpened } from './utils/opened-steps.js';
 import { renderStats } from './screens/stats.js';
 import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
@@ -1361,6 +1362,8 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'mission-step') {
     // A step link opens the real site itself (default action is left alone);
     // just remember the start so the briefing offers "I did it" on return.
+    // Simplest holds DONE back until the step's site has been opened (utils/opened-steps.js).
+    if (el.dataset.step) markOpened(el.dataset.mission, el.dataset.step);
     const firstTime = !state.startedMissions?.[el.dataset.mission];
     setState(markMissionStarted(state, el.dataset.mission));
     if (firstTime && !isCustomMission(el.dataset.mission)) {
