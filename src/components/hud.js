@@ -9,7 +9,7 @@ export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&u
 
 // tools: the mission screens' reading controls (Simple / Full intel, Read it to me, Focus
 // music), a row of their own in the top bar (Liz 2026-11-17: "put them at the top").
-export function renderHud(state, { tools = '' } = {}) {
+export function renderHud(state, { tools = '', nextLink = true } = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
   const streak = displayStreak(state);
@@ -22,6 +22,9 @@ export function renderHud(state, { tools = '' } = {}) {
   // mode … people can just click on it and switch back"). Mission screens have the full switch in
   // their tools row instead.
   const other = readLevel(state) === 'full' ? 'simplest' : 'full';
+  // Simple mode: What's next, from any screen (Liz 2026-11-18: "from the top thing, it can help
+  // them orient to the next thing").
+  const whatsNext = !tools && nextLink && readLevel(state) === 'simplest' ? '<a class="hud-next" href="#/next">What’s next &#9654;</a>' : '';
   const modeButton = tools ? '' : `<button type="button" class="hud-mode" data-action="read-level" data-level="${other}" aria-label="Switch to ${READ_LEVEL_LABELS[other]}">${READ_LEVEL_LABELS[other]}</button>`;
   return `
   <div${tools ? ' class="hud-bar hud-bar--tools"' : ''} style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;${tools ? ' flex-wrap: wrap; row-gap: 8px;' : ''} background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
@@ -44,6 +47,7 @@ export function renderHud(state, { tools = '' } = {}) {
         <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
       </div>
       ${bugButtonHtml()}
+      ${whatsNext}
       ${modeButton}
       ${supportBlock}
     </div>${tools ? `

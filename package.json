@@ -1,6 +1,6 @@
 {
   "name": "reclaim-city",
-  "version": "7.24.0",
+  "version": "7.25.0",
   "private": true,
   "type": "module",
   "scripts": {

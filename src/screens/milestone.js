@@ -1,4 +1,5 @@
 import { DISTRICTS } from '../data/districts.js';
+import { readLevel } from '../utils/reading.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { calcIntegrity, getBuildingState, districtBreachedAddresses } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
@@ -32,7 +33,10 @@ export function renderMilestone(state, districtId) {
   const addressesBreached = districtBreachedAddresses(state, districtId);
   const integrity = calcIntegrity(state);
   const nextDistrict = DISTRICTS.find((d) => d.chapter === district.chapter + 1);
-  const continueLink = nextDistrict
+  // Simple mode carries on from What's next (one card), not the next district's tabs.
+  const continueLink = readLevel(state) === 'simplest'
+    ? '<a class="btn-primary" href="#/next" style="display: inline-block; text-decoration: none;">WHAT’S NEXT &rarr;</a>'
+    : nextDistrict
     ? `<a class="btn-primary" href="#/district/${nextDistrict.id}" style="display: inline-block; text-decoration: none;">CONTINUE TO ${nextDistrict.name.toUpperCase()} &rarr;</a>`
     : `<a class="btn-primary" href="#/stats" style="display: inline-block; text-decoration: none;">VIEW YOUR CITY</a>`;
 

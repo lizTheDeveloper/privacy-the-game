@@ -15,7 +15,7 @@ beforeEach(() => { globalThis.localStorage = memory(); });
 // secondary button so it isn't as big and blue as START.
 const ID = 'gmail-recon-breach';
 const withGmail = (level) => toggleAccount(setReadLevel(createInitialState(), level), 'gmail', true);
-const button = /<button class="btn-secondary not-mine" data-action="not-mine" data-account="gmail" data-href="#\/district\/master-keys[^"]*">I don’t have Gmail<\/button>/;
+const button = /<button class="btn-secondary not-mine" data-action="not-mine" data-account="gmail" data-href="#\/next">I don’t have Gmail<\/button>/;
 
 describe('"I don’t have Gmail" on the Simple briefing', () => {
   it('is there, as a secondary button, under START', () => {

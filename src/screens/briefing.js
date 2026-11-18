@@ -483,7 +483,7 @@ function compactBriefingPage(p) {
       ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
-        ${simple ? notMineButton(state, mission, `#/district/${districtId}${targetTab}`) : ''}
+        ${simple ? notMineButton(state, mission, '#/next') : ''}
         ${canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
         <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
       </div>
@@ -494,7 +494,7 @@ function compactBriefingPage(p) {
 
 // Simple: "I don't have Gmail", in big words on a quiet button (Liz 2026-11-18: big words, but
 // the secondary button so it isn't as big and blue as START).
-// It turns the account off and goes back to the district (href), where Scout says so.
+// It turns the account off and goes to What's next (href), where Scout says so.
 export function notMineButton(state, mission, href) {
   const label = state.accounts?.[mission.accountId]?.enabled ? notMineLabel(mission.accountId) : null;
   return label ? `<button class="btn-secondary not-mine" data-action="not-mine" data-account="${mission.accountId}" data-href="${href}">${esc(label)}</button>` : '';
