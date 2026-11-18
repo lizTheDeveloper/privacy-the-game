@@ -13,6 +13,7 @@ import { yourPart } from '../src/utils/collective.js';
 import { restoreEvents } from '../src/utils/restore.js';
 import { renderDebrief, debriefReaction } from '../src/screens/debrief.js';
 import { renderBriefing } from '../src/screens/briefing.js';
+import { setReadLevel } from '../src/utils/reading.js';
 import { renderDistrict } from '../src/screens/district.js';
 
 beforeEach(() => {
@@ -188,7 +189,9 @@ describe.each(PAIRS)('%s asks whether it is the same address as %s', (acct, part
     const m = byId(`${acct}-recon-breach`);
     expect(m.steps[0].text).toContain(`Same address as your ${name}?`);
     expect(m.steps[0].url).toBeUndefined();
-    expect(renderBriefing(s0, m.id)).toContain(`Same address as your ${name}?`);
+    // Full intel keeps the mission's own words; Simple says it in plain words.
+    expect(renderBriefing(setReadLevel(s0, 'full'), m.id)).toContain(`Same address as your ${name}?`);
+    expect(renderBriefing(s0, m.id)).toContain(`Is this the same email address as your ${name}?`);
   });
 });
 
