@@ -1,5 +1,6 @@
 const ROUTES = [
   { pattern: /^#\/city$/, screen: 'city', params: () => ({}) },
+  { pattern: /^#\/next$/, screen: 'next', params: () => ({}) },
   {
     pattern: /^#\/district\/([^/?]+)(?:\?(.*))?$/,
     screen: 'district',

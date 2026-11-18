@@ -54,7 +54,7 @@ import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
-import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
+import { readLevel, setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
 import { speak, stopSpeaking } from './utils/read-aloud.js';
 import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
@@ -65,6 +65,7 @@ import { renderCityTogether, cityStats } from './screens/city-together.js';
 import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.js';
 import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
+import { renderNext } from './screens/next.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage } from './screens/phishing-quiz.js';
 import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from './screens/garage.js';
@@ -103,6 +104,8 @@ let restoring = false;
 let resetAnywayMission = null;
 // "I don't have Gmail" (the Simple briefing): the district it went back to says so, once.
 let notMine = { hash: null, id: null };
+// Simple mode: the report just sent, shown on What's next (#/next) once it lands there.
+let justFiled = null;
 // A started mission shows one step at a time; "Read the briefing again" peeks at the briefing.
 let briefingPeek = null;
 // The last route drawn, and the building #/saints was opened from (memory only).
@@ -198,6 +201,7 @@ const screens = {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
     notMine: notMine.hash === location.hash ? notMine.id : null,
   }),
+  next: () => renderNext(state, { filed: justFiled, notMine: notMine.hash === location.hash ? notMine.id : null }),
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
   prism: () => renderPrism(state),
@@ -407,6 +411,7 @@ function startScreenVisit(route) {
     const arriving = !landingReaction.landed && route.screen === 'district' && route.params.id === landingReaction.districtId;
     landingReaction = arriving ? { ...landingReaction, landed: true } : null;
   }
+  if (justFiled) justFiled = route.screen === 'next' ? { ...justFiled, landed: true } : justFiled.landed ? null : justFiled;
   if (route.screen === 'debrief' && twoFactorHugDue(state, route.params.id)) twoFactorHugShown = true;
 }
 
@@ -1077,6 +1082,11 @@ function afterMissionRecorded(mission, event) {
   if (progress.total > 0 && progress.percent === 100 && !wasComplete) {
     track('district-completed', { district: districtId });
     navigate(`#/milestone/${districtId}`);
+  } else if (readLevel(state) === 'simplest') {
+    // Simple mode: not the district's tabs, but one card saying it was sent and what's next.
+    justFiled = { id: missionId, reaction, landed: false };
+    if (reaction?.feeling === 'hug') setState(markTwoFactorHugSeen(state));
+    navigate('#/next');
   } else {
     const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
     landingReaction = reaction ? { districtId, reaction, landed: false } : null;
@@ -1451,6 +1461,7 @@ app.addEventListener('click', async (e) => {
       track('account-toggled', { account: id, enabled: false });
     }
     notMine = { hash: el.dataset.href, id };
+    justFiled = null;
     if (location.hash === el.dataset.href) renderCurrentRoute();
     else location.hash = el.dataset.href;
   } else if (action === 'toggle-account') {
@@ -1644,6 +1655,8 @@ app.addEventListener('click', async (e) => {
     }
     state = setReadLevel(state, el.dataset.level);
     started = true;
+    // Simple mode starts on one card: the first mission.
+    if (el.dataset.level === 'simplest') history.replaceState(null, '', '#/next');
     try {
       saveState(state);
     } catch (error) {
@@ -1865,6 +1878,9 @@ document.fonts?.addEventListener?.('loadingdone', () => {
 // The streak check runs once as the game opens; what it finds is a labelled WELCOME BACK
 // note on the city map (utils/notifications.js), shown until the player leaves the map.
 welcomeBack = checkStreakReminder(state);
+// Simple mode, opening the game again: What's next, not the map or a district's tabs, so it
+// says where they were (Liz 2026-11-18: "assume we're going to lose people and that we're coming back").
+if (started && readLevel(state) === 'simplest' && /^(#?|#\/city|#\/district\/.*)$/.test(location.hash)) history.replaceState(null, '', '#/next');
 initRouter(render);
 mountBugReporter();
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).

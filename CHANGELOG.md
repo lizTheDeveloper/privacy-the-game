@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.25.0 (2026-11-18): Simple mode's "What's next"
+
+Liz: "it just dumps you in the master keys and you're suddenly in recon again … make it really clear for the simple mode what we're doing next … card by card, and just assume we're going to lose people and that we're coming back."
+
+- **What's next (`#/next`)**: one card with one thing to do. Half-done comes first ("KEEP GOING · You were on step 2 of 3"), otherwise the next mission in plain words ("NEXT · Outlook · See if a business lost your Outlook email address…", START, and "I don't have Outlook"). It says the progress is saved on this phone and they can come back any time.
+- **After a report in Simple mode** the game lands there instead of on the district's tabs: "✓ Sent to Scout", Scout's line, then the next card. A finished district's celebration carries on to What's next too.
+- **Opening the game again in Simple mode** starts on What's next (from the map or a district; a mission screen stays where it was). Picking Simple mode on the welcome screen starts on the first mission's card.
+- **The top bar** has a **What's next ▶** button in Simple mode on every screen but the missions.
+- "I don't have Gmail" now comes back to What's next, with Scout's "Got it" and Put Gmail back above the next card.
+
 ## 7.24.0 (2026-11-18): Simple mode and Advanced mode; the steps already told Scout
 
 Liz: "when they click the start button, we should say simple mode, advanced mode … change the support to support us, and then put a tiny dollar icon, and then next to support, put simple mode."
