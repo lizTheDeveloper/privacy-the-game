@@ -182,7 +182,7 @@ const NO_RESET_STYLE = 'letter-spacing: 1px; color: var(--lime); background: rgb
 
 // A mission with no account (the password-manager report) has no building.
 function missionIcon(state, mission) {
-  if (ACCOUNTS[mission.accountId]) return renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32);
+  if (ACCOUNTS[mission.accountId]) return renderBuilding(mission.accountId, getBuildingState(state, mission.accountId), 32, { showName: false }); // the title names it
   const icon = mission.inPlayIfAny ? '&#128663;' : '&#128273;';
   return `<div aria-hidden="true" style="width: 32px; text-align: center; font-size: 20px; color: var(--cyan); flex-shrink: 0;">${icon}</div>`;
 }
@@ -222,7 +222,8 @@ function renderDisabledPanel(districtId) {
   </div>`;
 }
 
-function renderMissionRow(state, mission) {
+// lead: the one mission to do next gets the bright button; the rest are quieter (Liz 2026-11-17).
+function renderMissionRow(state, mission, { lead = true } = {}) {
   const record = state.missions[mission.id];
   const notNeeded = record?.status === 'not-needed';
   const completed = isMissionDone(record);
@@ -250,7 +251,9 @@ function renderMissionRow(state, mission) {
       <div class="badge" style="letter-spacing: 1px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">SKIPPED</div>
       <a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">START</a>`;
   } else {
-    statusCell = `<a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
+    statusCell = lead
+      ? `<a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`
+      : `<a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
   }
 
   return `
@@ -261,14 +264,13 @@ function renderMissionRow(state, mission) {
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${stepsStarted ? missionProgressLine(steps) : ''}
       ${timeline ? `<div data-timeline-note style="font-size: 11px; color: var(--cyan); margin-top: 2px;">${esc(timeline)}</div>` : ''}
-      ${mission.optional ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Optional bonus &mdash; never blocks progress or Secured.</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
       ${!completed && mission.replaces && isMissionDone(state.missions[mission.replaces]) ? `<div style="font-size: 11px; color: rgba(237,239,243,0.45); margin-top: 2px;">Your earlier email check still counts toward progress. This one checks the account itself.</div>` : ''}
       ${!completed && isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? `<div style="font-size: 11px; color: var(--magenta); margin-top: 2px;">Flagged by your password manager</div>` : ''}
     </div>
     ${mission.optional
       ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
-      : `<div class="badge" style="letter-spacing: 1px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15);">${esc(mission.phase).toUpperCase()}</div>`}
+      : ''}
     <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); white-space: nowrap;">~${mission.estimatedMinutes} min</div>
     ${statusCell}
   </div>`;
@@ -312,6 +314,15 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
       <div class="panel" style="padding: 32px; text-align: center; font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.4);">No missions available in this phase yet.</div>
     </div>`;
   }
+  // The mission to do next: one already begun, else the first not filed (bonus ones last).
+  const open = (m) => !isMissionDone(state.missions[m.id]) && state.missions[m.id]?.status !== 'skipped';
+  const begun = (m) => progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
+  const leadId = (missions.find((m) => open(m) && begun(m)) || missions.find((m) => open(m) && !m.optional) || missions.find(open))?.id;
+  const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId });
+  // Said once for the list, not on every bonus row.
+  const bonusNote = missions.some((m) => m.optional)
+    ? '<div data-bonus-note style="font-size: 12px; color: rgba(237,239,243,0.5); margin: 0 0 8px;"><span style="color: rgba(255,45,155,0.8); font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
+    : '';
   const prereq = PHASE_PREREQ[activeTab];
   if (prereq) {
     const byAccount = new Map();
@@ -322,7 +333,7 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
     const blocks = [...byAccount.entries()].map(([accountId, accountMissions]) => {
       const gate = getAccountPhaseGate(state, districtId, accountId, prereq);
       if (gate.unlocked) {
-        return accountMissions.map((m) => renderMissionRow(state, m)).join('');
+        return accountMissions.map(row).join('');
       }
       const accountName = ACCOUNTS[accountId]?.name || accountId;
       return `
@@ -337,6 +348,7 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
     }).join('');
     return `
     <div style="padding: 12px 24px 24px;">
+      ${bonusNote}
       <div class="panel" style="padding: 4px;">
         ${blocks}
       </div>
@@ -344,8 +356,9 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
   }
   return `
   <div style="padding: 12px 24px 24px;">
+    ${bonusNote}
     <div class="panel" style="padding: 4px;">
-      ${missions.map((m) => renderMissionRow(state, m)).join('')}
+      ${missions.map(row).join('')}
     </div>
   </div>`;
 }
@@ -627,7 +640,7 @@ function renderFacilityDistrict(state, district, reaction) {
     .join('');
 
   return `
-  <div class="scanlines">
+  <div class="scanlines district-page">
     ${renderHud(state)}
     ${reactionBlock(reaction)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
@@ -728,7 +741,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
   }
 
   return `
-  <div class="scanlines">
+  <div class="scanlines district-page">
     ${renderHud(state)}
     ${reactionBlock(reaction)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
@@ -747,7 +760,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
       </div>
     </div>
     ${categoryAskBlock(state, district.id)}
-    <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
+    <div class="district-buildings" style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT BUILDINGS</div>
       ${skylineHint(state, district.id, districtAccounts.map(([id]) => id))}
       <div style="display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap; padding-bottom: 4px;">
