@@ -2,6 +2,14 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.27.0 (2026-11-18): Read it to me is a switch, with a buffer
+
+Liz: "make read to me a toggle instead of a button you have to press every time … make it visibly like a toggle", "stream or prefetch … the next few readings so that they have it in the buffer", "don't unload right away either".
+
+- **Read it to me is an on/off switch** (a track and a knob; cyan when on), remembered on this phone. On, Scout reads each mission screen as it comes: the briefing, every new step, the report. Re-drawing the same screen (picking an answer) doesn't start him over; leaving the mission screens stops him. Off stops him at once.
+- **Phones:** the switch's tap lets the page play sound for the rest of the visit (one reused player, unlocked with a tenth of a second of silence). After a reload, Scout starts on the first tap.
+- **The buffer:** while a line plays, the rest of the screen and the next two steps download ahead and stay in memory for the visit (the 80 most recent clips), so the next step and going back play at once. A line not fetched yet streams as before. Only lines on Scout's list are fetched; the player's own words never leave the phone.
+
 ## 7.26.0 (2026-11-18): "Where are my passwords?" and resets that use it
 
 Liz: "for changing their passwords, we really need to get them in that password manager … walk them through, do they use Chrome as a password manager? Do they use your phone passwords? … they're not always going to know … Most people have a mixed, like where they can only log in on one computer and they don't know why."

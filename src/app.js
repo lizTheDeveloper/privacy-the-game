@@ -54,9 +54,9 @@ import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
-import { readLevel, setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
+import { readLevel, setReadLevel, readAloudOn, setReadAloud, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
-import { speak, stopSpeaking } from './utils/read-aloud.js';
+import { stopSpeaking, sayNow, unlockAudio, audioUnlocked, prefetch } from './utils/read-aloud.js';
 import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
 import { stepKey } from './utils/reading.js';
 import { markOpened } from './utils/opened-steps.js';
@@ -108,6 +108,9 @@ let resetAnywayMission = null;
 let notMine = { hash: null, id: null };
 // Simple mode: the report just sent, shown on What's next (#/next) once it lands there.
 let justFiled = null;
+// Read it to me (the switch): the lines last read, so a re-draw of the same screen (an answer
+// picked) doesn't start Scout over; a new screen or step reads from the top.
+let lastSaid = null;
 // A started mission shows one step at a time; "Read the briefing again" peeks at the briefing.
 let briefingPeek = null;
 // The last route drawn, and the building #/saints was opened from (memory only).
@@ -310,6 +313,29 @@ function renderWelcome() {
 // The building screen only counts as visited when it drew an actual interior.
 const hasInteriorScreen = (route) => route.screen === 'building' && hasInterior(route.params.id) && state.accounts?.[route.params.id]?.enabled;
 
+// The switch is on: read this screen's lines (the top bar's Read it to me says which), once.
+// A screen without them (the map, a district) stops Scout. Before any tap since the page
+// loaded, a phone won't play sound: the first tap starts it (below).
+function autoRead() {
+  if (!readAloudOn(state)) return;
+  const el = app.querySelector('[data-read-tools] [data-say-lines]');
+  if (!el) {
+    if (lastSaid !== null) { stopSpeaking(); lastSaid = null; }
+    return;
+  }
+  if (!audioUnlocked()) return;
+  const key = el.dataset.sayLines;
+  if (key === lastSaid) return;
+  lastSaid = key;
+  let lines = null;
+  try { lines = JSON.parse(key); } catch { lines = null; }
+  if (Array.isArray(lines) && lines.length) sayNow(lines);
+  // The next steps' lines, into the buffer while this screen is read.
+  let upcoming = null;
+  try { upcoming = JSON.parse(el.dataset.sayNext || 'null'); } catch { upcoming = null; }
+  if (Array.isArray(upcoming) && upcoming.length) setTimeout(() => prefetch(upcoming), 0);
+}
+
 function render(route, cause = RENDER_CAUSE.REFRESH) {
   if (!started) {
     app.innerHTML = renderWelcome();
@@ -366,6 +392,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
       state.lastCityVisit = new Date().toISOString();
       setState(state);
     }
+    autoRead();
   } catch (error) {
     captureError(error, errorContext(route));
     app.innerHTML = `<div style="padding: 40px; text-align: center;">
@@ -1305,11 +1332,20 @@ app.addEventListener('click', async (e) => {
     else await playMusic();
     renderCurrentRoute();
   } else if (action === 'read-aloud') {
-    // Scout's recorded voice, line by line, else the browser's own (utils/read-aloud.js). The
-    // lines are the game's own words: nothing about the player is sent.
-    let lines = null;
-    try { lines = JSON.parse(el.dataset.sayLines || 'null'); } catch { lines = null; }
-    if (speak(Array.isArray(lines) ? lines : el.dataset.say)) setState(recordSignal(state, 'readAloud'));
+    // A switch (Liz 2026-11-18): on, Scout reads this screen now and each one after it as it
+    // comes, in his recorded voice, else the browser's own (utils/read-aloud.js). The lines are
+    // the game's own words: nothing about the player is sent. Off stops him.
+    const on = !readAloudOn(state);
+    lastSaid = null;
+    if (on) {
+      unlockAudio();
+      setState(recordSignal(setReadAloud(state, true), 'readAloud'));
+    } else {
+      stopSpeaking();
+      setState(setReadAloud(state, false));
+    }
+    renderCurrentRoute();
+    app.querySelector('[data-action="read-aloud"]')?.focus({ preventScroll: true });
   } else if (action === 'gear-pick' || action === 'gear-reset') {
     // Local only: which phone or tracker someone has never leaves this browser.
     const next = action === 'gear-pick' ? setGear(state, el.dataset.group, el.dataset.value) : { ...state, gear: { ...state.gear, [el.dataset.group]: undefined } };
@@ -1891,6 +1927,14 @@ document.fonts?.addEventListener?.('loadingdone', () => {
 // The streak check runs once as the game opens; what it finds is a labelled WELCOME BACK
 // note on the city map (utils/notifications.js), shown until the player leaves the map.
 welcomeBack = checkStreakReminder(state);
+// With the switch on, the first tap after the page loads lets the phone play sound: read the
+// screen then (capture, so it runs before the tap's own action; a tap that turns it off wins).
+document.addEventListener('click', () => {
+  if (audioUnlocked() || !readAloudOn(state)) return;
+  unlockAudio();
+  lastSaid = null;
+  setTimeout(autoRead, 0);
+}, true);
 // Simple mode, opening the game again: What's next, not the map or a district's tabs, so it
 // says where they were (Liz 2026-11-18: "assume we're going to lose people and that we're coming back").
 if (started && readLevel(state) === 'simplest' && /^(#?|#\/city|#\/district\/.*)$/.test(location.hash)) history.replaceState(null, '', '#/next');

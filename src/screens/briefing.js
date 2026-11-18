@@ -189,7 +189,7 @@ ${actions}`;
 
   return `
   <div class="brief${slides ? ' brief--deck' : ''} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
-    ${renderHud(state, { tools: topTools(state, level, sayIntel) })}
+    ${renderHud(state, { tools: topTools(state, level, sayIntel, missionStepList.slice(0, 2).flatMap(stepSay)) })}
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; min-width: 0; padding: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 20px;">
@@ -489,7 +489,7 @@ function compactBriefingPage(p) {
       </div>
       ${renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
-  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine]));
+  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine], missionStepList.slice(0, 2).flatMap(stepSay)));
 }
 
 // Simple: "I don't have Gmail", in big words on a quiet button (Liz 2026-11-18: big words, but
@@ -607,6 +607,11 @@ function simpleWhere(steps, i) {
   return [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || '';
 }
 
+// What Read it to me reads for a step: its words, and any note shown open on its card.
+function stepSay(step) {
+  return [step.text, ...(step.note || []).filter((n) => n.open).flatMap((n) => [n.label, n.text])];
+}
+
 function stepModePage(p) {
   const { state, mission, titleTop, titleBottom, level, missionStepList, progress, marks, allSteps, bankPanelHtml } = p;
   const { total, current } = progress;
@@ -620,7 +625,9 @@ function stepModePage(p) {
   const simpleCard = simple && step ? { opened, where: simpleWhere(missionStepList, current) } : null;
   const showDone = !simple || opened;
   // Read it to me: the step, and any note shown open on its card (the password check's "Is this safe?").
-  const say = step ? [step.text, ...(step.note || []).filter((n) => n.open).flatMap((n) => [n.label, n.text])] : [];
+  const say = step ? stepSay(step) : [];
+  // The next two steps, fetched ahead while Read it to me is on.
+  const upcoming = allDone ? [] : missionStepList.slice(current + 1, current + 3).flatMap(stepSay);
   // The step cards already asked everything the report asks: the last DONE sends it to Scout.
   const report = stepReportAnswers(state, mission);
   const sends = Boolean(report && (allDone || progress.handled === total - 1));
@@ -663,7 +670,7 @@ function stepModePage(p) {
       ${bankPanelHtml}
       ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}
 `;
-    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top, topTools(state, level, say));
+    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top, topTools(state, level, say, upcoming));
   }
   const body = `
       <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
@@ -678,5 +685,5 @@ function stepModePage(p) {
         <button class="walk-link" data-action="show-briefing" data-mission="${mission.id}">Read the briefing again</button>
       </div>
 `;
-  return pageShell(state, p, body, 'brief-steps-mode', top, topTools(state, level, say));
+  return pageShell(state, p, body, 'brief-steps-mode', top, topTools(state, level, say, upcoming));
 }

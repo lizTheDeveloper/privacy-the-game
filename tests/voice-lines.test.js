@@ -65,7 +65,7 @@ describe('the game only asks for a recording of a line on Scout’s list', () =>
     const spoken = [];
     const prev = globalThis.window;
     globalThis.window = {
-      Audio: class { constructor(src) { requested.push(src); } play() { setTimeout(() => this.onended?.(), 0); return Promise.resolve(); } pause() {} },
+      Audio: class { set src(v) { if (!String(v).startsWith('data:')) requested.push(v); } play() { setTimeout(() => this.onended?.(), 0); return Promise.resolve(); } pause() {} },
       speechSynthesis: { speak: (u) => { spoken.push(u.text); setTimeout(() => u.onend?.(), 0); }, cancel() {}, speaking: false },
       SpeechSynthesisUtterance: class { constructor(t) { this.text = t; } },
     };
