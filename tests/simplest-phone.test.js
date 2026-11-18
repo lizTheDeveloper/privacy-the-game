@@ -65,7 +65,8 @@ describe('the other reading levels keep their step screen', () => {
     const html = renderBriefing(started('short'), ID);
     expect(html).toMatch(doneButton);
     expect(html).toContain('focus-steps-peek');
-    expect(html).not.toContain('simple-back');
-    expect(html).toContain('OPEN HAVEIBEENPWNED.COM');
+    expect(html).not.toContain('brief-simple');
+    // The step says "Open haveibeenpwned.com", so its button just says OPEN.
+    expect(html).toMatch(/class="btn-secondary focus-open"[^>]*>OPEN &#8599;/);
   });
 });

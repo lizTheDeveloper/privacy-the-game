@@ -26,7 +26,7 @@ describe('starting a mission is remembered (mobile: the other site opens in anot
   it('a started mission shows one step at a time: its site, DONE, and a way to report back', () => {
     const html = renderBriefing(markMissionStarted(createInitialState(), MISSION), MISSION);
     expect(html).toContain('data-step-card');
-    expect(html).toMatch(/data-step-card[\s\S]*STEP 1 OF \d[\s\S]*data-action="mission-step"[\s\S]*data-action="step-done"/);
+    expect(html).toMatch(/class="simple-count">Step 1 of \d[\s\S]*data-step-card[\s\S]*data-action="mission-step"[\s\S]*data-action="step-done"/);
     expect(html).toMatch(new RegExp(`href="#/mission/${MISSION}/debrief"[^>]*data-action="i-did-it"`));
   });
 

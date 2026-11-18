@@ -135,7 +135,7 @@ describe('the walkthrough', () => {
     const s = markStep(fresh(), MULTI.id, stepKey(st[0]), 'done');
     const html = renderBriefing(s, MULTI.id);
     expect(html).toMatch(new RegExp(`data-step-card data-step-key="${stepKey(st[1])}"`));
-    expect(html).toContain(`STEP 2 OF ${st.length}`);
+    expect(html).toContain(`Step 2 of ${st.length}`);
     expect(html).toContain('data-action="step-done"');
     expect(html).toContain('data-action="step-stuck"');
     expect(html).toContain('data-action="step-back"');
@@ -157,10 +157,16 @@ describe('the walkthrough', () => {
     expect(html).toMatch(/REPORT BACK/);
   });
 
-  it('the mission trail shows where the player is: read, steps, report', () => {
-    expect(renderBriefing(fresh(), MULTI.id)).toMatch(/<li class="is-now" aria-current="step"><span class="mission-trail-n">1<\/span>Read/);
+  // Each screen says where the player is once (Liz 2026-11-17): the briefing by its Back and
+  // "N steps", the steps by "Step 2 of 4" beside Back, the report by the trail.
+  it('each screen says where the player is once', () => {
+    const brief = renderBriefing(fresh(), MULTI.id);
+    expect(brief).not.toContain('mission-trail');
+    expect(brief).toContain('class="simple-back"');
     const started = renderBriefing(markMissionStarted(fresh(), MULTI.id), MULTI.id);
-    expect(started).toMatch(/aria-current="step"><span class="mission-trail-n">2<\/span>Steps 0\//);
+    expect(started).not.toContain('mission-trail');
+    expect(started.match(/Step 1 of \d/gi)).toHaveLength(1);
+    expect(started).not.toMatch(/All steps \(/);
     expect(renderDebrief(fresh(), MULTI.id)).toMatch(/aria-current="step"><span class="mission-trail-n">3<\/span>Report back/);
   });
 

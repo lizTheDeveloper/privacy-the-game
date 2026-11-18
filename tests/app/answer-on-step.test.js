@@ -26,7 +26,7 @@ describe('answer on the step', () => {
   it('Gmail breach step 3 of 4 shows "what did you find" with every report answer', () => {
     expect(GMAIL.steps[2].ask).toBe('finding');
     const html = renderBriefing(onStep3(), GMAIL.id);
-    expect(html).toContain('STEP 3 OF 4');
+    expect(html).toContain('Step 3 of 4');
     expect(html).toContain('data-step-ask="finding"');
     // Few words: Yes / No / Couldn't check first; "How many?" waits for a Yes.
     expect(html).toContain('Were you in any leaks?');
