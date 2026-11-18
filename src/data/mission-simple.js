@@ -12,10 +12,14 @@ const HIBP = 'https://haveibeenpwned.com';
 const PWNED_PASSWORDS = 'https://haveibeenpwned.com/Passwords';
 
 // The password check asks for a real password, so even the simplest version says why it is safe.
+// Liz 2026-11-17: never say "the same website". Typing a password into a website is the thing
+// players should never do, so the step says plainly that this is a different check that never
+// gets the password or the email address, and the note is open, not folded.
 const PASSWORD_SAFE_NOTE = [
   {
     label: 'Is this safe?',
-    text: 'Yes. Your password never leaves your phone or computer. The website only gets a short code made from it, and no one can turn that code back into your password. First, check the top of the page says “haveibeenpwned.com”. This game will never ask for your password.',
+    open: true,
+    text: 'Most of the time, never type your password into a website. This one is different. Your phone turns your password into a code first, and only the start of that code is sent. The website never gets your password, and it never gets your email address. First, check the top of the page says “haveibeenpwned.com”. This game will never ask for your password.',
   },
 ];
 
@@ -33,7 +37,7 @@ function leakCheck(name, { first = [], extra = [] } = {}) {
       { text: `On that website, type your ${name} email address in the “Email address” box, and tap “Check”` },
       { text: 'Read what it says. “Good news” means it was not found. “Oh no — pwned!” means a business lost it to someone who broke in.' },
       ...extra,
-      { text: 'Now check your password on the same website', url: PWNED_PASSWORDS, note: PASSWORD_SAFE_NOTE },
+      { text: 'Now open “Pwned Passwords”. It is a different check, made by the same people, and it never gets your email address.', url: PWNED_PASSWORDS, note: PASSWORD_SAFE_NOTE },
     ],
     scout: `"Someone with a password that got out can try it on your ${name} sign-in page. Let’s see if yours got out."`,
   };

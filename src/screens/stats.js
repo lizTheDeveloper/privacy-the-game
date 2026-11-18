@@ -231,7 +231,7 @@ export function renderStats(state, view = {}) {
   const findings = calcFindings(state);
 
   return `
-<div class="scanlines">
+<div class="scanlines stats-page">
   ${renderHud(state)}
   <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
     <a href="#/city" class="btn-secondary" style="display: inline-block; text-decoration: none;">← CITY</a>

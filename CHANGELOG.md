@@ -2,6 +2,18 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.19.0 (2026-11-17): Each thing said once, and the buttons you need on screen
+
+From a phone audit of every screen (iPhone size, Short): information shown twice, and key buttons below the first screen.
+
+- **District pages on phones** put the tabs and the task first. The building grid, which lists the same accounts as the survey and the mission lists, moves below them.
+- **Mission lists:** only the mission to do next has the bright START, and the rest are quieter. Rows no longer repeat the tab's name (RECON on every Recon card) or the account's name under its icon. "Optional bonus — never blocks progress or Secured" is said once above the list, not on every bonus row. Master Keys' Recon tab: 322 → 223 words.
+- **Mission screens at every reading level** get the big ‹ Back at the top left instead of the breadcrumb. The step screen counts once ("Step 2 of 4" beside Back): no trail, no STEP N OF M on the card, no count on All steps. Help and Read it to me are buttons, shown once. "Open haveibeenpwned.com" gets a plain OPEN button instead of naming the site twice.
+- **SUBMIT REPORT and CONTINUE stay on screen** on phones, pinned to the bottom edge while the answers scroll (they sat 1–2 screens down).
+- **Stats** no longer repeats Integrity, Exposure and Streak in the top bar above its own dials.
+- **The password check** (Liz): Simplest no longer says "check your password on the same website". It says "Now open “Pwned Passwords”. It is a different check, made by the same people, and it never gets your email address." "Is this safe?" is open on the card at every level. It explains that you should normally never type a password into a website, and why this one never gets your password or your email.
+- "LIBERATED" fits on a phone (it was cut to "LIBERATE").
+
 ## 7.18.0 (2026-11-17): Simplest works like a phone app; Scout starts you out
 
 Liz on her phone: Simplest still had too many words, DONE sat there before you'd been anywhere, "the box at the top" sent people looking at the top of the game, and Back was tiny text.

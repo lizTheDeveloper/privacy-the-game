@@ -37,7 +37,7 @@ export function renderMilestone(state, districtId) {
     : `<a class="btn-primary" href="#/stats" style="display: inline-block; text-decoration: none;">VIEW YOUR CITY</a>`;
 
   return `
-  <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0a1020 30%, #121828 100%); padding: 0 40px 60px; overflow: hidden;">
+  <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0a1020 30%, #121828 100%); padding: 0 40px 60px; overflow: clip;">
     ${renderHud(state)}
     <div style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, rgba(198,255,0,0.03) 40%, transparent 70%); pointer-events: none;"></div>
     <div style="position: relative; text-align: center; padding-top: 44px;">
@@ -45,7 +45,7 @@ export function renderMilestone(state, districtId) {
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">
-      <div style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2);">LIBERATED</div>
+      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2);">LIBERATED</div>
       <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${district.name.toUpperCase()} IS SECURE</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.5); margin-top: 8px;">${district.description}</div>
     </div>
@@ -73,7 +73,7 @@ export function renderMilestone(state, districtId) {
         <span style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.3);">CARD PREVIEW</span>
       </div>
     </div>
-    <div style="position: relative; display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    <div class="pin-bottom" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
       <button class="btn-secondary" data-action="share-card" data-district="${districtId}">SHARE CARD</button>
       ${continueLink}
     </div>

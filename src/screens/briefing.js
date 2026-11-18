@@ -624,7 +624,7 @@ function stepCardText(mission, step, simple = null) {
   const where = simple?.where && !step.url
     ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>`
     : '';
-  const notes = (step.note || []).map((n) => `<details class="focus-note"><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
+  const notes = (step.note || []).map((n) => `<details class="focus-note"${n.open ? ' open' : ''}><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
   return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${link}${notes}`;
 }
 

@@ -394,7 +394,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
       ${questions}
       ${progressLine}
       ${completed && isChecklistPending(state, mission.id) ? '<div style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 16px;">Tell Scout which ones you filed.</div>' : ''}
-      ${footer}
+      <div class="pin-bottom">${footer}</div>
     </div>
   </div>`;
 }

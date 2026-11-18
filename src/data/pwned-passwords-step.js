@@ -25,7 +25,9 @@ export const PWNED_PASSWORD_STEP = {
     },
     {
       label: 'Why it’s safe',
-      text: 'Your browser scrambles the password into a hash and sends only the first 5 characters of that hash. The site never receives your password. Before you type, check the address bar says haveibeenpwned.com. Reclaim City will never ask for your password.',
+      // Open on the card, not folded: this is the one place the game asks for a password (Liz 2026-11-17).
+      open: true,
+      text: 'Your browser scrambles the password into a hash and sends only the first 5 characters of that hash. The site never receives your password, and never asks for your email. Before you type, check the address bar says haveibeenpwned.com. Reclaim City will never ask for your password.',
     },
   ],
 };
