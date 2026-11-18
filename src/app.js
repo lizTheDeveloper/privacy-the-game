@@ -52,6 +52,7 @@ import { checklistTicksFor } from './components/broker-checklist.js';
 import { STUDIO_URL } from './components/hud.js';
 import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
+import { stepReportAnswers } from './utils/step-report.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
 import { setReadLevel, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
@@ -81,6 +82,8 @@ initErrorTracking();
 
 let state = ensureBurst(loadState());
 let started = hasSavedState();
+// PLAY on the welcome screen asks Simple mode or Advanced mode before the city (Liz 2026-11-18).
+let choosingMode = false;
 
 const app = document.getElementById('app');
 // Folds the player set by hand this screen visit (see applyOpenDesktop), and the desktop width test.
@@ -274,13 +277,23 @@ function saveBankForm() {
   app.querySelector('form[data-bank-note-form] [data-field="name"]')?.focus({ preventScroll: true });
 }
 
+// Simple mode or Advanced mode: the same as the switch in the top bar, so it can change any time.
+function modeChoice() {
+  return `<div class="mode-choice" data-mode-choice>
+      <h2 class="mode-choice-ask">How do you want to play?</h2>
+      <button type="button" class="btn-primary mode-pick" data-action="begin-game" data-level="simplest">Simple mode<span>Fewer words, one step at a time</span></button>
+      <button type="button" class="btn-secondary mode-pick" data-action="begin-game" data-level="full">Advanced mode<span>All the details</span></button>
+      <p class="mode-choice-note">You can switch at the top of the screen any time.</p>
+    </div>`;
+}
+
 function renderWelcome() {
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px;">
     <div style="font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
     <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(0,229,255,0.6); letter-spacing: 5px; margin-top: 12px;">A DATA PRIVACY GAME</div>
     <p style="max-width: 440px; font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.65); margin-top: 32px;">Secure your accounts, opt out of data brokers, and learn to spot scams &mdash; one mission at a time. Every action you take is real.</p>
-    <div data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</div>
+    ${choosingMode ? modeChoice() : `<button type="button" data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</button>`}
     <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 16px; letter-spacing: 1px;">NO ACCOUNT NEEDED &middot; YOUR DATA STAYS IN YOUR BROWSER</div>
     <a href="${STUDIO_URL}welcome" target="_blank" rel="noopener" data-studio-link="welcome" style="font-family: var(--font-mono); font-size: 10px; color: rgba(198,255,0,0.6); margin-top: 40px; letter-spacing: 2px; text-decoration: none;">A MULTIVERSE GAMES GAME &middot; MORE FREE GAMES&nbsp;&#8599;</a>
     <button type="button" data-bug-report style="font-family: var(--font-mono); font-size: 10px; color: rgba(255,45,155,0.75); margin-top: 16px; letter-spacing: 2px; background: none; border: 0; min-height: 44px; padding: 8px 12px; cursor: pointer;">🐞 REPORT A BUG</button>
@@ -964,6 +977,17 @@ function submitDebrief(missionId) {
   afterMissionRecorded(mission, filed.event);
 }
 
+// The report from the step cards' answers (utils/step-report.js), filed like SUBMIT REPORT.
+// false: the steps didn't answer all of it, so the report screen asks.
+function fileFromSteps(mission) {
+  const answers = stepReportAnswers(state, mission);
+  const filed = answers && fileDebrief(state, mission, answers);
+  if (!filed) return false;
+  setState(ensureBurst(streakAfterFiling(noteFirstTwoFactor(filed.state, mission, filed.state.missions[mission.id]), filed.event)));
+  afterMissionRecorded(mission, filed.event);
+  return true;
+}
+
 // Re-check: the answers are confirmed again, nothing is reopened or sent.
 // No afterMissionRecorded, no track.
 function submitRecheck(missionId) {
@@ -1294,8 +1318,14 @@ app.addEventListener('click', async (e) => {
     if (action === 'step-skip') next = recordSignal(next, 'skip');
     setState(next);
     stopSpeaking();
+    // The last step, and the step cards already answered the whole report: that DONE sends it.
+    const mission = action === 'step-done' && findMission(state, id);
+    if (mission && progressFor(state, id, visibleSteps(mission, state)).current === -1 && fileFromSteps(mission)) return;
     renderCurrentRoute();
     focusCurrentStep();
+  } else if (action === 'file-from-steps') {
+    const mission = findMission(state, el.dataset.mission);
+    if (!mission || !fileFromSteps(mission)) navigate(`#/mission/${el.dataset.mission}/debrief`);
   } else if (action === 'step-back') {
     // Back one step: the last one handled before the current step is open again.
     const mission = findMission(state, el.dataset.mission);
@@ -1605,6 +1635,14 @@ app.addEventListener('click', async (e) => {
     setState(state);
     renderCurrentRoute();
   } else if (action === 'begin-game') {
+    // PLAY asks which mode first; picking one starts the game in it.
+    if (!el.dataset.level) {
+      choosingMode = true;
+      renderCurrentRoute();
+      app.querySelector('[data-mode-choice] .mode-pick')?.focus({ preventScroll: true });
+      return;
+    }
+    state = setReadLevel(state, el.dataset.level);
     started = true;
     try {
       saveState(state);

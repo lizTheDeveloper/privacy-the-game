@@ -119,6 +119,6 @@ describe('app.js wiring: data arriving never logs a pageview', async () => {
 
   it('only leaving the welcome screen asks for a navigation outside the router', () => {
     expect((src.match(/RENDER_CAUSE\.NAVIGATE/g) || []).length).toBe(1);
-    expect(src).toMatch(/begin-game[\s\S]{0,300}renderCurrentRoute\(RENDER_CAUSE\.NAVIGATE\)/);
+    expect(src).toMatch(/begin-game[\s\S]{0,700}renderCurrentRoute\(RENDER_CAUSE\.NAVIGATE\)/);
   });
 });

@@ -22,7 +22,10 @@ import { plainText } from './readability.js';
 // 'simplest' so saves and the screens keep working; a save that says 'short' (the old default)
 // reads as Simple.
 export const READ_LEVELS = ['simplest', 'full'];
-export const READ_LEVEL_LABELS = { simplest: 'Simple', full: 'Full intel' };
+// Simple mode and Advanced mode (Liz 2026-11-18; Advanced was "Full intel"). The short words
+// are for the top bar on a phone.
+export const READ_LEVEL_LABELS = { simplest: 'Simple mode', full: 'Advanced mode' };
+export const READ_LEVEL_SHORT = { simplest: 'Simple', full: 'Advanced' };
 const LEGACY_LEVELS = { short: 'simplest' };
 
 export function readLevel(state) {

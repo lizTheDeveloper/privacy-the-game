@@ -2,6 +2,7 @@ import { calcIntegrity, calcExposure } from '../utils/calc.js';
 import { isCabinetMode } from '../utils/cabinet.js';
 import { bugButtonHtml } from './bug-reporter.js';
 import { displayStreak } from '../state.js';
+import { readLevel, READ_LEVEL_LABELS } from '../utils/reading.js';
 
 // Link home to the studio. The utm tags let the studio site count visits from the game.
 export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=';
@@ -14,9 +15,14 @@ export function renderHud(state, { tools = '' } = {}) {
   const streak = displayStreak(state);
   // Web cabinet (campus iframe): no real-money asks.
   const supportBlock = isCabinetMode() ? '' : `<div class="hud-support" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
-        <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-block;">SUPPORT</a>
+        <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-flex; align-items: center; gap: 4px;"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
         <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
       </div>`;
+  // The other mode, one tap away, next to Support us (Liz 2026-11-18: "next to support, put simple
+  // mode … people can just click on it and switch back"). Mission screens have the full switch in
+  // their tools row instead.
+  const other = readLevel(state) === 'full' ? 'simplest' : 'full';
+  const modeButton = tools ? '' : `<button type="button" class="hud-mode" data-action="read-level" data-level="${other}" aria-label="Switch to ${READ_LEVEL_LABELS[other]}">${READ_LEVEL_LABELS[other]}</button>`;
   return `
   <div${tools ? ' class="hud-bar hud-bar--tools"' : ''} style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;${tools ? ' flex-wrap: wrap; row-gap: 8px;' : ''} background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
     <div>
@@ -38,6 +44,7 @@ export function renderHud(state, { tools = '' } = {}) {
         <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
       </div>
       ${bugButtonHtml()}
+      ${modeButton}
       ${supportBlock}
     </div>${tools ? `
     <div class="hud-tools">${tools}</div>` : ''}

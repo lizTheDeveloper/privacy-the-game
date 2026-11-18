@@ -58,10 +58,10 @@ describe('mg:ready handshake', () => {
 });
 
 describe('real-money asks', () => {
-  it('HUD shows SUPPORT and Patreon outside cabinet mode', () => {
+  it('HUD shows SUPPORT US and Patreon outside cabinet mode', () => {
     vi.stubGlobal('window', fakeWindow({ framed: false }));
     const html = renderHud(hudState);
-    expect(html).toContain('>SUPPORT<');
+    expect(html).toContain('>$</span>SUPPORT US<');
     expect(html).toContain('buy.stripe.com');
     expect(html).toContain('patreon.com');
   });

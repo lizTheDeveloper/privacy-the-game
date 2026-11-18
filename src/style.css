@@ -792,6 +792,22 @@ img { image-rendering: pixelated; }
 .simple-count { font-size: 17px; font-weight: 600; color: rgba(237,239,243,0.8); }
 .brief-simple .focus-step-text { font-size: 24px; line-height: 1.4; }
 .brief-simple .focus-go { font-size: 18px; padding: 20px; }
+/* How to get back from the site a Simple step opens (Liz 2026-11-18). */
+.simple-tab-hint { font-size: 16px; line-height: 1.5; color: rgba(237,239,243,0.8); margin: -4px 0 0; }
+.simple-tab-hint .on-mouse { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .simple-tab-hint .on-touch { display: none; }
+  .simple-tab-hint .on-mouse { display: inline; }
+}
+/* The welcome screen's Simple mode / Advanced mode choice. */
+.mode-choice { display: flex; flex-direction: column; align-items: stretch; gap: 14px; width: 100%; max-width: 360px; margin-top: 36px; }
+.mode-choice-ask { font-family: var(--font-body); font-size: 24px; font-weight: 700; color: var(--offwhite); margin: 0 0 4px; }
+.mode-pick { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--font-body); font-size: 22px; font-weight: 700; letter-spacing: 0; text-transform: none; padding: 16px 20px; }
+.mode-pick span { font-size: 14px; font-weight: 400; opacity: 0.85; }
+.mode-choice-note { font-size: 13px; color: rgba(237,239,243,0.55); margin: 4px 0 0; }
+/* The top bar's mode switch and Support us (Liz 2026-11-18). */
+.hud-mode { font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.35); border-radius: 8px; padding: 6px 10px; min-height: 32px; cursor: pointer; white-space: nowrap; }
+.hud-dollar { display: inline-flex; align-items: center; justify-content: center; width: 11px; height: 11px; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-body); font-size: 8px; font-weight: 700; line-height: 1; letter-spacing: 0; }
 /* "I don't have Gmail": big words on the quiet button (Liz 2026-11-18). */
 .focus-actions .btn-secondary.not-mine { font-family: var(--font-body); font-size: 22px; font-weight: 600; letter-spacing: 0; line-height: 1.3; padding: 16px 20px; text-transform: none; overflow-wrap: anywhere; }
 .not-mine-done { padding: 16px 24px 0; }
@@ -840,12 +856,12 @@ img { image-rendering: pixelated; }
 .top-tool[aria-pressed="true"] { border-color: rgba(0,229,255,0.5); color: var(--cyan); }
 .top-tools .read-ask { margin: 8px 0 0; font-size: 13px; }
 /* One row on a phone: "Read" and "Music" (the button's name stays "Read it to me"). */
-.top-tool .tt-short { display: none; }
+.top-tool .tt-short, .read-level .tt-short { display: none; }
 @media (max-width: 480px) {
   .top-tools-row { flex-wrap: nowrap; gap: 6px; }
   .top-tools .read-level { padding: 0 9px; }
   .top-tool { font-size: 13px; padding: 0 9px; white-space: nowrap; }
-  .top-tool .tt-long { display: none; }
-  .top-tool .tt-short { display: inline; }
+  .top-tool .tt-long, .top-tools .read-level .tt-long { display: none; }
+  .top-tool .tt-short, .top-tools .read-level .tt-short { display: inline; }
   .top-tools .read-ask { font-size: 12px; margin-top: 6px; }
 }
