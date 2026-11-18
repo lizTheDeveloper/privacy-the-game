@@ -1397,13 +1397,15 @@ app.addEventListener('click', async (e) => {
     // An answer picked on the step card: kept here, never sent; the report starts from it.
     // Tapping the picked one again un-picks it.
     // "Yes" before "How many?" is `<question>:yes`; picking No or Couldn't check clears it.
+    // A Yes keeps only the answers that come after it (data-keep, screens/briefing.js stepAsk).
     const { mission: mid, question: qid, value } = el.dataset;
+    const keep = new Set((el.dataset.keep || '').split(' ').filter(Boolean));
     const same = stepAnswers(state, mid)[qid] === value;
     let next = setStepAnswer(state, mid, qid, same ? null : value);
     if (qid.endsWith(':yes')) {
       const base = qid.slice(0, -4);
       if (same) next = setStepAnswer(next, mid, base, null);
-      else if (!/breach/.test(stepAnswers(next, mid)[base] || '') || stepAnswers(next, mid)[base] === 'no-breaches') next = setStepAnswer(next, mid, base, null);
+      else if (!keep.has(stepAnswers(next, mid)[base])) next = setStepAnswer(next, mid, base, null);
     } else if (!same) next = setStepAnswer(next, mid, `${qid}:yes`, null);
     setState(next);
     renderCurrentRoute();

@@ -7,7 +7,8 @@
 //    the 8 email-address accounts have one that means anything);
 //  - the password manager's verdict on this account (pw_status, or the
 //    report's flagged list);
-//  - the account's own activity (activity) and login check (finding);
+//  - the account's own activity (activity), orders nobody at home placed
+//    (orders), and login check (finding);
 //  - this service's own breach, when it included passwords (service_breach).
 // An old "-recon-breach" record on any other account only re-checked the
 // player's email address, so it is ignored: it proves nothing either way.
@@ -18,6 +19,9 @@ import { EMAIL_ACCOUNT_IDS, ADDRESS_PARTNER, isSameAddress } from './calc.js';
 const BREACHED = new Set(['1-2-breaches', '3plus-breaches']);
 const PW_FLAGGED = new Set(['pw-leaked', 'pw-reused']);
 const ACTIVITY_BAD = new Set(['activity-unknown', 'activity-confirmed']);
+// An order someone at home placed is theirs; only one nobody placed counts.
+const ORDERS_BAD = new Set(['orders-unknown']);
+const activityBad = (r) => ACTIVITY_BAD.has(r?.activity) || ORDERS_BAD.has(r?.orders);
 // The new recon missions that carry pw_status / activity / service_breach.
 export const NEW_RECON_SUFFIXES = ['-recon-password', '-recon-activity', '-recon-service'];
 // A filing left open by one "couldn't check" answer still says what it says.
@@ -68,7 +72,7 @@ function loginCheck(state, accountId) {
 // The new recon's answers for this account, merged.
 export const passwordEvidence = (state, accountId) => evidence(state, accountId);
 function evidence(state, accountId) {
-  const out = { pw: null, pwFrom: null, activity: null, service: null, changedSince: null, serviceHadPasswords: false, serviceName: null };
+  const out = { pw: null, pwFrom: null, activity: null, orders: null, service: null, changedSince: null, serviceHadPasswords: false, serviceName: null };
   for (const suffix of NEW_RECON_SUFFIXES) {
     const id = `${accountId}${suffix}`;
     const r = filed(state, id);
@@ -78,6 +82,7 @@ function evidence(state, accountId) {
       out.pwFrom = id;
     }
     if (r.activity) out.activity = r.activity;
+    if (r.orders) out.orders = r.orders;
     if (r.service_breach) {
       const m = MISSIONS.find((x) => x.id === id);
       out.service = r.service_breach;
@@ -114,7 +119,7 @@ export function resetNeedSources(state, accountId) {
   if (breach && BREACHED.has(breach.finding) && breach.password_exposed !== 'no') out.push('breach');
   if ((state.pmFlagged || []).includes(accountId) || PW_FLAGGED.has(ev.pw)) out.push('pm');
   if (loginRec && BREACHED.has(loginRec.finding)) out.push('login');
-  if (ACTIVITY_BAD.has(ev.activity)) out.push('activity');
+  if (activityBad(ev)) out.push('activity');
   if (serviceBreachNeeds(ev)) out.push('service');
   return out;
 }
@@ -136,7 +141,7 @@ export function resetNeedDates(state, accountId) {
     if (PW_FLAGGED.has(ev.pw)) dates.push(dateOf(filed(state, ev.pwFrom)));
   }
   if (sources.includes('login')) dates.push(dateOf(loginCheck(state, accountId)));
-  if (sources.includes('activity')) for (const r of recon((x) => ACTIVITY_BAD.has(x.activity))) dates.push(dateOf(r));
+  if (sources.includes('activity')) for (const r of recon(activityBad)) dates.push(dateOf(r));
   if (sources.includes('service')) for (const r of recon((x) => x.service_breach)) dates.push(dateOf(r));
   return dates;
 }
@@ -161,7 +166,9 @@ export function notNeededReasons(state, accountId) {
   if (breach?.finding === 'no-breaches') reasons.push('Your breach check found no breaches.');
   else if (breach && BREACHED.has(breach.finding)) reasons.push('The breaches you found didn’t include your password.');
   if (ev.pw === 'pw-clean' || done(state, PM_MISSION_ID)) reasons.push('Your password manager didn’t flag it.');
-  if (ev.activity === 'activity-clean') reasons.push('Everything in its recent activity was yours.');
+  if (ev.activity === 'activity-clean') {
+    reasons.push(ev.orders === 'orders-household' ? 'Everything in its recent activity was yours or someone’s at home.' : 'Everything in its recent activity was yours.');
+  }
   if (ev.serviceHadPasswords && ev.service === 'not-in-service-breach') {
     reasons.push(`${ev.serviceName ? `“${ev.serviceName}”` : 'Its own breach'} isn’t in your breach results.`);
   }

@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.28.0 (2026-11-18): The orders step asks about your orders, and about the people at home
+
+Liz: "in marketplace It says open your orders anything you didn't order … I think you should look for ones like that and it's like That's where you can ask the question. Did you see any orders that you don't remember ordering? Yes or no … And then it also leads you to ask other people in the house that use that account."
+
+- **Amazon, Temu, Shein and eBay** ask their own orders question on the orders step: “Did you see any orders you don’t remember ordering?” Yes / No / Couldn’t check (eBay: “anything you don’t remember buying?”).
+- **A Yes asks the people at home:** “Ask the other people in your home who use this account. Did one of them order it?” “Yes, it was them” is fine. “No, nobody did” gets Scout’s line to report it to the store from inside its app or website, then change the password, and puts the Password Reset back on.
+- **The whole report is asked on the steps** for these four: the password manager’s answer on its step, the orders question on the orders step, and addresses and cards on their own step (that question no longer asks about orders too). The last DONE sends it to Scout. Advanced mode’s report screen shows the same questions in full, with a hint to ask the people at home.
+- **Safari:** the space under a step card’s answers is gone (a fieldset’s legend was counted twice).
+- Answers stay on this phone. Nothing about them is sent.
+
 ## 7.27.0 (2026-11-18): Read it to me is a switch, with a buffer
 
 Liz: "make read to me a toggle instead of a button you have to press every time … make it visibly like a toggle", "stream or prefetch … the next few readings so that they have it in the buffer", "don't unload right away either".

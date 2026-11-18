@@ -24,7 +24,7 @@
 //  - FTC, Data Brokers (May 2014): brokers buy transaction-level purchase data
 //    from retailers (what, how much, when, how you paid); one models the
 //    purchase history of 190 million consumers from 2,600+ merchants.
-import { pwQuestion, activityQuestion, pmSteps, reportInApp, scout, recon } from './missions-recon-accounts.js';
+import { pwQuestion, activityQuestion, ordersQuestion, pmSteps, reportInApp, scout, recon } from './missions-recon-accounts.js';
 
 const PASSWORD_DEBRIEF = [
   {
@@ -66,6 +66,7 @@ function permissionsQuestion(service) {
 }
 
 const PERMISSIONS_STEP = (service) => ({
+  ask: 'app_permissions',
   text: `Check what the ${service} app can reach. iPhone: Settings → Apps → ${service} (on older iOS, scroll down Settings to ${service}). Android: Settings → Apps → ${service} → Permissions. Switch off anything a shop doesn’t need: contacts, precise location, microphone, full photo access.`,
 });
 
@@ -83,18 +84,20 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     title: 'Account Recon: Temu',
     briefing: 'Temu’s own privacy policy says it shares your personal information for targeted advertising, and that this “may be considered a ‘sale’” under US state privacy laws. It also lists “data providers” among the places it gets information about you. Arkansas, Nebraska and Kentucky have sued Temu’s parent companies, alleging the app collects far more from your phone than a store needs. Temu denies it. Start with what you can see: the password, the orders, and what the app can reach.',
     steps: [
-      ...pmSteps('Temu'),
-      { text: 'In the Temu app or on its website, open Your orders. Anything you didn’t order?' },
-      { text: 'Check your saved addresses and payment methods.' },
+      ...pmSteps('Temu', { ask: true }),
+      { text: 'In the Temu app or on its website, open Your orders and look through them.', ask: 'orders' },
+      { text: 'Check your saved addresses and payment methods.', ask: 'activity' },
       PERMISSIONS_STEP('Temu'),
     ],
     debriefQs: [
       pwQuestion('Temu'),
-      activityQuestion('Any order, address or card you don’t recognize?'),
+      ordersQuestion(),
+      activityQuestion('Any address or card you don’t recognize?'),
       permissionsQuestion('Temu'),
     ],
     scoutDialog: scout('"Cheap things are cheap for a reason. Part of the price is you. Let’s see what you’ve been paying."', {
       ...PERMISSION_LINES,
+      'orders-unknown': `"${reportInApp('Temu')}"`,
       'activity-confirmed': `"${reportInApp('Temu')}"`,
     }),
   }),
@@ -154,18 +157,20 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
     title: 'Account Recon: Shein',
     briefing: 'In 2018 attackers took names, email addresses, hashed passwords and card data from 39 million SHEIN accounts. The company said 6.42 million people were affected and that it was notifying all of them. New York’s Attorney General found more than 32.5 million accounts were never told. The company paid $1.9 million in 2022. If you had Shein in 2018, the password from back then is out there. Check whether you’re still using it.',
     steps: [
-      ...pmSteps('Shein'),
-      { text: 'In the Shein app or on its website, open My Orders. Anything you didn’t order?' },
-      { text: 'Check your address book and saved payment methods.' },
+      ...pmSteps('Shein', { ask: true }),
+      { text: 'In the Shein app or on its website, open My Orders and look through them.', ask: 'orders' },
+      { text: 'Check your address book and saved payment methods.', ask: 'activity' },
       PERMISSIONS_STEP('SHEIN'),
     ],
     debriefQs: [
       pwQuestion('Shein'),
-      activityQuestion('Any order, address or card you don’t recognize?'),
+      ordersQuestion(),
+      activityQuestion('Any address or card you don’t recognize?'),
       permissionsQuestion('Shein'),
     ],
     scoutDialog: scout('"Thirty-nine million accounts, and most of them were never told. Let’s check if one of them was yours."', {
       ...PERMISSION_LINES,
+      'orders-unknown': `"${reportInApp('Shein')}"`,
       'activity-confirmed': `"${reportInApp('Shein')}"`,
     }),
   }),

@@ -238,13 +238,14 @@ const SEVERITY_RANK = { crit: 3, warn: 2, safe: 1, skip: 0 };
 
 // On a tie, the account's activity speaks first: money that moved is the
 // more urgent fact, and its line already ends with "change the password".
-const TIE_FIRST = ['activity'];
+// Next, an order nobody at home placed (Q-ORD), whose line ends the same way.
+const TIE_FIRST = ['orders', 'activity'];
 
 function mostSevere(mission, stored, values) {
   const rank = (v) => {
     const q = mission.debriefQs.find((x) => stored[x.id] === v);
     const sev = SEVERITY_RANK[q?.options?.find((o) => o.value === v)?.severity] ?? -1;
-    return sev * 10 + (TIE_FIRST.includes(q?.id) ? 1 : 0);
+    return sev * 10 + TIE_FIRST.indexOf(q?.id) + 1;
   };
   return values.reduce((best, v) => (best === undefined || rank(v) > rank(best) ? v : best), undefined);
 }
