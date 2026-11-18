@@ -720,6 +720,9 @@ img { image-rendering: pixelated; }
 .next-cheer { font-family: var(--font-display, var(--font-mono)); font-size: 30px; font-weight: 800; color: var(--lime); text-shadow: 0 0 16px rgba(198,255,0,0.5); margin-bottom: 4px; }
 .fill-caption { font-size: 16px; line-height: 1.5; color: rgba(237,239,243,0.75); margin: -6px 0 14px; }
 .fill-title { font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--cyan); margin-top: 10px; }
+/* What's next: the part of the district the bar counts (next.js districtBar). */
+.fill-name { font-size: 20px; font-weight: 700; line-height: 1.3; color: var(--offwhite, #EDEFF3); margin-top: 4px; }
+.next-progress[data-chapter-done] .fill-caption { color: var(--lime); font-weight: 700; }
 /* Confetti (components/celebrate.js), for good news. */
 /* Fixed to the screen and clipped, so pieces flying off the side never widen the page. */
 .confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 60; }
