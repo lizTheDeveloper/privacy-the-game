@@ -66,6 +66,8 @@ import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.
 import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderNext } from './screens/next.js';
+import { renderPasswordFinder } from './screens/password-finder.js';
+import { setFinderAnswer, finderBack } from './data/password-finder.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage } from './screens/phishing-quiz.js';
 import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from './screens/garage.js';
@@ -201,6 +203,7 @@ const screens = {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
     notMine: notMine.hash === location.hash ? notMine.id : null,
   }),
+  passwords: ({ from }) => renderPasswordFinder(state, { from: from && findMission(state, from) ? from : null }),
   next: () => renderNext(state, { filed: justFiled, notMine: notMine.hash === location.hash ? notMine.id : null }),
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
@@ -1451,6 +1454,16 @@ app.addEventListener('click', async (e) => {
     // An opt-in district (The Field). Off keeps every record: turning it back on restores progress.
     setState(setDistrictOn(state, el.dataset.district, action === 'district-opt-in'));
     renderCurrentRoute();
+  } else if (action === 'finder-answer' || action === 'finder-back') {
+    // "Where are my passwords?": local only, like the answer it ends in (never tracked).
+    setState(action === 'finder-back' ? finderBack(state) : setFinderAnswer(state, el.dataset.key, el.dataset.value));
+    stopSpeaking();
+    renderCurrentRoute();
+    window.scrollTo?.(0, 0);
+  } else if (action === 'finder-done') {
+    setState({ ...state, passwordManager: el.dataset.pm, passwordFinder: { ...state.passwordFinder, done: el.dataset.pm } });
+    const from = el.closest('[data-from]')?.dataset.from;
+    navigate(from ? `#/mission/${from}/briefing` : '#/next');
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
     renderCurrentRoute();

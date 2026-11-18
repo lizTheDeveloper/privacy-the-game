@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.26.0 (2026-11-18): "Where are my passwords?" and resets that use it
+
+Liz: "for changing their passwords, we really need to get them in that password manager … walk them through, do they use Chrome as a password manager? Do they use your phone passwords? … they're not always going to know … Most people have a mixed, like where they can only log in on one computer and they don't know why."
+
+- **Where are my passwords? (`#/passwords`)**, one question per card: phone, computer, both, or a password app; iPhone or Android; which browser on the computer (with "I don't know" → how to tell by the icon). Then **go look**: how to open the Passwords app, Google Password Manager, Chrome / Edge settings (search "passwords"), Firefox, or a Mac. "Do you see your accounts there?"
+- **Mixed setups explained**: an iPhone and Chrome don't share, "that's why a password can work on one and not the other". The player picks a main place. An iPhone and a Mac do share, and it says so. Nothing saved: start saving in the place they looked.
+- Opened from **"Help me find where they are"** on the password check and every Password Reset (first in Simple mode, with "I know where" folded under it). The answer is the same one the missions already used, and it stays on this phone.
+- **Password Resets follow it** (all but Cash App's PIN): do this on the device where your passwords are saved, let it make the new one ("Use Strong Password" on Apple, "Use suggested password" in Chrome, Edge's and Firefox's own, or the password app's generator), then **check it saved** (search for Gmail, your bank…).
+- Scout's voice list gains those lines (190 lines, about 12.7k characters).
+
 ## 7.25.0 (2026-11-18): Simple mode's "What's next"
 
 Liz: "it just dumps you in the master keys and you're suddenly in recon again … make it really clear for the simple mode what we're doing next … card by card, and just assume we're going to lose people and that we're coming back."

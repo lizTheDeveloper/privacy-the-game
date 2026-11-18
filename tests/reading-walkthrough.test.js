@@ -18,7 +18,7 @@ const byId = (id) => MISSIONS.find((m) => m.id === id);
 const fresh = () => createInitialState();
 
 // A mission with several plain steps and no device prefixes, for the walkthrough.
-const MULTI = MISSIONS.find((m) => m.steps?.length >= 3 && !m.stepsByManager && !m.stepsBuilder && gearQuestions(m.steps).length === 0 && m.phase === 'fortify');
+const MULTI = MISSIONS.find((m) => m.steps?.length >= 3 && !m.simple && !m.stepsByManager && !m.stepsBuilder && gearQuestions(m.steps).length === 0 && m.phase === 'fortify');
 const FITNESS = byId('fitness-audit-data-sharing');
 
 describe('reading levels', () => {

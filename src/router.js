@@ -1,6 +1,7 @@
 const ROUTES = [
   { pattern: /^#\/city$/, screen: 'city', params: () => ({}) },
   { pattern: /^#\/next$/, screen: 'next', params: () => ({}) },
+  { pattern: /^#\/passwords(?:\?(.*))?$/, screen: 'passwords', params: (m) => ({ from: (m[1] ? new URLSearchParams(m[1]).get('from') : null) || null }) },
   {
     pattern: /^#\/district\/([^/?]+)(?:\?(.*))?$/,
     screen: 'district',

@@ -2,6 +2,7 @@ import { ACCOUNTS } from './accounts.js';
 import { MISSION_LEADS } from './mission-leads.js';
 import { MISSION_SIMPLE } from './mission-simple.js';
 import { stepKey } from '../utils/step-key.js';
+import { resetStepsByManager } from './reset-steps.js';
 import { VAULT_CAPITOL_MISSIONS } from './missions-vault-capitol.js';
 import { MISSIONS_SQUARE_ARCHIVES_MARKETPLACE } from './missions-square-archives-marketplace.js';
 import { MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS } from './missions-marketplace-cheap.js';
@@ -1254,8 +1255,20 @@ export function askSteps(m) {
   return asks;
 }
 
+// What to search for in a password manager after a reset: the name the saved login goes by.
+const SAVED_AS = {
+  primary_bank: 'your bank', credit_card: 'your credit card', investment_account: 'your brokerage',
+  state_dmv: 'your DMV', healthcare_portal: 'your health portal', student_loans: 'StudentAid.gov',
+  icloud: 'Apple', apple_id: 'Apple', google: 'Google', microsoft: 'Microsoft', outlook: 'Microsoft',
+};
+
 function withReadingCopy(list) {
   for (const m of list) {
+    // A Password Reset is told for where the passwords are saved (data/reset-steps.js).
+    if (/-fortify-password$/.test(m.id) && !m.stepsByManager && ACCOUNTS[m.accountId]) {
+      const byManager = resetStepsByManager(m.steps, SAVED_AS[m.accountId] || ACCOUNTS[m.accountId].name);
+      if (byManager) m.stepsByManager = byManager;
+    }
     if (MISSION_LEADS[m.id]) m.lead = MISSION_LEADS[m.id];
     // A copy of the step, so a shared step object (PWNED_PASSWORD_STEP) is never changed.
     for (const [i, qid] of askSteps(m)) m.steps[i] = { ...m.steps[i], ask: qid };
