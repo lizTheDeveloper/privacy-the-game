@@ -16,7 +16,7 @@ import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
-import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
+import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
@@ -142,7 +142,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const sayIntel = plainText(`${intel} ${scoutLine}`);
   const intelTools = '';
   // The device questions and how far along the steps are.
-  const gearHtml = noReset ? '' : gearAsk(state, gearQuestions(allSteps));
+  const gearHtml = noReset ? '' : passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps));
   const progressHtml = !noReset && missionStepList.length > 1 ? walkProgress(progress) : '';
   const movePanelTop = `${gearHtml}${progressHtml}`;
 
@@ -426,13 +426,13 @@ function topTools(state, level, say) {
         <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
     : readLevelChosen(state)
     ? ''
-    : '<div class="read-ask" data-read-ask><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> How much do you want to read? You can change this any time.</div>';
+    : '<div class="read-ask" data-read-ask>How much do you want to read? Change it here any time.</div>';
   const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
   return `<div class="read-tools top-tools" data-read-tools>
         <div class="top-tools-row">
           <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
-          <button class="top-tool" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this out loud"><span aria-hidden="true">&#128266;</span> Read it to me</button>
-          <button class="top-tool" data-action="focus-music" aria-pressed="${playing}"><span aria-hidden="true">&#9835;</span> Focus music${playing ? ' (on)' : ''}</button>
+          <button class="top-tool" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read it to me"><span aria-hidden="true">&#128266;</span> <span class="tt-long">Read it to me</span><span class="tt-short" aria-hidden="true">Read</span></button>
+          <button class="top-tool" data-action="focus-music" aria-pressed="${playing}" aria-label="Focus music${playing ? ' (on)' : ''}"><span aria-hidden="true">&#9835;</span> <span class="tt-long">Focus music${playing ? ' (on)' : ''}</span><span class="tt-short" aria-hidden="true">Music</span></button>
         </div>
         ${ask}
       </div>`;
@@ -502,7 +502,7 @@ function compactBriefingPage(p) {
       ${many ? `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>
       <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
@@ -659,7 +659,7 @@ function stepModePage(p) {
   const top = simpleTop(back, allDone ? 'All done' : `Step ${current + 1} of ${total}`);
   if (simple) {
     const simpleBody = `
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
       ${card}
       ${p.extras}
@@ -670,7 +670,7 @@ function stepModePage(p) {
   }
   const body = `
       <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
       ${card}
       ${p.extras}

@@ -1,4 +1,8 @@
-// The Pwned Passwords check every Breach Recon mission ends with.
+// Pwned Passwords: the fallback in the password check (missions-passwords.js) for a player who
+// says they don't save passwords anywhere. Breach Recon missions used to end with it; since
+// 2026-11-17 (Liz) checking passwords is its own mission, which starts from the report built
+// into the player's phone or browser, because that report gives a number for every saved
+// password at once.
 //
 // The email search on haveibeenpwned.com answers "which companies leaked my
 // account?". It says nothing about the password itself, and the password is
@@ -31,3 +35,14 @@ export const PWNED_PASSWORD_STEP = {
     },
   ],
 };
+
+// The same check in plain words, for the password check's fallback step. Open on the card: it is
+// the one place the game asks someone to type a password, and it never says "the same website"
+// (Liz 2026-11-17).
+export const PASSWORD_SAFE_NOTE = [
+  {
+    label: 'Is this safe?',
+    open: true,
+    text: 'Most of the time, never type your password into a website. This one is different. Your phone turns your password into a code first, and only the start of that code is sent. The website never gets your password, and it never gets your email address. First, check the top of the page says “haveibeenpwned.com”. This game will never ask for your password.',
+  },
+];

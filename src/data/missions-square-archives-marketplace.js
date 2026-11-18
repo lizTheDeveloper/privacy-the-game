@@ -3,7 +3,6 @@ import { PASSWORD_EXPOSED_QUESTION } from './missions-passwords.js';
 // Breaks from rigid 5-per-account format -- missions are purposeful and distinct.
 // Low-stakes accounts grouped by action. Messaging apps get unique missions.
 
-import { PWNED_PASSWORD_STEP } from './pwned-passwords-step.js';
 
 const BREACH_DEBRIEF = [
   {
@@ -229,7 +228,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Type the email address linked to your Instagram into the search box and press Enter' },
       { text: 'Read the results -- look for the breach named "Instagram" (a January 2026 scrape, no passwords)' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -327,7 +325,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Twitter / X account" },
       { text: "Look for the Twitter breach specifically -- it's one of the most common hits" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -499,7 +496,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your LinkedIn" },
       { text: "The 2012 LinkedIn breach is extremely common in results -- expect to see it" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -715,7 +711,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email linked to your Discord account' },
       { text: 'Also check for breaches from Discord bots and third-party services you authenticated via Discord' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -811,7 +806,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Reddit account" },
       { text: "Old Reddit accounts with pre-2007 passwords are the most at risk" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -1039,7 +1033,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Dropbox" },
       { text: "The 2012 Dropbox breach is a very common hit -- 68 million records" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -1193,7 +1186,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Amazon account" },
       { text: "If the email is in any breach, and you reused that password for Amazon -- your stored payment methods are at risk" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -1291,7 +1283,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email linked to your eBay account' },
       { text: 'Have I Been Pwned doesn’t list the 2014 eBay breach. If you had eBay before 2014, treat that data as out there anyway' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -1340,7 +1331,6 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: "Enter the email linked to your Uber account" },
       { text: "Have I Been Pwned doesn't list Uber's 2016 breach, so a clean result here doesn't clear Uber" },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {

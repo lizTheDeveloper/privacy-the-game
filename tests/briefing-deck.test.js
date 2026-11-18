@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, onTestFinished } from 'vitest';
+import { PWNED_PASSWORD_STEP } from '../src/data/pwned-passwords-step.js';
 import { readFileSync } from 'node:fs';
 import { renderBriefing } from '../src/screens/briefing.js';
 import { createInitialState } from '../src/state.js';
@@ -126,7 +127,11 @@ describe('briefings are slides on phones', () => {
   });
 
   it('the steps are packed in order; a step with notes keeps its first note, and each further note is a slide labelled with the step', () => {
+    // No mission has a step with three notes since the Pwned Passwords step left the breach
+    // checks (2026-11-17), so this lends that step to one for the length of the test.
     const m = MISSIONS.find((x) => x.id === 'gmail-recon-breach');
+    m.steps.push(PWNED_PASSWORD_STEP);
+    onTestFinished(() => m.steps.pop());
     const slides = slidesOf(renderBriefing(state, m.id));
     const i = m.steps.findIndex((s) => s.note?.length);
     const step = m.steps[i];

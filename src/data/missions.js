@@ -14,7 +14,6 @@ import { CLINIC_MISSIONS } from './missions-clinic.js';
 import { TRAIL_MISSIONS } from './missions-trail.js';
 import { FIELD_MISSIONS } from './missions-field.js';
 import { OSINT_SIEVE_MISSIONS } from './missions-osint-sieve.js';
-import { PWNED_PASSWORD_STEP } from './pwned-passwords-step.js';
 import { PASSWORD_EXPOSED_QUESTION, TWO_FA_METHOD_DEBRIEF, PASSWORD_MISSIONS } from './missions-passwords.js';
 import { REPLACEMENT_FOR } from './missions-recon-accounts.js';
 
@@ -162,7 +161,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Gmail address' },
       { text: 'Read the results — note how many breaches (if any)' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -280,7 +278,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Outlook/Hotmail address' },
       { text: 'Note how many breaches your email appears in' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -397,7 +394,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your iCloud email address' },
       { text: 'Note how many breaches (if any) your email appears in' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -515,7 +511,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Yahoo email address' },
       { text: 'Read the breach names. Have I Been Pwned doesn’t include Yahoo’s 2013–2014 breaches (3 billion accounts). If you had a Yahoo account then, assume that data is out there anyway' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -632,7 +627,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your ProtonMail address' },
       { text: 'Note any third-party breaches where this address appeared' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {
@@ -753,7 +747,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Apple ID' },
       { text: 'Check for any breaches — cross-service credential reuse is the risk' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: pairedBreachDebrief('icloud'),
     scoutDialog: {
@@ -872,7 +865,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Google email address' },
       { text: 'Also check Google’s built-in Password Checkup', url: 'https://passwords.google.com/checkup' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: pairedBreachDebrief('gmail'),
     scoutDialog: {
@@ -995,7 +987,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email associated with your Microsoft account' },
       { text: 'Note how many breaches (if any) this address appears in' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: pairedBreachDebrief('outlook'),
     scoutDialog: {
@@ -1113,7 +1104,6 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter the email or phone number associated with your Facebook account' },
       { text: 'Note any breaches. The big Facebook dataset was matched by phone number, so an email search rarely finds it' },
-      PWNED_PASSWORD_STEP,
     ],
     debriefQs: BREACH_DEBRIEF,
     scoutDialog: {

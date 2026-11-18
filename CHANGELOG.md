@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.21.0 (2026-11-17): The password check is its own mission; reading controls at the top
+
+Liz: "It takes people to the Have I Been Pwned passwords page. That's a whole separate mission… focus on passwords saved in their browser or on their phone, because those managers can tell you the number."
+
+- **The breach checks stop at the email.** None of the 26 email/breach checks ends with Pwned Passwords any more (Gmail's is 3 steps, not 4).
+- **The password check** ("Check the passwords saved on your phone or computer") is a core Master Keys mission for every new save. It asks "Where are your passwords saved?" right on the mission, with the phone and the browser first (iPhone/iPad/Mac, Android/Chrome, Edge, Firefox, then 1Password, Bitwarden and the rest), and shows that place's security report steps. The report back asks for the number it gives. "I don't save passwords" looks on the phone first, then falls back to checking one password at Pwned Passwords, with "Is this safe?" open on the card.
+- The Master Keys question is now "Where are your passwords saved?" (the same answer).
+- **Old saves keep their 100%:** a save made before this release keeps the old rule (the check counts only once they say where their passwords are saved), so no finished district drops.
+- **Simple / Full intel, Read it to me and Focus music** are one row in the top bar on every briefing and step screen, not at the bottom ("Read" and "Music" on a phone). The step card keeps Help.
+
 ## 7.20.0 (2026-11-17): Short and Simplest are one level, Simple
 
 Liz: "merge simple + simplest into a single view." The reading levels are now **Simple** (the default) and **Full intel**.

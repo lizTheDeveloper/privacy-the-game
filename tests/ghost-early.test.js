@@ -1,3 +1,4 @@
+import { isMissionInPlay } from '../src/utils/mission-status.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderGhostEarly, renderGhostDone } from '../src/screens/ghost.js';
 import { renderCityTogether } from '../src/screens/city-together.js';
@@ -19,7 +20,7 @@ function memoryStorage() {
 function completeCity() {
   const s = createInitialState();
   for (const m of MISSIONS) {
-    if (isCoreMission(m) && s.accounts[m.accountId]?.enabled) s.missions[m.id] = { status: 'completed' };
+    if (isCoreMission(m) && isMissionInPlay(s, m)) s.missions[m.id] = { status: 'completed' };
   }
   return s;
 }

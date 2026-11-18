@@ -13,8 +13,9 @@ beforeEach(() => {
   globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
 });
 
+// Old saves (these tests are about not lowering one), from before the password check was for all.
 function only(ids) {
-  let s = createInitialState();
+  let s = { ...createInitialState(), createdAt: '2026-09-01T00:00:00.000Z' };
   for (const id of Object.keys(s.accounts)) s = { ...s, accounts: { ...s.accounts, [id]: { ...s.accounts[id], enabled: ids.includes(id) } } };
   return s;
 }

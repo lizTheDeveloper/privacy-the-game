@@ -1,3 +1,5 @@
+import { missionDistrict } from '../src/data/missions.js';
+import { isMissionInPlay } from '../src/utils/mission-status.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { restoreEvents, deletionStatus, deletedKinds } from '../src/utils/restore.js';
 import { getGhostInfo, markGoneGhost, clearGhost, isGhostPending, GHOST_KEY } from '../src/utils/ghost.js';
@@ -166,7 +168,7 @@ describe('restoreEvents', () => {
     const s = createInitialState();
     const district = ACCOUNTS.gmail.district;
     for (const m of MISSIONS) {
-      if (isCoreMission(m) && s.accounts[m.accountId]?.enabled && ACCOUNTS[m.accountId]?.district === district) {
+      if (isCoreMission(m) && isMissionInPlay(s, m) && missionDistrict(m) === district) {
         s.missions[m.id] = { status: 'completed' };
       }
     }

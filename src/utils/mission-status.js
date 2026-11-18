@@ -19,10 +19,20 @@ export function isMissionDoneIn(state, mission) {
     || Boolean(mission.replaces && isMissionDone(state?.missions?.[mission.replaces]));
 }
 
+// Saves made from this moment on get the password check as a core Master Keys mission.
+export const PASSWORD_CHECK_FOR_ALL_SINCE = '2026-11-17T12:00:00.000Z';
+
 // Missions that only appear once something is true (mission.unlock).
 export function isMissionAvailable(state, mission) {
   const u = mission.unlock;
   if (!u) return true;
+  if (u.type === 'password-check') {
+    if (isMissionDone(state.missions?.[mission.id])) return true;
+    if (Boolean(state.passwordManager) && state.passwordManager !== 'none') return true;
+    // Everyone's since the password check replaced the Pwned Passwords step (Liz 2026-11-17).
+    // An older save keeps the rule it was finished under: only with a password manager.
+    return !state.createdAt || state.createdAt >= PASSWORD_CHECK_FOR_ALL_SINCE;
+  }
   if (u.type === 'password-manager') {
     // A finished report keeps counting if the answer later changes to "none".
     if (isMissionDone(state.missions?.[mission.id])) return true;

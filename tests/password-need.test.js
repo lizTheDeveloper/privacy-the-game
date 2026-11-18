@@ -125,7 +125,7 @@ describe('not-needed counts as done for progress, never as a real action', () =>
   });
 
   function allCoreDone(passwordStatus) {
-    let s = createInitialState();
+    let s = { ...createInitialState(), createdAt: '2026-09-01T00:00:00.000Z' }; // an old save
     for (const m of getMissionsForDistrict('master-keys').filter(isCoreMission)) {
       if (m.unlock) continue; // the password-manager report: not in an old save
       if (m.id.endsWith('-fortify-password')) {

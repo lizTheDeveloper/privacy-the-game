@@ -835,4 +835,13 @@ img { image-rendering: pixelated; }
 .top-tool { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid rgba(237,239,243,0.18); border-radius: 10px; background: rgba(255,255,255,0.04); color: rgba(237,239,243,0.85); font: inherit; font-size: 14px; cursor: pointer; }
 .top-tool[aria-pressed="true"] { border-color: rgba(0,229,255,0.5); color: var(--cyan); }
 .top-tools .read-ask { margin: 8px 0 0; font-size: 13px; }
-@media (max-width: 480px) { .top-tool { font-size: 13px; padding: 0 10px; } }
+/* One row on a phone: "Read" and "Music" (the button's name stays "Read it to me"). */
+.top-tool .tt-short { display: none; }
+@media (max-width: 480px) {
+  .top-tools-row { flex-wrap: nowrap; gap: 6px; }
+  .top-tools .read-level { padding: 0 9px; }
+  .top-tool { font-size: 13px; padding: 0 9px; white-space: nowrap; }
+  .top-tool .tt-long { display: none; }
+  .top-tool .tt-short { display: inline; }
+  .top-tools .read-ask { font-size: 12px; margin-top: 6px; }
+}

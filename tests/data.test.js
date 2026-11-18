@@ -133,12 +133,14 @@ describe('MISSIONS', () => {
 describe('Breach Recon password check', () => {
   const breachRecon = MISSIONS.filter((m) => m.id.endsWith('-recon-breach'));
 
-  it('every Breach Recon mission ends with the Pwned Passwords step', () => {
+  // Liz 2026-11-17: checking passwords is its own mission, which starts from the phone or
+  // browser's own report. The breach checks stop at the email.
+  it('no Breach Recon mission sends the player to Pwned Passwords, at any reading level', () => {
     expect(breachRecon.length).toBeGreaterThan(0);
     for (const m of breachRecon) {
-      const step = m.steps.at(-1);
-      expect(step.url, `${m.id} missing the Pwned Passwords step`).toBe(PWNED_PASSWORDS_URL);
-      expect(step.note?.length, `${m.id} password step has no explanation`).toBe(3);
+      for (const step of [...m.steps, ...(m.simple?.steps || [])]) {
+        expect(step.url, `${m.id}: ${step.text}`).not.toBe(PWNED_PASSWORDS_URL);
+      }
     }
   });
 

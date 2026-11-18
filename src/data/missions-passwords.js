@@ -6,6 +6,7 @@
 // backup way in for the most critical accounts. Saves that never answered
 // the manager question keep exactly their old totals.
 import { ACCOUNTS } from './accounts.js';
+import { PWNED_PASSWORDS_URL, PASSWORD_SAFE_NOTE } from './pwned-passwords-step.js';
 
 const BREACHED = ['1-2-breaches', '3plus-breaches'];
 
@@ -62,21 +63,25 @@ export const TWO_FA_METHOD_DEBRIEF = [
   },
 ];
 
+// Where the player's passwords are saved. The phone and the browser come first (Liz 2026-11-17):
+// most people never set up a password manager, but their phone or browser saves passwords anyway
+// and its report says how many leaked. The values are the old ones, so saves keep their answer.
 export const PASSWORD_MANAGERS = [
-  { value: 'apple', text: 'Apple Passwords / iCloud Keychain' },
-  { value: 'google', text: 'Google Password Manager (incl. Chrome)' },
+  { value: 'apple', text: 'iPhone, iPad or Mac (Apple Passwords)' },
+  { value: 'google', text: 'Android phone or Chrome (Google)' },
+  { value: 'edge', text: 'Microsoft Edge' },
+  { value: 'firefox', text: 'Firefox' },
   { value: '1password', text: '1Password' },
   { value: 'bitwarden', text: 'Bitwarden' },
   { value: 'proton', text: 'Proton Pass' },
   { value: 'dashlane', text: 'Dashlane' },
   { value: 'lastpass', text: 'LastPass' },
-  { value: 'firefox', text: 'Firefox' },
-  { value: 'edge', text: 'Microsoft Edge' },
-  { value: 'other', text: 'Other' },
-  { value: 'none', text: 'No, I don’t use one' },
+  { value: 'other', text: 'Somewhere else' },
+  { value: 'none', text: 'I don’t save passwords' },
 ];
 
-const NOTE_STEP = { text: 'Note which of your accounts it lists as compromised, leaked or reused' };
+// The report's number is what the report back asks for.
+const NOTE_STEP = { text: 'Write down how many passwords it says are compromised, leaked or reused, and which of your accounts it names' };
 
 const PM_STEPS = {
   apple: [
@@ -130,19 +135,36 @@ const PM_STEPS = {
     { text: 'Look for a Security, Health, Watchtower or Checkup report in your manager.' },
     NOTE_STEP,
   ],
+  // No saved passwords: look on the phone first (it may save them without being asked), and
+  // only then check one password by hand.
+  none: [
+    { text: 'Look on your phone first. It may save passwords even if you never set that up. iPhone: open the Passwords app. Android: open passwords.google.com. Found some? Tap “Change” above and pick your phone.' },
+    { text: 'No saved passwords anywhere? Open “Pwned Passwords” and check the password you use most. It is a different check from the email search, and it never gets your email address.', url: PWNED_PASSWORDS_URL, note: PASSWORD_SAFE_NOTE },
+  ],
 };
+
+// Before the player says where their passwords are saved: the two places most people's are.
+const PM_STEPS_UNKNOWN = [
+  // Not "iPhone: …": that would ask "Which phone do you use?" on top of the question above.
+  { text: 'Apple (iPhone, iPad or Mac): open the Passwords app and tap Security' },
+  { text: 'Google (Android phone or Chrome): open Google Password Checkup', url: 'https://passwords.google.com/checkup' },
+  NOTE_STEP,
+];
 
 export const PASSWORD_MANAGER_MISSION = {
   id: 'password_manager-recon-report',
   accountId: 'password_manager',
   district: 'master-keys',
   phase: 'recon',
-  // Core for players who use a password manager (Liz, 2026-10-06: take its
-  // report seriously); players without one never see it.
-  unlock: { type: 'password-manager' },
-  title: 'Check your password manager’s security report',
-  briefing: 'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
-  steps: PM_STEPS.other,
+  // The password check, for everyone (Liz 2026-11-17). It used to be only for players who said
+  // they use a password manager, while every email breach check ended with Pwned Passwords. Now
+  // the breach checks stop at the email, and this one mission checks every saved password at once.
+  // A save from before then keeps the old rule, so no finished district loses its 100%
+  // (utils/mission-status.js).
+  unlock: { type: 'password-check' },
+  title: 'Check the passwords saved on your phone or computer',
+  briefing: 'Your phone and your web browser save your passwords, and they check them against known leaks. Their security report gives you a number: how many of your saved passwords leaked, and how many you reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
+  steps: PM_STEPS_UNKNOWN,
   stepsByManager: PM_STEPS,
   debriefQs: [
     {
@@ -151,7 +173,7 @@ export const PASSWORD_MANAGER_MISSION = {
       type: 'number',
       min: 0,
       max: 9999,
-      label: 'How many passwords did it flag?',
+      label: 'How many passwords did it say are compromised, leaked or reused?',
       hint: 'Whatever it flags gets a new password. A clean result isn’t proof of anything, just no known problem.',
       options: [{ value: 'skip', text: 'Couldn’t check right now', severity: 'skip' }],
     },
@@ -175,7 +197,7 @@ export const PASSWORD_MANAGER_MISSION = {
     },
   ],
   scoutDialog: {
-    briefing: '"Your password manager has been keeping notes. Let’s read them. Whatever it flags gets a new password — whatever it doesn’t, we leave alone."',
+    briefing: '"Your phone or browser has been keeping notes on your passwords. Let’s read them. Whatever it flags gets a new password — whatever it doesn’t, we leave alone."',
     debrief: {
       flagged: '"Now we know which passwords your manager knows are leaked or reused. Those resets are on the list."',
       'none-flagged': '"Nothing flagged. Your manager’s been keeping watch and the report is clean. That’s the kind of boring I like."',
