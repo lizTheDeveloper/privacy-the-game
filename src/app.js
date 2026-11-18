@@ -98,6 +98,8 @@ let notice = { hash: null, text: '' };
 let restoring = false;
 // "Reset it anyway" on a password recon showed is fine (until the page reloads).
 let resetAnywayMission = null;
+// "I don't have Gmail" (the Simple briefing): the district it went back to says so, once.
+let notMine = { hash: null, id: null };
 // A started mission shows one step at a time; "Read the briefing again" peeks at the briefing.
 let briefingPeek = null;
 // The last route drawn, and the building #/saints was opened from (memory only).
@@ -191,6 +193,7 @@ const screens = {
   city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival, welcomeBack }),
   district: ({ id, tab }) => renderDistrict(state, id, tab, {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
+    notMine: notMine.hash === location.hash ? notMine.id : null,
   }),
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
@@ -1411,10 +1414,20 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'set-password-manager') {
     setState({ ...state, passwordManager: el.dataset.pm });
     renderCurrentRoute();
+  } else if (action === 'not-mine') {
+    const id = el.dataset.account;
+    if (state.accounts[id]?.enabled) {
+      setState(toggleAccount(state, id, false));
+      track('account-toggled', { account: id, enabled: false });
+    }
+    notMine = { hash: el.dataset.href, id };
+    if (location.hash === el.dataset.href) renderCurrentRoute();
+    else location.hash = el.dataset.href;
   } else if (action === 'toggle-account') {
     const id = el.dataset.account;
     if (state.accounts[id]) {
       const enabled = !state.accounts[id].enabled;
+      if (enabled && notMine.id === id) notMine = { hash: null, id: null };
       setState(toggleAccount(state, id, enabled));
       track('account-toggled', { account: id, enabled });
       renderCurrentRoute();
