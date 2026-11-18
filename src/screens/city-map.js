@@ -775,6 +775,9 @@ const STYLE = `
       .welcome-back--scout { display: none; }
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
+      /* Scout starts you out: right under the top bar, before the buttons and the map (Liz 2026-11-17). */
+      .city-hud { order: -2; }
+      .city-scout { order: -1; }
       .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
       .city-readout { position: relative; top: auto; left: auto; padding: 8px 14px 0; flex-wrap: wrap; row-gap: 4px; }
       .city-skyline { position: relative; height: 420px; margin-top: -60px; }

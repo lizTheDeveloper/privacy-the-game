@@ -27,8 +27,10 @@ function leakCheck(name, { first = [], extra = [] } = {}) {
     lead: `See if a business lost your ${name} email address to someone who broke in.`,
     steps: [
       ...first,
-      { text: 'Open the “Have I Been Pwned” website', url: HIBP },
-      { text: `Type your ${name} email address in the box at the top` },
+      { text: `Open the “Have I Been Pwned” website. You will check your ${name} email address there.`, url: HIBP },
+      // Not "the box at the top": a player looks at the top of the game, not the other tab (Liz 2026-11-17).
+      // The box and button as the site labels them (checked 2026-11-17).
+      { text: `On that website, type your ${name} email address in the “Email address” box, and tap “Check”` },
       { text: 'Read what it says. “Good news” means it was not found. “Oh no — pwned!” means a business lost it to someone who broke in.' },
       ...extra,
       { text: 'Now check your password on the same website', url: PWNED_PASSWORDS, note: PASSWORD_SAFE_NOTE },

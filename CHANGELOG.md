@@ -2,6 +2,17 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.18.0 (2026-11-17): Simplest works like a phone app; Scout starts you out
+
+Liz on her phone: Simplest still had too many words, DONE sat there before you'd been anywhere, "the box at the top" sent people looking at the top of the game, and Back was tiny text.
+
+- **Simplest step screens.** A big **‹ Back** at the top left (to the step before, or the briefing from step 1) and "Step 2 of 4" in words on the right. Gone from these screens: the score bar, Support, the Read / Steps / Report back trail, the second list of steps, "Finished already?", "Read the briefing again", and the second Read it to me.
+- **OPEN first, then DONE.** A step with a website shows one bright button, **OPEN THE WEBSITE ↗**, with the site's address underneath as the phone's address bar shows it. DONE appears once you've opened it, and OPEN becomes a quiet "Open the website again". What you opened is remembered for this visit only, on this device.
+- **Every step says where it happens.** A step that happens on a site opened earlier shows "🌐 On haveibeenpwned.com ↗" above the words (tap it to go back there). The email check now says: "On that website, type your Gmail email address in the “Email address” box, and tap “Check”", the box and button as Have I Been Pwned labels them.
+- **Help and Read it to me** are big buttons, not small links.
+- **Scout starts you out.** On phones Scout's line and NEXT MISSION come first on the city map, right under the top bar, before the buttons and the map.
+- Short and Full intel are unchanged.
+
 ## 7.17.0 (2026-11-17): The Field, and the way back to the course
 
 - **The Field (chapter 13)** is an opt-in district for people whose work makes them a target: journalists, organizers, clinic workers, legal observers, mutual aid. Nine buildings, 74 missions, built from The Multiverse School's Field Opsec playbooks (shipped in #519).
