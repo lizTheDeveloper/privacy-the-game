@@ -75,12 +75,17 @@ export function hasSimplest(mission) {
 // A step that starts "iPhone: …" or "Fitbit: …" is for players with that device. The groups
 // are the questions the briefing can ask; only a mission with steps for two or more options
 // of a group asks (one lone "Fitbit:" step is just shown).
+// An option no step is labelled with: it is only ever an answer.
+const NO_STEP = /(?!)/;
+
 export const GEAR_GROUPS = {
   phone: {
     question: 'Which phone do you use?',
     options: {
       iphone: { label: 'iPhone', match: /^(on (your |an )?)?(iphone|ios|ipad|apple health)\b/i },
       android: { label: 'Android', match: /^(on (your |an )?)?(android|samsung|pixel|google pixel)\b/i },
+      // An answer to "About your devices" (Simple mode), never a step's label.
+      none: { label: 'I don’t have one', match: NO_STEP, answerOnly: true },
     },
   },
   tracker: {
@@ -106,6 +111,9 @@ export const GEAR_GROUPS = {
     options: {
       mac: { label: 'Mac', match: /^(on (your |a )?)?mac(os)?\b/i },
       windows: { label: 'Windows', match: /^(on (your |a )?)?windows\b/i },
+      chromebook: { label: 'Chromebook', match: /^(on (your |a )?)?chromebook\b/i },
+      shared: { label: 'I share one', match: NO_STEP, answerOnly: true },
+      none: { label: 'I don’t have one', match: NO_STEP, answerOnly: true },
     },
   },
   camera: {

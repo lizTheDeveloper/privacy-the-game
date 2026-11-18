@@ -55,7 +55,11 @@ describe('the Vault has no dead ends (Liz 2026-11-01: "the vault doesn\'t take y
     const bad = [];
     for (const m of VAULT_MISSIONS) {
       for (const started of [false, true]) {
-        const s = { ...createInitialState(), ...(started ? { startedMissions: { [m.id]: 'x' } } : {}) };
+        // Started in Simple: the "Before you start" card asks first, with a way to skip it.
+        const fresh = { ...createInitialState(), ...(started ? { startedMissions: { [m.id]: 'x' } } : {}) };
+        const setup = renderBriefing(fresh, m.id);
+        if (setup.includes('data-setup-card') && !setup.includes('data-action="setup-skip"')) bad.push(`${m.id}: no way past the setup card`);
+        const s = { ...fresh, gear: { phone: 'iphone', computer: 'windows' }, passwordManager: 'apple' };
         const h = renderBriefing(s, m.id);
         // A site of the mission's own: GO DO IT, a step link, or a saved bank (not the HUD's links).
         const hasSite = goUrl(h)?.startsWith('https://') || /data-action="(?:mission-step|bank-note-open)"/.test(h);

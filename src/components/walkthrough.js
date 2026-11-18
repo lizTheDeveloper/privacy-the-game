@@ -6,6 +6,8 @@ import { plainText } from '../utils/readability.js';
 import { GEAR_GROUPS, gearChoice, stepKey, stepMarks, readLevel } from '../utils/reading.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 import { fillBar } from './fill-bar.js';
+import { twoPlaceNames } from '../data/two-places.js';
+import { passwordPlaces } from '../utils/password-places.js';
 
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -146,6 +148,10 @@ export function gearAsk(state, questions) {
     const choice = gearChoice(state, group);
     if (choice) {
       const change = `<button class="walk-link" data-action="gear-reset" data-group="${group}">Change</button>`;
+      // "I don't have one" or "I share one" (About your devices): every step shows.
+      if (g.options[choice]?.answerOnly) {
+        return `<div class="walk-gear-set" data-gear-set="${group}">Showing all the steps. ${change}</div>`;
+      }
       if (choice !== 'all' && !options.includes(choice)) {
         return `<div class="walk-gear-set" data-gear-set="${group}">No steps here just for <strong>${g.options[choice]?.label}</strong>, so all of them are shown. ${change}</div>`;
       }
@@ -191,8 +197,14 @@ export { stepMarks };
 export function passwordPlaceAsk(state, mission) {
   if (!mission?.stepsByManager) return '';
   const chosen = PASSWORD_MANAGERS.find((pm) => pm.value === state?.passwordManager);
+  const change = '<button class="walk-link" data-action="set-password-manager" data-pm="">Change</button>';
+  // Two places (the finder): steps that cover both. Nothing to move.
+  const two = twoPlaceNames(passwordPlaces(state));
+  if (chosen && two) {
+    return `<div class="walk-gear-set" data-pm-set data-pm-two>Your passwords are in two places: <strong>${two[0]}</strong> and <strong>${two[1]}</strong>. These steps cover both. ${change}</div>`;
+  }
   if (chosen) {
-    return `<div class="walk-gear-set" data-pm-set>Showing steps for <strong>${chosen.text}</strong>. <button class="walk-link" data-action="set-password-manager" data-pm="">Change</button></div>`;
+    return `<div class="walk-gear-set" data-pm-set>Showing steps for <strong>${chosen.text}</strong>. ${change}</div>`;
   }
   const chips = PASSWORD_MANAGERS.map((pm) => `<button class="walk-gear-chip" data-action="set-password-manager" data-pm="${pm.value}">${pm.text}</button>`).join('');
   // Not everyone knows (Liz 2026-11-18): the finder asks one thing at a time and has them look.
@@ -204,7 +216,59 @@ export function passwordPlaceAsk(state, mission) {
   return `
     <div class="walk-gear" data-pm-ask>
       <div class="walk-gear-q">Where are your passwords saved? <span>Then you only see your steps.</span></div>
+      ${devicesNote(state)}
       ${find}
       ${list}
     </div>`;
+}
+
+// --- About your devices (Simple mode) ------------------------------------------------------
+// Liz 2026-11-18: "find out what their other devices are, if they're in simple mode, because you
+// can help clarify what to do and where to go … separate information gathering and signal
+// gathering from action taking." Asked once, before a mission's first step, and kept in
+// state.gear (the same answers as the device questions above the steps). Never tracked.
+
+const DEVICE_ASKS = [
+  ['phone', 'What phone do you have?', ['iphone', 'android', 'none']],
+  ['computer', 'What computer do you use?', ['windows', 'mac', 'chromebook', 'shared', 'none']],
+];
+
+export function devicesAnswered(state) {
+  return DEVICE_ASKS.every(([group]) => gearChoice(state, group));
+}
+
+// A mission whose steps change with the player's phone or computer: a Password Reset or the
+// password check (where the passwords are saved), or steps for an iPhone and an Android.
+export function missionNeedsDevices(mission, questions = []) {
+  return Boolean(mission?.stepsByManager) || questions.some((q) => q.group === 'phone' || q.group === 'computer');
+}
+
+export function devicesAsk(state) {
+  const rows = DEVICE_ASKS.map(([group, ask, options]) => {
+    const g = GEAR_GROUPS[group];
+    const choice = gearChoice(state, group);
+    if (choice) {
+      return `<div class="walk-gear-set" data-gear-set="${group}">${ask} <strong>${g.options[choice]?.label || 'All of them'}</strong>. <button class="walk-link" data-action="gear-reset" data-group="${group}">Change</button></div>`;
+    }
+    const chips = options.map((o) => `<button class="walk-gear-chip" data-action="gear-pick" data-group="${group}" data-value="${o}">${g.options[o].label}</button>`).join('');
+    return `<div class="walk-gear" data-gear-ask="${group}"><div class="walk-gear-q">${ask}</div><div class="walk-gear-chips">${chips}</div></div>`;
+  }).join('');
+  return `
+    <div class="walk-devices" data-devices-ask>
+      <h2 class="finder-q finder-q--small">First, about your devices</h2>
+      <p class="walk-devices-why">Then we can tell you where to go. Your answers stay on this phone.</p>
+      ${rows}
+    </div>`;
+}
+
+// A phone and a computer that don't keep the same passwords: say so up front, before any step,
+// so a password missing from one place never feels like the player did something wrong.
+// An iPhone with Windows or a Chromebook, an Android phone with a Mac.
+const APART = { iphone: ['windows', 'chromebook'], android: ['mac'] };
+const DEVICE_WORDS = { iphone: 'Your iPhone', android: 'Your Android phone', windows: 'your Windows computer', mac: 'your Mac', chromebook: 'your Chromebook' };
+export function devicesNote(state) {
+  const phone = gearChoice(state, 'phone');
+  const computer = gearChoice(state, 'computer');
+  if (!APART[phone]?.includes(computer)) return '';
+  return `<p class="walk-devices-note" data-devices-note>${DEVICE_WORDS[phone]} and ${DEVICE_WORDS[computer]} may not keep the same passwords. A password can be saved on one and not the other. That’s normal. We’ll help you check each place.</p>`;
 }

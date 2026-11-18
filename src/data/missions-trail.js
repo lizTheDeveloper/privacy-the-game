@@ -325,7 +325,8 @@ export const TRAIL_MISSIONS = [
     title: "Harden Your Browser",
     briefing: "Firefox is the best mainstream browser for fingerprinting resistance because Mozilla actively works to make Firefox users look similar to each other. Enhanced Tracking Protection in Strict mode blocks known fingerprinters. The 'resist fingerprinting' flag goes further, lying to websites about your timezone, fonts, and screen size. uBlock Origin blocks the scripts that do the fingerprinting before they run.",
     steps: [
-      { text: "Firefox: Settings > Privacy & Security > Enhanced Tracking Protection > select 'Strict'. This blocks known fingerprinting scripts and cross-site cookies.", url: "about:preferences#privacy" },
+      // Not a hidden move (Liz 2026-11-18): these steps are for Firefox, but no one has to switch.
+      { text: "Firefox: Settings > Privacy & Security > Enhanced Tracking Protection > select 'Strict'. This blocks known fingerprinting scripts and cross-site cookies.", url: "about:preferences#privacy", note: [{ label: "Don’t use Firefox?", text: "You don’t have to switch. Your saved passwords stay in the browser you use now. You can still install uBlock Origin there. If you try Firefox, keep your old browser too." }] },
       { text: "Firefox advanced: In the address bar, type about:config > search 'privacy.resistFingerprinting' > set to true. This makes Firefox report generic values for timezone, screen size, and fonts." },
       { text: "Install uBlock Origin: the most effective content blocker. It blocks tracking scripts before they can fingerprint you.", url: "https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/" },
       { text: "Mobile: On iPhone, use Firefox Focus or Safari (which has built-in fingerprinting protection). On Android, Firefox or Brave both have fingerprinting resistance." },

@@ -17,7 +17,7 @@ import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
 import { topTools } from '../components/top-tools.js';
-import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
+import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel, devicesAsk, devicesAnswered, missionNeedsDevices } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
@@ -517,6 +517,7 @@ function accountSite(mission, steps, goUrl) {
 // The page a step happens on: its own link, else the last link before it, else the
 // account's security page ("Enter your Gmail address" happens on haveibeenpwned.com).
 function stepSite(steps, i, account) {
+  if (steps[i]?.elsewhere) return '';
   return steps[i]?.url || [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || account?.securityUrl || '';
 }
 
@@ -611,12 +612,29 @@ function namesSite(step) {
 // The site an earlier step opened, for a Simplest step without a link of its own. Only a
 // step's own link counts: the account's security page would name the wrong place.
 function simpleWhere(steps, i) {
+  if (steps[i]?.elsewhere) return '';
   return [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || '';
 }
 
 // What Read it to me reads for a step: its words, and any note shown open on its card.
 function stepSay(step) {
   return [step.text, ...(step.note || []).filter((n) => n.open).flatMap((n) => [n.label, n.text])];
+}
+
+// What a Simple mission asks before its first step: the player's devices (once, for a mission
+// whose steps depend on them), where the passwords are saved, and any other device question.
+// '' when everything is answered.
+function setupCard(state, mission, allSteps) {
+  // Never a gate: "Skip this" shows every step, as before (kept with the mission's ticks).
+  if (state?.stepProgress?.[mission.id]?.setup === 'skipped') return '';
+  const skip = `<button class="walk-link focus-setup-skip" data-action="setup-skip" data-mission="${mission.id}">Skip this. Show me all the steps.</button>`;
+  const questions = gearQuestions(allSteps);
+  if (missionNeedsDevices(mission, questions) && !devicesAnswered(state)) return devicesAsk(state) + skip;
+  const unanswered = questions.filter((q) => !state?.gear?.[q.group]);
+  const place = mission.stepsByManager && !state?.passwordManager ? passwordPlaceAsk(state, mission) : '';
+  if (!place && !unanswered.length) return '';
+  // The top of the screen says "Before you start".
+  return `${place}${gearAsk(state, unanswered)}${skip}`;
 }
 
 function stepModePage(p) {
@@ -667,14 +685,22 @@ function stepModePage(p) {
   // Back: the step before, or the briefing from the first step. "Step 2 of 4" beside it is the
   // one place the screen counts (no trail, no count on the card or the list).
   const back = progress.handled ? { action: 'step-back', mission: mission.id } : { action: 'show-briefing', mission: mission.id };
+  // Simple: the questions come before the doing, on their own card (Liz 2026-11-18: "separate
+  // information gathering and signal gathering from action taking"). Never mid-step.
+  const setup = simple && !allDone ? setupCard(state, mission, allSteps) : '';
   // Simple mode shows the bar, not the numbers (Liz 2026-11-18).
-  const top = simpleTop(back, level === 'simplest' ? '' : allDone ? 'All done' : `Step ${current + 1} of ${total}`);
+  const top = simpleTop(back, setup ? 'Before you start' : level === 'simplest' ? '' : allDone ? 'All done' : `Step ${current + 1} of ${total}`);
+  if (simple && setup) {
+    return pageShell(state, p, `
+      <div class="focus-card focus-setup" data-setup-card>${setup}</div>
+`, 'brief-steps-mode brief-simple', top, topTools(state, level, [plainText(setup)], upcoming));
+  }
   if (simple) {
     const simpleBody = `
-      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true, key: `steps:${mission.id}`, size: 'big' })}
       ${allDone ? confetti() : ''}
       ${card}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${p.extras}
       ${bankPanelHtml}
       ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}

@@ -54,6 +54,7 @@ import { mountBugReporter } from './components/bug-reporter.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
+import { setPasswordPlaces } from './utils/password-places.js';
 import { readLevel, setReadLevel, readAloudOn, setReadAloud, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
 import { stopSpeaking, sayNow, unlockAudio, audioUnlocked, prefetch } from './utils/read-aloud.js';
@@ -1346,6 +1347,12 @@ app.addEventListener('click', async (e) => {
     }
     renderCurrentRoute();
     app.querySelector('[data-action="read-aloud"]')?.focus({ preventScroll: true });
+  } else if (action === 'setup-skip') {
+    // Simple's "Before you start" card, skipped: every step shows. Local only.
+    const id = el.dataset.mission;
+    const prev = state.stepProgress?.[id] || {};
+    setState({ ...state, stepProgress: { ...state.stepProgress, [id]: { ...prev, setup: 'skipped' } } });
+    renderCurrentRoute();
   } else if (action === 'gear-pick' || action === 'gear-reset') {
     // Local only: which phone or tracker someone has never leaves this browser.
     const next = action === 'gear-pick' ? setGear(state, el.dataset.group, el.dataset.value) : { ...state, gear: { ...state.gear, [el.dataset.group]: undefined } };
@@ -1499,11 +1506,14 @@ app.addEventListener('click', async (e) => {
     renderCurrentRoute();
     window.scrollTo?.(0, 0);
   } else if (action === 'finder-done') {
-    setState({ ...state, passwordManager: el.dataset.pm, passwordFinder: { ...state.passwordFinder, done: el.dataset.pm } });
+    // Two places stay two places (Liz 2026-11-18): both are remembered, nothing is moved.
+    // Local only, never tracked.
+    const places = el.dataset.places ? el.dataset.places.split(',') : [el.dataset.pm];
+    setState({ ...setPasswordPlaces(state, places), passwordFinder: { ...state.passwordFinder, done: el.dataset.pm } });
     const from = el.closest('[data-from]')?.dataset.from;
     navigate(from ? `#/mission/${from}/briefing` : '#/next');
   } else if (action === 'set-password-manager') {
-    setState({ ...state, passwordManager: el.dataset.pm });
+    setState(setPasswordPlaces(state, [el.dataset.pm]));
     renderCurrentRoute();
   } else if (action === 'not-mine') {
     const id = el.dataset.account;

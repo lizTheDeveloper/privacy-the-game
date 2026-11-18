@@ -210,7 +210,7 @@ const CHAPTER_1_MISSIONS = [
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {
-      briefing: '"The strongest wall in your city. Make this one count — long, unique, stored in a password manager."',
+      briefing: '"The strongest wall in your city. Make this one count — long, unique, and saved where you keep your passwords."',
       debrief: {
         'reset-password': '"Fresh password locked in. One less door they can walk through."',
         'already-strong': '"Already unique and strong — you’re ahead of the game."',
@@ -675,7 +675,7 @@ const CHAPTER_1_MISSIONS = [
       { text: 'Select Account and password' },
       { text: 'Click the pencil button next to your password' },
       { text: 'Enter your current one' },
-      { text: 'Set a strong, unique password and store it in a password manager' },
+      { text: 'Set a strong, unique password and save it where you keep your passwords' },
     ],
     debriefQs: PASSWORD_DEBRIEF,
     scoutDialog: {

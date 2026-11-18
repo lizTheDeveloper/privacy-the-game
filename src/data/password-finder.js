@@ -112,7 +112,10 @@ export const SAW = [
 
 // What to ask next, from the answers so far (f = state.passwordFinder). Every card can be left
 // and come back to: the answers are saved as they are given.
-export function finderCard(f = {}) {
+// gear: the "About your devices" answers (state.gear), so a question already answered there is
+// not asked again (Liz 2026-11-18: find out their devices first, in Simple mode).
+export function finderCard(answers = {}, gear = {}) {
+  const f = withDevices(answers, gear);
   if (!f.where) return { kind: 'ask', key: 'where' };
   if (f.where === 'app') return f.app ? { kind: 'result' } : { kind: 'ask', key: 'app' };
   const phone = f.where === 'phone' || f.where === 'both';
@@ -134,7 +137,8 @@ export function finderFound(f = {}) {
 
 // The answer for the password check, and whether the passwords are split across places that
 // don't share (an iPhone and Chrome: why a password works on one and not the other).
-export function finderResult(f = {}) {
+export function finderResult(answers = {}, gear = {}) {
+  const f = withDevices(answers, gear);
   if (f.where === 'app') return { managers: [f.app], mixed: false, found: [] };
   const found = finderFound(f);
   const managers = [...new Set(found.map((p) => PLACES[p].manager))];
@@ -142,6 +146,30 @@ export function finderResult(f = {}) {
   const looked = [f.phone, f.browser].filter((p) => PLACES[p]);
   const start = looked.length ? PLACES[looked[0]].manager : null;
   return { managers, mixed: managers.length > 1, found, start };
+}
+
+// The finder's answers, with what "About your devices" already said: the kind of phone, and
+// Chrome on a Chromebook. Only the answers given here are saved in state.passwordFinder.
+export function withDevices(f = {}, gear = {}) {
+  const out = { ...f };
+  if (!out.phone && FINDER_QUESTIONS.phone.options.some(([v]) => v === gear?.phone)) out.phone = gear.phone;
+  if (!out.browser && gear?.computer === 'chromebook') out.browser = 'chrome';
+  return out;
+}
+
+// A question's options, without the ones the devices rule out: no phone, no computer, or
+// Safari on Windows.
+export function finderOptions(key, gear = {}) {
+  const options = FINDER_QUESTIONS[key]?.options || [];
+  const noPhone = gear?.phone === 'none';
+  const noComputer = gear?.computer === 'none';
+  if (key === 'where' && noPhone !== noComputer) {
+    return options.filter(([v]) => v !== 'both' && v !== (noPhone ? 'phone' : 'computer'));
+  }
+  if (key === 'browser' && (gear?.computer === 'windows' || gear?.computer === 'chromebook')) {
+    return options.filter(([v]) => v !== 'safari');
+  }
+  return options;
 }
 
 export const FINDER_KEYS = ['where', 'phone', 'phoneSaw', 'browser', 'browserSaw', 'app'];
