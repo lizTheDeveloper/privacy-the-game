@@ -4,6 +4,7 @@
 
 import { plainText } from '../utils/readability.js';
 import { GEAR_GROUPS, gearChoice, stepKey, stepMarks } from '../utils/reading.js';
+import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -182,3 +183,20 @@ export function missionTrail(stage, p, { already = false } = {}) {
 
 // The ticks for a mission (re-exported for the screens).
 export { stepMarks };
+
+// The password check asks where the player's passwords are saved, right on the mission, so its
+// steps are for their phone or browser. Same answer as the question in The Master Keys
+// (state.passwordManager); it never leaves this browser.
+export function passwordPlaceAsk(state, mission) {
+  if (!mission?.stepsByManager) return '';
+  const chosen = PASSWORD_MANAGERS.find((pm) => pm.value === state?.passwordManager);
+  if (chosen) {
+    return `<div class="walk-gear-set" data-pm-set>Showing steps for <strong>${chosen.text}</strong>. <button class="walk-link" data-action="set-password-manager" data-pm="">Change</button></div>`;
+  }
+  const chips = PASSWORD_MANAGERS.map((pm) => `<button class="walk-gear-chip" data-action="set-password-manager" data-pm="${pm.value}">${pm.text}</button>`).join('');
+  return `
+    <div class="walk-gear" data-pm-ask>
+      <div class="walk-gear-q">Where are your passwords saved? <span>Then you only see your steps.</span></div>
+      <div class="walk-gear-chips">${chips}</div>
+    </div>`;
+}

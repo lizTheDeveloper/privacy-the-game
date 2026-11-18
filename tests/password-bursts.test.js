@@ -134,7 +134,7 @@ describe('11a and 12a: the report asks how many (local only)', () => {
 
   it('asks the number first, then throwaways, then the accounts here', () => {
     expect(PM_REPORT.debriefQs.map((q) => q.id)).toEqual(['flagged_count', 'throwaway_count', 'flagged']);
-    expect(PM_REPORT.debriefQs[0].label).toBe('How many passwords did it flag?');
+    expect(PM_REPORT.debriefQs[0].label).toBe('How many passwords did it say are compromised, leaked or reused?');
     expect(visibleQuestions(PM_REPORT, { flagged_count: 'skip' }).map((q) => q.id)).toEqual(['flagged_count']);
     expect(visibleQuestions(PM_REPORT, { flagged_count: '78' }).map((q) => q.id)).toEqual(['flagged_count', 'throwaway_count', 'flagged']);
   });

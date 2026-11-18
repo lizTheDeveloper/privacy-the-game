@@ -114,7 +114,7 @@ describe('legacy missions are hidden but keep counting', () => {
 
   it('an old save keeps its district %, integrity, gates and buildings', () => {
     // A save from before Phase 2: every core mission of the time done.
-    const s0 = allOn();
+    const s0 = { ...allOn(), createdAt: '2026-09-01T00:00:00.000Z' };
     let old = s0;
     for (const m of MISSIONS) {
       if (m.replaces || m.phase === 'survey' || m.optional || m.unlock) continue;

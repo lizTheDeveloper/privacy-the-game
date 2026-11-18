@@ -12,7 +12,8 @@ import { createInitialState, updateMission } from '../src/state.js';
 // Core missions every player has. The password-manager report is core too,
 // but only for players who say they use a manager (mission.unlock).
 function coreCh1() {
-  return getMissionsForDistrict('master-keys').filter((m) => isCoreMission(m) && !m.unlock);
+  // The password check (unlock 'password-check') is core for every new save.
+  return getMissionsForDistrict('master-keys').filter((m) => isCoreMission(m) && (!m.unlock || m.unlock.type === 'password-check'));
 }
 
 function completeAll(state, ids) {
@@ -25,7 +26,7 @@ describe('MUL-38 Chapter 1 core/bonus split', () => {
   it('district progress total counts only core missions', () => {
     const progress = calcDistrictProgress(createInitialState(), 'master-keys');
     expect(progress.total).toBe(coreCh1().length);
-    expect(progress.total).toBe(27);
+    expect(progress.total).toBe(28);
     expect(progress.bonusTotal).toBe(22);
   });
 
@@ -55,7 +56,7 @@ describe('MUL-38 Chapter 1 core/bonus split', () => {
 
   it('city map advertises the core count, not 49', () => {
     const html = renderCityMap(createInitialState());
-    expect(html).toContain('0/27 MISSIONS');
+    expect(html).toContain('0/28 MISSIONS');
     expect(html).not.toContain('0/49 MISSIONS');
   });
 

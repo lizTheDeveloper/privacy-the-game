@@ -456,7 +456,7 @@ function renderPasswordManagerQuestion(state) {
   const line = chosen === 'none' ? PASSWORD_DIALOGUE.noManager : chosen ? PASSWORD_DIALOGUE.hasManager : '';
   return `
     <div class="panel" style="padding: 14px; margin: 16px 0 8px;">
-      <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 12px;">DO YOU USE A PASSWORD MANAGER?</div>
+      <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 12px;">WHERE ARE YOUR PASSWORDS SAVED?</div>
       <div style="display: flex; flex-wrap: wrap; gap: 6px;">${chips}</div>
       ${line ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin-top: 14px;">
         <img src="assets/characters/scout_0.png" alt="" style="width: 32px; height: 32px; flex-shrink: 0;">

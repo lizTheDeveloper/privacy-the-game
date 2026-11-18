@@ -66,7 +66,7 @@ describe('fix 3 and 4: the no-reset briefing', () => {
 
 describe('fix 5: bonus missions that unlock later never lower integrity', () => {
   function oldSave() {
-    let s = s0;
+    let s = { ...s0, createdAt: '2026-09-01T00:00:00.000Z' };
     // An old save: no manager answer, so no password-manager report.
     for (const m of getMissionsForDistrict('master-keys').filter(isCoreMission)) {
       if (m.unlock) continue;
@@ -124,13 +124,17 @@ describe('fix 7: Enter and Space activate role="button" actions', () => {
   });
 });
 
-describe('fix 9 (Liz): the password manager report is core for players with a manager', () => {
+describe('fix 9 (Liz): the password check is core (for an old save, only with a manager)', () => {
   const PM = 'password_manager-recon-report';
   const withPm = { ...s0, passwordManager: '1password' };
+  const old = { ...s0, createdAt: '2026-09-01T00:00:00.000Z' };
 
-  it('counts toward Master Keys only with a manager', () => {
-    expect(calcDistrictProgress(s0, 'master-keys').total).toBe(27);
-    expect(calcDistrictProgress({ ...s0, passwordManager: 'none' }, 'master-keys').total).toBe(27);
+  it('counts toward Master Keys for a new save; an old save only with a manager', () => {
+    expect(calcDistrictProgress(s0, 'master-keys').total).toBe(28);
+    expect(calcDistrictProgress({ ...s0, passwordManager: 'none' }, 'master-keys').total).toBe(28);
+    expect(calcDistrictProgress(old, 'master-keys').total).toBe(27);
+    expect(calcDistrictProgress({ ...old, passwordManager: 'none' }, 'master-keys').total).toBe(27);
+    expect(calcDistrictProgress({ ...old, passwordManager: '1password' }, 'master-keys').total).toBe(28);
     expect(calcDistrictProgress(withPm, 'master-keys').total).toBe(28);
     const done = set(withPm, PM, { status: 'completed', action: 'none-flagged', flagged: ['none'] });
     expect(calcDistrictProgress(done, 'master-keys').completed).toBe(1);
@@ -148,7 +152,7 @@ describe('fix 9 (Liz): the password manager report is core for players with a ma
   it('briefing says plainly that its flags decide the resets', () => {
     // On a phone the briefing is slides, so the text is read with the markup set aside.
     expect(renderBriefing(withPm, PM).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')).toContain(
-      'Your password manager can see things we can’t — which passwords leaked and which you’ve reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
+      'Their security report gives you a number: how many of your saved passwords leaked, and how many you reused. Whatever it flags, we change. If it doesn’t flag a password, we won’t ask you to change it, though a clean result isn’t proof nothing leaked.',
     );
     // Ruling (round 6): a clean report isn't proof, so the debrief says so.
     expect(renderDebrief(withPm, PM)).toContain('Whatever it flags gets a new password. A clean result isn’t proof of anything, just no known problem.');

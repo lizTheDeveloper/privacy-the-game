@@ -1,3 +1,4 @@
+import { markMissionStarted } from '../src/state.js';
 import { describe, it, expect } from 'vitest';
 import { renderDebrief } from '../src/screens/debrief.js';
 import { renderBriefing } from '../src/screens/briefing.js';
@@ -181,10 +182,10 @@ describe('briefing: no reset needed', () => {
 describe('district screens', () => {
   it('the Master Keys survey asks about a password manager', () => {
     const html = renderDistrict(s0, 'master-keys', 'survey');
-    expect(html).toContain('DO YOU USE A PASSWORD MANAGER?');
+    expect(html).toContain('WHERE ARE YOUR PASSWORDS SAVED?');
     expect(html.match(/data-action="set-password-manager"/g)).toHaveLength(11);
     expect(html).not.toContain(PASSWORD_DIALOGUE.noManager);
-    expect(renderDistrict(s0, 'vault', 'survey')).not.toContain('PASSWORD MANAGER?');
+    expect(renderDistrict(s0, 'vault', 'survey')).not.toContain('PASSWORDS SAVED?');
   });
 
   it('marks the chosen manager; no manager gets Scout’s one-line nudge', () => {
@@ -193,10 +194,21 @@ describe('district screens', () => {
     expect(html).toContain(PASSWORD_DIALOGUE.noManager);
   });
 
-  it('the report mission is in recon only for players with a manager', () => {
-    expect(renderDistrict(s0, 'master-keys', 'recon')).not.toContain('password_manager-recon-report');
-    expect(renderDistrict({ ...s0, passwordManager: 'none' }, 'master-keys', 'recon')).not.toContain('password_manager-recon-report');
-    expect(renderDistrict({ ...s0, passwordManager: 'lastpass' }, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+  it('the password check is in recon for every new save; an old save sees it only with a manager', () => {
+    expect(renderDistrict(s0, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+    expect(renderDistrict({ ...s0, passwordManager: 'none' }, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+    const old = { ...s0, createdAt: '2026-09-01T00:00:00.000Z' };
+    expect(renderDistrict(old, 'master-keys', 'recon')).not.toContain('password_manager-recon-report');
+    expect(renderDistrict({ ...old, passwordManager: 'lastpass' }, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+  });
+
+  it('the password check asks where passwords are saved, on the mission itself', () => {
+    const ask = renderBriefing(markMissionStarted(s0, 'password_manager-recon-report'), 'password_manager-recon-report');
+    expect(ask).toContain('Where are your passwords saved?');
+    expect(ask.match(/data-action="set-password-manager"/g)).toHaveLength(11);
+    const set1 = renderBriefing(markMissionStarted({ ...s0, passwordManager: 'apple' }, 'password_manager-recon-report'), 'password_manager-recon-report');
+    expect(set1).toContain('Showing steps for <strong>iPhone, iPad or Mac (Apple Passwords)</strong>');
+    expect(set1).toContain('data-pm=""');
   });
 
   it('fortify list: "no reset needed" before and after GOT IT', () => {
@@ -235,6 +247,7 @@ describe('city map next mission', () => {
     for (const m of core) {
       if (m.id !== 'gmail-fortify-password' && m !== leftOpen) s = set(s, m.id, { status: 'completed' });
     }
+    s = set(s, 'password_manager-recon-report', { status: 'completed', flagged: ['none'] });
     s = clean(s);
     s = recordNotNeeded(s, 'gmail-fortify-password');
     const html = renderCityMap(s, { collective: { status: 'idle' }, whoami: { status: 'idle' } });

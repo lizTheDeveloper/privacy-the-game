@@ -26,7 +26,7 @@ describe('answer on the step', () => {
   it('Gmail breach step 3 of 4 shows "what did you find" with every report answer', () => {
     expect(GMAIL.steps[2].ask).toBe('finding');
     const html = renderBriefing(onStep3(), GMAIL.id);
-    expect(html).toContain('Step 3 of 4');
+    expect(html).toContain('Step 3 of 3');
     expect(html).toContain('data-step-ask="finding"');
     // Few words: Yes / No / Couldn't check first; "How many?" waits for a Yes.
     expect(html).toContain('Were you in any leaks?');
@@ -82,9 +82,7 @@ describe('answer on the step', () => {
     expect(missing).toEqual([]);
   });
 
-  it('the shared Pwned Passwords step is never given a question', () => {
-    const shared = MISSIONS.flatMap((m) => m.steps).filter((st) => /^Separately, check this account/.test(st.text));
-    expect(shared.length).toBeGreaterThan(10);
-    expect(shared.filter((st) => st.ask)).toEqual([]);
+  it('no breach check has a Pwned Passwords step any more (the password check is its own mission)', () => {
+    expect(MISSIONS.flatMap((m) => m.steps).filter((st) => /^Separately, check this account/.test(st.text))).toEqual([]);
   });
 });

@@ -298,7 +298,7 @@ export const MISSION_LEADS = {
   "osint-sieve-social-graph": "See what your friends and followers give away about you.",
   "osint-sieve-cross-platform": "Check if a stranger can tie your accounts on other sites to you.",
   "osint-sieve-breadcrumbs": "Find the public lists and settings that quietly show your name and town.",
-  "password_manager-recon-report": "See which passwords your password manager says you should change.",
+  "password_manager-recon-report": "Your phone or browser can tell you how many of your saved passwords leaked.",
   "password_manager-fortify-burst": "Change the next three passwords your password manager flagged.",
   "gmail-fortify-2fa-upgrade": "Swap text or email codes on your Gmail for an app or passkey.",
   "outlook-fortify-2fa-upgrade": "Swap text or email codes on your Outlook for an app or passkey.",

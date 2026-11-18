@@ -16,7 +16,7 @@ import { renderBankNotesPanel } from '../components/bank-notes.js';
 import { missionUsesBankNotes } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
 import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
-import { walkStepRow, walkProgress, gearAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
+import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { readingOffer, OFFER_LINES } from '../utils/reading-signals.js';
@@ -140,9 +140,9 @@ export function renderBriefing(state, missionId, opts = {}) {
 
   // How much to read (Scout asks the first time), and Read it to me.
   const sayIntel = plainText(`${intel} ${scoutLine}`);
-  const intelTools = readingTools(state, level, sayIntel);
+  const intelTools = '';
   // The device questions and how far along the steps are.
-  const gearHtml = noReset ? '' : gearAsk(state, gearQuestions(allSteps));
+  const gearHtml = noReset ? '' : passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps));
   const progressHtml = !noReset && missionStepList.length > 1 ? walkProgress(progress) : '';
   const movePanelTop = `${gearHtml}${progressHtml}`;
 
@@ -188,7 +188,7 @@ ${actions}`;
 
   return `
   <div class="brief${slides ? ' brief--deck' : ''} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
-    ${renderHud(state)}
+    ${renderHud(state, { tools: topTools(state, level, sayIntel) })}
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; min-width: 0; padding: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 20px;">
@@ -414,27 +414,28 @@ function whyHtml(why) {
   return `<details class="brief-why" data-why><summary>Why it matters</summary><div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.7;">${why}</div></details>`;
 }
 
-// How much to read, and Read it to me. The first time, Scout asks; after that it is a quiet
-// switch. Nothing about the choice leaves this browser (utils/reading.js).
-function readingTools(state, level, say, playing = isPlaying()) {
+// How much to read, Read it to me and Focus music: in the top bar on every mission screen (Liz
+// 2026-11-17). The first time, Scout asks how much to read just under them; after that it is a
+// quiet switch. Nothing about the choice leaves this browser (utils/reading.js).
+// say: what Read it to me reads (the intel on a briefing, the step on a step screen).
+function topTools(state, level, say) {
+  const playing = isPlaying();
   const offer = readingOffer(state);
   const ask = offer
     ? `<div class="read-ask read-offer" data-read-offer="${offer}"><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> <span>${OFFER_LINES[offer].line}</span>
         <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
     : readLevelChosen(state)
     ? ''
-    : '<div class="read-ask" data-read-ask><img src="assets/characters/scout_0.png" alt="" width="24" height="24"> How much do you want to read? You can change this any time.</div>';
+    : '<div class="read-ask" data-read-ask>How much do you want to read? Change it here any time.</div>';
   const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
-  const attr = String(say).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  return `
-          <div class="read-tools" data-read-tools>
-            ${ask}
-            <div class="read-row">
-              <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
-              <button class="walk-link" data-action="read-aloud" data-say="${attr}" aria-label="Read the briefing out loud">&#128266; Read it to me</button>
-              <button class="walk-link" data-action="focus-music" aria-pressed="${playing}">&#9835; Focus music${playing ? ' (on)' : ''}</button>
-            </div>
-          </div>`;
+  return `<div class="read-tools top-tools" data-read-tools>
+        <div class="top-tools-row">
+          <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
+          <button class="top-tool" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read it to me"><span aria-hidden="true">&#128266;</span> <span class="tt-long">Read it to me</span><span class="tt-short" aria-hidden="true">Read</span></button>
+          <button class="top-tool" data-action="focus-music" aria-pressed="${playing}" aria-label="Focus music${playing ? ' (on)' : ''}"><span aria-hidden="true">&#9835;</span> <span class="tt-long">Focus music${playing ? ' (on)' : ''}</span><span class="tt-short" aria-hidden="true">Music</span></button>
+        </div>
+        ${ask}
+      </div>`;
 }
 
 // ---- The compact briefing and step mode --------------------------------------------------
@@ -442,10 +443,10 @@ function readingTools(state, level, say, playing = isPlaying()) {
 const attrEsc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'the page'; } };
 
-function pageShell(state, { districtId, district, targetTab, mission }, body, cls = '', top = '') {
+function pageShell(state, { districtId, district, targetTab, mission }, body, cls = '', top = '', tools = '') {
   return `
   <div class="brief brief-focus ${cls} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
-    ${renderHud(state)}
+    ${renderHud(state, { tools })}
     <div class="focus-col">
       ${top || `<div class="focus-crumb">
         <a href="#/district/${districtId}${targetTab}">${district?.name || districtId}</a>
@@ -464,29 +465,6 @@ function focusTitle(titleTop, titleBottom) {
 // Scout's line, small, beside the sprite.
 function scoutBubble(line) {
   return `<div class="focus-scout"><img src="assets/characters/scout_0.png" data-scout="briefing" alt="Scout" width="48" height="48"><div class="focus-scout-line">${line}</div></div>`;
-}
-
-// Reading level, Read it to me and Focus music, quietly at the bottom.
-function readingBar(state, level, say, { noRead = false } = {}) {
-  const playing = isPlaying();
-  const buttons = READ_LEVELS.map((l) => `<button class="read-level${l === level ? ' is-on' : ''}" data-action="read-level" data-level="${l}" aria-pressed="${l === level}">${READ_LEVEL_LABELS[l]}</button>`).join('');
-  const offer = readingOffer(state);
-  const offerHtml = offer
-    ? `<div class="read-ask read-offer" data-read-offer="${offer}"><span>${OFFER_LINES[offer].line}</span>
-        <span class="read-offer-buttons"><button class="btn-secondary" data-action="read-offer" data-offer="${offer}" data-answer="yes">${OFFER_LINES[offer].yes}</button><button class="walk-link" data-action="read-offer" data-offer="${offer}" data-answer="no">No thanks</button></span></div>`
-    : '';
-  const ask = !offer && !readLevelChosen(state) ? '<div class="read-ask" data-read-ask>How much do you want to read? You can change this any time.</div>' : '';
-  return `
-      <div class="read-tools focus-tools" data-read-tools>
-        ${offerHtml}${ask}
-        <div class="read-row">
-          <div class="read-levels" role="group" aria-label="How much to read">${buttons}</div>
-        </div>
-        <div class="read-row">
-          ${noRead ? '' : `<button class="walk-link" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this out loud">&#128266; Read it to me</button>`}
-          <button class="walk-link" data-action="focus-music" aria-pressed="${playing}">&#9835; Focus music${playing ? ' (on)' : ''}</button>
-        </div>
-      </div>`;
 }
 
 // Simplest: the top of the screen works like a phone app's. A big Back at the top left (Liz
@@ -524,17 +502,16 @@ function compactBriefingPage(p) {
       ${many ? `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>
       <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
         ${canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
         <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
       </div>
-      ${readingBar(state, level, plainText(`${intel} ${scoutLine}`))}
       ${renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
-  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }));
+  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, plainText(`${intel} ${scoutLine}`)));
 }
 
 // "Settings → Health → Data Access" as chips when it is a plain path, else the words.
@@ -669,7 +646,6 @@ function stepModePage(p) {
         ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003;</button>` : ''}
         <div class="simple-pills">
           <button class="simple-pill" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}"><span aria-hidden="true">?</span> Help</button>
-          <button class="simple-pill" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this step out loud"><span aria-hidden="true">&#128266;</span> Read it to me</button>
         </div>${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}
       </div>`;
   const list = missionStepList.map((st, i) => {
@@ -683,18 +659,18 @@ function stepModePage(p) {
   const top = simpleTop(back, allDone ? 'All done' : `Step ${current + 1} of ${total}`);
   if (simple) {
     const simpleBody = `
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
       ${card}
       ${p.extras}
       ${bankPanelHtml}
       ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}
-      ${readingBar(state, level, say, { noRead: true })}`;
-    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top);
+`;
+    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top, topTools(state, level, say));
   }
   const body = `
       <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
-      ${gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
       ${card}
       ${p.extras}
@@ -704,6 +680,6 @@ function stepModePage(p) {
         ${allDone ? '' : `<a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a>`}
         <button class="walk-link" data-action="show-briefing" data-mission="${mission.id}">Read the briefing again</button>
       </div>
-      ${readingBar(state, level, say, { noRead: true })}`;
-  return pageShell(state, p, body, 'brief-steps-mode', top);
+`;
+  return pageShell(state, p, body, 'brief-steps-mode', top, topTools(state, level, say));
 }

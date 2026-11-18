@@ -179,11 +179,12 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
     for (const m of [...core, ...vaultCore]) {
       expect(m.id).not.toMatch(/-fortify-2fa-(upgrade|backup)$/);
     }
-    expect(calcDistrictProgress(createInitialState(), 'master-keys').total).toBe(27);
+    expect(calcDistrictProgress({ ...createInitialState(), createdAt: '2026-09-01T00:00:00.000Z' }, 'master-keys').total).toBe(27);
+    expect(calcDistrictProgress(createInitialState(), 'master-keys').total).toBe(28); // + the password check
   });
 
   it('an old save with the core path done stays at 100%', () => {
-    let s = createInitialState();
+    let s = { ...createInitialState(), createdAt: '2026-09-01T00:00:00.000Z' };
     for (const m of getMissionsForDistrict('master-keys').filter(isCoreMission)) {
       if (m.unlock) continue; // the password-manager report: not in an old save
       s = updateMission(s, m.id, { status: 'completed', action: m.id.endsWith('2fa') ? 'enabled-2fa' : undefined });
@@ -195,8 +196,8 @@ describe('bonus missions: upgrade from codes, backup way in', () => {
 describe('password manager recon', () => {
   const pm = byId('password_manager-recon-report');
 
-  it('is a core Master Keys recon mission (in play only with a manager)', () => {
-    expect(pm.title).toBe('Check your password manager’s security report');
+  it('is the core Master Keys password check', () => {
+    expect(pm.title).toBe('Check the passwords saved on your phone or computer');
     expect(pm.optional).toBeFalsy();
     expect(isCoreMission(pm)).toBe(true);
     expect(pm.phase).toBe('recon');
@@ -205,17 +206,31 @@ describe('password manager recon', () => {
   });
 
   it('lists the managers players can pick', () => {
+    // The phone and the browser first (Liz 2026-11-17).
     expect(PASSWORD_MANAGERS.map((p) => p.value)).toEqual(
-      ['apple', 'google', '1password', 'bitwarden', 'proton', 'dashlane', 'lastpass', 'firefox', 'edge', 'other', 'none'],
+      ['apple', 'google', 'edge', 'firefox', '1password', 'bitwarden', 'proton', 'dashlane', 'lastpass', 'other', 'none'],
     );
-    expect(PASSWORD_MANAGERS.at(-1).text).toBe('No, I don’t use one');
+    expect(PASSWORD_MANAGERS[0].text).toMatch(/iPhone/);
+    expect(PASSWORD_MANAGERS.at(-1).text).toBe('I don’t save passwords');
   });
 
-  it('appears only for players who use a password manager', () => {
+  it('is for every new save; an old save keeps the old rule (only with a manager)', () => {
     const s = createInitialState();
-    expect(isMissionInPlay(s, pm)).toBe(false);
-    expect(isMissionInPlay({ ...s, passwordManager: 'none' }, pm)).toBe(false);
-    expect(isMissionInPlay({ ...s, passwordManager: 'bitwarden' }, pm)).toBe(true);
+    expect(isMissionInPlay(s, pm)).toBe(true);
+    expect(isMissionInPlay({ ...s, passwordManager: 'none' }, pm)).toBe(true);
+    const old = { ...s, createdAt: '2026-09-01T00:00:00.000Z' };
+    expect(isMissionInPlay(old, pm)).toBe(false);
+    expect(isMissionInPlay({ ...old, passwordManager: 'none' }, pm)).toBe(false);
+    expect(isMissionInPlay({ ...old, passwordManager: 'bitwarden' }, pm)).toBe(true);
+    expect(isMissionInPlay({ ...old, missions: { [pm.id]: { status: 'completed' } } }, pm)).toBe(true);
+  });
+
+  it('no saved passwords: look on the phone first, then Pwned Passwords with its safety note open', () => {
+    const steps = pm.stepsByManager.none;
+    expect(steps[0].text).toMatch(/^Look on your phone first/);
+    expect(steps[1].url).toBe('https://haveibeenpwned.com/Passwords');
+    expect(steps[1].note[0].open).toBe(true);
+    expect(steps[1].text).not.toMatch(/same website/);
   });
 
   it.each([
