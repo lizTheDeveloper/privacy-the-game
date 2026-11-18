@@ -801,3 +801,25 @@ img { image-rendering: pixelated; }
 .simple-open { overflow-wrap: normal; }
 .simple-host { display: block; margin-top: 6px; font-family: var(--font-body, system-ui, sans-serif); font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; opacity: 0.75; }
 .simple-again { align-self: flex-start; text-decoration: none; }
+
+/* ---------- District pages on phones (Liz 2026-11-17): the task first ----------
+   The building grid lists the same accounts as the survey and the mission list, and it
+   pushed the tabs and the task below the first screen. On a phone it comes after them. */
+@media (max-width: 768px) {
+  .district-page { display: flex; flex-direction: column; }
+  .district-page > .district-buildings { order: 10; border-top: 1px solid rgba(0,229,255,0.08); }
+}
+
+/* ---------- The button that finishes a screen stays on screen (Liz 2026-11-17) ----------
+   SUBMIT REPORT and CONTINUE sat below the first screen on a phone. They stick to the bottom
+   edge while the answers above them scroll. (A parent with overflow: hidden would stop this;
+   the milestone screen clips with overflow: clip instead.) */
+.pin-bottom { position: relative; }
+@media (max-width: 768px) {
+  .pin-bottom { position: sticky; bottom: 0; z-index: 20; padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(13,16,24,0) 0%, rgba(13,16,24,0.96) 22%); }
+}
+
+/* Stats shows Integrity, Exposure and Streak as its big dials, so the top bar doesn't repeat them. */
+.stats-page .hud-stat { display: none !important; }
+/* "LIBERATED" at 56px is wider than a phone; it was cut to "LIBERATE". */
+@media (max-width: 480px) { .milestone-word { font-size: 38px !important; letter-spacing: 2px !important; } }

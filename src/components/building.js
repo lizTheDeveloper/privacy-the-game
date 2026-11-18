@@ -5,7 +5,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 // A tappable building wears an INSIDE badge on top (pulsing while isNew, so
 // until its first visit) and, when sealed/controllable are given, a lock
 // count under its name. A compact one is a small tile: no badge, no pulse.
-export function renderBuilding(accountId, buildingState, size = 64, { href, glow = 0, sealed, controllable, isNew = false, compact = false } = {}) {
+export function renderBuilding(accountId, buildingState, size = 64, { href, glow = 0, sealed, controllable, isNew = false, compact = false, showName = true } = {}) {
   const account = ACCOUNTS[accountId];
   const scarred = buildingState === 'liberated-scarred';
   const liberated = buildingState === 'liberated' || scarred;
@@ -37,7 +37,7 @@ export function renderBuilding(accountId, buildingState, size = 64, { href, glow
   <div style="position: relative; display: inline-block; text-align: center;">
     <img src="${src}" style="display: block; margin: 0 auto; width: ${size}px; height: auto; filter: ${filter};">
     ${scar}
-    <div style="font-family: var(--font-display); font-size: 8px; letter-spacing: 1px; text-align: center; color: rgba(237,239,243,0.7); margin-top: 4px;">${account?.name || accountId}</div>
+    ${showName ? `<div style="font-family: var(--font-display); font-size: 8px; letter-spacing: 1px; text-align: center; color: rgba(237,239,243,0.7); margin-top: 4px;">${account?.name || accountId}</div>` : ''}
   </div>`;
   if (!href) return building;
   const name = account?.name || accountId;

@@ -516,7 +516,6 @@ function compactBriefingPage(p) {
         : `<button class="btn-primary focus-go" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`;
   const simple = level === 'simplest';
   const body = `
-      ${simple ? '' : missionTrail(started ? 'steps' : 'brief', progress)}
       ${simple ? focusTitle('', titleBottom) : focusTitle(titleTop, titleBottom)}
       <p class="focus-lead" data-intel>${intel}</p>
       ${why ? `<details class="brief-why" data-why><summary>Why it matters</summary><div class="focus-why">${why}</div></details>` : ''}
@@ -534,9 +533,8 @@ function compactBriefingPage(p) {
       </div>
       ${readingBar(state, level, plainText(`${intel} ${scoutLine}`))}
       ${renderLoreSection(loreData)}`;
-  return simple
-    ? pageShell(state, p, body, 'brief-simple', simpleTop({ href: `#/district/${districtId}${targetTab}` }))
-    : pageShell(state, p, body);
+  // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
+  return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }));
 }
 
 // "Settings → Health → Data Access" as chips when it is a plain path, else the words.
@@ -620,14 +618,20 @@ function stepCardText(mission, step, simple = null) {
   const open = (cls, inner) => `<a class="${cls}" href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}">${inner}</a>`;
   // Simplest names the site underneath in plain lower case, as the phone's address bar shows it.
   const link = !step.url ? ''
-    : !simple ? open('btn-secondary focus-open', `OPEN ${hostOf(step.url).toUpperCase()} &#8599;`)
+    : !simple ? open('btn-secondary focus-open', namesSite(step) ? 'OPEN &#8599;' : `OPEN ${hostOf(step.url).toUpperCase()} &#8599;`)
     : big ? open('btn-primary focus-go focus-open simple-open', `OPEN THE WEBSITE &#8599;<span class="simple-host">${hostOf(step.url)}</span>`)
     : open('simple-pill simple-again', '<span aria-hidden="true">&#8599;</span> Open the website again');
   const where = simple?.where && !step.url
     ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>`
     : '';
-  const notes = (step.note || []).map((n) => `<details class="focus-note"><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
+  const notes = (step.note || []).map((n) => `<details class="focus-note"${n.open ? ' open' : ''}><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
   return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${link}${notes}`;
+}
+
+// "Open haveibeenpwned.com": the step's words already name the site its button opens.
+function namesSite(step) {
+  const t = plainText(step.text).toLowerCase();
+  return /^open\b/.test(t) && t.includes(hostOf(step.url).toLowerCase());
 }
 
 // The site an earlier step opened, for a Simplest step without a link of its own. Only a
@@ -659,28 +663,25 @@ function stepModePage(p) {
       </div>`
     : `
       <div class="focus-card" data-step-card data-step-key="${key}">
-        ${simple ? '' : `<div class="focus-card-head">STEP ${current + 1} OF ${total}</div>`}
         ${stepCardText(mission, step, simpleCard)}
         ${accountSite(mission, missionStepList, p.goUrl)}
         ${showDone ? stepAsk(state, mission, step) : ''}
         ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}">DONE &#10003;</button>` : ''}
-        ${simple ? `<div class="simple-pills">
+        <div class="simple-pills">
           <button class="simple-pill" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}"><span aria-hidden="true">?</span> Help</button>
           <button class="simple-pill" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this step out loud"><span aria-hidden="true">&#128266;</span> Read it to me</button>
-        </div>` : `<div class="focus-row">
-          ${progress.handled ? `<button class="walk-link" data-action="step-back" data-mission="${mission.id}">&#8592; Back</button>` : ''}
-          <button class="walk-link" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}">Help</button>
-          <button class="walk-link" data-action="read-aloud" data-say="${attrEsc(say)}" aria-label="Read this step out loud">&#128266; Read it to me</button>
-        </div>`}${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}
+        </div>${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}
       </div>`;
   const list = missionStepList.map((st, i) => {
     const m = marks[stepKeyOf(st)];
     const cls = m === 'done' ? 'is-done' : m === 'skipped' ? 'is-skipped' : i === current ? 'is-current' : '';
     return `<li class="${cls}"><button class="walk-check" data-action="step-toggle" data-mission="${mission.id}" data-step="${stepKeyOf(st)}" aria-pressed="${m === 'done'}" aria-label="${m === 'done' ? `Step ${i + 1} done. Tap to undo.` : `Mark step ${i + 1} done`}">${m === 'done' ? '&#10003;' : m === 'skipped' ? '&#8631;' : i + 1}</button><span>${plainText(st.text)}${st.url ? ` <a href="${st.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}">${hostOf(st.url)} &#8599;</a>` : ''}</span></li>`;
   }).join('');
+  // Back: the step before, or the briefing from the first step. "Step 2 of 4" beside it is the
+  // one place the screen counts (no trail, no count on the card or the list).
+  const back = progress.handled ? { action: 'step-back', mission: mission.id } : { action: 'show-briefing', mission: mission.id };
+  const top = simpleTop(back, allDone ? 'All done' : `Step ${current + 1} of ${total}`);
   if (simple) {
-    // Back: the step before, or the briefing from the first step.
-    const back = progress.handled ? { action: 'step-back', mission: mission.id } : { action: 'show-briefing', mission: mission.id };
     const simpleBody = `
       ${gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
@@ -688,21 +689,20 @@ function stepModePage(p) {
       ${p.extras}
       ${bankPanelHtml}
       ${readingBar(state, level, say, { noRead: true })}`;
-    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', simpleTop(back, allDone ? 'All done' : `Step ${current + 1} of ${total}`));
+    return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top);
   }
   const body = `
-      ${missionTrail('steps', progress)}
       <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
       ${gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true })}
       ${card}
       ${p.extras}
       ${bankPanelHtml}
-      <details class="focus-steps-peek"><summary>All steps (${progress.handled}/${total})</summary><ol class="focus-all">${list}</ol></details>
+      <details class="focus-steps-peek"><summary>All steps</summary><ol class="focus-all">${list}</ol></details>
       <div class="focus-actions focus-actions--quiet">
         ${allDone ? '' : `<a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a>`}
         <button class="walk-link" data-action="show-briefing" data-mission="${mission.id}">Read the briefing again</button>
       </div>
-      ${readingBar(state, level, say)}`;
-  return pageShell(state, p, body, 'brief-steps-mode');
+      ${readingBar(state, level, say, { noRead: true })}`;
+  return pageShell(state, p, body, 'brief-steps-mode', top);
 }
