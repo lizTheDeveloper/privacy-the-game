@@ -581,6 +581,17 @@ function renderFacilitySection(state, facilityId, district) {
 
 // Scout's reaction to the report just filed (app.js passes it on the landing
 // visit only): the same line and feeling the debrief shows when reopened.
+// After "I don't have Gmail" on a Simple briefing: Scout says it's off the list, and one tap
+// puts it back (the same switch as the list below).
+export function notMineBlock(state, id) {
+  const account = ACCOUNTS[id];
+  if (!account || state.accounts?.[id]?.enabled !== false) return '';
+  return `<div class="not-mine-done" data-not-mine>
+    ${renderScout(`Got it. I took ${esc(account.name)} off your list.`, { feeling: 'happy' })}
+    <button class="btn-secondary" data-action="toggle-account" data-account="${id}">Put ${esc(account.name)} back</button>
+  </div>`;
+}
+
 function reactionBlock(reaction) {
   if (!reaction) return '';
   return `<div data-scout-reaction style="padding: 16px 24px 0;">
@@ -626,7 +637,7 @@ function renderOptOutLink(district) {
   </div>`;
 }
 
-function renderFacilityDistrict(state, district, reaction) {
+function renderFacilityDistrict(state, district, reaction, notMine) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictProgress(state, district.id);
 
@@ -643,6 +654,7 @@ function renderFacilityDistrict(state, district, reaction) {
   <div class="scanlines district-page">
     ${renderHud(state)}
     ${reactionBlock(reaction)}
+    ${notMineBlock(state, notMine)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
@@ -681,12 +693,12 @@ function renderFacilityDistrict(state, district, reaction) {
   </div>`;
 }
 
-export function renderDistrict(state, districtId, activeTab, { reaction = null } = {}) {
+export function renderDistrict(state, districtId, activeTab, { reaction = null, notMine = null } = {}) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
 
   if (district.type === 'facility') {
-    return renderFacilityDistrict(state, district, reaction);
+    return renderFacilityDistrict(state, district, reaction, notMine);
   }
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
@@ -744,6 +756,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null }
   <div class="scanlines district-page">
     ${renderHud(state)}
     ${reactionBlock(reaction)}
+    ${notMineBlock(state, notMine)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">

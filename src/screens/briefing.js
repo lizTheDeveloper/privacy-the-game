@@ -21,6 +21,7 @@ import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pat
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
+import { notMineLabel } from '../data/not-mine.js';
 
 function notFound(state) {
   return `
@@ -481,12 +482,21 @@ function compactBriefingPage(p) {
       ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
+        ${simple ? notMineButton(state, mission, `#/district/${districtId}${targetTab}`) : ''}
         ${canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
         <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
       </div>
       ${renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
   return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine]));
+}
+
+// Simple: "I don't have Gmail", in big words on a quiet button (Liz 2026-11-18: big words, but
+// the secondary button so it isn't as big and blue as START).
+// It turns the account off and goes back to the district (href), where Scout says so.
+export function notMineButton(state, mission, href) {
+  const label = state.accounts?.[mission.accountId]?.enabled ? notMineLabel(mission.accountId) : null;
+  return label ? `<button class="btn-secondary not-mine" data-action="not-mine" data-account="${mission.accountId}" data-href="${href}">${esc(label)}</button>` : '';
 }
 
 // "Settings → Health → Data Access" as chips when it is a plain path, else the words.

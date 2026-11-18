@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.23.0 (2026-11-18): "I don't have Gmail" on the Simple briefing
+
+Liz: "there's no button that says I don't have Gmail … use I don't have Gmail as really big words, but use the secondary button so that it's not as big and blue."
+
+- **The Simple briefing has a way out** for something the player doesn't have: "I don't have Gmail", "I don't use Instagram", "I don't have a bank account". Big words, on the quiet secondary button under START.
+- It turns that account off (the same switch as the district's list) and goes back to the district, where Scout says "Got it. I took Gmail off your list." with a **Put Gmail back** button.
+- Shown for the accounts a person has or uses (email, money, social, cloud, shopping, AI, smart devices). Not for the Capitol's government accounts (worth making before a thief does), cars (only listed because the player added one), or the topic districts.
+- The AI missions name what they're really about: "I don't have Facebook or Instagram" for Meta AI, "I don't have LinkedIn" for LinkedIn AI.
+
 ## 7.22.1 (2026-11-17): Scout only fetches his own lines
 
 - The game now checks a line against Scout's list (`src/data/voice-ids.txt`, loaded the first time someone taps Read it to me) before asking for a recording. A line with anything of the player's in it, such as their own numbers or a mission they made, is read by the browser's voice and never leaves the browser, not even as a hash. (7.22.0 asked the server for every line; the server never voiced unlisted ones, but the request itself carried the hash.)
