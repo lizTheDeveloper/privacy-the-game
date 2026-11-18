@@ -2,6 +2,10 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.22.1 (2026-11-17): Scout only fetches his own lines
+
+- The game now checks a line against Scout's list (`src/data/voice-ids.txt`, loaded the first time someone taps Read it to me) before asking for a recording. A line with anything of the player's in it, such as their own numbers or a mission they made, is read by the browser's voice and never leaves the browser, not even as a hash. (7.22.0 asked the server for every line; the server never voiced unlisted ones, but the request itself carried the hash.)
+
 ## 7.22.0 (2026-11-17): Scout reads it to you, in his own voice
 
 Liz: "can you also get Scout to read everything to you."

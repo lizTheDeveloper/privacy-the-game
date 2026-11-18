@@ -1,10 +1,10 @@
 // Scout's voice for "Read it to me" (Liz 2026-11-17: "get Scout to read everything to you").
 //
-// Each line the game can read has an id: a hash of its spoken text. The game asks its own
-// server for api/voice/<id>.mp3. The server only voices lines on its list, which is built from
-// the game's own words (scripts/voice-lines.mjs → collective/voice-lines.json), so nothing a
-// player typed or chose is ever sent to the voice service. Any line not on the list is read by
-// the browser's own voice instead.
+// Each line the game can read has an id: a hash of its spoken text. Scout's list is built from
+// the game's own words (scripts/voice-lines.mjs → collective/voice-lines.json for the server,
+// src/data/voice-ids.txt for the game). The game asks its server for api/voice/<id>.mp3 only
+// when the id is on that list, and the server only voices listed lines, so nothing a player typed
+// or chose is ever sent, to us or to the voice service. Other lines: the browser's own voice.
 
 import { plainText } from './readability.js';
 
@@ -26,5 +26,3 @@ export function voiceId(text) {
   }
   return h.toString(16).padStart(16, '0');
 }
-
-export const voiceUrl = (text) => `api/voice/${voiceId(text)}.mp3`;

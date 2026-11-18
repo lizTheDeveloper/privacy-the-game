@@ -46,3 +46,39 @@ describe('Scout’s recorded lines (Liz 2026-11-17)', () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe('the game only asks for a recording of a line on Scout’s list', () => {
+  it('src/data/voice-ids.txt is the list’s ids', () => {
+    const ids = readFileSync(new URL('../src/data/voice-ids.txt', import.meta.url), 'utf8').trim().split('\n');
+    expect(ids).toEqual(Object.keys(LIST));
+  });
+
+  it('a line with the player’s own words in it is never requested, not even as a hash', async () => {
+    const { speak, stopSpeaking, recordingUrl, _setVoiceIds } = await import('../src/utils/read-aloud.js');
+    const listed = 'Welcome back, agent. What did you find?';
+    const mine = 'You have 12 flagged passwords at Acme Credit Union';
+    const set = new Set(Object.keys(LIST));
+    expect(recordingUrl(listed, set)).toBe(`api/voice/${voiceId(listed)}.mp3`);
+    expect(recordingUrl(mine, set)).toBeNull();
+    // Play both: only the listed one becomes a request; the other goes to the browser's voice.
+    const requested = [];
+    const spoken = [];
+    const prev = globalThis.window;
+    globalThis.window = {
+      Audio: class { constructor(src) { requested.push(src); } play() { setTimeout(() => this.onended?.(), 0); return Promise.resolve(); } pause() {} },
+      speechSynthesis: { speak: (u) => { spoken.push(u.text); setTimeout(() => u.onend?.(), 0); }, cancel() {}, speaking: false },
+      SpeechSynthesisUtterance: class { constructor(t) { this.text = t; } },
+    };
+    try {
+      _setVoiceIds([...set]);
+      expect(speak([listed, mine])).toBe(true);
+      await new Promise((r) => setTimeout(r, 20));
+      expect(requested).toEqual([`api/voice/${voiceId(listed)}.mp3`]);
+      expect(spoken).toEqual([mine]);
+    } finally {
+      stopSpeaking();
+      _setVoiceIds(null);
+      globalThis.window = prev;
+    }
+  });
+});
