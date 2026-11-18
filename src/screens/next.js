@@ -9,22 +9,28 @@ import { esc } from './stats.js';
 import { fillBar } from '../components/fill-bar.js';
 import { confetti } from '../components/celebrate.js';
 import { missionDistrict } from '../data/missions.js';
-import { DISTRICTS } from '../data/districts.js';
-import { calcDistrictProgress } from '../utils/calc.js';
+import { calcChapterProgress } from '../utils/calc.js';
 
 // Good news gets confetti (Liz 2026-11-18: "a little bit more celebration when things are good").
 const GOOD = new Set(['happy', 'proud', 'hug']);
 
 // The district's bar, filling from where it was: security as a process, one mission at a time.
-function districtBar(state, districtId) {
-  const district = DISTRICTS.find((d) => d.id === districtId);
-  if (!district) return '';
-  const p = calcDistrictProgress(state, districtId);
-  if (!p.total) return '';
-  return `<div class="next-progress" data-next-progress>
-      <div class="fill-title">YOUR PROGRESS IN ${esc(district.name.toUpperCase())}</div>
-      ${fillBar({ key: `district:${districtId}`, done: p.completed, total: p.total, size: 'big', label: `${p.percent}% secured` })}
-      <p class="fill-caption">${p.completed >= p.total ? 'All done here. You took it back.' : 'Security is a process. Every mission fills this a little more.'}</p>
+// It counts the part of the district the player is in, not the whole district (Liz 2026-11-18:
+// "yes, make the district bar count the current chapter only"), so one mission moves it a lot.
+// Each part has its own bar key, so a new part fills from empty. filedId: the report just filed.
+function districtBar(state, districtId, filedId) {
+  const p = calcChapterProgress(state, districtId, { missionId: filedId });
+  if (!p?.total) return '';
+  const caption = !p.done
+    ? 'Security is a process. Every mission fills this a little more.'
+    : p.next
+      ? `Part ${p.chapter} done! Next: part ${p.next.chapter}, ${esc(p.next.name.toLowerCase())}.`
+      : 'All done here. You took it back.';
+  return `<div class="next-progress" data-next-progress data-chapter="${p.chapter}"${p.done ? ' data-chapter-done' : ''}>
+      <div class="fill-title">${esc(p.label)}</div>
+      <div class="fill-name">${esc(p.name)}</div>
+      ${fillBar({ key: `chapter:${districtId}:${p.chapter}`, done: p.completed, total: p.total, size: 'big', label: `${p.completed} of ${p.total} done` })}
+      <p class="fill-caption">${caption}</p>
     </div>`;
 }
 
@@ -108,7 +114,7 @@ export function renderNext(state, { filed = null, notMine = null } = {}) {
     ${renderHud(state, { nextLink: false })}
     <div class="focus-col">
       ${sent}${dropped}
-      ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '')}
+      ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '', filed?.id)}
       ${nextCard(state, up, !anyDone && !sent)}
       <p class="next-saved">Your progress is saved on this phone. You can stop and come back any time. This page will show you what's next.</p>
       <a class="focus-notnow next-city" href="#/city">See the whole city</a>

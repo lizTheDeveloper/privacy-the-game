@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.30.1 (2026-11-18): What’s next counts the part you’re in
+
+Liz: "yes, make the district bar count the current chapter only".
+
+- **The What’s next bar counts one part of the district, not all of it.** The Master Keys has 28 missions, so after the first one the bar was a sliver. Each district is now in parts of a few missions (up to 8), in the order the game hands them out: Check your accounts, then Lock them up, then Take your data back. The Master Keys is five parts (5, 5, 6, 6, 6). One mission fills a fifth of the first bar.
+- **"Part", not "chapter"**: the game already calls each district a chapter (The Master Keys is Chapter 1, The Vault is Chapter 2), so the bar says PART 1 OF 5 · THE MASTER KEYS, with the part’s name under it.
+- **Finishing a part**: the report that finishes it shows the bar full and green, with "Part 1 done! Next: part 2, check your accounts." Next time, the bar starts the next part from empty.
+- It counts the same missions as the district’s own progress: accounts you said you don’t have, bonus missions and old replaced missions are left out. The district page’s bar still shows the whole district.
+- Nothing about this is tracked or sent.
+
 ## 7.30.0 (2026-11-18): Passwords in two places are fine; your devices come first
 
 Liz: "Your passwords are in two places. This is like a huge step that we're asking them to suddenly do … migrate their passwords. So look for any place where you've asked for a hidden migration. What I want you to do is just gather signals … there might be a reason, it might be backed up … most people do this, and I'm a security person … don't ask them to do a migration right there … just say, okay, you know, we'll remember that it's two places and prompt you to check both places." And: "find out what their other devices are, if they're in simple mode, because you can help clarify what to do and where to go … if they're using an iPhone but then they have a Windows computer … it's going to make them feel like they're doing it bad … So separate information gathering and signal gathering from action taking."

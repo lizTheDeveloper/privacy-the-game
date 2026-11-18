@@ -1,5 +1,6 @@
 import { MISSIONS, getMissionsForAccount, getMissionsForDistrict } from '../data/missions.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from './mission-status.js';
+import { DISTRICTS } from '../data/districts.js';
 
 export { isMissionDone };
 
@@ -52,12 +53,18 @@ export function calcExposure(state) {
   return Math.max(0, Math.round(1000 - done * perPoint));
 }
 
+// The missions a district's progress counts: in play (not legacy, not for an
+// account the player doesn't have) and core, or a bonus that counts like core
+// once done (countsWhenDone), so it never lowers %.
+function countedMissions(state, inDistrict) {
+  return inDistrict.filter((m) => isCoreMission(m) || (m.countsWhenDone && isMissionDoneIn(state, m)));
+}
+
 export function calcDistrictProgress(state, districtId) {
   const inDistrict = getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m));
   const isDone = (m) => isMissionDoneIn(state, m);
-  // A bonus that counts like core once done (countsWhenDone) never lowers %.
   const countsAsCore = (m) => isCoreMission(m) || (m.countsWhenDone && isDone(m));
-  const relevant = inDistrict.filter(countsAsCore);
+  const relevant = countedMissions(state, inDistrict);
   const bonus = inDistrict.filter((m) => m.phase !== 'survey' && m.optional && !countsAsCore(m));
   const completed = relevant.filter(isDone).length;
   const bonusCompleted = bonus.filter(isDone).length;
@@ -67,6 +74,63 @@ export function calcDistrictProgress(state, districtId) {
     percent: relevant.length ? Math.round((completed / relevant.length) * 100) : 0,
     bonusTotal: bonus.length,
     bonusCompleted,
+  };
+}
+
+// A district in parts (Liz 2026-11-18: "yes, make the district bar count the current chapter
+// only"). The Master Keys has 27 or so missions, so after the first one its bar was a sliver.
+// "Chapter" already means a whole district here (The Master Keys is Chapter 1), so these are
+// parts: the district's missions in the order the game hands them out (check, then lock, then
+// take back), each kind cut into even parts of up to PART_MAX. The same missions as
+// calcDistrictProgress, so the counts agree. Nothing here is tracked or sent.
+const PART_PHASES = ['recon', 'fortify', 'reclaim'];
+export const PART_MAX = 8;
+export const PART_NAMES = { recon: 'Check your accounts', fortify: 'Lock them up', reclaim: 'Take your data back' };
+
+export function districtParts(state, districtId) {
+  const relevant = countedMissions(state, getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m)));
+  const phases = [...PART_PHASES, ...new Set(relevant.map((m) => m.phase).filter((p) => !PART_PHASES.includes(p)))];
+  const parts = [];
+  for (const phase of phases) {
+    const list = relevant.filter((m) => m.phase === phase);
+    if (!list.length) continue;
+    const count = Math.ceil(list.length / PART_MAX);
+    const base = Math.floor(list.length / count);
+    let at = 0;
+    for (let i = 0; i < count; i += 1) {
+      const size = base + (i < list.length % count ? 1 : 0);
+      parts.push({ phase, name: PART_NAMES[phase] || 'More missions', missions: list.slice(at, at + size) });
+      at += size;
+    }
+  }
+  return parts.map((part, i) => ({ ...part, chapter: i + 1 }));
+}
+
+// The part the What's next bar shows: the earliest one with missions left, or
+// (missionId, the report just filed) the part that mission is in, so the bar
+// moves for it and shows full when it finished the part.
+// { chapter, of, name, label, completed, total, done, next } or null.
+export function calcChapterProgress(state, districtId, { missionId = null } = {}) {
+  const parts = districtParts(state, districtId);
+  if (!parts.length) return null;
+  const left = (part) => part.missions.some((m) => !isMissionDoneIn(state, m));
+  const pinned = missionId ? parts.findIndex((part) => part.missions.some((m) => m.id === missionId)) : -1;
+  const firstLeft = parts.findIndex(left);
+  const part = parts[pinned > -1 ? pinned : firstLeft > -1 ? firstLeft : parts.length - 1];
+  const completed = part.missions.filter((m) => isMissionDoneIn(state, m)).length;
+  const total = part.missions.length;
+  const done = completed >= total;
+  const next = done ? parts.find((p) => p !== part && left(p)) || null : null;
+  const district = DISTRICTS.find((d) => d.id === districtId);
+  return {
+    chapter: part.chapter,
+    of: parts.length,
+    name: part.name,
+    label: `PART ${part.chapter} OF ${parts.length}${district ? ` · ${district.name.toUpperCase()}` : ''}`,
+    completed,
+    total,
+    done,
+    next: next && { chapter: next.chapter, name: next.name },
   };
 }
 

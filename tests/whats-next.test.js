@@ -54,10 +54,10 @@ describe('What’s next (#/next)', () => {
     const h = renderNext(s, { filed: { id: GMAIL, reaction: { line: 'Clean. Nice.', feeling: 'happy' } } });
     expect(h).toContain('&#10003; Sent to Scout');
     expect(h).toContain('Clean. Nice.');
-    // Good news is celebrated: confetti, "Nice work!", and the district's bar.
+    // Good news is celebrated: confetti, "Nice work!", and the bar for this part of the district.
     expect(h).toContain('class="confetti"');
     expect(h).toContain('Nice work!');
-    expect(h).toMatch(/data-next-progress[\s\S]*data-fill-bar="district:/);
+    expect(h).toMatch(/data-next-progress[\s\S]*data-fill-bar="chapter:master-keys:1"/);
     expect(h).toMatch(/<div class="next-label">NEXT<\/div>/);
     expect(h).not.toContain(`data-mission="${GMAIL}"`);
   });
