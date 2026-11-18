@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.29.0 (2026-11-18): Bars that fill, and a little celebration
+
+Liz: "we need a little bit more... celebration when things are good", "we need to see a bar fill, we need to 'see security as a process'", "for simple mode, use a bar", "a big, visual, motivating, filling bar … that like, visibly animatedly fills up", "on advanced mode even, bars filling? motivating".
+
+- **A bar that fills**, everywhere a mission counts its steps: it pours from where it was to where it is now (a little past, then settling), a shine sweeps it as it grows, each step is a segment and the one being worked on glows softly, and a full bar turns green and glows. Simple mode's step screens show a big one instead of "Step 2 of 4" (the numbers are still read out to screen readers). After DONE the bar scrolls into view so it's seen filling.
+- **Districts have a bar too**, on the district page (Simple and Advanced) and on What's next: "YOUR PROGRESS IN THE MASTER KEYS … Security is a process. Every mission fills this a little more." Started missions show a small bar on their row, and What's next's "Keep going" card shows how far along, not "You were on step 2 of 4".
+- **Celebration for good news:** confetti when every step is done, and "Nice work!" with confetti on What's next when Scout's news is good (a clean check). Worrying news gets no party. Reduced motion: no confetti, bars just show where they are.
+- **Where are my passwords?** "On your computer, what do you use to go on the internet?": each browser button carries the browser's own icon (Chrome, Safari, Edge, Firefox), and so does the "Look in…" heading. "Look in Chrome" (and Edge, Firefox) is a **numbered list**, one action per step, all the same size; "if that doesn't work" (an older Mac, a Samsung phone) is its own labeled amber box instead of small gray text that read as optional (Liz: "the second step is in gray and that's really small and contextually gray reads as an optional step … use a numbered list").
+
 ## 7.28.0 (2026-11-18): The orders step asks about your orders, and about the people at home
 
 Liz: "in marketplace It says open your orders anything you didn't order … I think you should look for ones like that and it's like That's where you can ask the question. Did you see any orders that you don't remember ordering? Yes or no … And then it also leads you to ask other people in the house that use that account."

@@ -22,6 +22,8 @@ import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
 import { notMineLabel } from '../data/not-mine.js';
+import { fillBar } from '../components/fill-bar.js';
+import { confetti } from '../components/celebrate.js';
 import { stepReportAnswers } from '../utils/step-report.js';
 
 function notFound(state) {
@@ -144,7 +146,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const intelTools = '';
   // The device questions and how far along the steps are.
   const gearHtml = noReset ? '' : passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps));
-  const progressHtml = !noReset && missionStepList.length > 1 ? walkProgress(progress) : '';
+  const progressHtml = !noReset && missionStepList.length > 1 ? walkProgress(progress, { key: `steps:${mission.id}` }) : '';
   const movePanelTop = `${gearHtml}${progressHtml}`;
 
   const actions = `
@@ -476,7 +478,7 @@ function compactBriefingPage(p) {
       ${why ? `<details class="brief-why" data-why><summary>Why it matters</summary><div class="focus-why">${why}</div></details>` : ''}
       ${p.extras}
       ${scoutBubble(scoutLine)}
-      ${many ? `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>
+      ${many ? `${simple ? `${fillBar({ key: `steps:${mission.id}`, done: progress.handled, total: n, label: `${n} steps` })}<div class="focus-meta">About ${mission.estimatedMinutes} min</div>` : `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>`}
       <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
       ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
@@ -665,11 +667,13 @@ function stepModePage(p) {
   // Back: the step before, or the briefing from the first step. "Step 2 of 4" beside it is the
   // one place the screen counts (no trail, no count on the card or the list).
   const back = progress.handled ? { action: 'step-back', mission: mission.id } : { action: 'show-briefing', mission: mission.id };
-  const top = simpleTop(back, allDone ? 'All done' : `Step ${current + 1} of ${total}`);
+  // Simple mode shows the bar, not the numbers (Liz 2026-11-18).
+  const top = simpleTop(back, level === 'simplest' ? '' : allDone ? 'All done' : `Step ${current + 1} of ${total}`);
   if (simple) {
     const simpleBody = `
       ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
-      ${walkProgress(progress, { bare: true })}
+      ${walkProgress(progress, { bare: true, key: `steps:${mission.id}`, size: 'big' })}
+      ${allDone ? confetti() : ''}
       ${card}
       ${p.extras}
       ${bankPanelHtml}
@@ -680,7 +684,7 @@ function stepModePage(p) {
   const body = `
       <div class="focus-mission">${titleTop ? `${titleTop}: ` : ''}${titleBottom}</div>
       ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
-      ${walkProgress(progress, { bare: true })}
+      ${walkProgress(progress, { bare: true, key: `steps:${mission.id}` })}
       ${card}
       ${p.extras}
       ${bankPanelHtml}

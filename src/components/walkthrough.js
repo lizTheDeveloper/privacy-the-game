@@ -5,6 +5,7 @@
 import { plainText } from '../utils/readability.js';
 import { GEAR_GROUPS, gearChoice, stepKey, stepMarks, readLevel } from '../utils/reading.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
+import { fillBar } from './fill-bar.js';
 
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -125,16 +126,16 @@ export function walkStepRow({ mission, step, index, mark, current, notes = step.
 
 // "STEP 2 OF 5" and a bar; "ALL 5 STEPS HANDLED" at the end.
 // bare: just the bar (step mode's card says which step it is).
-export function walkProgress(p, { bare = false } = {}) {
+// key: the mission, so its bar fills from where it was (components/fill-bar.js).
+export function walkProgress(p, { bare = false, key = 'steps', size = 'mid' } = {}) {
   if (p.total < 2) return '';
-  const pct = Math.round((p.handled / p.total) * 100);
   const label = p.current === -1
     ? `ALL ${p.total} STEPS HANDLED${p.skipped ? ` · ${p.skipped} SKIPPED` : ''}`
     : `STEP ${p.current + 1} OF ${p.total}`;
   return `
     <div class="walk-progress" data-walk-progress>
       ${bare ? '' : `<div class="walk-progress-label">${label}</div>`}
-      <div class="walk-bar" role="progressbar" aria-label="Steps handled" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.handled}"><span style="width: ${pct}%;"></span></div>
+      ${fillBar({ key, done: p.handled, total: p.total, size, label: p.current === -1 ? 'All steps done' : `Step ${p.current + 1} of ${p.total}` })}
     </div>`;
 }
 

@@ -1,4 +1,5 @@
 import { prismTag, prismMark } from '../components/prism-tag.js';
+import { fillBar } from '../components/fill-bar.js';
 import { visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
@@ -262,7 +263,7 @@ function renderMissionRow(state, mission, { lead = true } = {}) {
     <div class="mission-text" style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
-      ${stepsStarted ? missionProgressLine(steps) : ''}
+      ${stepsStarted ? missionProgressLine(steps, mission.id) : ''}
       ${timeline ? `<div data-timeline-note style="font-size: 11px; color: var(--cyan); margin-top: 2px;">${esc(timeline)}</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
       ${!completed && mission.replaces && isMissionDone(state.missions[mission.replaces]) ? `<div style="font-size: 11px; color: rgba(237,239,243,0.45); margin-top: 2px;">Your earlier email check still counts toward progress. This one checks the account itself.</div>` : ''}
@@ -663,6 +664,7 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
           <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
         </div>
         <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
         ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
@@ -765,6 +767,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
           <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
         </div>
         <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
         ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
@@ -790,7 +793,6 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
 }
 
 // "Step 3 of 5" and a thin bar under a mission the player has started ticking off.
-export function missionProgressLine(p) {
-  const pct = Math.round((p.handled / p.total) * 100);
-  return `<div class="mission-progress" data-mission-progress>${progressLabel(p)}<div class="walk-bar" aria-hidden="true"><span style="width: ${pct}%;"></span></div></div>`;
+export function missionProgressLine(p, missionId = '') {
+  return `<div class="mission-progress" data-mission-progress>${progressLabel(p)}${fillBar({ key: `steps:${missionId}`, done: p.handled, total: p.total, size: 'small', label: progressLabel(p) })}</div>`;
 }

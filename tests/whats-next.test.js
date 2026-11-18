@@ -40,7 +40,12 @@ describe('What’s next (#/next)', () => {
     expect(nextUp(s).kind).toBe('resume');
     const h = renderNext(s);
     expect(h).toContain('KEEP GOING');
-    expect(h).toContain('You were on step 2 of 3.');
+    // A bar, not numbers (Liz 2026-11-18); the numbers are its label.
+    expect(h).toMatch(/class="fill-bar fill-bar--big[^"]*" role="progressbar" aria-label="Step 2 of 3"/);
+    expect(h).toContain('Pick up where you left off.');
+    // The bar is a <div>: inside a <p> the browser would push it (and this line) out.
+    expect(h).toContain('<div class="next-meta">');
+    expect(h).not.toContain('<p class="next-meta">');
     expect(h).not.toContain('data-action="not-mine"');
   });
 
@@ -49,6 +54,10 @@ describe('What’s next (#/next)', () => {
     const h = renderNext(s, { filed: { id: GMAIL, reaction: { line: 'Clean. Nice.', feeling: 'happy' } } });
     expect(h).toContain('&#10003; Sent to Scout');
     expect(h).toContain('Clean. Nice.');
+    // Good news is celebrated: confetti, "Nice work!", and the district's bar.
+    expect(h).toContain('class="confetti"');
+    expect(h).toContain('Nice work!');
+    expect(h).toMatch(/data-next-progress[\s\S]*data-fill-bar="district:/);
     expect(h).toMatch(/<div class="next-label">NEXT<\/div>/);
     expect(h).not.toContain(`data-mission="${GMAIL}"`);
   });
@@ -100,5 +109,18 @@ describe('one message at a time', () => {
   it('"I don’t have …" replaces the "Sent to Scout" message', () => {
     const block = app.slice(app.indexOf("} else if (action === 'not-mine') {"), app.indexOf("} else if (action === 'toggle-account') {"));
     expect(block).toContain('justFiled = null;');
+  });
+});
+
+describe('celebrating only good news', () => {
+  it('a worrying report gets no confetti', async () => {
+    const { renderNext } = await import('../src/screens/next.js');
+    const { createInitialState, updateMission } = await import('../src/state.js');
+    const { setReadLevel } = await import('../src/utils/reading.js');
+    const s = updateMission(setReadLevel(createInitialState(), 'simplest'), 'gmail-recon-breach', { status: 'completed', finding: '3plus-breaches' });
+    const h = renderNext(s, { filed: { id: 'gmail-recon-breach', reaction: { line: 'That’s a lot.', feeling: 'worried' } } });
+    expect(h).toContain('&#10003; Sent to Scout');
+    expect(h).not.toContain('class="confetti"');
+    expect(h).not.toContain('Nice work!');
   });
 });

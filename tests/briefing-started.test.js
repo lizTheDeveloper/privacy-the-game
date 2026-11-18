@@ -36,7 +36,9 @@ describe('starting a mission is remembered (mobile: the other site opens in anot
       markOpened(MISSION, stepKey(first));
       html = renderBriefing(s, MISSION);
     }
-    expect(html).toMatch(/class="simple-count">Step 1 of \d[\s\S]*data-step-card[\s\S]*data-action="mission-step"[\s\S]*data-action="step-done"/);
+    // Simple mode: a bar that fills, not "Step 1 of 3" (Liz 2026-11-18); the words are its label.
+    expect(html).not.toContain('class="simple-count"');
+    expect(html).toMatch(/class="fill-bar fill-bar--big[^"]*" role="progressbar" aria-label="Step 1 of \d"[\s\S]*data-step-card[\s\S]*data-action="mission-step"[\s\S]*data-action="step-done"/);
     expect(html).toMatch(new RegExp(`href="#/mission/${MISSION}/debrief"[^>]*data-action="i-did-it"`));
   });
 
