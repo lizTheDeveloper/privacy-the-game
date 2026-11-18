@@ -3,7 +3,7 @@
 // how far along the player is. See utils/reading.js for the why.
 
 import { plainText } from '../utils/readability.js';
-import { GEAR_GROUPS, gearChoice, stepKey, stepMarks } from '../utils/reading.js';
+import { GEAR_GROUPS, gearChoice, stepKey, stepMarks, readLevel } from '../utils/reading.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -194,9 +194,16 @@ export function passwordPlaceAsk(state, mission) {
     return `<div class="walk-gear-set" data-pm-set>Showing steps for <strong>${chosen.text}</strong>. <button class="walk-link" data-action="set-password-manager" data-pm="">Change</button></div>`;
   }
   const chips = PASSWORD_MANAGERS.map((pm) => `<button class="walk-gear-chip" data-action="set-password-manager" data-pm="${pm.value}">${pm.text}</button>`).join('');
+  // Not everyone knows (Liz 2026-11-18): the finder asks one thing at a time and has them look.
+  const find = `<a class="btn-secondary finder-go" href="#/passwords?from=${mission.id}" data-finder-go>Help me find where they are &#9654;</a>`;
+  // Simple mode: the finder first, the list for those who know.
+  const list = readLevel(state) === 'simplest'
+    ? `<details class="walk-gear-know"><summary>I know where</summary><div class="walk-gear-chips">${chips}</div></details>`
+    : `<div class="walk-gear-chips">${chips}</div>`;
   return `
     <div class="walk-gear" data-pm-ask>
       <div class="walk-gear-q">Where are your passwords saved? <span>Then you only see your steps.</span></div>
-      <div class="walk-gear-chips">${chips}</div>
+      ${find}
+      ${list}
     </div>`;
 }
