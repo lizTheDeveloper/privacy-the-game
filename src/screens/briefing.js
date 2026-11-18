@@ -525,6 +525,9 @@ function stepSite(steps, i, account) {
 const SHORT_ASKS = {
   breach: { label: 'Were you in any leaks?', none: 'no-breaches', more: 'How many?', some: [['1-2-breaches', '1 or 2'], ['3plus-breaches', '3 or more']] },
   login: { label: 'Any you don’t know?', none: 'no-breaches', more: 'Are you sure it wasn’t you?', some: [['1-2-breaches', 'Not sure'], ['3plus-breaches', 'Sure. It wasn’t me']] },
+  // Orders (Liz 2026-11-18): after a Yes, ask the people at home who use the account. The
+  // question's own label ("Did you see any orders you don’t remember ordering?") is the first ask.
+  orders: { none: 'orders-clean', lead: 'Ask the other people in your home who use this account.', more: 'Did one of them order it?', some: [['orders-household', 'Yes, it was them'], ['orders-unknown', 'No, nobody did']] },
 };
 const SHORT_FOLLOW = { password_exposed: 'Did a leak have your password in it?' };
 // "Yes — passwords were in the leaked data" → "Yes".
@@ -536,13 +539,14 @@ function stepAsk(state, mission, step, sends = false) {
   const q = qs.find((x) => x.id === step.ask);
   if (!q || q.multi || q.type === 'number') return '';
   const answers = stepAnswers(state, mission.id);
-  const btn = (qid, value, text, on) => `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${qid}" data-value="${attrEsc(value)}" aria-pressed="${on}">${on ? '&#10003; ' : ''}${text}</button>`;
+  // keep: the answers a Yes leaves in place (the ones that come after it), for app.js.
+  const btn = (qid, value, text, on, keep = '') => `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${qid}" data-value="${attrEsc(value)}"${keep ? ` data-keep="${attrEsc(keep)}"` : ''} aria-pressed="${on}">${on ? '&#10003; ' : ''}${text}</button>`;
   const group = (id, label, buttons, hint = '') => `
         <fieldset class="focus-ask-q" data-ask-q="${id}">
           <legend>${label}</legend>${hint ? `<p class="focus-ask-hint">${hint}</p>` : ''}
           <div class="focus-ask-opts">${buttons.join('')}</div>
         </fieldset>`;
-  const kind = q.id !== 'finding' ? null : /-recon-breach$/.test(mission.id) ? 'breach' : 'login';
+  const kind = q.id === 'orders' ? 'orders' : q.id !== 'finding' ? null : /-recon-breach$/.test(mission.id) ? 'breach' : 'login';
   const spec = SHORT_ASKS[kind];
   const valid = (v) => q.options.some((o) => o.value === v);
   const parts = [];
@@ -550,11 +554,12 @@ function stepAsk(state, mission, step, sends = false) {
     const a = answers[q.id];
     const yes = answers[`${q.id}:yes`] === 'yes' || spec.some.some(([v]) => v === a);
     const skip = q.options.find((o) => o.severity === 'skip');
-    parts.push(group(q.id, spec.label, [
-      btn(`${q.id}:yes`, 'yes', 'Yes', yes),
+    parts.push(group(q.id, spec.label || q.label, [
+      btn(`${q.id}:yes`, 'yes', 'Yes', yes, spec.some.map(([v]) => v).join(' ')),
       btn(q.id, spec.none, 'No', a === spec.none),
       ...(skip ? [btn(q.id, skip.value, 'Couldn’t check', a === skip.value)] : []),
     ]));
+    if (yes && spec.lead) parts.push(`<p class="focus-ask-lead">${spec.lead}</p>`);
     if (yes) parts.push(group(`${q.id}-how`, spec.more, spec.some.map(([v, t]) => btn(q.id, v, t, a === v))));
   } else {
     parts.push(group(q.id, q.label, questionOptions(q, state).map((o) => btn(q.id, o.value, shortText(o.text), answers[q.id] === o.value))));

@@ -50,6 +50,24 @@ export function activityQuestion(label) {
   };
 }
 
+// Q-ORD: orders the player doesn't remember (Liz 2026-11-18: "Did you see any orders that you
+// don't remember ordering? Yes or no … And then it also leads you to ask other people in the
+// house that use that account"). An order someone at home placed is theirs, not a stranger's.
+// The step card asks it as Yes / No, then "Did one of them order it?" (screens/briefing.js).
+export function ordersQuestion(label = 'Did you see any orders you don’t remember ordering?') {
+  return {
+    id: 'orders',
+    label,
+    hint: 'Not sure? Ask the other people in your home who use this account.',
+    options: [
+      { value: 'orders-clean', text: 'No, they were all mine', severity: 'safe' },
+      { value: 'orders-household', text: 'Yes, but someone at home ordered it', severity: 'safe' },
+      { value: 'orders-unknown', text: 'Yes, and nobody at home ordered it', severity: 'crit' },
+      SKIP,
+    ],
+  };
+}
+
 // Q-SVC: is this service's own breach, by its HIBP name, in the results?
 function serviceQuestion(label, hadPasswords) {
   return {
@@ -78,9 +96,11 @@ function changedSinceQuestion(service, since) {
 }
 
 // The password manager check, one action a step: search, then read what it says.
-export const pmSteps = (what) => [
+// `ask`: the reading step asks Q-PW on its card, for a mission whose every question is asked
+// on a step (then the last DONE files the report, utils/step-report.js).
+export const pmSteps = (what, { ask = false } = {}) => [
   { text: `Open the security report where your passwords are saved (your phone, browser or password manager) and search for ${what}` },
-  { text: 'Note whether it says leaked, compromised or reused.' },
+  { text: 'Note whether it says leaked, compromised or reused.', ...(ask ? { ask: 'pw_status' } : {}) },
 ];
 
 // Scout, in his understated voice. Every line is true whatever else the
@@ -98,11 +118,16 @@ const ACTIVITY_LINES = {
   'activity-unknown': '"Something you don’t recognize. It might be nothing. A new password closes the door either way."',
 };
 
+const ORDERS_LINES = {
+  'orders-clean': '"Every order was yours. Good."',
+  'orders-household': '"Someone at home ordered it. Good that you asked them."',
+};
+
 const CARD_CALL = 'Call the number on the back of your card and tell them what you didn’t do. Then change the password.';
 export const reportInApp = (name) => `Report it to ${name} from inside its app or its own website, not through a link or number from an email or text. Then change the password.`;
 
 export function scout(briefing, extra = {}) {
-  return { briefing, debrief: { ...PW_LINES, ...ACTIVITY_LINES, ...extra } };
+  return { briefing, debrief: { ...PW_LINES, ...ACTIVITY_LINES, ...ORDERS_LINES, ...extra } };
 }
 
 export function recon(fields) {
@@ -448,17 +473,19 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Account Recon: Amazon',
     briefing: 'Amazon isn’t in Have I Been Pwned’s breach list, so the email check says nothing about it. A taken-over Amazon account shows itself in orders, addresses and saved cards. That’s what this checks, along with the password.',
     steps: [
-      ...pmSteps('Amazon'),
-      { text: 'Open Your Orders. Anything you didn’t order?', url: 'https://www.amazon.com/your-orders/orders' },
+      ...pmSteps('Amazon', { ask: true }),
+      { text: 'Open Your Orders and look through them.', url: 'https://www.amazon.com/your-orders/orders', ask: 'orders' },
       { text: 'In Your Account, check your saved addresses and Your Payments. Any address or card you don’t know?' },
       { text: 'Open Login & security.' },
-      { text: 'Check that the email and phone number are yours.' },
+      { text: 'Check that the email and phone number are yours.', ask: 'activity' },
     ],
     debriefQs: [
       pwQuestion('Amazon'),
-      activityQuestion('Any order, address, card or contact change you didn’t make?'),
+      ordersQuestion(),
+      activityQuestion('Any address, card, email or phone number you didn’t add?'),
     ],
     scoutDialog: scout('"Saved cards and one-click buying. Let’s make sure every click was yours."', {
+      'orders-unknown': `"${reportInApp('Amazon')}"`,
       'activity-confirmed': `"${reportInApp('Amazon')}"`,
     }),
   }),
@@ -469,15 +496,18 @@ export const RECON_ACCOUNT_MISSIONS = [
     title: 'Account Recon: eBay',
     briefing: 'eBay’s 2014 breach (145 million names, addresses, birth dates and encrypted passwords) is real, but it isn’t in Have I Been Pwned’s list. If you had eBay before 2014, treat that data as out there. This checks the password and the account’s own activity.',
     steps: [
-      ...pmSteps('eBay'),
+      ...pmSteps('eBay', { ask: true }),
       { text: 'In eBay’s Sign in and security settings, review any devices or activity it lists, and anything you don’t recognize.' },
-      { text: 'Check your purchase history and addresses.' },
+      { text: 'Open your purchase history and look through it.', ask: 'orders' },
+      { text: 'Check your saved addresses.', ask: 'activity' },
     ],
     debriefQs: [
       pwQuestion('eBay'),
-      activityQuestion('Any sign-in, purchase or address you don’t recognize?'),
+      ordersQuestion('Did you see anything you don’t remember buying?'),
+      activityQuestion('Any sign-in or address you don’t recognize?'),
     ],
     scoutDialog: scout('"The 2014 leak isn’t in the list we searched. The account’s own history is."', {
+      'orders-unknown': `"${reportInApp('eBay')}"`,
       'activity-confirmed': `"${reportInApp('eBay')}"`,
     }),
   }),
