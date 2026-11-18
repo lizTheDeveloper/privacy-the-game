@@ -7,6 +7,7 @@
 // the manager question keep exactly their old totals.
 import { ACCOUNTS } from './accounts.js';
 import { PWNED_PASSWORDS_URL, PASSWORD_SAFE_NOTE } from './pwned-passwords-step.js';
+import { PHONE_PLACE, COMPUTER_PLACE, TWO_PLACE_PAIRS, pairKey } from './two-places.js';
 
 const BREACHED = ['1-2-breaches', '3plus-breaches'];
 
@@ -142,6 +143,24 @@ const PM_STEPS = {
     { text: 'No saved passwords anywhere? Open “Pwned Passwords” and check the password you use most. It is a different check from the email search, and it never gets your email address.', url: PWNED_PASSWORDS_URL, note: PASSWORD_SAFE_NOTE },
   ],
 };
+
+// Passwords in two places (Liz 2026-11-18): check the report in each, phone first. Nothing moves.
+const PM_ON_PHONE = { apple: [PM_STEPS.apple[0]], google: PM_STEPS.google.slice(0, 2) };
+const PM_ON_COMPUTER = {
+  apple: [PM_STEPS.apple[1]],
+  google: PM_STEPS.google.slice(0, 3),
+  edge: PM_STEPS.edge.slice(0, 2),
+  firefox: PM_STEPS.firefox.slice(0, 2),
+};
+const NOTE_BOTH_STEP = { text: 'Write down how many passwords each one says are compromised, leaked or reused. Add them up. Note which of your accounts they name' };
+for (const [a, b] of TWO_PLACE_PAIRS) {
+  PM_STEPS[pairKey(a, b)] = [
+    { text: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Each one has its own check. Let’s look at both.` },
+    ...PM_ON_PHONE[a],
+    ...PM_ON_COMPUTER[b],
+    NOTE_BOTH_STEP,
+  ];
+}
 
 // Before the player says where their passwords are saved: the two places most people's are.
 const PM_STEPS_UNKNOWN = [

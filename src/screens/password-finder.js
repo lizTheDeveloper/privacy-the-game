@@ -1,7 +1,7 @@
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
-import { FINDER_QUESTIONS, BROWSER_HELP, PLACES, SAW, finderCard, finderResult } from '../data/password-finder.js';
+import { FINDER_QUESTIONS, BROWSER_HELP, PLACES, SAW, finderCard, finderResult, finderOptions, withDevices } from '../data/password-finder.js';
 
 // "Where are my passwords?" (#/passwords): one card at a time (data/password-finder.js).
 // from: the mission it was opened from, to go back to when it's done.
@@ -19,10 +19,10 @@ function choice(key, value, text, cls = 'finder-opt') {
   return `<button type="button" class="${cls}${icon ? ' has-icon' : ''}" data-action="finder-answer" data-key="${key}" data-value="${attr(value)}">${icon}<span>${text}</span></button>`;
 }
 
-function askCard(card) {
+function askCard(card, gear) {
   const q = FINDER_QUESTIONS[card.key];
   const help = card.help ? `<div class="finder-help" data-finder-help>${BROWSER_HELP.map((t) => `<p>${t}</p>`).join('')}</div>` : '';
-  const options = q.options.filter(([v]) => !(card.help && v === 'unknown'));
+  const options = finderOptions(card.key, gear).filter(([v]) => !(card.help && v === 'unknown'));
   return `<h1 class="finder-q">${card.help ? 'Here’s how to tell.' : q.ask}</h1>${help}
       <div class="finder-opts">${options.map(([v, t]) => choice(card.key, v, t)).join('')}</div>`;
 }
@@ -48,7 +48,8 @@ function useButton(manager, label) {
   return `<button type="button" class="btn-primary focus-go finder-use" data-action="finder-done" data-pm="${attr(manager)}">${label}</button>`;
 }
 
-function resultCard(f) {
+function resultCard(answers, gear) {
+  const f = withDevices(answers, gear);
   const r = finderResult(f);
   if (f.where === 'app') {
     return `<div class="next-label">FOUND THEM</div>
@@ -57,14 +58,16 @@ function resultCard(f) {
       ${useButton(f.app, 'THAT’S RIGHT &#10003;')}`;
   }
   if (r.mixed) {
+    // Two places is fine, often a backup (Liz 2026-11-18): "don't ask them to do a migration
+    // right there … we'll remember that it's two places and prompt you to check both places."
     const [a, b] = r.found;
-    const pick = (p) => `<button type="button" class="btn-secondary finder-pick" data-action="finder-done" data-pm="${PLACES[p].manager}">${PLACES[p].mine}</button>`;
+    const places = r.managers.join(',');
     return `<div class="next-label">FOUND THEM, IN TWO PLACES</div>
       <h1 class="finder-q">Your passwords are in two places.</h1>
-      <p class="finder-look">Some are in ${PLACES[a].name}. Some are in ${PLACES[b].name}.</p>
-      <p class="finder-look">These two don’t share. That’s why a password can work on one and not the other.</p>
-      <h2 class="finder-q finder-q--small">Pick one to be your main place. Save every new password there.</h2>
-      <div class="finder-opts">${pick(a)}${pick(b)}</div>`;
+      <p class="finder-look">You have passwords saved in ${PLACES[a].name}. You also have some in ${PLACES[b].name}.</p>
+      <p class="finder-look">That’s OK. Lots of people keep passwords in two places. It can be a backup. You don’t need to move them.</p>
+      <p class="finder-look">These two don’t share, so a password can work on one and not the other. We’ll remember both. When you change a password, we’ll remind you to update it in both places.</p>
+      <button type="button" class="btn-primary focus-go finder-use" data-action="finder-done" data-pm="${attr(r.managers[0])}" data-places="${attr(places)}" data-finder-both>OK, REMEMBER BOTH &#10003;</button>`;
   }
   if (r.managers.length) {
     const both = r.found.length > 1;
@@ -84,8 +87,9 @@ function resultCard(f) {
 
 export function renderPasswordFinder(state, { from = null } = {}) {
   const f = state.passwordFinder || {};
-  const card = finderCard(f);
-  const body = card.kind === 'ask' ? askCard(card) : card.kind === 'look' ? lookCard(card) : resultCard(f);
+  const gear = state.gear || {};
+  const card = finderCard(f, gear);
+  const body = card.kind === 'ask' ? askCard(card, gear) : card.kind === 'look' ? lookCard(card) : resultCard(f, gear);
   const answered = Object.keys(f).some((k) => k !== 'done');
   const back = answered
     ? '<button class="simple-back" data-action="finder-back"><span aria-hidden="true">&#8249;</span> Back</button>'

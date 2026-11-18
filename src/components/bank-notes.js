@@ -5,6 +5,7 @@
 // errorNoise.js drops those from error-report breadcrumbs). Names and addresses go only in text
 // and in href/value, never in an id, name, title, aria-label or data-* attribute.
 import { renderHud } from './hud.js';
+import { passwordPlaces } from '../utils/password-places.js';
 import { MISSIONS } from '../data/missions.js';
 import {
   bankNotes, noteLink, primaryLinkKind, managerPointer, MANAGER_POINTER_TAIL, ANY_BANK_STEPS,
@@ -59,6 +60,9 @@ function noteLinks(note, missionId, kind) {
 
 // Where the player's saved logins already live, from the manager they told us. Nothing for none.
 export function renderManagerPointer(state, { tail = '' } = {}) {
+  // Two places (the finder): a pointer for each, so both get checked.
+  const places = passwordPlaces(state);
+  if (places.length > 1) return places.map((pm, i) => renderManagerPointer({ ...state, passwordManager: pm, passwordPlaces: [] }, { tail: i === places.length - 1 ? tail : '' })).join('');
   const p = managerPointer(state?.passwordManager);
   if (!p) {
     if (state?.passwordManager === 'none') return '';

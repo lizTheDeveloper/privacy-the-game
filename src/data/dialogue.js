@@ -615,7 +615,7 @@ export const PASSWORD_DIALOGUE = {
   notNeededAfterLeak: `There were leaks, but your password wasn't in them, and nothing's flagged it. Changing it now would just be busywork.`,
   notNeededPm: `Your password manager has nothing on this one, and nothing else says it leaked. Changing it now would just be busywork.`,
   breachNoPassword: `Your address leaked; your password didn't. Expect a bit more spam and a few more phishing attempts aimed at that inbox — but these leaks didn't hand anyone your key.`,
-  noManager: `Your phone or browser may be saving passwords anyway. The password check shows you where to look. And it's worth using one on purpose: it makes a different strong password for every account and remembers them all.`,
+  noManager: `Your phone or browser may be saving passwords anyway. The password check shows you where to look. Nothing to set up today. Later, if you want, one can make a different strong password for every account and remember them all.`,
   hasManager: `Good. It can tell you which of your passwords leaked or got reused. The password check reads that report.`,
 };
 

@@ -12,6 +12,7 @@ import { hasInterior } from '../data/interiors/index.js';
 import { controllableProgress } from '../utils/interior-state.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, pick } from '../data/dialogue.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
+import { passwordPlaces } from '../utils/password-places.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 import { isPasswordMission, passwordResetNeed, isPmFlagged } from '../utils/password-need.js';
 import { twoFactorMethod } from '../utils/two-factor.js';
@@ -450,8 +451,10 @@ function showsPasswordProgress(state, districtId) {
 
 function renderPasswordManagerQuestion(state) {
   const chosen = state.passwordManager;
+  // Two places from the finder: both are lit (utils/password-places.js).
+  const places = passwordPlaces(state);
   const chips = PASSWORD_MANAGERS.map((pm) => {
-    const on = pm.value === chosen;
+    const on = places.includes(pm.value);
     return `<span data-action="set-password-manager" data-pm="${pm.value}" role="button" tabindex="0" aria-pressed="${on}" style="cursor: pointer; font-size: 12px; padding: 7px 12px; border: 1px solid ${on ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${on ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${on ? 'var(--lime)' : 'rgba(237,239,243,0.7)'};">${esc(pm.text)}</span>`;
   }).join('');
   const line = chosen === 'none' ? PASSWORD_DIALOGUE.noManager : chosen ? PASSWORD_DIALOGUE.hasManager : '';

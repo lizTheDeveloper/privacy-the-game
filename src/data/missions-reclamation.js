@@ -627,7 +627,8 @@ export const RECLAMATION_MISSIONS = [
       { text: "Visit the NAI opt-out page -- use its links to members' own opt-outs, or add its Global Privacy Control extension in Chrome", url: "https://thenai.org/how-to-opt-out/" },
       { text: "Run the DAA WebChoices opt-out -- it tries to opt this browser out of the participating companies in one go; a browser that blocks third-party cookies may make some fail", url: "https://optout.aboutads.info/" },
       { text: "Disable your advertising ID -- iOS: Settings → Privacy & Security → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID" },
-      { text: "Install or switch to a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)" },
+      // Not a hidden move (Liz 2026-11-18): a new browser leaves the saved passwords behind.
+      { text: "Optional: try a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)", note: [{ label: "Do I have to switch?", text: "No. You can keep the browser you use now. Your saved passwords stay in it. Trying a new one is fine too." }] },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     optOut: { optout_result: ["all-submitted", "some-submitted"] },

@@ -859,6 +859,14 @@ img { image-rendering: pixelated; }
 .finder-go { margin: 10px 0; }
 .finder-use { margin-top: 8px; }
 .walk-gear-know > summary { cursor: pointer; font-size: 15px; color: var(--cyan); min-height: 40px; display: flex; align-items: center; }
+/* Simple's "Before you start" card: devices and where the passwords are, before any step (Liz 2026-11-18). */
+.focus-setup .finder-q--small { margin-top: 0; }
+.walk-devices-why { font-size: 17px; line-height: 1.5; color: rgba(237,239,243,0.75); margin: 0 0 14px; }
+.walk-devices-note { font-size: 17px; line-height: 1.5; color: var(--offwhite); margin: 0 0 12px; border-left: 2px solid var(--lime); padding-left: 10px; }
+.brief-simple .focus-setup .walk-gear-q { font-size: 18px; font-weight: 600; }
+.brief-simple .focus-setup .walk-gear-chip { font-family: var(--font-body); font-size: 17px; min-height: 48px; border-radius: 10px; }
+.brief-simple .focus-setup .walk-gear-set { font-size: 16px; }
+.focus-setup-skip { align-self: flex-start; font-size: 15px; min-height: 40px; }
 /* The welcome screen's Simple mode / Advanced mode choice. */
 .mode-choice { display: flex; flex-direction: column; align-items: stretch; gap: 14px; width: 100%; max-width: 360px; margin-top: 36px; }
 .mode-choice-ask { font-family: var(--font-body); font-size: 24px; font-weight: 700; color: var(--offwhite); margin: 0 0 4px; }

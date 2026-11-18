@@ -2,6 +2,7 @@
 // depend on the player (optionsFrom), multi-select answers, and what a set of
 // answers records and tracks. Pure, so screens, app and restore share it.
 import { MISSIONS, missionDistrict } from '../data/missions.js';
+import { placesKey } from './password-places.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { twoFactorAction, twoFactorMethod } from './two-factor.js';
 import { updateMission } from '../state.js';
@@ -163,7 +164,8 @@ export function missionEventData(mission, record) {
 
 // A mission's steps for this player (the password-manager report is tailored).
 export function missionSteps(mission, state) {
-  if (mission.stepsByManager) return mission.stepsByManager[state?.passwordManager] || mission.steps;
+  // Two places: the steps that cover both (utils/password-places.js), else the first place's.
+  if (mission.stepsByManager) return mission.stepsByManager[placesKey(state)] || mission.stepsByManager[state?.passwordManager] || mission.steps;
   if (mission.stepsBuilder === 'pm-burst') return pmBurstSteps(mission, state);
   return mission.steps;
 }
@@ -171,7 +173,7 @@ export function missionSteps(mission, state) {
 // "Change the next 3": open the report, then the order to work in. Accounts
 // here that the manager flagged come first (they're among the email/money ones).
 function pmBurstSteps(mission, state) {
-  const report = mission.reportSteps[state?.passwordManager] || mission.reportSteps.other;
+  const report = mission.reportSteps[placesKey(state)] || mission.reportSteps[state?.passwordManager] || mission.reportSteps.other;
   const steps = report.filter((st) => !/^Note which of your accounts/.test(st.text));
   // Only accounts that have a Password Reset mission to file.
   const inCity = (state?.pmFlagged || [])

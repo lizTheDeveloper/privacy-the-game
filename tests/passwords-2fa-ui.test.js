@@ -203,10 +203,15 @@ describe('district screens', () => {
   });
 
   it('the password check asks where passwords are saved, on the mission itself', () => {
-    const ask = renderBriefing(markMissionStarted(s0, 'password_manager-recon-report'), 'password_manager-recon-report');
+    // Simple asks about the devices first, on a card of its own (Liz 2026-11-18), then where.
+    const first = renderBriefing(markMissionStarted(s0, 'password_manager-recon-report'), 'password_manager-recon-report');
+    expect(first).toContain('data-devices-ask');
+    expect(first).not.toContain('data-step-card');
+    const s1 = { ...s0, gear: { phone: 'iphone', computer: 'windows' } };
+    const ask = renderBriefing(markMissionStarted(s1, 'password_manager-recon-report'), 'password_manager-recon-report');
     expect(ask).toContain('Where are your passwords saved?');
     expect(ask.match(/data-action="set-password-manager"/g)).toHaveLength(11);
-    const set1 = renderBriefing(markMissionStarted({ ...s0, passwordManager: 'apple' }, 'password_manager-recon-report'), 'password_manager-recon-report');
+    const set1 = renderBriefing(markMissionStarted({ ...s1, passwordManager: 'apple' }, 'password_manager-recon-report'), 'password_manager-recon-report');
     expect(set1).toContain('Showing steps for <strong>iPhone, iPad or Mac (Apple Passwords)</strong>');
     expect(set1).toContain('data-pm=""');
   });
