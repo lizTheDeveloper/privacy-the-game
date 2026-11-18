@@ -51,10 +51,15 @@ export function collectVoiceLines() {
 }
 
 export const VOICE_LINES_FILE = new URL('../collective/voice-lines.json', import.meta.url);
+// The ids alone, for the game: it asks for a recording only of a line on the list, so a line with
+// anything of the player's in it (their numbers, their own missions) never leaves the browser,
+// not even as a hash. Loaded the first time someone taps Read it to me.
+export const VOICE_IDS_FILE = new URL('../src/data/voice-ids.txt', import.meta.url);
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const lines = collectVoiceLines();
   writeFileSync(VOICE_LINES_FILE, `${JSON.stringify(lines, null, 0).replace(/","/g, '",\n"')}\n`);
+  writeFileSync(VOICE_IDS_FILE, `${Object.keys(lines).join('\n')}\n`);
   const chars = Object.values(lines).reduce((n, t) => n + t.length, 0);
   console.log(`${Object.keys(lines).length} lines, ${chars} characters`);
 }

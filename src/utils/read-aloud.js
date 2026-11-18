@@ -1,9 +1,27 @@
 // "Read it to me". Scout reads, in his own recorded voice (utils/voice-line.js), line by line.
-// A line the server has no recording for (or can't make right now) is read by the browser's own
-// speech (speechSynthesis), which runs on the device. Nothing about the player is sent: the
-// audio files are the game's own lines, fetched like its pictures.
+// The game only asks the server for a line on Scout's list (data/voice-ids.txt: the game's own
+// words). Any other line, such as one with the player's own numbers or a mission they made, is
+// read by the browser's own speech (speechSynthesis) on the device and is never sent anywhere,
+// not even as a hash. So is a listed line the server can't record right now.
 
-import { voiceText, voiceUrl } from './voice-line.js';
+import { voiceText, voiceId } from './voice-line.js';
+
+const IDS_URL = 'data/voice-ids.txt';
+let ids = null;
+let idsLoading = null;
+
+// The list, fetched once, the first time someone taps Read it to me. No list: the browser reads.
+function loadIds() {
+  if (ids) return Promise.resolve(ids);
+  if (!idsLoading) {
+    idsLoading = (typeof fetch === 'function' ? fetch(IDS_URL).then((r) => (r.ok ? r.text() : '')) : Promise.resolve(''))
+      .catch(() => '')
+      .then((t) => { ids = new Set(t.split('\n').filter((x) => /^[0-9a-f]{16}$/.test(x))); return ids; });
+  }
+  return idsLoading;
+}
+
+export function _setVoiceIds(list) { ids = list ? new Set(list) : null; idsLoading = null; }
 
 let speaking = false;
 let audio = null;
@@ -26,9 +44,15 @@ function synthLine(text, done) {
   window.speechSynthesis.speak(u);
 }
 
+export function recordingUrl(text, list = ids) {
+  const id = voiceId(text);
+  return list && list.has(id) ? `api/voice/${id}.mp3` : null;
+}
+
 function playLine(text, done, fail) {
-  if (typeof window.Audio !== 'function') return fail();
-  const a = new window.Audio(voiceUrl(text));
+  const url = recordingUrl(text);
+  if (!url || typeof window.Audio !== 'function') return fail();
+  const a = new window.Audio(url);
   audio = a;
   a.onended = done;
   a.onerror = fail;
@@ -49,6 +73,7 @@ export function speak(text) {
   speaking = true;
   const next = (i) => {
     if (mine !== run) return;
+    if (!ids) { loadIds().then(() => next(i)); return; }
     if (i >= lines.length) { speaking = false; audio = null; return; }
     let moved = false;
     const go = () => { if (!moved) { moved = true; next(i + 1); } };
