@@ -76,7 +76,7 @@ import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from '
 import { renderTimeline, renderSocialForm, renderEraQuestions } from './screens/timeline.js';
 import { socialProfileFromForm } from './utils/social-timeline.js';
 import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
-import { initErrorTracking, captureError } from './utils/errors.js';
+import { initErrorTracking, captureError, captureStorageWriteError } from './utils/errors.js';
 import { announceReady } from './utils/cabinet.js';
 import { newScreenVisit, feelingDuration } from './components/scout.js';
 import { noteFirstTwoFactor, twoFactorHugDue, markTwoFactorHugSeen } from './utils/scout-feelings.js';
@@ -991,7 +991,7 @@ function setState(next) {
   try {
     saveState(state);
   } catch (error) {
-    captureError(error, { screen: 'saveState' });
+    captureStorageWriteError(error, { screen: 'saveState' });
   }
 }
 
@@ -1726,7 +1726,7 @@ app.addEventListener('click', async (e) => {
     try {
       saveState(state);
     } catch (error) {
-      captureError(error, { screen: 'saveState' });
+      captureStorageWriteError(error, { screen: 'saveState' });
     }
     // Leaving the welcome screen is the first real view of the game.
     renderCurrentRoute(RENDER_CAUSE.NAVIGATE);
