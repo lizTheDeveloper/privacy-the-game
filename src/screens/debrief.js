@@ -390,9 +390,9 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
     </style>
     ${renderHud(state, { tools: topTools(state, readLevel(state), sayLines) })}
     <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
-      <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">${recheck ? 'RE-CHECK' : 'MISSION DEBRIEF'}</div>
+      <div class="screen-eyebrow">${recheck ? 'RE-CHECK' : 'MISSION DEBRIEF'}</div>
       <div style="flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,229,255,0.2), transparent);"></div>
-      <a href="#/mission/${mission.id}/briefing" style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); text-decoration: none;">&#8592; ${mission.title}</a>
+      <a href="#/mission/${mission.id}/briefing" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-quiet); text-decoration: none;">&#8592; ${mission.title}</a>
     </div>
     <div style="flex: 1; padding: 24px;">
       ${recheck ? '' : missionTrail(completed ? 'filed' : 'report', progressFor(state, mission.id, visibleSteps(mission, state)), { already: saidAlready(state, mission.id) && !progressFor(state, mission.id, visibleSteps(mission, state)).handled })}

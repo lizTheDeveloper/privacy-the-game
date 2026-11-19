@@ -2,7 +2,7 @@ import { DISTRICTS } from '../data/districts.js';
 import { activeDistricts } from '../utils/opt-in.js';
 import { missionsInProgress, visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
 import { findMission } from '../data/custom-missions.js';
-import { MISSIONS } from '../data/missions.js';
+import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { calcDistrictProgress, calcIntegrity, isCoreMission } from '../utils/calc.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 import { currentBurst, isHeldBack, returnPacingLine, PM_BURST_ID } from '../utils/bursts.js';
@@ -336,7 +336,16 @@ const GROUND_TOP = -TH / 2 - TH * 7;
 const GROUND_W = TW * 17;
 const GROUND_H = TH * 19;
 
+// The district the next mission is in: a half-done one first (as the Scout's line says), then
+// nextAvailableMission. Its card is the one lit on the map; the rest are quieter.
+export function nextDistrictId(state) {
+  const resume = resumeLine(state);
+  const mission = resume ? findMission(state, resume.id) : nextAvailableMission(state);
+  return mission ? missionDistrict(mission) : null;
+}
+
 function renderDistrictLabels(state, startHere) {
+  const nextId = nextDistrictId(state);
   return BLOCK_DEFS.map((def) => {
     const district = DISTRICTS.find((d) => d.id === def.district);
     const { percent, completed, total, bonusTotal, bonusCompleted } = calcDistrictProgress(state, district.id);
@@ -346,18 +355,20 @@ function renderDistrictLabels(state, startHere) {
     const posStyle = `top: ${top}px; ${side}: 28px`;
     const classes = ['city-label', `is-${status}`, `city-label--${side}`];
     if (isMaster) classes.push('city-label--master');
-    if (isMaster && startHere) classes.push('city-start-pulse');
+    const isNext = district.id === nextId;
+    classes.push(isNext ? 'city-label--next' : 'city-label--rest');
+    if (isNext) classes.push('city-start-pulse');
     const name = isMaster ? 'MASTER KEYS' : district.name.replace(/^The /i, '').toUpperCase();
     const code = `D-0${district.chapter}`;
     const statusWord = { occupied: 'OCCUPIED', contested: 'CONTESTED', secured: 'SECURED' }[status];
-    const startTag = isMaster && startHere
-      ? '<div class="city-label__start">▶ START HERE</div>'
+    const startTag = isNext
+      ? `<div class="city-label__start">${startHere ? '▶ START HERE' : '▶ NEXT UP'}</div>`
       : '';
     const cells = Array.from({ length: 10 }, (_, c) => {
       const lit = percent >= (c + 1) * 10 - 5;
       return `<i class="${lit ? 'lit' : ''}"></i>`;
     }).join('');
-    const bonus = bonusTotal > 0 ? ` <span style="color: ${percent >= 100 ? 'var(--lime)' : 'rgba(0,229,255,0.45)'};">+ ${percent >= 100 ? `${bonusCompleted}/${bonusTotal}` : `${bonusTotal}`} BONUS</span>` : '';
+    const bonus = bonusTotal > 0 ? ` <span class="${percent >= 100 ? 'city-label__bonus is-done' : 'city-label__bonus'}">+ ${percent >= 100 ? `${bonusCompleted}/${bonusTotal}` : `${bonusTotal}`} BONUS</span>` : '';
     return `
     <a href="#/district/${district.id}" class="${classes.join(' ')}" style="${posStyle}">
       <span class="city-label__tick"></span>
@@ -429,13 +440,13 @@ function renderCityScout(state, feeling, lastVisit) {
 
   if (!anyComplete) {
     return say(
-      'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a href="#/district/master-keys" style="color: var(--cyan); font-weight: 600;">Master Keys</a> district first — everything else in the city builds on it.',
+      'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first — everything else in the city builds on it.',
       next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : {},
     );
   }
   if (next) {
     return say(
-      `Ready for the next one? <span style="color: var(--cyan); font-weight: 600;">${next.title}</span> — about ${next.estimatedMinutes} minutes.`,
+      `Ready for the next one? <strong class="say-name">${next.title}</strong> — about ${next.estimatedMinutes} minutes.`,
       { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` },
     );
   }
@@ -642,11 +653,10 @@ const STYLE = `
         linear-gradient(var(--c), var(--c)) right bottom / 1px 22px no-repeat;
     }
     .city-readout { position: absolute; top: 66px; left: 20px; z-index: 30; display: flex; align-items: center; gap: 10px;
-      font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: rgba(0,229,255,0.55); white-space: nowrap; }
-    .city-readout b { color: rgba(0,229,255,0.85); font-weight: 600; }
-    .city-readout .sep { color: rgba(0,229,255,0.25); }
-    .city-readout__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); box-shadow: 0 0 8px var(--magenta);
-      animation: cityBlink 1.2s steps(2, start) infinite; }
+      font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
+    .city-readout b { color: var(--text-quiet); font-weight: 600; }
+    .city-readout .sep { color: var(--text-dim); }
+    .city-readout__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); }
     .city-readout__dot.is-secured { background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: none; }
     @keyframes cityBlink { to { visibility: hidden; } }
 
@@ -654,12 +664,9 @@ const STYLE = `
     .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
-    .city-btn--magenta { color: var(--magenta); border-color: rgba(255,45,155,0.4); background: rgba(255,45,155,0.08); text-shadow: 0 0 8px rgba(255,45,155,0.5); }
-    .city-btn--magenta:hover { background: rgba(255,45,155,0.2); box-shadow: inset 0 0 14px rgba(255,45,155,0.25); transform: translateY(-1px); }
-    .city-btn--cyan { color: var(--cyan); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
-    .city-btn--cyan:hover { background: rgba(0,229,255,0.2); box-shadow: inset 0 0 14px rgba(0,229,255,0.25); transform: translateY(-1px); }
-    .city-btn--lime { color: var(--lime); border-color: rgba(198,255,0,0.4); background: rgba(198,255,0,0.08); text-shadow: 0 0 8px rgba(198,255,0,0.5); }
-    .city-btn--lime:hover { background: rgba(198,255,0,0.2); box-shadow: inset 0 0 14px rgba(198,255,0,0.25); transform: translateY(-1px); }
+    /* Shortcuts, not the next step: quiet outlines in one neutral color (the colour language, style.css). */
+    .city-btn { color: var(--text-strong); border-color: var(--line-quiet); background: rgba(255,255,255,0.03); }
+    .city-btn:hover { border-color: rgba(0,229,255,0.55); background: rgba(0,229,255,0.08); transform: translateY(-1px); }
 
     /* ---------- isometric city ---------- */
     .city-skyline { position: absolute; inset: 0; z-index: 2; }
@@ -731,16 +738,24 @@ const STYLE = `
     .city-label--right .city-label__tick { left: -18px; transform: scaleX(-1); }
     .city-label--right .city-label__tick::after { right: -3px; }
     .city-label__head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1.5px; }
-    .city-label__code { color: rgba(237,239,243,0.4); }
+    .city-label__code { color: var(--text-dim); }
     .city-label__status { font-weight: 700; padding-left: 8px; position: relative; }
     .city-label__status::before { content: ''; position: absolute; left: 0; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
-    .is-occupied .city-label__status { color: var(--magenta); }
-    .is-occupied .city-label__status::before { animation: cityBeacon 1.4s ease-in-out infinite; }
-    .is-contested .city-label__status { color: var(--cyan); }
+    /* The status word is grey; its dot keeps the meaning (magenta occupied, cyan contested, lime secured). */
+    .city-label__status { color: var(--text-dim); }
+    .city-label__status::before { box-shadow: none; }
+    .is-occupied .city-label__status::before { background: var(--magenta); }
+    .is-contested .city-label__status::before { background: var(--cyan); }
     .is-secured .city-label__status { color: var(--lime); }
-    .city-label__name { margin-top: 5px; font-family: var(--font-display); font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: var(--cyan);
-      text-shadow: 0 0 10px rgba(0,229,255,0.45); white-space: nowrap; }
-    .city-label--master .city-label__name { font-size: 10.5px; text-shadow: 0 0 12px rgba(0,229,255,0.6), 0 0 24px rgba(0,229,255,0.25); }
+    .city-label__name { margin-top: 5px; font-family: var(--font-display); font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: var(--text-strong);
+      white-space: nowrap; }
+    .city-label--master .city-label__name { font-size: 10.5px; }
+    /* The district the next mission is in: the one lit card. The rest are quiet until they are done. */
+    .city-label--next { opacity: 1; border-color: rgba(0,229,255,0.6); background: linear-gradient(160deg, rgba(0,40,52,0.92), rgba(16,22,38,0.88)); }
+    .city-label--next .city-label__name { color: var(--cyan); text-shadow: 0 0 12px rgba(0,229,255,0.5); }
+    .city-label--rest:not(.is-secured) { --bracket: rgba(237,239,243,0.3); border-color: rgba(237,239,243,0.12); }
+    .city-label__bonus { color: var(--text-dim); }
+    .city-label__bonus.is-done { color: var(--lime); }
     .is-secured .city-label__name { color: var(--lime); text-shadow: 0 0 10px rgba(198,255,0,0.45); }
     .city-label__meter { display: flex; align-items: center; gap: 7px; margin-top: 6px; }
     .city-label__bar { display: flex; gap: 2px; flex: 1; height: 6px; }
@@ -749,16 +764,16 @@ const STYLE = `
     .city-label__bar i.lit:nth-child(n+7) { background: linear-gradient(90deg, #8ff58a, #C6FF00); border-color: rgba(198,255,0,0.5); box-shadow: 0 0 5px rgba(198,255,0,0.5); }
     .is-secured .city-label__bar { animation: cityBarGlow 2.4s ease-in-out infinite; }
     @keyframes cityBarGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); } }
-    .city-label__pct { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; min-width: 28px; text-align: right; color: rgba(0,229,255,0.5); }
+    .city-label__pct { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; min-width: 28px; text-align: right; color: var(--text-quiet); }
     .is-contested .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.4); }
     .is-secured .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.6); }
-    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(237,239,243,0.32); }
+    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: var(--text-dim); }
     .city-label__start { margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(0,229,255,0.3); font-family: var(--font-mono); font-size: 8px; font-weight: 700;
       letter-spacing: 1.5px; color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.7); }
     .city-start-pulse { border-color: rgba(0,229,255,0.35); animation: cityStartPulse 1.6s ease-in-out infinite; }
     @keyframes cityStartPulse {
       0%, 100% { border-color: rgba(0,229,255,0.3); box-shadow: 0 0 6px rgba(0,229,255,0.15); }
-      50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 22px rgba(0,229,255,0.55), inset 0 0 18px rgba(0,229,255,0.08); }
+      50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 14px rgba(0,229,255,0.06); }
     }
 
     .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 30; }
@@ -847,12 +862,12 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
     <span>SECURED <b>${securedCount}</b></span>
   </div>
   <div class="city-actions">
-    <a href="#/quickquest" class="city-btn city-btn--magenta">⚡ QUICK QUEST</a>
-    <a href="#/stats" class="city-btn city-btn--cyan">STATS</a>
-    <a href="#/reclamation/map" class="city-btn city-btn--lime">↑ LOOK UP</a>
-    <a href="#/prism" class="city-btn city-btn--magenta">◈ PRISM</a>
-    <a href="#/government" class="city-btn city-btn--magenta">◎ WHO GETS IT</a>
-    <a href="#/city-together" class="city-btn city-btn--cyan">WHOLE CITY</a>
+    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
+    <a href="#/stats" class="city-btn">STATS</a>
+    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
+    <a href="#/prism" class="city-btn">◈ PRISM</a>
+    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
+    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
   </div>
   <div class="city-skyline">
     <div class="city-horizon"></div>
@@ -882,7 +897,7 @@ export function resumeLine(state) {
     const p = progressFor(state, id, visibleSteps(m, state));
     if (!p.handled) continue;
     const where = p.current === -1 ? 'All its steps are done — just file the report.' : `You were on ${progressLabel(p).toLowerCase()}.`;
-    return { id, text: `Pick up where you left off: <span style="color: var(--cyan); font-weight: 600;">${m.title}</span>. ${where}` };
+    return { id, text: `Pick up where you left off: <strong class="say-name">${m.title}</strong>. ${where}` };
   }
   return null;
 }

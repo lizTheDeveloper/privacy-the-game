@@ -26,6 +26,7 @@ import { CURATED_MESSAGES } from '../data/phishing.js';
 import { timelineNote, timelineRank, timelineLine } from '../utils/social-timeline.js';
 import { TIMELINE_DOES } from './timeline.js';
 import { isDistrictOn } from '../utils/opt-in.js';
+import { nextAvailableMission } from './city-map.js';
 
 function renderDistrictIntro(state, districtId) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
@@ -37,14 +38,14 @@ function renderDistrictIntro(state, districtId) {
     <div style="display: flex; gap: 14px; align-items: flex-start;">
       <div style="flex-shrink: 0; text-align: center;">
         <img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
-        <div style="font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--cyan); margin-top: 3px; letter-spacing: 2px;">SCOUT</div>
+        <div class="scout-name">SCOUT</div>
       </div>
       <div style="flex: 1; background: rgba(26,31,43,0.8); border: 1px solid rgba(0,229,255,0.2); padding: 14px 16px;">
         ${introBody(dialogue)}
       </div>
     </div>
     <div style="text-align: right; margin-top: 8px;">
-      <span data-action="dismiss-intro" data-district="${districtId}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); letter-spacing: 1px;">DISMISS</span>
+      <span data-action="dismiss-intro" data-district="${districtId}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px;">DISMISS</span>
     </div>
   </div>`;
 }
@@ -206,7 +207,7 @@ function renderTabs(districtId, activeTab) {
   const tabs = PHASES.map((phase) => {
     const active = phase.id === activeTab;
     return `
-    <a href="#/district/${districtId}?tab=${phase.id}" class="panel${active ? ' panel--active' : ''}" style="flex: 1 1 0; min-width: 0; text-align: center; padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'rgba(237,239,243,0.25)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
+    <a href="#/district/${districtId}?tab=${phase.id}" class="panel${active ? ' panel--active' : ''}" style="flex: 1 1 0; min-width: 0; text-align: center; padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'var(--text-dim)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
   });
   return `
   <div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 24px 0;">
@@ -250,30 +251,30 @@ function renderMissionRow(state, mission, { lead = true } = {}) {
     statusCell = `<div class="badge" style="letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);">SECURED</div>`;
   } else if (skipped) {
     statusCell = `
-      <div class="badge" style="letter-spacing: 1px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">SKIPPED</div>
-      <a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">START</a>`;
+      <div class="badge badge--skip" style="letter-spacing: 1px;">SKIPPED</div>
+      <a class="btn-secondary btn-sm" href="#/mission/${mission.id}/briefing">START</a>`;
   } else {
     statusCell = lead
-      ? `<a class="btn-primary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 3px 0 #009bb3;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`
-      : `<a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none;" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
+      ? `<a class="btn-primary btn-sm" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`
+      : `<a class="btn-secondary btn-sm" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
   }
 
   return `
-  <div class="mission-row" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05); ${dimmed ? 'opacity: 0.55;' : 'border: 1px solid rgba(0,229,255,0.2); background: rgba(0,229,255,0.03);'}">
+  <div class="mission-row${dimmed ? ' mission-row--done' : lead ? ' mission-row--lead' : ' mission-row--rest'}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px;">
     ${missionIcon(state, mission)}
     <div class="mission-text" style="flex: 1; min-width: 0;">
       <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${stepsStarted ? missionProgressLine(steps, mission.id) : ''}
-      ${timeline ? `<div data-timeline-note style="font-size: 11px; color: var(--cyan); margin-top: 2px;">${esc(timeline)}</div>` : ''}
+      ${timeline ? `<div data-timeline-note class="mission-note" style="font-size: 11px; margin-top: 2px;">${esc(timeline)}</div>` : ''}
       ${noResetYet ? `<div style="font-size: 11px; color: var(--lime); margin-top: 2px;">No reset needed &mdash; open it to see why.</div>` : ''}
       ${!completed && mission.replaces && isMissionDone(state.missions[mission.replaces]) ? `<div style="font-size: 11px; color: rgba(237,239,243,0.45); margin-top: 2px;">Your earlier email check still counts toward progress. This one checks the account itself.</div>` : ''}
-      ${!completed && isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? `<div style="font-size: 11px; color: var(--magenta); margin-top: 2px;">Flagged by your password manager</div>` : ''}
+      ${!completed && isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? `<div style="font-size: 11px; color: var(--amber); margin-top: 2px;">Flagged by your password manager</div>` : ''}
     </div>
     ${mission.optional
-      ? `<div class="badge" style="letter-spacing: 1px; color: rgba(255,45,155,0.7); background: rgba(255,45,155,0.06); border-color: rgba(255,45,155,0.2);">BONUS</div>`
+      ? `<div class="badge badge--bonus" style="letter-spacing: 1px;">BONUS</div>`
       : ''}
-    <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); white-space: nowrap;">~${mission.estimatedMinutes} min</div>
+    <div class="mission-min" style="font-family: var(--font-mono); font-size: 11px; white-space: nowrap;">~${mission.estimatedMinutes} min</div>
     ${statusCell}
   </div>`;
 }
@@ -323,7 +324,7 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
   const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId });
   // Said once for the list, not on every bonus row.
   const bonusNote = missions.some((m) => m.optional)
-    ? '<div data-bonus-note style="font-size: 12px; color: rgba(237,239,243,0.5); margin: 0 0 8px;"><span style="color: rgba(255,45,155,0.8); font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
+    ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
     : '';
   const prereq = PHASE_PREREQ[activeTab];
   if (prereq) {
@@ -489,14 +490,15 @@ export function quizBadge(quiz) {
 }
 
 // Scam Defense's training: the curated quiz and quiz mode (they don't count toward % SECURED).
-function renderQuizPanel(state) {
+// lead: nothing else in the district is left to start, so training is the bright button.
+function renderQuizPanel(state, lead = false) {
   const quiz = state.phishingQuiz || { curated: {} };
   const total = CURATED_MESSAGES.length;
   const answered = Object.keys(quiz.curated).length;
   const correct = Object.values(quiz.curated).filter(a => a.correct).length;
   const allDone = answered >= total;
   const badge = quizBadge(quiz);
-  const statusColor = badge === 'TRAINED' ? 'var(--lime)' : answered > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
+  const statusColor = badge === 'TRAINED' ? 'var(--lime)' : 'var(--text-quiet)';
   const btnLabel = allDone ? 'QUIZ MODE — KEEP PRACTICING' : answered > 0 ? 'CONTINUE TRAINING' : 'START TRAINING';
 
   return `
@@ -507,13 +509,24 @@ function renderQuizPanel(state) {
         </div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
           Real or fake? Identify phishing emails, texts, calls, and push notifications.
-          ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--cyan);">${correct}/${answered} correct so far.</span>` : ''}
+          ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--offwhite);">${correct}/${answered} correct so far.</span>` : ''}
         </div>
-        <a class="btn-primary" style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
+        <a class="${lead ? 'btn-primary' : 'btn-secondary'}" style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
       </div>`;
 }
 
-function renderFacilitySection(state, facilityId, district) {
+// The facility mission to do next, for the one bright button: one already begun, else the
+// game's next mission when it is here, else the first one not done (in facility order).
+export function facilityLeadId(state, district) {
+  const order = district.facilityOrder || Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id).map(([id]) => id);
+  const rows = order.flatMap((id) => getMissionsForDistrict(district.id).filter((m) => m.accountId === id && !m.legacy));
+  const open = rows.filter((m) => !isMissionDone(state.missions[m.id]) && state.missions[m.id]?.status !== 'skipped');
+  const begun = open.find((m) => progressFor(state, m.id, visibleSteps(m, state)).handled > 0);
+  const next = nextAvailableMission(state);
+  return (begun || open.find((m) => m.id === next?.id) || open[0])?.id || null;
+}
+
+function renderFacilitySection(state, facilityId, district, leadId = null) {
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId && !m.legacy);
@@ -524,7 +537,7 @@ function renderFacilitySection(state, facilityId, district) {
   const connection = district.facilityConnections?.[facilityId];
 
   const pctWidth = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const statusColor = allDone ? 'var(--lime)' : completed > 0 ? 'var(--cyan)' : 'rgba(237,239,243,0.3)';
+  const statusColor = allDone ? 'var(--lime)' : 'var(--text-quiet)';
   const statusText = facilityBadge(completed, total);
 
   const missionRows = missions.map((m) => {
@@ -540,23 +553,23 @@ function renderFacilitySection(state, facilityId, district) {
       action = `<div class="badge" style="${dim} letter-spacing: 1px; color: var(--lime); background: rgba(198,255,0,0.08); border-color: rgba(198,255,0,0.2);">DONE</div>`;
       // A filed broker mission can be filed again: main's re-check mode.
       if (record.status === 'completed' && checklistFor(m.id)) {
-        action = `<div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">${action}<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/recheck">RE-CHECK</a></div>`;
+        action = `<div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">${action}<a class="btn-secondary btn-xs" href="#/mission/${m.id}/recheck">RE-CHECK</a></div>`;
       }
     } else if (skipped) {
-      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">RETRY</a>`;
+      action = `<a class="btn-secondary btn-xs" href="#/mission/${m.id}/briefing">RETRY</a>`;
     } else {
       const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
-      action = `<a class="btn-primary" style="padding: 6px 14px; font-size: 8px; text-decoration: none; box-shadow: 0 0 10px rgba(0,229,255,0.15), 0 2px 0 #009bb3;" href="#/mission/${m.id}/briefing">${begun ? 'CONTINUE' : 'START'}</a>`;
+      action = `<a class="${m.id === leadId ? 'btn-primary' : 'btn-secondary'} btn-xs" href="#/mission/${m.id}/briefing">${begun ? 'CONTINUE' : 'START'}</a>`;
     }
 
     return `
-    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(0,229,255,0.04);">
-      <div style="${dim} font-family: var(--font-mono); font-size: 10px; color: ${done ? 'var(--lime)' : skipped ? 'rgba(237,239,243,0.3)' : 'var(--cyan)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
+    <div class="facility-row${m.id === leadId ? ' facility-row--lead' : ''}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
+      <div style="${dim} font-family: var(--font-mono); font-size: 10px; color: ${done ? 'var(--lime)' : 'var(--text-dim)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
       <div style="${dim} flex: 1; min-width: 0;">
         <div style="font-size: 13px; font-weight: ${done ? 400 : 500}; color: ${done ? 'rgba(237,239,243,0.5)' : 'var(--offwhite)'};">${esc(m.title)}</div>
-        ${summary ? `<div style="font-size: 10px; color: rgba(237,239,243,0.3); margin-top: 2px;">${esc(summary)}</div>` : ''}
+        ${summary ? `<div class="quiet-note" style="font-size: 10px; margin-top: 2px;">${esc(summary)}</div>` : ''}
       </div>
-      <div style="${dim} font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.25);">~${m.estimatedMinutes}m</div>
+      <div class="mission-min" style="${dim} font-family: var(--font-mono); font-size: 10px;">~${m.estimatedMinutes}m</div>
       ${action}
     </div>`;
   }).join('');
@@ -578,7 +591,7 @@ function renderFacilitySection(state, facilityId, district) {
       <div>
         ${missionRows}
       </div>
-      ${facilityId === 'scam_defense' ? renderQuizPanel(state) : ''}
+      ${facilityId === 'scam_defense' ? renderQuizPanel(state, !leadId) : ''}
     </div>
   </div>`;
 }
@@ -650,8 +663,9 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
     .join('');
 
   const facilityOrder = district.facilityOrder || districtAccounts.map(([id]) => id);
+  const leadId = facilityLeadId(state, district);
   const facilities = facilityOrder
-    .map((id) => renderFacilitySection(state, id, district))
+    .map((id) => renderFacilitySection(state, id, district, leadId))
     .join('');
 
   return `
@@ -663,16 +677,16 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">${esc(district.name)}</div>
-          <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
+          <div class="district-name">${esc(district.name)}</div>
+          <div class="badge badge--quiet" style="letter-spacing: 1px;">CHAPTER ${district.chapter}</div>
         </div>
-        <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        <div class="district-desc">${esc(district.description)}</div>
         ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
         ${renderCategoryQuiet(state, district.id)}
       </div>
-      <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
-        <span class="stat-value" style="color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.3);">${progress.percent}%</span>
-        <span class="stat-label" style="color: rgba(0,229,255,0.5);">SECURED</span>
+      <div class="hud-stat hud-stat--progress" style="flex-shrink: 0;">
+        <span class="stat-value">${progress.percent}%</span>
+        <span class="stat-label">SECURED</span>
       </div>
     </div>
     ${categoryAskBlock(state, district.id)}
@@ -766,16 +780,16 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">${esc(district.name)}</div>
-          <div class="badge" style="letter-spacing: 1px; color: var(--cyan); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.25);">CHAPTER ${district.chapter}</div>
+          <div class="district-name">${esc(district.name)}</div>
+          <div class="badge badge--quiet" style="letter-spacing: 1px;">CHAPTER ${district.chapter}</div>
         </div>
-        <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">${esc(district.description)}</div>
+        <div class="district-desc">${esc(district.description)}</div>
         ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
         ${renderCategoryQuiet(state, district.id)}
       </div>
-      <div class="hud-stat hud-stat--cyan" style="flex-shrink: 0;">
-        <span class="stat-value" style="color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.3);">${progress.percent}%</span>
-        <span class="stat-label" style="color: rgba(0,229,255,0.5);">SECURED</span>
+      <div class="hud-stat hud-stat--progress" style="flex-shrink: 0;">
+        <span class="stat-value">${progress.percent}%</span>
+        <span class="stat-label">SECURED</span>
       </div>
     </div>
     ${categoryAskBlock(state, district.id)}

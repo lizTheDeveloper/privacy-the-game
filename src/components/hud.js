@@ -14,9 +14,9 @@ export function renderHud(state, { tools = '', nextLink = true } = {}) {
   const exposure = calcExposure(state);
   const streak = displayStreak(state);
   // Web cabinet (campus iframe): no real-money asks.
-  const supportBlock = isCabinetMode() ? '' : `<div class="hud-support" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
-        <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-flex; align-items: center; gap: 4px;"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
-        <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
+  const supportBlock = isCabinetMode() ? '' : `<div class="hud-support">
+        <a class="hud-support-link" href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
+        <a class="hud-patreon" href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener">or any amount on Patreon</a>
       </div>`;
   // The other mode, one tap away, next to Support us (Liz 2026-11-18: "next to support, put simple
   // mode … people can just click on it and switch back"). Mission screens have the full switch in
@@ -29,22 +29,22 @@ export function renderHud(state, { tools = '', nextLink = true } = {}) {
   return `
   <div${tools ? ' class="hud-bar hud-bar--tools"' : ''} style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;${tools ? ' flex-wrap: wrap; row-gap: 8px;' : ''} background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
     <div>
-      <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">RECLAIM CITY</div>
-      <div style="font-family: var(--font-mono); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-top: 1px;">TAKE BACK YOUR DATA</div>
-      <a href="${STUDIO_URL}hud" target="_blank" rel="noopener" data-studio-link="hud" style="display: inline-block; font-family: var(--font-mono); font-size: 7px; color: rgba(198,255,0,0.55); letter-spacing: 2px; margin-top: 3px; text-decoration: none;">BY MULTIVERSE GAMES&nbsp;&#8599;</a>
+      <div class="hud-brand">RECLAIM CITY</div>
+      <div class="hud-tagline">TAKE BACK YOUR DATA</div>
+      <a class="hud-studio" href="${STUDIO_URL}hud" target="_blank" rel="noopener" data-studio-link="hud">BY MULTIVERSE GAMES&nbsp;&#8599;</a>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
       <div class="hud-stat hud-stat--lime">
-        <span class="stat-value" style="color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.3);">${integrity}%</span>
-        <span class="stat-label" style="color: rgba(198,255,0,0.5);">INTEGRITY</span>
+        <span class="stat-value">${integrity}%</span>
+        <span class="stat-label">INTEGRITY</span>
       </div>
       <div class="hud-stat hud-stat--magenta">
-        <span class="stat-value" style="color: var(--magenta); text-shadow: 0 0 8px rgba(255,45,155,0.3);">${exposure}</span>
-        <span class="stat-label" style="color: rgba(255,45,155,0.5);">EXPOSURE</span>
+        <span class="stat-value">${exposure}</span>
+        <span class="stat-label">EXPOSURE</span>
       </div>
       <div class="hud-stat hud-stat--amber">
-        <span class="stat-value" style="color: var(--amber); text-shadow: 0 0 8px rgba(255,159,0,0.3);">${streak}d</span>
-        <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
+        <span class="stat-value">${streak}d</span>
+        <span class="stat-label">STREAK</span>
       </div>
       ${bugButtonHtml()}
       ${whatsNext}

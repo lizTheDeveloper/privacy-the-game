@@ -83,13 +83,15 @@ export function renderBriefing(state, missionId, opts = {}) {
 
   // A step's row; `notes` lets a phone slide carry only the first note (the rest get slides).
   // The next step to do is lit with DONE, Help and Read it to me (components/walkthrough.js).
+  // On the briefing the page's own GO DO IT / START is the one bright button (the colour
+  // language, style.css), so the lit step's DONE is an outline here.
   const stepRow = (step, i, notes = step.note) => walkStepRow({
     mission, step, index: i, notes, stepNote,
     mark: marks[stepKeyOf(step)],
     current: !noReset && i === progress.current && missionStepList.length > 1,
     site: stepSite(missionStepList, i, account),
     ask: stepAsk(state, mission, step),
-  });
+  }).replace('class="btn-primary walk-done"', 'class="btn-secondary walk-done"');
   const stepRows = missionStepList.map((step, i) => stepRow(step, i));
   const steps = stepRows.join('');
 
@@ -126,13 +128,13 @@ export function renderBriefing(state, missionId, opts = {}) {
   const header = `
         ${missionTrail(started ? 'steps' : 'brief', progress)}
         <div style="font-family: var(--font-display); font-size: 26px; font-weight: 800; line-height: 1.4; letter-spacing: 1px; margin-bottom: 14px; color: var(--offwhite);">
-          ${titleTop ? `${titleTop}<br>` : ''}<span style="color: var(--cyan); text-shadow: 0 0 15px rgba(0,229,255,0.3);">${titleBottom}</span>
+          ${titleTop ? `${titleTop}<br>` : ''}<span class="brief-title-name">${titleBottom}</span>
         </div>
 
         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;">
-          <div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); padding: 4px 12px; letter-spacing: 1px;">${mission.phase.toUpperCase()} MISSION</div>
-          ${mission.optional ? `<div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px;">BONUS &mdash; NEVER BLOCKS PROGRESS</div>` : ''}
-          <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.4); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px;">~${mission.estimatedMinutes} MIN</div>
+          <div class="tag-quiet">${mission.phase.toUpperCase()} MISSION</div>
+          ${mission.optional ? `<div class="tag-quiet">BONUS &mdash; NEVER BLOCKS PROGRESS</div>` : ''}
+          <div class="tag-quiet">~${mission.estimatedMinutes} MIN</div>
           ${noReset ? NO_RESET_BADGE : ''}
         </div>
         ${sharesNote(state, mission)}
@@ -164,7 +166,7 @@ export function renderBriefing(state, missionId, opts = {}) {
               ? `<button class="btn-primary" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`
               : `<button class="btn-primary" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`}
           ${!noReset && canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
-          ${noResetFiled ? '' : `<a href="#/district/${districtId}${targetTab}" style="font-size: 13px; color: rgba(237,239,243,0.35); text-decoration: none;">NOT NOW</a>`}
+          ${noResetFiled ? '' : `<a class="focus-notnow" href="#/district/${districtId}${targetTab}" style="font-size: 13px;">NOT NOW</a>`}
         </div>`;
 
   // A briefing that fits one phone screen stays as it is; a longer one is slides on a phone.
@@ -203,7 +205,7 @@ ${actions}`;
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; min-width: 0; padding: 24px;">
         <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 20px;">
-          <a href="#/district/${districtId}${targetTab}" style="color: rgba(237,239,243,0.4); text-decoration: none;">${district?.name || districtId}</a>
+          <a href="#/district/${districtId}${targetTab}" style="color: var(--text-quiet); text-decoration: none;">${district?.name || districtId}</a>
           <span style="color: rgba(237,239,243,0.2);">/</span>
           <span style="color: rgba(237,239,243,0.6); text-transform: uppercase;">${mission.phase}</span>
         </div>
@@ -212,7 +214,7 @@ ${main}
 
       <div class="brief-side" style="flex: 1 1 240px; background: rgba(26,31,43,0.4); border-left: 1px solid rgba(0,229,255,0.1); padding: 24px; flex-direction: column; align-items: center;">
         ${briefingScout(scoutFeeling)}
-        <div style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4);">SCOUT</div>
+        <div class="scout-name" style="font-size: 9px; margin-bottom: 16px; letter-spacing: 3px;">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
           <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${scoutLine}</div>
         </div>
@@ -342,7 +344,7 @@ function sharesNote(state, mission) {
   const rows = shared.map((m) => {
     const done = isMissionDoneIn(state, m);
     const where = DISTRICTS.find((d) => d.id === missionDistrict(m))?.name || '';
-    return `<li><a href="#/mission/${m.id}/briefing" style="color: var(--cyan);">${done ? '&#10003; ' : ''}${esc(m.title)}</a> <span style="color: rgba(237,239,243,0.4);">(${esc(where)})</span></li>`;
+    return `<li><a href="#/mission/${m.id}/briefing" style="color: var(--cyan);">${done ? '&#10003; ' : ''}${esc(m.title)}</a> <span style="color: var(--text-dim);">(${esc(where)})</span></li>`;
   }).join('');
   return `<div data-shares style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
     <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">ALREADY IN RECLAIM CITY &mdash; PART OF THIS JOB</div>

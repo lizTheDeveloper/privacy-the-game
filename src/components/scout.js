@@ -79,7 +79,7 @@ export function scoutSprite(feeling, { size = 64, style = '', attrs = '' } = {})
 
 export function renderScout(message, options = {}) {
   const action = options.actionText && options.actionHref
-    ? `<a href="${options.actionHref}" style="flex-shrink: 0; display: inline-block; border: 1px solid var(--cyan); padding: 10px 18px; font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); text-decoration: none; white-space: nowrap; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); box-shadow: 0 0 12px rgba(0,229,255,0.15), inset 0 0 12px rgba(0,229,255,0.05);">${options.actionText}</a>`
+    ? `<a class="btn-primary scout-action" href="${options.actionHref}">${options.actionText}</a>`
     : '';
   const sprite = isFeeling(options.feeling)
     ? scoutSprite(options.feeling, { size: 64, style: 'filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));' })
@@ -89,11 +89,11 @@ export function renderScout(message, options = {}) {
     <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
       <div style="flex-shrink: 0; text-align: center;">
         ${sprite}
-        <div style="font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--cyan); margin-top: 3px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,229,255,0.4);">SCOUT</div>
+        <div class="scout-name">SCOUT</div>
       </div>
       <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
         <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">${message}</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--cyan);"></div>
+        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(237,239,243,0.35);"></div>
       </div>
       ${action}
     </div>

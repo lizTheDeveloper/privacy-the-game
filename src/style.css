@@ -991,3 +991,136 @@ img { image-rendering: pixelated; }
 .bw-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .bw-less, .bw-hide { font-size: 15px; color: rgba(237,239,243,0.8); background: none; border: 1px solid rgba(237,239,243,0.25); padding: 0 14px; }
 .bw--advanced .bw-line { font-size: 15px; }
+
+/* ===== colour language: start =====
+   A player (2026-11-18): "I need your help to ONLY highlight and emphasize the part that is
+   supposed to do next. There are so many different words highlighted, each page feels like
+   extra work." So colour means one thing each, on every screen:
+
+   CYAN, FILLED, WITH A GLOW (.btn-primary): the one thing to tap next. One per screen, or one per
+     list when the list is the point (the recommended row is filled, the rest are outlined).
+   CYAN OUTLINE / CYAN TEXT: you can tap this, but it is not the next thing (.btn-secondary, links,
+     tabs, MORE). Words you can't tap are never cyan.
+   LIME: done, good, progress (SECURED, ticks, the filled bar, LIBERATED).
+   AMBER: a warning (look at this, flagged).
+   MAGENTA: danger and exposure only (CRIT, the exposure score, occupied ground on the map).
+   EVERYTHING ELSE IS NEUTRAL: off-white for what you read; --text-quiet and --text-dim greys for
+     labels, eyebrows and side notes. Both greys pass WCAG AA on the dark background. A real
+     instruction is never grey: demote decoration, not content.
+
+   Pressing anything moves it down and flashes it brighter. Arriving on a screen pulses its one
+   bright button once (app.js sets #app.is-arriving on a navigation, not on a re-draw).
+   Reduced motion keeps the colour flash and drops the movement. */
+:root {
+  --text-strong: #EDEFF3;
+  --text-quiet: #AEB4BF;  /* 8.9:1 on --midnight */
+  --text-dim: #8A92A0;    /* 5.9:1 on --midnight, 5.0:1 on a panel */
+  --line-quiet: rgba(237, 239, 243, 0.2);
+}
+html { -webkit-tap-highlight-color: rgba(0, 229, 255, 0.28); }
+/* A link with no colour of its own is cyan, not the browser's dark blue (2:1 on this background). */
+a { color: var(--cyan); }
+.mission-trail, .focus-crumb, .focus-crumb a { color: var(--text-dim); }
+
+/* The one bright button. */
+.btn-primary { text-decoration: none; transition: transform 90ms ease, box-shadow 140ms ease, background-color 140ms ease; }
+.btn-primary:hover { background: #5CEFFF; }
+.btn-primary:active { transform: translateY(3px); background: #C2FAFF; box-shadow: 0 0 30px rgba(0, 229, 255, 0.7), 0 1px 0 #009bb3; }
+.btn-primary:focus-visible { outline: 3px solid var(--offwhite); outline-offset: 3px; }
+.btn-primary.btn-sm { padding: 8px 16px; font-size: 9px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3), 0 3px 0 #009bb3; }
+.btn-primary.btn-xs { padding: 6px 14px; font-size: 8px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 0 2px 0 #009bb3; }
+.btn-primary.btn-sm:active, .btn-primary.btn-xs:active { box-shadow: 0 0 22px rgba(0, 229, 255, 0.7), 0 0 0 #009bb3; }
+
+/* Everything else you can tap: an outline, words in off-white. */
+.btn-secondary { color: var(--text-strong); background: transparent; border-color: rgba(0, 229, 255, 0.4); text-decoration: none; transition: transform 90ms ease, background-color 140ms ease, border-color 140ms ease; }
+.btn-secondary:hover { border-color: rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.06); }
+.btn-secondary.btn-sm { padding: 8px 16px; font-size: 9px; }
+.btn-secondary.btn-xs { padding: 6px 14px; font-size: 8px; }
+
+/* Pressed: down a little, and a flash of cyan. */
+:is(.btn-secondary, .city-btn, .hud-next, .hud-mode, .hud-support-link, .simple-back, .simple-pill, .finder-opt, .survey-chip, .focus-ask-opt, .walk-gear-chip, .deck-btn, .interior-btn, .top-tool, .building-link, .read-level, .candle-btn):active:not(:disabled) {
+  transform: translateY(2px);
+  background-color: rgba(0, 229, 255, 0.24);
+  border-color: var(--cyan);
+}
+:is(a, summary, [role="button"], .walk-link):active { filter: brightness(1.35); }
+
+/* Keyboard focus: a ring on everything (rules that set their own keep theirs). */
+:where(a, button, summary, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--cyan) !important; outline-offset: 1px; }
+
+/* Arriving on a screen: the one bright button pulses once. */
+@keyframes primary-arrive {
+  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.75), 0 4px 0 #009bb3; }
+  70% { box-shadow: 0 0 0 16px rgba(0, 229, 255, 0), 0 4px 0 #009bb3; }
+  100% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.35), 0 4px 0 #009bb3; }
+}
+#app.is-arriving .btn-primary { animation: primary-arrive 1.1s ease-out 0.3s 1 backwards; }
+
+/* The top bar: the name stays cyan; the rest is quiet. Each score keeps its meaning colour on the number only. */
+.hud-brand { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 40px rgba(0, 229, 255, 0.15); }
+.hud-tagline { font-family: var(--font-mono); font-size: 8px; color: var(--text-dim); letter-spacing: 2px; margin-top: 1px; }
+.hud-studio { display: inline-block; font-family: var(--font-mono); font-size: 7px; color: var(--text-dim); letter-spacing: 2px; margin-top: 3px; text-decoration: none; }
+.hud-stat--lime, .hud-stat--magenta, .hud-stat--amber, .hud-stat--cyan, .hud-stat--progress { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); }
+.hud-stat .stat-label { color: var(--text-dim); }
+.hud-stat--lime .stat-value, .hud-stat--progress .stat-value { color: var(--lime); }
+.hud-stat--magenta .stat-value { color: var(--magenta); }
+.hud-stat--amber .stat-value { color: var(--text-strong); }
+.hud-support { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.hud-support-link { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--text-strong); text-decoration: none; border: 1px solid var(--line-quiet); }
+.hud-patreon { display: inline-block; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: var(--text-dim); text-decoration: none; }
+/* What's next in the top bar is a way back, not the screen's next step: an outline. */
+.hud-next { color: var(--cyan); background: transparent; border: 1px solid rgba(0, 229, 255, 0.6); }
+.hud-mode { color: var(--text-strong); background: transparent; border-color: var(--line-quiet); }
+
+/* Scout: the name is a quiet label; the button under a line is the next step. */
+.scout-name { font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--text-dim); margin-top: 3px; letter-spacing: 2px; }
+.scout-action { flex-shrink: 0; display: inline-block; text-align: center; white-space: nowrap; padding: 12px 20px; font-size: 10px; letter-spacing: 1px; }
+.say-name { color: var(--offwhite); font-weight: 700; }
+.say-link { color: var(--cyan); font-weight: 600; }
+
+/* Labels, eyebrows and tags: grey. (.section-label is coloured inline on many screens.) */
+.section-label { color: var(--text-quiet) !important; }
+.screen-eyebrow { font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--text-quiet); }
+.tag-quiet { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); padding: 4px 12px; }
+.badge--quiet, .badge--bonus { color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border-color: var(--line-quiet); }
+.badge--skip { color: var(--text-dim); }
+.bonus-word { color: var(--text-quiet); font-weight: 700; }
+.quiet-note { color: var(--text-quiet); }
+.mission-min { color: var(--text-dim); }
+.mission-note { color: rgba(237, 239, 243, 0.8); }
+.next-label, .fill-title, .focus-meta, .focus-card-head { color: var(--text-quiet); }
+.focus-card.is-done .focus-card-head { color: var(--lime); }
+.focus-title-main, .brief-title-name { color: var(--offwhite); text-shadow: none; }
+.brief-scout-name { color: var(--text-dim); text-shadow: none; }
+.skyline-hint b { color: var(--offwhite); }
+.focus-notnow { color: var(--text-quiet); text-decoration: underline; text-decoration-color: rgba(237, 239, 243, 0.3); text-underline-offset: 3px; }
+
+/* A district: its name in off-white; the progress stat in lime. */
+.district-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--offwhite); letter-spacing: 3px; text-transform: uppercase; }
+.district-desc { font-size: 12px; color: var(--text-quiet); margin-top: 4px; }
+.intro-more-toggle { border-color: var(--line-quiet); }
+.building-link, .building-link--compact { border-color: rgba(237, 239, 243, 0.14); background: transparent; }
+.building-badge { color: var(--cyan); background: transparent; border: 1px solid rgba(0, 229, 255, 0.6); box-shadow: none; }
+.building-badge--new { animation-iteration-count: 3; }
+.survey-chip.is-on { color: var(--offwhite); background: rgba(198, 255, 0, 0.06); border-color: rgba(198, 255, 0, 0.45); }
+.survey-chip.is-on .survey-chip-mark { color: var(--lime); }
+
+/* A list of missions: the next one is lit; the rest are outlined; done ones fade. */
+.mission-row { border: 1px solid rgba(237, 239, 243, 0.08); }
+.mission-row + .mission-row { margin-top: 4px; }
+.mission-row--lead { border-color: rgba(0, 229, 255, 0.55); background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
+.mission-row--done { opacity: 0.55; }
+.facility-row { border-bottom: 1px solid rgba(237, 239, 243, 0.06); }
+.facility-row--lead { background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
+
+/* Marks that aren't buttons don't look like buttons. */
+.mission-trail .is-now .mission-trail-n { background: transparent; color: var(--cyan); border-color: var(--cyan); }
+.finder-steps li::before, .site-preview-steps li::before { background: rgba(237, 239, 243, 0.1); color: var(--offwhite); border: 1px solid rgba(237, 239, 243, 0.35); }
+.deck-btn:not(:disabled) { color: var(--text-strong); background: transparent; border-color: rgba(0, 229, 255, 0.4); }
+
+@media (prefers-reduced-motion: reduce) {
+  #app.is-arriving .btn-primary { animation: none; }
+  .btn-primary:active, :is(.btn-secondary, .city-btn, .hud-next, .hud-mode, .hud-support-link, .simple-back, .simple-pill, .finder-opt, .survey-chip, .focus-ask-opt, .walk-gear-chip, .deck-btn, .interior-btn, .top-tool, .building-link, .read-level, .candle-btn):active { transform: none; }
+}
+/* ===== colour language: end ===== */

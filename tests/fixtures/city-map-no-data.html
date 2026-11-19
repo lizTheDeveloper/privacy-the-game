@@ -80,11 +80,10 @@
         linear-gradient(var(--c), var(--c)) right bottom / 1px 22px no-repeat;
     }
     .city-readout { position: absolute; top: 66px; left: 20px; z-index: 30; display: flex; align-items: center; gap: 10px;
-      font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: rgba(0,229,255,0.55); white-space: nowrap; }
-    .city-readout b { color: rgba(0,229,255,0.85); font-weight: 600; }
-    .city-readout .sep { color: rgba(0,229,255,0.25); }
-    .city-readout__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); box-shadow: 0 0 8px var(--magenta);
-      animation: cityBlink 1.2s steps(2, start) infinite; }
+      font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
+    .city-readout b { color: var(--text-quiet); font-weight: 600; }
+    .city-readout .sep { color: var(--text-dim); }
+    .city-readout__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); }
     .city-readout__dot.is-secured { background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: none; }
     @keyframes cityBlink { to { visibility: hidden; } }
 
@@ -92,12 +91,9 @@
     .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
-    .city-btn--magenta { color: var(--magenta); border-color: rgba(255,45,155,0.4); background: rgba(255,45,155,0.08); text-shadow: 0 0 8px rgba(255,45,155,0.5); }
-    .city-btn--magenta:hover { background: rgba(255,45,155,0.2); box-shadow: inset 0 0 14px rgba(255,45,155,0.25); transform: translateY(-1px); }
-    .city-btn--cyan { color: var(--cyan); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
-    .city-btn--cyan:hover { background: rgba(0,229,255,0.2); box-shadow: inset 0 0 14px rgba(0,229,255,0.25); transform: translateY(-1px); }
-    .city-btn--lime { color: var(--lime); border-color: rgba(198,255,0,0.4); background: rgba(198,255,0,0.08); text-shadow: 0 0 8px rgba(198,255,0,0.5); }
-    .city-btn--lime:hover { background: rgba(198,255,0,0.2); box-shadow: inset 0 0 14px rgba(198,255,0,0.25); transform: translateY(-1px); }
+    /* Shortcuts, not the next step: quiet outlines in one neutral color (the colour language, style.css). */
+    .city-btn { color: var(--text-strong); border-color: var(--line-quiet); background: rgba(255,255,255,0.03); }
+    .city-btn:hover { border-color: rgba(0,229,255,0.55); background: rgba(0,229,255,0.08); transform: translateY(-1px); }
 
     /* ---------- isometric city ---------- */
     .city-skyline { position: absolute; inset: 0; z-index: 2; }
@@ -169,16 +165,24 @@
     .city-label--right .city-label__tick { left: -18px; transform: scaleX(-1); }
     .city-label--right .city-label__tick::after { right: -3px; }
     .city-label__head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1.5px; }
-    .city-label__code { color: rgba(237,239,243,0.4); }
+    .city-label__code { color: var(--text-dim); }
     .city-label__status { font-weight: 700; padding-left: 8px; position: relative; }
     .city-label__status::before { content: ''; position: absolute; left: 0; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
-    .is-occupied .city-label__status { color: var(--magenta); }
-    .is-occupied .city-label__status::before { animation: cityBeacon 1.4s ease-in-out infinite; }
-    .is-contested .city-label__status { color: var(--cyan); }
+    /* The status word is grey; its dot keeps the meaning (magenta occupied, cyan contested, lime secured). */
+    .city-label__status { color: var(--text-dim); }
+    .city-label__status::before { box-shadow: none; }
+    .is-occupied .city-label__status::before { background: var(--magenta); }
+    .is-contested .city-label__status::before { background: var(--cyan); }
     .is-secured .city-label__status { color: var(--lime); }
-    .city-label__name { margin-top: 5px; font-family: var(--font-display); font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: var(--cyan);
-      text-shadow: 0 0 10px rgba(0,229,255,0.45); white-space: nowrap; }
-    .city-label--master .city-label__name { font-size: 10.5px; text-shadow: 0 0 12px rgba(0,229,255,0.6), 0 0 24px rgba(0,229,255,0.25); }
+    .city-label__name { margin-top: 5px; font-family: var(--font-display); font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: var(--text-strong);
+      white-space: nowrap; }
+    .city-label--master .city-label__name { font-size: 10.5px; }
+    /* The district the next mission is in: the one lit card. The rest are quiet until they are done. */
+    .city-label--next { opacity: 1; border-color: rgba(0,229,255,0.6); background: linear-gradient(160deg, rgba(0,40,52,0.92), rgba(16,22,38,0.88)); }
+    .city-label--next .city-label__name { color: var(--cyan); text-shadow: 0 0 12px rgba(0,229,255,0.5); }
+    .city-label--rest:not(.is-secured) { --bracket: rgba(237,239,243,0.3); border-color: rgba(237,239,243,0.12); }
+    .city-label__bonus { color: var(--text-dim); }
+    .city-label__bonus.is-done { color: var(--lime); }
     .is-secured .city-label__name { color: var(--lime); text-shadow: 0 0 10px rgba(198,255,0,0.45); }
     .city-label__meter { display: flex; align-items: center; gap: 7px; margin-top: 6px; }
     .city-label__bar { display: flex; gap: 2px; flex: 1; height: 6px; }
@@ -187,16 +191,16 @@
     .city-label__bar i.lit:nth-child(n+7) { background: linear-gradient(90deg, #8ff58a, #C6FF00); border-color: rgba(198,255,0,0.5); box-shadow: 0 0 5px rgba(198,255,0,0.5); }
     .is-secured .city-label__bar { animation: cityBarGlow 2.4s ease-in-out infinite; }
     @keyframes cityBarGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); } }
-    .city-label__pct { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; min-width: 28px; text-align: right; color: rgba(0,229,255,0.5); }
+    .city-label__pct { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; min-width: 28px; text-align: right; color: var(--text-quiet); }
     .is-contested .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.4); }
     .is-secured .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.6); }
-    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(237,239,243,0.32); }
+    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: var(--text-dim); }
     .city-label__start { margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(0,229,255,0.3); font-family: var(--font-mono); font-size: 8px; font-weight: 700;
       letter-spacing: 1.5px; color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.7); }
     .city-start-pulse { border-color: rgba(0,229,255,0.35); animation: cityStartPulse 1.6s ease-in-out infinite; }
     @keyframes cityStartPulse {
       0%, 100% { border-color: rgba(0,229,255,0.3); box-shadow: 0 0 6px rgba(0,229,255,0.15); }
-      50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 22px rgba(0,229,255,0.55), inset 0 0 18px rgba(0,229,255,0.08); }
+      50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 14px rgba(0,229,255,0.06); }
     }
 
     .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 30; }
@@ -343,29 +347,29 @@
   <div class="city-hud">
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
     <div>
-      <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15);">RECLAIM CITY</div>
-      <div style="font-family: var(--font-mono); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-top: 1px;">TAKE BACK YOUR DATA</div>
-      <a href="https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=hud" target="_blank" rel="noopener" data-studio-link="hud" style="display: inline-block; font-family: var(--font-mono); font-size: 7px; color: rgba(198,255,0,0.55); letter-spacing: 2px; margin-top: 3px; text-decoration: none;">BY MULTIVERSE GAMES&nbsp;&#8599;</a>
+      <div class="hud-brand">RECLAIM CITY</div>
+      <div class="hud-tagline">TAKE BACK YOUR DATA</div>
+      <a class="hud-studio" href="https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=hud" target="_blank" rel="noopener" data-studio-link="hud">BY MULTIVERSE GAMES&nbsp;&#8599;</a>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
       <div class="hud-stat hud-stat--lime">
-        <span class="stat-value" style="color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.3);">0%</span>
-        <span class="stat-label" style="color: rgba(198,255,0,0.5);">INTEGRITY</span>
+        <span class="stat-value">0%</span>
+        <span class="stat-label">INTEGRITY</span>
       </div>
       <div class="hud-stat hud-stat--magenta">
-        <span class="stat-value" style="color: var(--magenta); text-shadow: 0 0 8px rgba(255,45,155,0.3);">1000</span>
-        <span class="stat-label" style="color: rgba(255,45,155,0.5);">EXPOSURE</span>
+        <span class="stat-value">1000</span>
+        <span class="stat-label">EXPOSURE</span>
       </div>
       <div class="hud-stat hud-stat--amber">
-        <span class="stat-value" style="color: var(--amber); text-shadow: 0 0 8px rgba(255,159,0,0.3);">0d</span>
-        <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
+        <span class="stat-value">0d</span>
+        <span class="stat-label">STREAK</span>
       </div>
       <button type="button" class="hud-bug" data-bug-report aria-label="Report a bug" title="Report a bug">🐞</button>
       <a class="hud-next" href="#/next">What’s next &#9654;</a>
       <button type="button" class="hud-mode" data-action="read-level" data-level="full" aria-label="Switch to Advanced mode">Advanced mode</button>
-      <div class="hud-support" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
-        <a href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: var(--lime); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.06); display: inline-flex; align-items: center; gap: 4px;"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
-        <a href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener" style="font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: rgba(198,255,0,0.5); text-decoration: none; display: inline-block;">or any amount on Patreon</a>
+      <div class="hud-support">
+        <a class="hud-support-link" href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
+        <a class="hud-patreon" href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener">or any amount on Patreon</a>
       </div>
     </div>
   </div></div>
@@ -378,12 +382,12 @@
     <span>SECURED <b>0</b></span>
   </div>
   <div class="city-actions">
-    <a href="#/quickquest" class="city-btn city-btn--magenta">⚡ QUICK QUEST</a>
-    <a href="#/stats" class="city-btn city-btn--cyan">STATS</a>
-    <a href="#/reclamation/map" class="city-btn city-btn--lime">↑ LOOK UP</a>
-    <a href="#/prism" class="city-btn city-btn--magenta">◈ PRISM</a>
-    <a href="#/government" class="city-btn city-btn--magenta">◎ WHO GETS IT</a>
-    <a href="#/city-together" class="city-btn city-btn--cyan">WHOLE CITY</a>
+    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
+    <a href="#/stats" class="city-btn">STATS</a>
+    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
+    <a href="#/prism" class="city-btn">◈ PRISM</a>
+    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
+    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
   </div>
   <div class="city-skyline">
     <div class="city-horizon"></div>
@@ -517,7 +521,7 @@
   <div class="city-frame"></div>
   <div class="city-labels">
     
-    <a href="#/district/master-keys" class="city-label is-occupied city-label--right city-label--master city-start-pulse" style="top: 464px; right: 28px">
+    <a href="#/district/master-keys" class="city-label is-occupied city-label--right city-label--master city-label--next city-start-pulse" style="top: 464px; right: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-01</span>
@@ -528,10 +532,10 @@
         <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
         <span class="city-label__pct" aria-hidden="true">0%</span>
       </div>
-      <div class="city-label__sub">0/28 MISSIONS <span style="color: rgba(0,229,255,0.45);">+ 22 BONUS</span></div>
+      <div class="city-label__sub">0/28 MISSIONS <span class="city-label__bonus">+ 22 BONUS</span></div>
       <div class="city-label__start">▶ START HERE</div>
     </a>
-    <a href="#/district/vault" class="city-label is-occupied city-label--left" style="top: 468px; left: 28px">
+    <a href="#/district/vault" class="city-label is-occupied city-label--left city-label--rest" style="top: 468px; left: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-02</span>
@@ -545,7 +549,7 @@
       <div class="city-label__sub">0/18 MISSIONS</div>
       
     </a>
-    <a href="#/district/square" class="city-label is-occupied city-label--right" style="top: 360px; right: 28px">
+    <a href="#/district/square" class="city-label is-occupied city-label--right city-label--rest" style="top: 360px; right: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-03</span>
@@ -559,7 +563,7 @@
       <div class="city-label__sub">0/40 MISSIONS</div>
       
     </a>
-    <a href="#/district/archives" class="city-label is-occupied city-label--left" style="top: 364px; left: 28px">
+    <a href="#/district/archives" class="city-label is-occupied city-label--left city-label--rest" style="top: 364px; left: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-04</span>
@@ -573,7 +577,7 @@
       <div class="city-label__sub">0/8 MISSIONS</div>
       
     </a>
-    <a href="#/district/marketplace" class="city-label is-occupied city-label--right" style="top: 256px; right: 28px">
+    <a href="#/district/marketplace" class="city-label is-occupied city-label--right city-label--rest" style="top: 256px; right: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-05</span>
@@ -587,7 +591,7 @@
       <div class="city-label__sub">0/14 MISSIONS</div>
       
     </a>
-    <a href="#/district/capitol" class="city-label is-occupied city-label--left" style="top: 260px; left: 28px">
+    <a href="#/district/capitol" class="city-label is-occupied city-label--left city-label--rest" style="top: 260px; left: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-06</span>
@@ -601,7 +605,7 @@
       <div class="city-label__sub">0/11 MISSIONS</div>
       
     </a>
-    <a href="#/district/perimeter" class="city-label is-occupied city-label--right" style="top: 152px; right: 28px">
+    <a href="#/district/perimeter" class="city-label is-occupied city-label--right city-label--rest" style="top: 152px; right: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-07</span>
@@ -615,7 +619,7 @@
       <div class="city-label__sub">0/15 MISSIONS</div>
       
     </a>
-    <a href="#/district/reclamation" class="city-label is-occupied city-label--left" style="top: 156px; left: 28px">
+    <a href="#/district/reclamation" class="city-label is-occupied city-label--left city-label--rest" style="top: 156px; left: 28px">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
         <span class="city-label__code">D-08</span>
@@ -635,13 +639,13 @@
     <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
       <div style="flex-shrink: 0; text-align: center;">
         <img src="assets/characters/scout_0.png" style="width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
-        <div style="font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--cyan); margin-top: 3px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,229,255,0.4);">SCOUT</div>
+        <div class="scout-name">SCOUT</div>
       </div>
       <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
-        <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a href="#/district/master-keys" style="color: var(--cyan); font-weight: 600;">Master Keys</a> district first — everything else in the city builds on it.</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--cyan);"></div>
+        <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first — everything else in the city builds on it.</div>
+        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(237,239,243,0.35);"></div>
       </div>
-      <a href="#/mission/gmail-recon-breach/briefing" style="flex-shrink: 0; display: inline-block; border: 1px solid var(--cyan); padding: 10px 18px; font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); text-decoration: none; white-space: nowrap; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); box-shadow: 0 0 12px rgba(0,229,255,0.15), inset 0 0 12px rgba(0,229,255,0.05);">NEXT MISSION</a>
+      <a class="btn-primary scout-action" href="#/mission/gmail-recon-breach/briefing">NEXT MISSION</a>
     </div>
   </div></div>
 </div>
