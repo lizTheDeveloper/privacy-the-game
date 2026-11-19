@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createInitialState, updateMission, toggleAccount } from '../src/state.js';
 import { setReadLevel } from '../src/utils/reading.js';
-import { calcChapterProgress, calcDistrictProgress, districtParts, PART_MAX } from '../src/utils/calc.js';
+import { calcChapterProgress, calcDistrictProgress, districtParts, foldLoneParts, PART_MAX } from '../src/utils/calc.js';
+import { DISTRICTS } from '../src/data/districts.js';
 import { renderNext } from '../src/screens/next.js';
 import { _resetFillBars } from '../src/components/fill-bar.js';
 
@@ -50,7 +51,101 @@ describe('districtParts', () => {
   });
 });
 
+// Liz 2026-11-19: "a part with only one mission should fold". One tap filling a whole bar feels
+// hollow, and it makes "OF N" bigger for nothing.
+const fake = (phase, n, from = 0) => ({
+  phase,
+  name: { recon: 'Check your accounts', fortify: 'Lock them up', reclaim: 'Take your data back' }[phase],
+  missions: Array.from({ length: n }, (_, i) => ({ id: `${phase}-${from + i}`, phase })),
+});
+const sizes = (parts) => parts.map((p) => p.missions.length);
+const flat = (parts) => parts.flatMap(ids);
+// A part holding a mission of another phase took in a folded one.
+const foldedMission = (part) => part.missions.find((m) => m.phase !== part.phase);
+
+describe('a part with one mission folds', () => {
+  it('a phase with one mission folds into the part before it, missions in order', () => {
+    const parts = [fake('recon', 5), fake('fortify', 5), fake('reclaim', 1)];
+    const out = foldLoneParts(parts);
+    expect(sizes(out)).toEqual([5, 6]);
+    expect(flat(out)).toEqual(flat(parts));
+    expect(out[1]).toMatchObject({ phase: 'fortify', name: 'Lock them up' });
+  });
+
+  it('a one-mission first part folds forward, into the part after it', () => {
+    const parts = [fake('recon', 1), fake('fortify', 6), fake('fortify', 5, 6), fake('reclaim', 3)];
+    const out = foldLoneParts(parts);
+    expect(sizes(out)).toEqual([7, 5, 3]);
+    expect(flat(out)).toEqual(flat(parts));
+    expect(out[0].missions[0].id).toBe('recon-0');
+    expect(out[0]).toMatchObject({ phase: 'fortify', name: 'Lock them up' });
+  });
+
+  it('two one-mission parts in a row make one part of two, named for the first', () => {
+    const out = foldLoneParts([fake('recon', 1), fake('fortify', 1), fake('reclaim', 4)]);
+    expect(sizes(out)).toEqual([2, 4]);
+    expect(out[0].name).toBe('Check your accounts');
+  });
+
+  it('a one-mission district stays one part', () => {
+    const out = foldLoneParts([fake('fortify', 1)]);
+    expect(sizes(out)).toEqual([1]);
+    expect(out[0].name).toBe('Lock them up');
+  });
+
+  it('parts of two or more are left as they are', () => {
+    const parts = [fake('recon', 2), fake('fortify', 8), fake('fortify', 7, 8), fake('reclaim', 3)];
+    expect(foldLoneParts(parts)).toEqual(parts);
+    // The Master Keys has no lone part: every part is one kind of mission.
+    for (const p of districtParts(simple(), MK)) expect(foldedMission(p)).toBeUndefined();
+  });
+
+  it('no real district has a one-mission part, and every mission is in exactly one part', () => {
+    let folded = 0;
+    for (const d of DISTRICTS) {
+      const s = simple();
+      const parts = districtParts(s, d.id);
+      expect(parts.map((p) => p.chapter)).toEqual(parts.map((_, i) => i + 1));
+      if (parts.length > 1) for (const p of parts) expect(p.missions.length).toBeGreaterThan(1);
+      const all = flat(parts);
+      expect(all.length).toBe(calcDistrictProgress(s, d.id).total);
+      expect(new Set(all).size).toBe(all.length);
+      folded += parts.filter(foldedMission).length;
+    }
+    expect(folded).toBeGreaterThan(0); // the data has folds (The Vault, The Capitol, The Perimeter)
+  });
+
+  it('The Capitol’s one take-back mission folds into its locks', () => {
+    // 5 checks, 5 locks, 1 take-back: two parts, not three.
+    const parts = districtParts(simple(), 'capitol');
+    expect(parts.length).toBe(2);
+    expect(parts.at(-1).missions.at(-1).phase).toBe('reclaim');
+    expect(parts.at(-1).name).toBe('Lock them up');
+  });
+});
+
 describe('calcChapterProgress', () => {
+  it('pinned to a folded mission: the merged part, renumbered', () => {
+    const s0 = simple();
+    const parts = districtParts(s0, 'capitol');
+    const last = parts.at(-1);
+    const lone = foldedMission(last);
+    expect(lone).toBeDefined();
+    const s = done(s0, [lone.id]);
+    const p = calcChapterProgress(s, 'capitol', { missionId: lone.id });
+    expect(p).toMatchObject({ chapter: parts.length, of: parts.length, name: 'Lock them up', completed: 1, total: last.missions.length, done: false });
+    expect(p.label).toBe(`PART ${parts.length} OF ${parts.length} · THE CAPITOL`);
+  });
+
+  it('pinned to a mission folded forward into part 1', () => {
+    const parts = districtParts(simple(), 'perimeter');
+    const lone = foldedMission(parts[0]);
+    expect(lone?.phase).toBe('recon');
+    expect(parts[0].missions[0]).toBe(lone); // still first, as the game hands it out
+    const p = calcChapterProgress(done(simple(), [lone.id]), 'perimeter', { missionId: lone.id });
+    expect(p).toMatchObject({ chapter: 1, of: parts.length, completed: 1, total: parts[0].missions.length, name: parts[0].name });
+  });
+
   it('a new player is on part 1, with nothing done', () => {
     const p = calcChapterProgress(simple(), MK);
     expect(p).toMatchObject({ chapter: 1, completed: 0, done: false, next: null, name: 'Check your accounts' });
@@ -103,6 +198,16 @@ describe('calcChapterProgress', () => {
 });
 
 describe('What’s next shows the part', () => {
+  it('a folded mission shows the merged part’s bar, with its renumbered key', () => {
+    const parts = districtParts(simple(), 'capitol');
+    const lone = foldedMission(parts.at(-1));
+    const s = done(simple(), [lone.id]);
+    const h = renderNext(s, { filed: { id: lone.id, reaction: { line: 'Done.', feeling: 'proud' } } });
+    expect(h).toContain(`data-fill-bar="chapter:capitol:${parts.length}"`);
+    expect(h).toContain(`<div class="fill-title">PART ${parts.length} OF ${parts.length} · THE CAPITOL</div>`);
+    expect(h).toContain('<div class="fill-name">Lock them up</div>');
+  });
+
   it('the bar is the part’s, with its own key, name and label', () => {
     const s = done(simple(), ['gmail-recon-breach']);
     const h = renderNext(s, { filed: { id: 'gmail-recon-breach', reaction: { line: 'Clean.', feeling: 'happy' } } });
