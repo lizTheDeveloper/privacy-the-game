@@ -84,9 +84,35 @@ export function shouldReportRejection(event) {
   return event.reason instanceof Error;
 }
 
+// Returns whether the report was handed to GlitchTip.
 export function captureError(error, context) {
+  let sent = false;
   if (started && typeof Sentry !== 'undefined' && errorReportsAllowed()) {
     Sentry.captureException(error, { extra: context });
+    sent = true;
   }
   console.error(error);
+  return sent;
 }
+
+// A browser that can't save (an old Safari private window, Instagram's or
+// TikTok's in-app browser, a storage-blocked iframe) fails every save, and the
+// game saves on every tap: one player sent GlitchTip a report per tap. The
+// player already sees the won't-save warning (browser-check.js), so one report
+// per visit (page load) is enough to learn how often it happens. The first one
+// keeps its context; later ones in the same visit, from saveState or from
+// app.js's wrappers around it, only go to the console. The flag flips only
+// when a report was actually sent, so with sharing off nothing is used up.
+let storageWriteReported = false;
+export function captureStorageWriteError(error, context) {
+  if (storageWriteReported) {
+    console.error(error);
+    return false;
+  }
+  const sent = captureError(error, context);
+  if (sent) storageWriteReported = true;
+  return sent;
+}
+
+// Tests only: start a new visit.
+export function _resetStorageWriteReport() { storageWriteReported = false; }

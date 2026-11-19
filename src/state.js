@@ -1,4 +1,4 @@
-import { captureError } from './utils/errors.js';
+import { captureError, captureStorageWriteError } from './utils/errors.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { OPT_IN_DISTRICTS } from './data/districts.js';
 import { migrateBrokenAnswers } from './utils/migrate-answers.js';
@@ -88,10 +88,20 @@ export function hasSavedState(storage = defaultStorage()) {
 
 export function saveState(state, storage = defaultStorage()) {
   if (!storage) return;
+  // A state that can't be turned into JSON (a circular value) is a bug in the
+  // game: report it every time. Only the write itself is a storage failure,
+  // reported once per visit (captureStorageWriteError).
+  let json;
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(state));
+    json = JSON.stringify(state);
   } catch (error) {
     captureError(error, { operation: 'saveState' });
+    return;
+  }
+  try {
+    storage.setItem(STORAGE_KEY, json);
+  } catch (error) {
+    captureStorageWriteError(error, { operation: 'saveState' });
   }
 }
 

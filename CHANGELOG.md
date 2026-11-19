@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.33.1 (2026-11-18): One report per visit when a browser can't save
+
+A browser that can't save (an old Safari private window, Instagram's or TikTok's in-app browser, a page that blocks storage) fails every save, and the game saves on every tap. Each failure sent us an error report, so one player could send dozens. They already see the warning that their progress isn't saving (7.31.0), so the extra reports told us nothing new.
+
+- **One storage report per visit.** The first save that fails sends one report, as before. The rest in that visit don't, wherever in the game the save came from. Opening the game again counts as a new visit, so we still learn how often it happens.
+- **Everything else reports as before.** Other errors are untouched, and a save that fails for another reason (the game's own data can't be written down, which is a bug) still reports every time.
+- **With sharing off, nothing is sent**, as before. Every failure still shows in the browser's console.
+- Nothing new is tracked or sent.
+
 ## 7.33.0 (2026-11-18): One thing to tap next
 
 A player, in an Instagram comment: "Colors are off. Need better color coordination in regard to understanding where to click. When clicking on something it would be nice if the color popped more. As in, when you click on a link that takes you to a new screen there is so much for me to look at it. It feels overwhelming and the things I'm supposed to be working on are not clear. There are so many important things on each page, but I need your help to ONLY highlight and emphasize the part that is supposed to do next. There are so many different words highlighted, each page feels like extra work."
