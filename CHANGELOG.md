@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.33.2 (2026-11-19): No part with only one mission
+
+The What's next bar counts one part of a district at a time (7.30.1). Some parts had only one mission, so one tap filled the whole bar, which felt empty, and it made "PART 1 OF N" bigger than it needed to be.
+
+- **A part with one mission joins the part next to it.** It joins the part before it, or, if it's the first part, the part after it. The missions stay in the same order. A district with only one mission still has its one part.
+- **The joined part keeps the name of the part with more missions**, so it still says one plain thing to do ("Lock them up", not a mix).
+- **Where it changes:** The Vault goes from 4 parts to 3, The Capitol from 3 to 2, and The Perimeter from 4 to 3 (its first part is now "Lock them up", starting with the phishing check). Every other district is the same.
+- The parts are numbered again from 1, so "PART X OF N" and "Next: part …" match. Every mission is still in exactly one part, and the counts still match the district's own progress.
+- Nothing new is tracked or sent.
+
 ## 7.33.1 (2026-11-18): One report per visit when a browser can't save
 
 A browser that can't save (an old Safari private window, Instagram's or TikTok's in-app browser, a page that blocks storage) fails every save, and the game saves on every tap. Each failure sent us an error report, so one player could send dozens. They already see the warning that their progress isn't saving (7.31.0), so the extra reports told us nothing new.

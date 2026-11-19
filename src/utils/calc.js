@@ -103,7 +103,27 @@ export function districtParts(state, districtId) {
       at += size;
     }
   }
-  return parts.map((part, i) => ({ ...part, chapter: i + 1 }));
+  return foldLoneParts(parts).map((part, i) => ({ ...part, chapter: i + 1 }));
+}
+
+// A part with only one mission folds into the part before it, or the first part into the one
+// after (Liz 2026-11-19: "a part with only one mission should fold"): one tap filling a whole
+// bar feels hollow, and it makes "OF N" bigger for nothing. The missions keep their order. The
+// merged part takes the name (and phase) of the part that brings more missions, the earlier one
+// on a tie, so it still reads as one plain thing to do. It may run past PART_MAX. A district
+// with one mission in all keeps its one part.
+export function foldLoneParts(parts) {
+  const merge = (a, b) => {
+    const named = b.missions.length > a.missions.length ? b : a;
+    return { phase: named.phase, name: named.name, missions: [...a.missions, ...b.missions] };
+  };
+  const out = [];
+  for (const part of parts) {
+    if (part.missions.length === 1 && out.length) out[out.length - 1] = merge(out[out.length - 1], part);
+    else out.push(part);
+  }
+  if (out.length > 1 && out[0].missions.length === 1) out.splice(0, 2, merge(out[0], out[1]));
+  return out;
 }
 
 // The part the What's next bar shows: the earliest one with missions left, or
