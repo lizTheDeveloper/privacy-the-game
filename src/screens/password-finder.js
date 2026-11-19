@@ -2,6 +2,7 @@ import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 import { FINDER_QUESTIONS, BROWSER_HELP, PLACES, SAW, finderCard, finderResult, finderOptions, withDevices } from '../data/password-finder.js';
+import { saveNote } from '../components/browser-warning.js';
 
 // "Where are my passwords?" (#/passwords): one card at a time (data/password-finder.js).
 // from: the mission it was opened from, to go back to when it's done.
@@ -102,7 +103,7 @@ export function renderPasswordFinder(state, { from = null } = {}) {
       <div class="simple-top">${back}<div class="simple-count">Where are my passwords?</div></div>
       ${intro}
       <section class="next-card finder-card">${body}</section>
-      <p class="next-saved">Your answers stay on this phone. You can stop and come back any time.</p>
+      <p class="next-saved">${saveNote('passwords')}</p>
     </div>
   </div>`;
 }

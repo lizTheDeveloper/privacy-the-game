@@ -8,6 +8,7 @@ import { PASSWORD_MANAGERS } from '../data/missions-passwords.js';
 import { fillBar } from './fill-bar.js';
 import { twoPlaceNames } from '../data/two-places.js';
 import { passwordPlaces } from '../utils/password-places.js';
+import { saveNote } from './browser-warning.js';
 
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -256,7 +257,7 @@ export function devicesAsk(state) {
   return `
     <div class="walk-devices" data-devices-ask>
       <h2 class="finder-q finder-q--small">First, about your devices</h2>
-      <p class="walk-devices-why">Then we can tell you where to go. Your answers stay on this phone.</p>
+      <p class="walk-devices-why">Then we can tell you where to go. ${saveNote('devices')}</p>
       ${rows}
     </div>`;
 }
