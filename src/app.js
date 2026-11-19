@@ -303,12 +303,12 @@ function renderWelcome() {
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px;">
     <div style="font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
-    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(0,229,255,0.6); letter-spacing: 5px; margin-top: 12px;">A DATA PRIVACY GAME</div>
-    <p style="max-width: 440px; font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.65); margin-top: 32px;">Secure your accounts, opt out of data brokers, and learn to spot scams &mdash; one mission at a time. Every action you take is real.</p>
+    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-quiet); letter-spacing: 5px; margin-top: 12px;">A DATA PRIVACY GAME</div>
+    <p style="max-width: 440px; font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.8); margin-top: 32px;">Secure your accounts, opt out of data brokers, and learn to spot scams &mdash; one mission at a time. Every action you take is real.</p>
     ${choosingMode ? modeChoice() : `<button type="button" data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</button>`}
-    <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 16px; letter-spacing: 1px;">NO ACCOUNT NEEDED &middot; YOUR DATA STAYS IN YOUR BROWSER</div>
-    <a href="${STUDIO_URL}welcome" target="_blank" rel="noopener" data-studio-link="welcome" style="font-family: var(--font-mono); font-size: 10px; color: rgba(198,255,0,0.6); margin-top: 40px; letter-spacing: 2px; text-decoration: none;">A MULTIVERSE GAMES GAME &middot; MORE FREE GAMES&nbsp;&#8599;</a>
-    <button type="button" data-bug-report style="font-family: var(--font-mono); font-size: 10px; color: rgba(255,45,155,0.75); margin-top: 16px; letter-spacing: 2px; background: none; border: 0; min-height: 44px; padding: 8px 12px; cursor: pointer;">🐞 REPORT A BUG</button>
+    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 16px; letter-spacing: 1px;">NO ACCOUNT NEEDED &middot; YOUR DATA STAYS IN YOUR BROWSER</div>
+    <a href="${STUDIO_URL}welcome" target="_blank" rel="noopener" data-studio-link="welcome" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 40px; letter-spacing: 2px; text-decoration: none;">A MULTIVERSE GAMES GAME &middot; MORE FREE GAMES&nbsp;&#8599;</a>
+    <button type="button" data-bug-report style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 16px; letter-spacing: 2px; background: none; border: 0; min-height: 44px; padding: 8px 12px; cursor: pointer;">🐞 REPORT A BUG</button>
   </div>`;
 }
 
@@ -366,6 +366,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     const watched = hasInteriorScreen(route) ? newlySealed(state, route.params.id) : null;
     // The map re-draws on every zoom and tap: no screen fade on those (it flashes the sky).
     app.classList.toggle('map-refresh', route.screen === 'broker-map' && !tracksPageview(cause));
+    // Arriving at a screen: its one bright button pulses once (style.css), not on every re-draw.
+    app.classList.toggle('is-arriving', tracksPageview(cause));
     // A re-draw (an action, data arriving) keeps each slide deck on its slide; arriving starts at slide 1.
     const decksBefore = tracksPageview(cause) ? null : deckPositions(app);
     // So does every fold the player opened (a saint's story, a full slip, an entry).

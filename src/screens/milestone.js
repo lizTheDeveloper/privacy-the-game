@@ -49,9 +49,9 @@ export function renderMilestone(state, districtId) {
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">
-      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.2);">LIBERATED</div>
+      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">LIBERATED</div>
       <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${district.name.toUpperCase()} IS SECURE</div>
-      <div style="font-size: 13px; color: rgba(237,239,243,0.5); margin-top: 8px;">${district.description}</div>
+      <div style="font-size: 13px; color: var(--text-quiet); margin-top: 8px;">${district.description}</div>
     </div>
     <div style="position: relative; display: flex; gap: 4px; align-items: flex-end; justify-content: center; margin: 44px 0 10px;">
       ${enabledAccounts.map((id) => renderBuilding(id, getBuildingState(state, id), 56)).join('')}
@@ -60,27 +60,27 @@ export function renderMilestone(state, districtId) {
     <div style="position: relative; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px;">
       <div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(198,255,0,0.06); border: 1px solid rgba(198,255,0,0.25);">
         <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--lime); text-shadow: 0 0 15px rgba(198,255,0,0.3);">${accountsSecured}</div>
-        <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 2px; color: rgba(198,255,0,0.6); margin-top: 6px;">ACCOUNTS SECURED</div>
+        <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 2px; color: var(--lime); margin-top: 6px;">ACCOUNTS SECURED</div>
       </div>
       ${addressesBreached === null ? '' : `<div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(255,159,0,0.06); border: 1px solid rgba(255,159,0,0.25);">
         <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--amber); text-shadow: 0 0 15px rgba(255,159,0,0.3);">${addressesBreached}</div>
         <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 2px; color: rgba(255,159,0,0.6); margin-top: 6px;">${addressesBreached === 1 ? 'ADDRESS' : 'ADDRESSES'} FOUND IN A BREACH</div>
       </div>`}
-      <div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.25);">
-        <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--cyan); text-shadow: 0 0 15px rgba(0,229,255,0.3);">${integrity}<span style="font-size: 18px; color: rgba(237,239,243,0.3);">%</span></div>
-        <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.6); margin-top: 6px;">CITY INTEGRITY</div>
+      <div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(255,255,255,0.03); border: 1px solid var(--line-quiet);">
+        <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--offwhite);">${integrity}<span style="font-size: 18px; color: var(--text-dim);">%</span></div>
+        <div style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 2px; color: var(--text-quiet); margin-top: 6px;">CITY INTEGRITY</div>
       </div>
     </div>
     <div style="position: relative; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 28px 36px 24px; width: 512px; max-width: 100%; margin: 0 auto 32px; box-shadow: 0 0 20px rgba(0,229,255,0.05);">
-      <div style="position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: #090B10; padding: 2px 12px; font-family: var(--font-display); font-size: 7px; font-weight: 600; color: rgba(0,229,255,0.4); letter-spacing: 3px;">SHARE CARD</div>
+      <div style="position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: #090B10; padding: 2px 12px; font-family: var(--font-display); font-size: 7px; font-weight: 600; color: var(--text-dim); letter-spacing: 3px;">SHARE CARD</div>
       <div id="milestone-card-preview" style="width: 100%; aspect-ratio: 600 / 315; background: #05070b; border: 1px solid rgba(0,229,255,0.1); display: flex; align-items: center; justify-content: center;">
-        <span style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.3);">CARD PREVIEW</span>
+        <span style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 3px; color: var(--text-dim);">CARD PREVIEW</span>
       </div>
     </div>
     <div class="pin-bottom" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
       <button class="btn-secondary" data-action="share-card" data-district="${districtId}">SHARE CARD</button>
       ${continueLink}
     </div>
-    <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin-top: 12px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--cyan);"></div>
+    <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin-top: 12px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--offwhite);"></div>
   </div>`;
 }

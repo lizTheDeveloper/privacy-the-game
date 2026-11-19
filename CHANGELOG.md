@@ -2,6 +2,20 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.33.0 (2026-11-18): One thing to tap next
+
+A player, in an Instagram comment: "Colors are off. Need better color coordination in regard to understanding where to click. When clicking on something it would be nice if the color popped more. As in, when you click on a link that takes you to a new screen there is so much for me to look at it. It feels overwhelming and the things I'm supposed to be working on are not clear. There are so many important things on each page, but I need your help to ONLY highlight and emphasize the part that is supposed to do next. There are so many different words highlighted, each page feels like extra work."
+
+- **A colour language, the same on every screen** (written at the top of its section in `style.css`). **Filled cyan with a glow** is the one thing to tap next. **A cyan outline or cyan words** is something you can tap that isn't next. **Lime** is done, good, progress. **Amber** is a warning. **Magenta** is danger and exposure only. Everything else is off-white to read and grey for labels. Words you can't tap are never cyan any more.
+- **One bright button per screen.** The top bar's What's next is an outline now (it was a second bright button on the city, every district and the milestone). A facility district (The Perimeter and the others) had a filled START on every row, 16 of them: now only the one to do next is filled. A skipped mission's START, RE-CHECK and RETRY are outlines. On Advanced's briefing, GO DO IT is the bright button and the step list's DONE is an outline. Nothing was removed: every button and link is still there.
+- **The next one is lit.** On a district's mission list the next mission's row has a cyan edge; the others are quiet outlines. On the city map the district your next mission is in is the one lit card ("START HERE", then "NEXT UP"), and Scout's NEXT MISSION is a filled button.
+- **Quieter around it.** The city's six shortcut buttons (Quick Quest, Stats, Look up, Prism, Who gets it, Whole city) are one quiet style instead of magenta, cyan and lime. District names, mission names, CHAPTER, THREAT INTEL, YOUR FIRST MISSION, SCOUT and the other labels are off-white or grey, not glowing cyan. BONUS is grey, not magenta. "Flagged by your password manager" is amber. Support us and the studio link are grey, not lime. The scores keep their colour on the number only. LIBERATED is lime, because it's good news.
+- **Pressing pops.** Every button moves down a little and flashes brighter when you press it, and a phone's tap flash is cyan.
+- **Arriving shows the way.** On a new screen its bright button pulses once. Not on every re-draw, and not with reduced motion.
+- **Keyboard focus shows** on every link and button.
+- **Easier to read.** Small grey text (minutes, mission counts, inactive tabs, NOT NOW, See the whole city, district codes) was under WCAG AA contrast in about 200 places across the main screens; it's all AA now. Real instructions stay off-white.
+- Nothing about this is tracked.
+
 ## 7.32.0 (2026-11-18): Before you go, what to do there
 
 A player, in an Instagram comment: "Sometimes you tell me to click on a link to go somewhere but not what to do once I'm there. Then I go back to the game and the instructions are there. If you could put the instructions for what to do before I click the link, that would help."
