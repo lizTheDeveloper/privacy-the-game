@@ -6,6 +6,7 @@ import { isCandleLit } from '../utils/interior-state.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
 import { deck } from '../components/deck.js';
+import { saveNote } from '../components/browser-warning.js';
 
 export const SAINT_ORDER = ['swartz', 'snowden', 'klein', 'zimmermann', 'ellsberg', 'manning', 'drake', 'binney', 'poitras'];
 
@@ -71,7 +72,7 @@ export function renderSaints(state, { from = null } = {}) {
       ${backLink(state, from)}
       <div class="interior-title">SAINTS</div>
       <div class="interior-sub">People whose work made this map knowable</div>
-      <details class="phone-fold" data-fold="saints-candles" data-open-desktop><summary>About candles</summary><div class="dim interior-note">Candles stay on this phone. Nothing here is sent anywhere.</div></details>
+      <details class="phone-fold" data-fold="saints-candles" data-open-desktop><summary>About candles</summary><div class="dim interior-note">${saveNote('candles')} Nothing here is sent anywhere.</div></details>
       ${deck(saints.map((s) => ({ html: card(state, s) })), { label: 'Saints', className: 'saints-deck', names: saints.map((s) => s.name) })}
     </div>
   </div>`;

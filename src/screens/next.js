@@ -10,6 +10,7 @@ import { fillBar } from '../components/fill-bar.js';
 import { confetti } from '../components/celebrate.js';
 import { missionDistrict } from '../data/missions.js';
 import { calcChapterProgress } from '../utils/calc.js';
+import { saveNote } from '../components/browser-warning.js';
 
 // Good news gets confetti (Liz 2026-11-18: "a little bit more celebration when things are good").
 const GOOD = new Set(['happy', 'proud', 'hug']);
@@ -116,7 +117,7 @@ export function renderNext(state, { filed = null, notMine = null } = {}) {
       ${sent}${dropped}
       ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '', filed?.id)}
       ${nextCard(state, up, !anyDone && !sent)}
-      <p class="next-saved">Your progress is saved on this phone. You can stop and come back any time. This page will show you what's next.</p>
+      <p class="next-saved">${saveNote('next')} This page will show you what's next.</p>
       <a class="focus-notnow next-city" href="#/city">See the whole city</a>
     </div>
   </div>`;

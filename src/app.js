@@ -51,6 +51,7 @@ import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
 import { STUDIO_URL } from './components/hud.js';
 import { mountBugReporter } from './components/bug-reporter.js';
+import { initBrowserWarning, syncBrowserWarning } from './components/browser-warning.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
 import { renderDebrief, debriefReaction } from './screens/debrief.js';
@@ -338,6 +339,8 @@ function autoRead() {
 }
 
 function render(route, cause = RENDER_CAUSE.REFRESH) {
+  // A browser that won't keep the save says so: in full on the start page, a slim bar elsewhere.
+  syncBrowserWarning({ start: !started, simple: readLevel(state) === 'simplest' });
   if (!started) {
     app.innerHTML = renderWelcome();
     return;
@@ -1725,6 +1728,8 @@ app.addEventListener('click', async (e) => {
     }
     // Leaving the welcome screen is the first real view of the game.
     renderCurrentRoute(RENDER_CAUSE.NAVIGATE);
+    // From the top: the won't-save warning can make the welcome screen scroll.
+    window.scrollTo?.(0, 0);
   } else if (action === 'whoami-open') {
     loadCollective();
     loadWhoami();
@@ -1947,6 +1952,8 @@ document.addEventListener('click', () => {
   lastSaid = null;
   setTimeout(autoRead, 0);
 }, true);
+// Before the first draw: is this a browser that won't keep the save (components/browser-warning.js)?
+initBrowserWarning({ onChange: () => renderCurrentRoute() });
 // Simple mode, opening the game again: What's next, not the map or a district's tabs, so it
 // says where they were (Liz 2026-11-18: "assume we're going to lose people and that we're coming back").
 if (started && readLevel(state) === 'simplest' && /^(#?|#\/city|#\/district\/.*)$/.test(location.hash)) history.replaceState(null, '', '#/next');

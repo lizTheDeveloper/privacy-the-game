@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.31.0 (2026-11-18): Saying so when a browser won't keep your progress
+
+Liz: "if people are on like Instagram's browser or like, you know, the temporary browser, you have to tell them that their info is not saving. That's a huge thing that is confusing people who aren't tech literate."
+
+- **A warning when progress won't stay.** Links from social posts open in the app's own browser, which often forgets everything when it closes. The game now spots Instagram, Facebook, Messenger, TikTok, Snapchat, LinkedIn, Threads, X, Pinterest, LINE, WeChat, the Google app and other apps' built-in browsers, a browser that can't save at all, and (as a hint only) a private window. The start page shows it in full: "Instagram’s browser won’t save your progress. If you close it, you start over." with numbered steps for that app ("Tap ••• at the top right. Look for “Open in external browser”."), and a **Copy the link** button to paste into Safari or Chrome. Every other screen has a slim bar with **How to fix**. **Hide this** lasts until the page closes, and works when storage doesn't. Advanced mode says the same in one line.
+- **No more promises it can't keep.** What's next, Where are my passwords?, the devices question and the saints' candles said progress "is saved on this phone"; in those browsers they now say it won't keep, and where to open the game instead.
+- Starting the game scrolls to the top, so the bar is in view.
+- One event when the warning shows: the kind (app browser, private window, no storage) and the app's name from a fixed list. Never the browser's own details. The warning is not read aloud.
+
 ## 7.30.1 (2026-11-18): What’s next counts the part you’re in
 
 Liz: "yes, make the district bar count the current chapter only".
