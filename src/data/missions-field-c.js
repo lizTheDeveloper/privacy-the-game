@@ -51,7 +51,7 @@ export const FIELD_MISSIONS_C = [
       { text: `Keep each device's recovery key off the device.` },
       { text: `Write a help number on paper: a lawyer, legal aid, or MigraWatch at 1-844-363-1423.` },
       { text: `Find free nonprofit legal help near you in the National Immigration Legal Services Directory, by zip code.`, url: 'https://www.immigrationadvocates.org/legaldirectory/' },
-      { text: `Pick a rapid-response line for afterward: Freedom of the Press Foundation, Reporters Committee for Freedom of the Press, Committee to Protect Journalists, Access Now (outside the US), your union, or your org's general counsel.` },
+      { text: `Pick a rapid-response line for afterward: Freedom of the Press Foundation, Reporters Committee for Freedom of the Press, Committee to Protect Journalists, Access Now (outside the US), your union, or your org's general counsel.`, elsewhere: true },
       { text: `Set up an outside contact you can alert with one tap or one message (Burn Protocol walks you through it).` },
       { text: `Check the rules on recording on-duty officers where you live (some US states require all-party consent for audio).` },
       { text: `Pick a shelf where a camera can point at the door, not at the agents.` },

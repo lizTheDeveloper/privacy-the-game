@@ -1232,7 +1232,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: 'Open Amazon Advertising Preferences', url: 'https://www.amazon.com/adprefs' },
       { text: `Turn off "Interest-Based Ads from Amazon"` },
       { text: `Go to Amazon → Account → "Manage Your Data" → review what Amazon has collected` },
-      { text: `If you use Alexa: Alexa app → More → Alexa Privacy → Review Alexa History, and review or delete your voice recordings there` },
+      { text: `If you use Alexa: Alexa app → More → Alexa Privacy → Review Alexa History, and review or delete your voice recordings there`, elsewhere: true },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -1387,7 +1387,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
       { text: "Note the year — that's your starting line." },
       { text: "Count your posts (it's in your profile header). This tells you how big the job is." },
       { text: "Export your data now — it takes time to generate: Settings → Accounts Center → Your information and permissions → Export your information", url: "https://accountscenter.instagram.com/info_and_permissions/dyi/" },
-      { text: "While that processes, look at your story archive: Profile > Menu > Archive. These were 'temporary' but Instagram kept them all." },
+      { text: "While that processes, look at your story archive: Profile > Menu > Archive. These were 'temporary' but Instagram kept them all.", elsewhere: true },
     ],
     debriefQs: [{ id: 'finding', label: 'How old is your account?', options: [
       { value: 'cleaned-up', text: '1-3 years', severity: 'safe' },
@@ -1511,7 +1511,7 @@ export const MISSIONS_SQUARE_ARCHIVES_MARKETPLACE = [
     briefing: "Facebook is probably the oldest social media account you have. Some people have 15+ years of posts on here — that's high school, college, first jobs, relationships that ended, opinions you've outgrown. Before we start the year-by-year review, let's figure out what we're dealing with and get your data downloaded.",
     steps: [
       { text: "Check your account age: open About on your profile, look for 'Joined Facebook' date" },
-      { text: "Open Activity Log — this is your master record", url: "https://www.facebook.com/allactivity" },
+      { text: "Open Activity Log — this is your master record, with your posts, comments and likes back to the year you joined", url: "https://www.facebook.com/allactivity" },
       { text: 'Export your data: Settings & privacy → Settings → Accounts Center → Your information and permissions → Export your information', url: 'https://accountscenter.facebook.com/' },
       { text: "Check which apps still have access: Settings > Apps and websites." },
       { text: "Check which apps still have access: Revoke old ones now while you're here." },

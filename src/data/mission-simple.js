@@ -45,7 +45,7 @@ export const MISSION_SIMPLE = {
   'apple_id-recon-breach': leakCheck('Apple Account', { first: sameAs('iCloud') }),
   'google-recon-breach': leakCheck('Google Account', {
     first: sameAs('Gmail'),
-    extra: [{ text: 'Also open Google’s own “Password Checkup”', url: 'https://passwords.google.com/checkup' }],
+    extra: [{ text: 'Also open Google’s own “Password Checkup”. Sign in if it asks. It shows which of your saved passwords got out, so you can change them.', url: 'https://passwords.google.com/checkup' }],
   }),
   'microsoft-recon-breach': leakCheck('Microsoft Account', { first: sameAs('Outlook') }),
 

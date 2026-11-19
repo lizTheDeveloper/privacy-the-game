@@ -903,6 +903,17 @@ img { image-rendering: pixelated; }
 .simple-open { overflow-wrap: normal; }
 .simple-host { display: block; margin-top: 6px; font-family: var(--font-body, system-ui, sans-serif); font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; opacity: 0.75; }
 .simple-again { align-self: flex-start; text-decoration: none; }
+/* Before you go (2026-11-18): what to do on the site, above its OPEN button. Full-size, full
+   white words: small gray reads as "optional". */
+.site-preview { margin: 0; padding: 10px 12px; border: 1px solid rgba(0,229,255,0.35); border-radius: 10px; background: rgba(9,11,16,0.55); }
+.site-preview-label { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--cyan); }
+.site-preview-steps { list-style: none; counter-reset: sitestep; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.site-preview-steps li { counter-increment: sitestep; position: relative; padding-left: 34px; font-size: 16px; line-height: 1.4; color: var(--offwhite); min-height: 24px; overflow-wrap: anywhere; }
+.site-preview-steps li::before { content: counter(sitestep); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--cyan); color: #090B10; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.site-preview-back { margin: 8px 0 0; font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--offwhite); }
+.site-preview--simple .site-preview-label, .site-preview--simple .site-preview-back { font-size: 18px; }
+.site-preview--simple .site-preview-steps li { font-size: 18px; padding-left: 36px; min-height: 26px; }
+.site-preview--simple .site-preview-steps li::before { width: 26px; height: 26px; font-size: 14px; }
 
 /* ---------- District pages on phones (Liz 2026-11-17): the task first ----------
    The building grid lists the same accounts as the survey and the mission list, and it

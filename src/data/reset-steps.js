@@ -87,7 +87,8 @@ export function resetStepsByManager(steps, accountName) {
     ...steps.slice(0, at + 1),
     { text: t.make },
     ...steps.slice(at + 1),
-    { text: t.check(accountName), ...(t.checkUrl ? { url: t.checkUrl } : {}) },
+    // Without a link of its own, the check happens where the passwords are saved, not on the site.
+    { text: t.check(accountName), ...(t.checkUrl ? { url: t.checkUrl } : { elsewhere: true }) },
     ...(t.also ? [t.also(accountName)] : []),
   ];
   return {

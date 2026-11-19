@@ -87,7 +87,7 @@ const NOTE_STEP = { text: 'Write down how many passwords it says are compromised
 const PM_STEPS = {
   apple: [
     { text: 'iPhone or iPad: open the Passwords app and tap Security (on older iOS: Settings → Passwords → Security Recommendations)' },
-    { text: 'Mac: open the Passwords app and choose Security' },
+    { text: 'Mac: open the Passwords app and choose Security', elsewhere: true },
     NOTE_STEP,
   ],
   google: [
@@ -123,12 +123,12 @@ const PM_STEPS = {
     NOTE_STEP,
   ],
   firefox: [
-    { text: 'In Firefox, type about:logins in the address bar and look for alerts on your saved logins' },
+    { text: 'In Firefox, type about:logins in the address bar and look for alerts on your saved logins', elsewhere: true },
     { text: 'Check Mozilla Monitor for leaks tied to your email', url: 'https://monitor.mozilla.org' },
     NOTE_STEP,
   ],
   edge: [
-    { text: 'In Microsoft Edge, open Settings → Passwords' },
+    { text: 'In Microsoft Edge, open Settings → Passwords', elsewhere: true },
     { text: 'Open Password Monitor and look at the leaked passwords it lists' },
     NOTE_STEP,
   ],

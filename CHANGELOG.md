@@ -2,6 +2,18 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.32.0 (2026-11-18): Before you go, what to do there
+
+A player, in an Instagram comment: "Sometimes you tell me to click on a link to go somewhere but not what to do once I'm there. Then I go back to the game and the instructions are there. If you could put the instructions for what to do before I click the link, that would help."
+
+- **"When it opens:" before every OPEN button.** On a phone the other site covers the game, so a step that opens a website now lists what to do there first: the steps that happen on that site, numbered, each in its first sentence, then "Then come back here and tap DONE." It stops at the next step with a link of its own, at a step that happens somewhere else, or at the step that asks a question here. Simple mode shows up to 3, Advanced up to 4 (with "tap DONE to see the rest" when there are more). Full-size white words in a box, not small gray. The OPEN button stays on the first screen of a 390×844 phone.
+- **Those steps are still their own cards**, with their own DONE and their questions. It's a preview, not a merge.
+- **Advanced's briefing says it above GO DO IT**, for the site GO DO IT opens (on a phone the step slides are behind you by then).
+- **Read it to me reads it** before you leave: the step, "When it opens:", each step, and come back. Scout's list has the new lines (`node scripts/voice-lines.mjs`).
+- **Steps that aren't on that site are marked as elsewhere**, so the preview, Help's "open it again" and Simple's "On example.com" don't send you to the wrong place: in-app and phone Settings steps (Venmo's passcode, Alexa, Temu's notifications, Instagram's archive, the car apps' insurance programs, Apple Health, Fitbit, iPhone and Android tracking switches, Private DNS), calls (SSA, carriers), other companies listed after a link (Oracle, X-Mode, Merlin and Tracers, the people-search sites without a link, Afterpay and Zip, other cards and loyalty programs), email (Spokeo's confirmation link), a Password Reset's "Check it saved" in the Passwords app or a password app, and the password check's second place (the Mac, Edge, Firefox).
+- **Links with nothing to do there now say what to do**: Google's Password Checkup (Simple and Advanced), Facebook's Activity Log, the Google Safe Browsing checker, Apple's App Tracking Transparency page (now says where the switch is on the iPhone), and the USPhonebook, ThatsThem, SmartBackgroundChecks, SearchPeopleFree and SpyDialer opt-outs.
+- Nothing about this is tracked.
+
 ## 7.31.0 (2026-11-18): Saying so when a browser won't keep your progress
 
 Liz: "if people are on like Instagram's browser or like, you know, the temporary browser, you have to tell them that their info is not saving. That's a huge thing that is confusing people who aren't tech literate."

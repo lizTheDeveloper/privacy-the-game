@@ -25,6 +25,7 @@ import { notMineLabel } from '../data/not-mine.js';
 import { fillBar } from '../components/fill-bar.js';
 import { confetti } from '../components/celebrate.js';
 import { stepReportAnswers } from '../utils/step-report.js';
+import { sitePreview, sitePreviewHtml, sitePreviewSay, PREVIEW_MAX } from '../components/site-preview.js';
 
 function notFound(state) {
   return `
@@ -141,8 +142,13 @@ export function renderBriefing(state, missionId, opts = {}) {
 
         ${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
 
+  // GO DO IT opens the first step's site: what to do there comes first, above the button (on a
+  // phone the step slides are behind the player by then, and the site covers the game).
+  const goAt = !started && !noReset && goUrl ? missionStepList.findIndex((st) => st.url === goUrl) : -1;
+  const goPreview = goAt === -1 ? null : sitePreview(missionStepList, goAt);
+  const goPreviewHtml = sitePreviewHtml(goPreview);
   // How much to read (Scout asks the first time), and Read it to me.
-  const sayIntel = [intel, scoutLine];
+  const sayIntel = [intel, scoutLine, ...sitePreviewSay(goPreview)];
   const intelTools = '';
   // The device questions and how far along the steps are.
   const gearHtml = noReset ? '' : passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps));
@@ -170,6 +176,7 @@ export function renderBriefing(state, missionId, opts = {}) {
   const bankPanel = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   const main = slides ? `${deck(slides, { label: 'Mission briefing', className: 'brief-deck' })}
         ${bankPanel ? `<div style="margin-top: 20px;">${bankPanel}</div>` : ''}
+        ${goPreviewHtml ? `<div style="margin-top: 20px;">${goPreviewHtml}</div>` : ''}
         <div style="margin-top: 20px;">${actions}</div>` : `${header}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
@@ -187,6 +194,7 @@ export function renderBriefing(state, missionId, opts = {}) {
           </div>
         </div>`}
 ${bankPanel}
+${goPreviewHtml ? `<div style="margin-bottom: 20px;">${goPreviewHtml}</div>` : ''}
 ${actions}`;
 
   return `
@@ -516,9 +524,14 @@ function accountSite(mission, steps, goUrl) {
 
 // The page a step happens on: its own link, else the last link before it, else the
 // account's security page ("Enter your Gmail address" happens on haveibeenpwned.com).
+// A step that happens elsewhere (an app, the phone's Settings) moves the player off that site, so
+// the steps after it aren't on it either.
 function stepSite(steps, i, account) {
   if (steps[i]?.elsewhere) return '';
-  return steps[i]?.url || [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || account?.securityUrl || '';
+  if (steps[i]?.url) return steps[i].url;
+  const before = [...steps.slice(0, i)].reverse().find((st) => st.url || st.elsewhere);
+  if (before) return before.elsewhere ? '' : before.url;
+  return account?.securityUrl || '';
 }
 
 // A step's report question, right on the step, in as few words as it can be:
@@ -583,7 +596,8 @@ function stepAsk(state, mission, step, sends = false) {
 // is the big button (and DONE waits, see stepModePage); after, it is a quiet "open it again".
 // `where` is the site a step without a link happens on, shown above the words so "the box"
 // is never read as a box on this page (Liz 2026-11-17).
-function stepCardText(mission, step, simple = null) {
+// preview: what to do once the site opens (components/site-preview.js), before its button.
+function stepCardText(mission, step, simple = null, preview = null) {
   const key = stepKeyOf(step);
   const big = simple && !simple.opened;
   const open = (cls, inner) => `<a class="${cls}" href="${step.url}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}">${inner}</a>`;
@@ -596,7 +610,7 @@ function stepCardText(mission, step, simple = null) {
     ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>${BACK_HINT}`
     : '';
   const notes = (step.note || []).map((n) => `<details class="focus-note"${n.open ? ' open' : ''}><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
-  return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${link}${notes}`;
+  return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${step.url ? sitePreviewHtml(preview, { simple: Boolean(simple) }) : ''}${link}${notes}`;
 }
 
 // The site opens in a new tab, which on a phone looks like leaving the game; say how to get
@@ -613,7 +627,8 @@ function namesSite(step) {
 // step's own link counts: the account's security page would name the wrong place.
 function simpleWhere(steps, i) {
   if (steps[i]?.elsewhere) return '';
-  return [...steps.slice(0, i)].reverse().find((st) => st.url)?.url || '';
+  const before = [...steps.slice(0, i)].reverse().find((st) => st.url || st.elsewhere);
+  return before?.elsewhere ? '' : before?.url || '';
 }
 
 // What Read it to me reads for a step: its words, and any note shown open on its card.
@@ -649,8 +664,11 @@ function stepModePage(p) {
   const opened = Boolean(step && (!step.url || wasOpened(mission.id, key) || marks[key] === 'done'));
   const simpleCard = simple && step ? { opened, where: simpleWhere(missionStepList, current) } : null;
   const showDone = !simple || opened;
-  // Read it to me: the step, and any note shown open on its card (the password check's "Is this safe?").
-  const say = step ? stepSay(step) : [];
+  // A step that opens a site says first what to do there (the site covers the game on a phone).
+  const preview = step ? sitePreview(missionStepList, current, { max: PREVIEW_MAX[level] || PREVIEW_MAX.full }) : null;
+  // Read it to me: the step, any note shown open on its card (the password check's "Is this
+  // safe?"), and what to do once the site opens, read before the player leaves.
+  const say = step ? [...stepSay(step), ...sitePreviewSay(preview)] : [];
   // The next two steps, fetched ahead while Read it to me is on.
   const upcoming = allDone ? [] : missionStepList.slice(current + 1, current + 3).flatMap(stepSay);
   // The step cards already asked everything the report asks: the last DONE sends it to Scout.
@@ -669,7 +687,7 @@ function stepModePage(p) {
       </div>`
     : `
       <div class="focus-card" data-step-card data-step-key="${key}">
-        ${stepCardText(mission, step, simpleCard)}
+        ${stepCardText(mission, step, simpleCard, preview)}
         ${accountSite(mission, missionStepList, p.goUrl)}
         ${showDone ? stepAsk(state, mission, step, sends) : ''}
         ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}

@@ -83,9 +83,9 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: 'Fitbit: open the Fitbit app → your profile → Manage connected apps → revoke any you don’t use' },
       { text: 'Fitbit accounts are now Google accounts, so also review the apps connected to your Google Account', url: 'https://myaccount.google.com/linkedapps' },
-      { text: 'Apple Watch: on your iPhone, Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → review each app listed' },
+      { text: 'Apple Watch: on your iPhone, Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → review each app listed', elsewhere: true },
       { text: 'Garmin: open Garmin Connect settings → Profile & Privacy', url: 'https://connect.garmin.com/app/settings' },
-      { text: 'Any tracker: check which third-party apps have been granted access to your health data' },
+      { text: 'Any tracker: check which third-party apps have been granted access to your health data', elsewhere: true },
     ],
     debriefQs: HEALTH_AUDIT_DEBRIEF,
     scoutDialog: {
@@ -107,7 +107,7 @@ export const CLINIC_MISSIONS = [
     briefing: "Now that you know who has access, cut the connections that should not exist. Disable third-party data sharing, revoke app permissions you do not recognize, and set data retention to the minimum your tracker allows. Download your data before restricting access, so you have your own copy.",
     steps: [
       { text: "Fitbit: download your data first (Fitbit accounts are now Google accounts, so it comes from Google Takeout)", url: "https://takeout.google.com" },
-      { text: "Fitbit: Revoke third-party apps in the Fitbit app → your profile → Manage connected apps" },
+      { text: "Fitbit: Revoke third-party apps in the Fitbit app → your profile → Manage connected apps", elsewhere: true },
       { text: "Apple Health: Settings → Health → Data Access & Devices (iOS 18 and later: Settings → Apps → Health) → tap each app → turn off any categories you do not want shared" },
       { text: "Garmin: Garmin Connect settings → Profile & Privacy → set sharing to the minimum", url: "https://connect.garmin.com/app/settings" },
       { text: "Check for connected apps like Strava, MyFitnessPal, insurance apps -- revoke access from any you do not actively use" },
@@ -159,7 +159,7 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: "Flo: in the app’s privacy settings, look for Anonymous Mode and review data processing settings." },
       { text: "Clue: Review their privacy policy -- they are GDPR-bound and have committed to never selling data", url: "https://helloclue.com/privacy" },
-      { text: "Natural Cycles: it says it never sells or shares cycle or health data. It does share identifiers (device, IP, hashed email) with ad platforms. Check Settings → Privacy for tracking toggles" },
+      { text: "Natural Cycles: it says it never sells or shares cycle or health data. It does share identifiers (device, IP, hashed email) with ad platforms. Check Settings → Privacy for tracking toggles", elsewhere: true },
       { text: "Consider whether you need cloud sync at all -- some trackers can work fully offline" },
     ],
     debriefQs: HEALTH_AUDIT_DEBRIEF,
@@ -212,7 +212,7 @@ export const CLINIC_MISSIONS = [
     steps: [
       { text: "MyFitnessPal: use the delete-account option in your account settings. Do not just uninstall the app." },
       { text: "Check haveibeenpwned.com to see if your email was in the MyFitnessPal breach or other health app breaches", url: "https://haveibeenpwned.com" },
-      { text: "List any health apps you installed, tried once, and forgot about." },
+      { text: "List any health apps you installed, tried once, and forgot about.", elsewhere: true },
       { text: "Search your email for signup confirmations." },
       { text: "Delete the accounts on each one -- Settings > Account > Delete." },
       { text: "Request data deletion where available." },
@@ -269,7 +269,7 @@ export const CLINIC_MISSIONS = [
       { text: "AncestryDNA: in your account's DNA settings, find the research consent and withdraw it" },
       { text: "MyHeritage: in your account's DNA settings, review and restrict data sharing" },
       { text: "GEDmatch: If you uploaded your DNA, review your privacy settings -- law enforcement access requires your opt-in", url: "https://www.gedmatch.com" },
-      { text: "Check if you uploaded your DNA to any other database (FamilyTreeDNA, LivingDNA, Promethease)" },
+      { text: "Check if you uploaded your DNA to any other database (FamilyTreeDNA, LivingDNA, Promethease)", elsewhere: true },
       { text: "Review and restrict each one." },
     ],
     debriefQs: GENETIC_DEBRIEF,

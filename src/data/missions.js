@@ -838,7 +838,7 @@ const CHAPTER_1_MISSIONS = [
     steps: [
       { text: 'Open your Apple Account', url: 'https://account.apple.com' },
       { text: 'Review "Sign in with Apple" — revoke access for apps you no longer use' },
-      { text: 'On your device: Settings > Privacy & Security > review each category' },
+      { text: 'On your device: Settings > Privacy & Security > review each category', elsewhere: true },
     ],
     debriefQs: PRIVACY_DEBRIEF,
     scoutDialog: {
@@ -865,7 +865,7 @@ const CHAPTER_1_MISSIONS = [
       sameAddressStep('gmail', 'breach check'),
       { text: 'Open haveibeenpwned.com', url: 'https://haveibeenpwned.com' },
       { text: 'Enter your Google email address' },
-      { text: 'Also check Google’s built-in Password Checkup', url: 'https://passwords.google.com/checkup' },
+      { text: 'Also check Google’s built-in Password Checkup: sign in, and look for any passwords it calls compromised, reused or weak', url: 'https://passwords.google.com/checkup' },
     ],
     debriefQs: pairedBreachDebrief('gmail'),
     scoutDialog: {

@@ -164,7 +164,8 @@ function makeManufacturerMissions(accountId) {
       steps: [
         { text: 'Request your LexisNexis Consumer Disclosure Report. Its telematics section shows driving data insurers received', url: 'https://consumer.risk.lexisnexis.com/request' },
         { text: 'Request your Verisk report and look for Driving Data. Verisk’s driving-data exchange shut down in April 2024, so it shows past data', url: 'https://fcra.verisk.com' },
-        { text: acct.insuranceStep },
+        // The brand’s own side: its app or program, not the Verisk site the step before opened.
+        { text: acct.insuranceStep, elsewhere: true },
       ],
       debriefQs: INSURER_DATA_DEBRIEF,
       scoutDialog: {

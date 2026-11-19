@@ -297,7 +297,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Spokeo: search your name on spokeo.com and copy the web address of the page about you", url: "https://www.spokeo.com" },
       { text: "Spokeo: on the opt-out page, paste that web address with your email and tap “Opt Out”", url: "https://www.spokeo.com/optout" },
-      { text: "Spokeo: tap the link in the email Spokeo sends you" },
+      { text: "Spokeo: tap the link in the email Spokeo sends you", elsewhere: true },
       { text: "Whitepages: Go to suppression requests, search your name, find your listing, request removal", url: "https://www.whitepages.com/suppression-requests" },
       { text: "BeenVerified: Go to their opt-out FAQ, follow the steps to search and remove", url: "https://www.beenverified.com/faq/opt-out/" },
     ],
@@ -344,9 +344,9 @@ export const RECLAMATION_MISSIONS = [
     briefing: "The remaining people-search brokers. USPhonebook, ThatsThem and PeopleFinder each have their own opt-out links. Radaris used to have a privacy control center, but its site now shows a court-transfer notice instead.",
     steps: [
       { text: 'Radaris: its site now shows a notice saying the domain was transferred by court order, and no opt-out is left there (checked October 2026). Nothing to submit' },
-      { text: "USPhonebook: Submit opt-out", url: "https://www.usphonebook.com/opt-out" },
-      { text: "ThatsThem: Submit opt-out", url: "https://thatsthem.com/optout" },
-      { text: 'PeopleFinder: use the opt-out link on its site' },
+      { text: "USPhonebook: on the opt-out page, find your listing and submit the opt-out", url: "https://www.usphonebook.com/opt-out" },
+      { text: "ThatsThem: on the opt-out page, find your listing and submit the opt-out", url: "https://thatsthem.com/optout" },
+      { text: 'PeopleFinder: use the opt-out link on its site', elsewhere: true },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     optOut: { optout_result: ["all-submitted", "some-submitted"] },
@@ -396,11 +396,11 @@ export const RECLAMATION_MISSIONS = [
     title: "Extended Sweep: Background Check Sites",
     briefing: "These background-check and people-search sites commonly list people's names, addresses, and phone numbers. They're smaller than Spokeo or WhitePages but still serve that up to anyone who searches. Look yourself up on each one first; most have their own opt-out page.",
     steps: [
-      { text: "SmartBackgroundChecks: Submit opt-out", url: "https://www.smartbackgroundchecks.com/remove" },
-      { text: 'AdvancedBackgroundChecks: use the removal link on its site' },
+      { text: "SmartBackgroundChecks: on the removal page, find your record and submit the removal", url: "https://www.smartbackgroundchecks.com/remove" },
+      { text: 'AdvancedBackgroundChecks: use the removal link on its site', elsewhere: true },
       { text: 'AdvancedPeopleSearch: its domain is parked now, so there’s nothing left to remove there' },
       { text: 'PrivateEye: it now passes searches on to partner sites and has no removal form of its own (checked October 2026). Nothing to submit there' },
-      { text: "SearchPeopleFree: Submit opt-out", url: "https://www.searchpeoplefree.com/opt-out" },
+      { text: "SearchPeopleFree: on the opt-out page, find your listing and submit the opt-out", url: "https://www.searchpeoplefree.com/opt-out" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     optOut: { optout_result: ["all-submitted", "some-submitted"] },
@@ -422,9 +422,9 @@ export const RECLAMATION_MISSIONS = [
     briefing: "Phone-lookup and people-finder sites that aggregate public records. PeopleWhiz runs a whole network of mirror sites (Peoplewhizr, Peoplewiz, Peoplewizard, etc.) — one opt-out covers them all. SpyDialer, Anywho, and QuickPeopleTrace each need their own removal.",
     steps: [
       { text: 'PeopleWhiz (covers all Peoplewiz* mirrors): use the opt-out link on its site' },
-      { text: "SpyDialer: Submit opt-out", url: "https://www.spydialer.com/consumers/" },
+      { text: "SpyDialer: on the consumer page, find your listing and submit the opt-out", url: "https://www.spydialer.com/consumers/" },
       { text: 'Anywho: its opt-out link now leads to Spokeo’s opt-out form', url: 'https://www.anywho.com/optout' },
-      { text: 'QuickPeopleTrace: use the opt-out link on its site' },
+      { text: 'QuickPeopleTrace: use the opt-out link on its site', elsewhere: true },
       { text: 'Usatrace: use the opt-out link on its site' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -475,7 +475,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'Request your LexisNexis Consumer Disclosure Report. It arrives by mail or download and shows what they hold', url: 'https://consumer.risk.lexisnexis.com/request' },
       { text: 'Request your employment data report from The Work Number (Equifax). The same site offers a data freeze', url: 'https://employees.theworknumber.com/employment-data-report' },
       { text: 'Read Thomson Reuters CLEAR’s privacy page. Thomson Reuters may limit who can get records deleted; you can still submit a request', url: 'https://legal.thomsonreuters.com/en/legal-notices/privacy-records' },
-      { text: 'Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement' },
+      { text: 'Take in the supply chain: public records → brokers → aggregators → banks, insurers, landlords, law enforcement', elsewhere: true },
     ],
     debriefQs: REPORT_REQUESTS_DEBRIEF,
     scoutDialog: {
@@ -572,7 +572,7 @@ export const RECLAMATION_MISSIONS = [
       { text: 'The Work Number (Equifax): request your employment data report, and freeze it if you want', url: 'https://employees.theworknumber.com/employment-data-report' },
       { text: 'Data Axle: use the consumer choices in its privacy policy', url: 'https://www.data-axle.com/privacy-policy/' },
       { text: 'Sift: read its service privacy notice for how to request or delete your data', url: 'https://sift.com/legal-and-compliance/service-privacy-notice/' },
-      { text: 'Merlin Information Services (utility connection records): its site didn’t answer when we checked (October 2026)' },
+      { text: 'Merlin Information Services (utility connection records): its site didn’t answer when we checked (October 2026)', elsewhere: true },
       { text: 'Tracers (debt collectors and PIs): find the consumer privacy request on its site' },
     ],
     debriefQs: OPTOUT_DEBRIEF,
@@ -600,7 +600,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: 'Check what Google uses for your ads in My Ad Center', url: 'https://myadcenter.google.com/home' },
       { text: 'Check your Meta ad preferences in Accounts Center', url: 'https://accountscenter.facebook.com/ad_preferences' },
-      { text: 'On iPhone, check how many apps can track you: Settings → Privacy & Security → Tracking' },
+      { text: 'On iPhone, check how many apps can track you: Settings → Privacy & Security → Tracking', elsewhere: true },
     ],
     debriefQs: AD_PROFILE_DEBRIEF,
     scoutDialog: {
@@ -626,7 +626,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Visit the NAI opt-out page -- use its links to members' own opt-outs, or add its Global Privacy Control extension in Chrome", url: "https://thenai.org/how-to-opt-out/" },
       { text: "Run the DAA WebChoices opt-out -- it tries to opt this browser out of the participating companies in one go; a browser that blocks third-party cookies may make some fail", url: "https://optout.aboutads.info/" },
-      { text: "Disable your advertising ID -- iOS: Settings → Privacy & Security → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID" },
+      { text: "Disable your advertising ID -- iOS: Settings → Privacy & Security → Tracking → toggle off; Android: Settings → Privacy → Ads → Delete advertising ID", elsewhere: true },
       // Not a hidden move (Liz 2026-11-18): a new browser leaves the saved passwords behind.
       { text: "Optional: try a browser with Global Privacy Control built in (Firefox, Brave, or DuckDuckGo)", note: [{ label: "Do I have to switch?", text: "No. You can keep the browser you use now. Your saved passwords stay in it. Trying a new one is fine too." }] },
     ],
@@ -651,7 +651,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: 'Google: open My Ad Center and turn off Personalized ads', url: 'https://myadcenter.google.com/home' },
       { text: "Meta: Go to Ad Preferences → Ad Settings, limit data use for ads", url: "https://www.facebook.com/adpreferences/ad_settings" },
-      { text: "Apple: Review App Tracking Transparency settings", url: "https://support.apple.com/en-us/102420" },
+      { text: "Apple: read Apple’s page on App Tracking Transparency. Then on your iPhone, open Settings → Privacy & Security → Tracking and turn off any app you don’t want tracking you", url: "https://support.apple.com/en-us/102420" },
     ],
     debriefQs: OPTOUT_DEBRIEF,
     optOut: { optout_result: ["all-submitted", "some-submitted"] },
@@ -674,7 +674,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: 'Opt out of LiveRamp -- they match your real name to your browser cookies', url: 'https://liveramp.com/privacy/my-privacy-choices/' },
       { text: "Opt out of Acxiom -- one of the oldest and largest consumer data brokers", url: "https://www.acxiom.com/opt-out/" },
-      { text: 'Oracle Data Cloud / BlueKai: Oracle shut down its advertising business in 2024, so there’s no opt-out left to file' },
+      { text: 'Oracle Data Cloud / BlueKai: Oracle shut down its advertising business in 2024, so there’s no opt-out left to file', elsewhere: true },
       { text: "Opt out of Lotame (cross-device audience data): its privacy-choices page links the request form", url: "https://www.lotame.com/privacy/information-privacy-choices-services/" },
       { text: "Opt out of Epsilon (its email lists were breached in 2011)", url: "https://legal.epsilon.com/us/consumer-information" },
     ],
@@ -761,7 +761,7 @@ export const RECLAMATION_MISSIONS = [
     briefing: "Individual opt-outs from the major location data brokers. Most require an email rather than a web form -- these companies don't make it easy. SafeGraph sells foot-traffic data. X-Mode (now Outlogic) sold prayer app data to the military. Gravy Analytics was breached in 2025.",
     steps: [
       { text: "Opt out of SafeGraph -- email privacy@safegraph.com citing your right to data deletion", url: "https://www.safegraph.com/privacy-policy" },
-      { text: 'X-Mode Social (later Outlogic): an FTC order bars it from selling sensitive location data, and its opt-out page no longer works' },
+      { text: 'X-Mode Social (later Outlogic): an FTC order bars it from selling sensitive location data, and its opt-out page no longer works', elsewhere: true },
       { text: 'Opt out of Placer.ai -- use the contact in its privacy policy', url: 'https://www.placer.ai/privacy-policy/consumer-privacy-policy' },
       { text: 'Opt out of Gravy Analytics (it now does business as Unacast) -- use its Opt Out & Do Not Sell form. An FTC order also limits its use of sensitive location data', url: 'https://gravyanalytics.com/opt-out-do-not-sell' },
     ],
@@ -863,7 +863,7 @@ export const RECLAMATION_MISSIONS = [
     steps: [
       { text: "Go to my Social Security", url: "https://www.ssa.gov/myaccount/" },
       { text: "Create an account if you don't have one, with a unique password and two-factor" },
-      { text: "If your SSN has been compromised: call SSA at 1-800-772-1213 (TTY 1-800-325-0778) and ask to Block Electronic Access" },
+      { text: "If your SSN has been compromised: call SSA at 1-800-772-1213 (TTY 1-800-325-0778) and ask to Block Electronic Access", elsewhere: true },
       { text: "Note: the block also stops you using your record online. To remove it, call SSA again and prove who you are" },
     ],
     debriefQs: DEFENSE_DEBRIEF,
