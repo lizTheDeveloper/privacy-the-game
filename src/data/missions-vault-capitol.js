@@ -374,7 +374,7 @@ export const VAULT_CAPITOL_MISSIONS = [
     steps: [
       { text: 'Open Venmo Settings', url: 'https://account.venmo.com/settings/security' },
       { text: 'Change your password (generate in password manager)' },
-      { text: 'Settings → Preferences → Passcode & biometric unlock (Face ID & Passcode on iPhone): turn it on. Venmo asks for it when the app opens, and may ask again when you send money' },
+      { text: 'Settings → Preferences → Passcode & biometric unlock (Face ID & Passcode on iPhone): turn it on. Venmo asks for it when the app opens, and may ask again when you send money', elsewhere: true },
       { text: 'Set a passcode that is NOT your phone unlock PIN or your bank PIN' },
     ],
     debriefQs: PASSWORD_DEBRIEF,

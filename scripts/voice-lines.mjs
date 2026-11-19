@@ -10,6 +10,7 @@ import { MISSIONS } from '../src/data/missions.js';
 import * as DIALOGUE from '../src/data/dialogue.js';
 import { DEBRIEF_GREETINGS } from '../src/screens/debrief.js';
 import { voiceId, voiceText } from '../src/utils/voice-line.js';
+import { WHEN_OPENS, COME_BACK, COME_BACK_MORE, previewText } from '../src/components/site-preview.js';
 
 // Longer than this is not one line (ElevenLabs takes up to 10,000 characters a request).
 export const MAX_LINE = 2500;
@@ -28,6 +29,11 @@ export function collectVoiceLines() {
     texts.push(m.lead, m.simple?.lead, m.briefing, m.simple?.scout);
     strings(m.scoutDialog, texts);
     const steps = [...(m.steps || []), ...(m.simple?.steps || []), ...Object.values(m.stepsByManager || {}).flat()];
+    // How a step reads in the "When it opens:" list of a link step before it (a step after any
+    // link: the device questions can take out a step in between).
+    for (const list of [m.steps, m.simple?.steps, ...Object.values(m.stepsByManager || {}), ...Object.values(m.reportSteps || {})]) {
+      (list || []).forEach((st, i) => { if (!st.url && list.slice(0, i).some((x) => x.url)) texts.push(previewText(st)); });
+    }
     for (const st of steps) {
       texts.push(st.text);
       for (const n of st.note || []) texts.push(n.label, n.text);
@@ -40,6 +46,8 @@ export function collectVoiceLines() {
   for (const v of Object.values(DIALOGUE)) if (typeof v !== 'function') strings(v, texts);
   strings(DEBRIEF_GREETINGS, texts);
   texts.push('Follow the steps above and report back when you’re done.', 'Report back — what did you find?');
+  // A link step's "before you go" (components/site-preview.js); its steps are the steps' own words.
+  texts.push(WHEN_OPENS, COME_BACK, COME_BACK_MORE);
   const lines = {};
   for (const t of texts) {
     if (typeof t !== 'string') continue;

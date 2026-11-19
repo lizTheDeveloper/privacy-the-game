@@ -53,7 +53,7 @@ export const PERIMETER_MISSIONS = [
       { text: 'T-Mobile: Set a 6–15 digit PIN that isn’t your birthday or SSN. T-Mobile’s fraud page also covers Port Out Protection.', url: 'https://www.t-mobile.com/support/plans-features/help-with-t-mobile-account-fraud' },
       { text: 'AT&T: in the myAT&T app, turn on Wireless Account Lock (tap the person icon → Wireless account lock, then swipe to lock). AT&T says it blocks specific changes, including moving your number to another carrier (unlock it yourself when you switch). Also set your account passcode (for calls and stores) and the extra security passcode, which is for signing in online.', url: 'https://www.att.com/support/article/wireless/000102016/' },
       { text: 'Verizon: set a 4-digit Account PIN at vzw.com/PIN (or in the My Verizon app). Number Lock is a separate switch: My Verizon app → Me → Edit profile and settings → Security → Number Lock, turned on for each line.', url: 'https://www.verizon.com/support/knowledge-base-309293/' },
-      { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor." },
+      { text: "Other carriers: Call customer service and ask for an account PIN/passcode and port-out protection. If they say they don't have it, ask for a supervisor.", elsewhere: true },
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {
@@ -75,7 +75,7 @@ export const PERIMETER_MISSIONS = [
     steps: [
       { text: "Google: Open myaccount.google.com/signinoptions/two-step-verification → under \"How you sign in,\" remove your phone number as a verification method. Keep Google Authenticator or your security key.", url: "https://myaccount.google.com/signinoptions/two-step-verification" },
       { text: "Microsoft: Open account.live.com/proofs/manage → remove \"Text a code to my phone\" as a sign-in method. Keep the Microsoft Authenticator app.", url: "https://account.live.com/proofs/manage" },
-      { text: "Apple: If you use Trusted Phone Numbers, make sure you also have trusted devices as alternatives (iPhone, iPad, or Mac signed into iCloud)." },
+      { text: "Apple: If you use Trusted Phone Numbers, make sure you also have trusted devices as alternatives (iPhone, iPad, or Mac signed into iCloud).", elsewhere: true },
       { text: "Banks: log into your primary bank and look in its security settings: if your bank offers an authenticator app or passkey, switch to it from text codes." },
       { text: "For any account where SMS is the ONLY 2FA option: add an authenticator app first" },
       { text: "Confirm it works" },
@@ -219,9 +219,9 @@ export const PERIMETER_MISSIONS = [
     steps: [
       { text: "Global Privacy Control -- Firefox: Settings → Privacy & Security → check \"Tell websites not to sell or share my data.\" Brave: already on by default. Chrome: install the Privacy Badger extension from the Chrome Web Store." },
       { text: "Verify GPC is working", url: "https://global-privacy-control.vercel.app/" },
-      { text: "Disable advertising ID -- iPhone: Settings → Privacy & Security → Tracking → turn OFF \"Allow Apps to Request to Track.\" Android: Settings → Privacy → Ads → \"Delete advertising ID.\"" },
+      { text: "Disable advertising ID -- iPhone: Settings → Privacy & Security → Tracking → turn OFF \"Allow Apps to Request to Track.\" Android: Settings → Privacy → Ads → \"Delete advertising ID.\"", elsewhere: true },
       { text: "Bookmark VirusTotal -- paste suspicious URLs here instead of clicking them", url: "https://www.virustotal.com/gui/home/url" },
-      { text: "Bookmark Google Safe Browsing checker", url: "https://transparencyreport.google.com/safe-browsing/search" },
+      { text: "Bookmark Google Safe Browsing checker -- paste a web address there to see if Google lists the site as unsafe", url: "https://transparencyreport.google.com/safe-browsing/search" },
     ],
     debriefQs: ACTION_DEBRIEF,
     scoutDialog: {

@@ -98,8 +98,9 @@ function changedSinceQuestion(service, since) {
 // The password manager check, one action a step: search, then read what it says.
 // `ask`: the reading step asks Q-PW on its card, for a mission whose every question is asked
 // on a step (then the last DONE files the report, utils/step-report.js).
-export const pmSteps = (what, { ask = false } = {}) => [
-  { text: `Open the security report where your passwords are saved (your phone, browser or password manager) and search for ${what}` },
+// `elsewhere`: after a step with a link, the report is not on that site (components/site-preview.js).
+export const pmSteps = (what, { ask = false, elsewhere = false } = {}) => [
+  { text: `Open the security report where your passwords are saved (your phone, browser or password manager) and search for ${what}`, ...(elsewhere ? { elsewhere: true } : {}) },
   { text: 'Note whether it says leaked, compromised or reused.', ...(ask ? { ask: 'pw_status' } : {}) },
 ];
 
@@ -318,7 +319,7 @@ export const RECON_ACCOUNT_MISSIONS = [
       { text: 'Open claims or Explanation of Benefits (EOBs) for the last 12 months.' },
       { text: 'Look for visits, prescriptions or equipment you never got.' },
       { text: 'Search your insurer and your main hospital or clinic on the HHS breach portal.', url: 'https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf' },
-      ...pmSteps('your insurer or patient portal'),
+      ...pmSteps('your insurer or patient portal', { elsewhere: true }),
     ],
     debriefQs: [
       activityQuestion('Any claim or prescription you didn’t get?'),

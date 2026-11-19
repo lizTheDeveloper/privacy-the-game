@@ -134,7 +134,7 @@ export const MARKETPLACE_CHEAP_ACCOUNTS_MISSIONS = [
       { text: 'Open Temu’s personalized advertising page while signed in', url: 'https://www.temu.com/bgp_personalized_advertising.html' },
       { text: 'Switch off “Allow Temu to share my data to personalize my ad experience.”' },
       { text: 'Not signed in? Turn it off in every browser and on every device you use with Temu.' },
-      { text: 'In the app’s settings, open Notifications and turn off the promotional ones.' },
+      { text: 'In the app’s settings, open Notifications and turn off the promotional ones.', elsewhere: true },
       { text: 'Not a regular shopper? Temu’s policy says you can delete your account from the app’s Settings. Do that instead of keeping it “just in case.”' },
       { text: 'Read what Temu says it collects and who it shares it with', url: 'https://www.temu.com/privacy-and-cookie-policy.html' },
     ],
