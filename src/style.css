@@ -1129,4 +1129,15 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   #app.is-arriving .btn-primary { animation: none; }
   .btn-primary:active, :is(.btn-secondary, .city-btn, .hud-next, .hud-mode, .hud-music, .hud-support-link, .simple-back, .simple-pill, .finder-opt, .survey-chip, .focus-ask-opt, .walk-gear-chip, .deck-btn, .interior-btn, .top-tool, .building-link, .read-level, .candle-btn):active { transform: none; }
 }
+
+/* Next up (Liz 2026-11-19): a district's next mission, under the tab bar (or a facility district's
+   fill bar), when its bright button would be off a phone's first screen. One line: the name, then
+   the button (screens/district.js). */
+.next-up { display: flex; align-items: center; gap: 12px; margin: 12px 24px 0; padding: 10px 12px 10px 14px; border: 1px solid rgba(0, 229, 255, 0.55); background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
+.next-up-text { flex: 1; min-width: 0; }
+.next-up-label { display: block; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-quiet); margin-bottom: 3px; }
+.next-up-name { font-size: 14px; font-weight: 600; color: var(--offwhite); line-height: 1.35; }
+.next-up--simple .next-up-label { display: inline; font-family: inherit; font-size: 16px; letter-spacing: 0; color: var(--offwhite); margin: 0; }
+.next-up--simple .next-up-name { font-size: 16px; }
+.next-up-go { flex-shrink: 0; white-space: nowrap; }
 /* ===== colour language: end ===== */

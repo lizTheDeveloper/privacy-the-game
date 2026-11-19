@@ -1,6 +1,6 @@
 import { prismTag, prismMark } from '../components/prism-tag.js';
 import { fillBar } from '../components/fill-bar.js';
-import { visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
+import { visibleSteps, progressFor, progressLabel, readLevel } from '../utils/reading.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
@@ -225,8 +225,53 @@ function renderDisabledPanel(districtId) {
   </div>`;
 }
 
+// Next up (Liz 2026-11-19, "district yes if its nav"): on a phone the lead mission's bright
+// START sat under the intro, the tabs and the missions already done, so the one thing to tap
+// next was off the first screen. When the screen's bright button takes you somewhere, it comes up
+// here, under the tab bar (or, on a district without tabs, under its fill bar), with the
+// mission's name; the row in the list keeps its lit edge and an outlined START. A bright button
+// that does something in place (TURN ON THE FIELD, a switch, a chip) stays where it is.
+// Simple reads "Next: <mission>"; Advanced keeps the NEXT UP label.
+export function renderNextUp(state, { name, label, href }) {
+  const simple = readLevel(state) === 'simplest';
+  const plain = label.charAt(0) + label.slice(1).toLowerCase();
+  return `
+  <div class="next-up${simple ? ' next-up--simple' : ''}" data-next-up>
+    <div class="next-up-text">${simple
+      ? `<span class="next-up-label">Next:</span> <span class="next-up-name">${esc(name)}</span>`
+      : `<span class="next-up-label">NEXT UP</span><span class="next-up-name">${esc(name)}</span>`}</div>
+    <a class="btn-primary btn-sm next-up-go" href="${href}" aria-label="${esc(`${plain} ${name}`)}">${esc(label)}</a>
+  </div>`;
+}
+
+// Next up is for a bright button that would be off the first screen. Drawn, the page measures
+// where the list's own button sits without it: on the first screen anyway, Next up is hidden and
+// the list's button is the bright one (as before 7.34.1); below it, Next up shows and the list's
+// button is outlined. Either way there is one bright button. It runs after every draw of a district,
+// before the browser paints, and again when a picture or the warning bar moves the page
+// (app.js), so it can be undone: nothing is removed.
+export function settleNextUp(root, fold) {
+  const row = root?.querySelector?.('[data-next-up]');
+  const twin = root?.querySelector?.('[data-next-up-twin]');
+  const go = row?.querySelector?.('.next-up-go');
+  if (!row || !twin || !go || typeof twin.getBoundingClientRect !== 'function') return;
+  row.style.display = 'none';
+  const inView = twin.getBoundingClientRect().bottom + (globalThis.scrollY || 0) <= fold;
+  row.style.display = inView ? 'none' : '';
+  bright(twin, inView);
+  bright(go, !inView);
+}
+
+function bright(el, on) {
+  el.classList.toggle('btn-primary', on);
+  el.classList.toggle('btn-secondary', !on);
+}
+
 // lead: the one mission to do next gets the bright button; the rest are quieter (Liz 2026-11-17).
-function renderMissionRow(state, mission, { lead = true } = {}) {
+// hoisted: its bright button is in Next up at the top of the tab (renderNextUp), so the row keeps
+// its lit edge and an outlined twin, which becomes the bright one again when the row is on the
+// first screen anyway (settleNextUp).
+function renderMissionRow(state, mission, { lead = true, hoisted = false } = {}) {
   const record = state.missions[mission.id];
   const notNeeded = record?.status === 'not-needed';
   const completed = isMissionDone(record);
@@ -254,9 +299,9 @@ function renderMissionRow(state, mission, { lead = true } = {}) {
       <div class="badge badge--skip" style="letter-spacing: 1px;">SKIPPED</div>
       <a class="btn-secondary btn-sm" href="#/mission/${mission.id}/briefing">START</a>`;
   } else {
-    statusCell = lead
+    statusCell = lead && !hoisted
       ? `<a class="btn-primary btn-sm" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`
-      : `<a class="btn-secondary btn-sm" href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
+      : `<a class="btn-secondary btn-sm"${lead ? ' data-next-up-twin' : ''} href="#/mission/${mission.id}/briefing">${stepsStarted ? 'CONTINUE' : 'START'}</a>`;
   }
 
   return `
@@ -287,29 +332,49 @@ const PHASE_PREREQ = { fortify: 'recon', reclaim: 'fortify' };
 function renderCustomMissions(state, districtId, activeTab) {
   const missions = customMissionsFor(state, districtId).filter((m) => m.phase === activeTab);
   if (!missions.length) return '';
+  // One bright button per screen: the game's next mission has it when there is one; else the
+  // first of these not done yet.
+  const open = (m) => !isMissionDone(state.missions[m.id]) && state.missions[m.id]?.status !== 'skipped';
+  const leadId = tabLeadMission(state, districtId, activeTab) ? null : missions.find(open)?.id;
   return `
   <div class="custom-account" style="padding: 0 24px 24px;">
     <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 6px;">ACCOUNTS YOU ADDED</div>
     <div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.5; margin-bottom: 10px;">The game doesn’t know these services, so their missions are steps that work on almost any account. They stay in this browser and don’t count toward the district’s progress.</div>
     <div class="panel" style="padding: 4px;">
-      ${missions.map((m) => renderMissionRow(state, m)).join('')}
+      ${missions.map((m) => renderMissionRow(state, m, { lead: m.id === leadId })).join('')}
     </div>
   </div>`;
 }
 
-function renderMissionList(state, districtId, activeTab) {
-  return renderGameMissionList(state, districtId, activeTab, Boolean(customMissionsFor(state, districtId).some((m) => m.phase === activeTab)))
+function renderMissionList(state, districtId, activeTab, { hoisted = false } = {}) {
+  return renderGameMissionList(state, districtId, activeTab, Boolean(customMissionsFor(state, districtId).some((m) => m.phase === activeTab)), hoisted)
     + renderCustomMissions(state, districtId, activeTab);
 }
 
-function renderGameMissionList(state, districtId, activeTab, hasCustom) {
+// The game's missions on a tab, in list order: bonus ones last; on Reclaim, the Social Timeline's
+// answers put the platforms and eras the player posted most in first (utils/social-timeline.js).
+function tabMissions(state, districtId, activeTab) {
   const missions = getMissionsForDistrict(districtId).filter(
     (m) => m.phase === activeTab && isMissionInPlay(state, m),
   );
-  // On Reclaim, the Social Timeline's answers put the platforms and eras the player
-  // posted most in first (utils/social-timeline.js); the sort is stable otherwise.
   const rank = activeTab === 'reclaim' ? (m) => timelineRank(state, m) : () => 0;
-  missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0) || rank(b) - rank(a));
+  return missions.sort((a, b) => (a.optional ? 1 : 0) - (b.optional ? 1 : 0) || rank(b) - rank(a));
+}
+
+// The mission to do next on a tab: one already begun, else the first not filed (bonus ones last).
+// Only a mission with a row of its own counts: one behind a "Complete RECON first" gate has no
+// button to light.
+export function tabLeadMission(state, districtId, activeTab) {
+  const prereq = PHASE_PREREQ[activeTab];
+  const missions = tabMissions(state, districtId, activeTab)
+    .filter((m) => !prereq || getAccountPhaseGate(state, districtId, m.accountId, prereq).unlocked);
+  const open = (m) => !isMissionDone(state.missions[m.id]) && state.missions[m.id]?.status !== 'skipped';
+  const begun = (m) => progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
+  return missions.find((m) => open(m) && begun(m)) || missions.find((m) => open(m) && !m.optional) || missions.find(open) || null;
+}
+
+function renderGameMissionList(state, districtId, activeTab, hasCustom, hoisted = false) {
+  const missions = tabMissions(state, districtId, activeTab);
   if (missions.length === 0) {
     if (hasCustom) return '';
     return `
@@ -317,11 +382,8 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom) {
       <div class="panel" style="padding: 32px; text-align: center; font-family: var(--font-mono); font-size: 12px; color: rgba(237,239,243,0.4);">No missions available in this phase yet.</div>
     </div>`;
   }
-  // The mission to do next: one already begun, else the first not filed (bonus ones last).
-  const open = (m) => !isMissionDone(state.missions[m.id]) && state.missions[m.id]?.status !== 'skipped';
-  const begun = (m) => progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
-  const leadId = (missions.find((m) => open(m) && begun(m)) || missions.find((m) => open(m) && !m.optional) || missions.find(open))?.id;
-  const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId });
+  const leadId = tabLeadMission(state, districtId, activeTab)?.id;
+  const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId, hoisted });
   // Said once for the list, not on every bonus row.
   const bonusNote = missions.some((m) => m.optional)
     ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
@@ -432,7 +494,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
       <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
     </div>
-    <div style="margin-top: 20px; text-align: right;">
+    <div class="pin-bottom survey-done" style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none; display: inline-block; max-width: 100%;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
     </div>
   </div>`;
@@ -489,17 +551,22 @@ export function quizBadge(quiz) {
   return `${correct}/${total} RIGHT`;
 }
 
+function quizButtonLabel(quiz) {
+  const answered = Object.keys(quiz?.curated || {}).length;
+  if (answered >= CURATED_MESSAGES.length) return 'QUIZ MODE — KEEP PRACTICING';
+  return answered > 0 ? 'CONTINUE TRAINING' : 'START TRAINING';
+}
+
 // Scam Defense's training: the curated quiz and quiz mode (they don't count toward % SECURED).
 // lead: nothing else in the district is left to start, so training is the bright button.
-function renderQuizPanel(state, lead = false) {
+function renderQuizPanel(state, lead = false, hoisted = false) {
   const quiz = state.phishingQuiz || { curated: {} };
   const total = CURATED_MESSAGES.length;
   const answered = Object.keys(quiz.curated).length;
   const correct = Object.values(quiz.curated).filter(a => a.correct).length;
-  const allDone = answered >= total;
   const badge = quizBadge(quiz);
   const statusColor = badge === 'TRAINED' ? 'var(--lime)' : 'var(--text-quiet)';
-  const btnLabel = allDone ? 'QUIZ MODE — KEEP PRACTICING' : answered > 0 ? 'CONTINUE TRAINING' : 'START TRAINING';
+  const btnLabel = quizButtonLabel(quiz);
 
   return `
       <div data-quiz-panel style="padding: 16px; text-align: center; border-top: 1px solid rgba(0,229,255,0.08);">
@@ -511,7 +578,7 @@ function renderQuizPanel(state, lead = false) {
           Real or fake? Identify phishing emails, texts, calls, and push notifications.
           ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--offwhite);">${correct}/${answered} correct so far.</span>` : ''}
         </div>
-        <a class="${lead ? 'btn-primary' : 'btn-secondary'}" style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
+        <a class="${lead && !hoisted ? 'btn-primary' : 'btn-secondary'}"${lead && hoisted ? ' data-next-up-twin' : ''} style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
       </div>`;
 }
 
@@ -526,7 +593,7 @@ export function facilityLeadId(state, district) {
   return (begun || open.find((m) => m.id === next?.id) || open[0])?.id || null;
 }
 
-function renderFacilitySection(state, facilityId, district, leadId = null) {
+function renderFacilitySection(state, facilityId, district, leadId = null, hoisted = false) {
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId && !m.legacy);
@@ -559,7 +626,8 @@ function renderFacilitySection(state, facilityId, district, leadId = null) {
       action = `<a class="btn-secondary btn-xs" href="#/mission/${m.id}/briefing">RETRY</a>`;
     } else {
       const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
-      action = `<a class="${m.id === leadId ? 'btn-primary' : 'btn-secondary'} btn-xs" href="#/mission/${m.id}/briefing">${begun ? 'CONTINUE' : 'START'}</a>`;
+      const lit = m.id === leadId && !hoisted;
+      action = `<a class="${lit ? 'btn-primary' : 'btn-secondary'} btn-xs"${m.id === leadId && hoisted ? ' data-next-up-twin' : ''} href="#/mission/${m.id}/briefing">${begun ? 'CONTINUE' : 'START'}</a>`;
     }
 
     return `
@@ -591,7 +659,7 @@ function renderFacilitySection(state, facilityId, district, leadId = null) {
       <div>
         ${missionRows}
       </div>
-      ${facilityId === 'scam_defense' ? renderQuizPanel(state, !leadId) : ''}
+      ${facilityId === 'scam_defense' ? renderQuizPanel(state, !leadId, hoisted) : ''}
     </div>
   </div>`;
 }
@@ -654,6 +722,20 @@ function renderOptOutLink(district) {
   </div>`;
 }
 
+// A facility district's Next up: its lead mission, else (Scam Defense, every mission done) the
+// phishing training. Nothing when there is nothing to do next.
+function facilityNextUp(state, district, facilityOrder, leadId) {
+  if (leadId) {
+    const m = getMissionsForDistrict(district.id).find((x) => x.id === leadId);
+    const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
+    return renderNextUp(state, { name: m.title, label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing` });
+  }
+  if (facilityOrder.includes('scam_defense') && ACCOUNTS.scam_defense) {
+    return renderNextUp(state, { name: 'Phishing training', label: quizButtonLabel(state.phishingQuiz), href: '#/quiz/phishing' });
+  }
+  return '';
+}
+
 function renderFacilityDistrict(state, district, reaction, notMine) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictProgress(state, district.id);
@@ -664,8 +746,11 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
 
   const facilityOrder = district.facilityOrder || districtAccounts.map(([id]) => id);
   const leadId = facilityLeadId(state, district);
+  // Off, an opt-in district's one bright button is TURN ON: it acts in place, so it stays put.
+  const off = district.optIn && !isDistrictOn(state, district.id);
+  const nextUp = off ? '' : facilityNextUp(state, district, facilityOrder, leadId);
   const facilities = facilityOrder
-    .map((id) => renderFacilitySection(state, id, district, leadId))
+    .map((id) => renderFacilitySection(state, id, district, leadId, Boolean(nextUp)))
     .join('');
 
   return `
@@ -689,6 +774,7 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
         <span class="stat-label">SECURED</span>
       </div>
     </div>
+    ${nextUp}
     ${categoryAskBlock(state, district.id)}
     <div style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT FACILITIES</div>
@@ -703,7 +789,7 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
     <div style="padding: 16px 24px 8px;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; max-width: 640px;">${esc(district.facilityIntro)}</div>
     </div>` : ''}
-    ${district.optIn && !isDistrictOn(state, district.id) ? renderOptInPanel(district) : `
+    ${off ? renderOptInPanel(district) : `
     <div style="padding: 8px 0 24px;">
       ${facilities}
     </div>
@@ -736,6 +822,14 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     .map(([id]) => skylineBuilding(state, districtId, id))
     .join('');
 
+  // Next up: the tab's lead mission, on a tab that shows its mission list (not Survey, and not
+  // with every account switched off).
+  const listTab = activeTab !== 'survey' && !(allDisabled && !(districtId === 'square' && activeTab === 'reclaim'));
+  const lead = listTab ? tabLeadMission(state, districtId, activeTab) : null;
+  const leadBegun = lead && progressFor(state, lead.id, visibleSteps(lead, state)).handled > 0;
+  const nextUp = lead ? renderNextUp(state, { name: lead.title, label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` }) : '';
+  const hoisted = Boolean(nextUp);
+
   let content;
   if (district.hasGarage && activeTab === 'survey') {
     const vehicleCount = (state.vehicles || []).length;
@@ -762,13 +856,13 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
         <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
       </div>
     </div>`;
-    content = timelineBanner + renderMissionList(state, districtId, activeTab);
+    content = timelineBanner + renderMissionList(state, districtId, activeTab, { hoisted });
   } else if (allDisabled && activeTab !== 'survey') {
     content = renderDisabledPanel(districtId) + renderCustomMissions(state, districtId, activeTab);
   } else if (activeTab === 'survey') {
     content = renderSurvey(state, districtId, districtAccounts, allDisabled);
   } else {
-    content = renderMissionList(state, districtId, activeTab);
+    content = renderMissionList(state, districtId, activeTab, { hoisted });
   }
 
   return `
@@ -804,6 +898,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     ${renderDistrictIntro(state, districtId)}
     ${districtId === 'vault' ? renderBankNotesCard(state) : ''}
     ${renderTabs(districtId, activeTab)}
+    ${nextUp}
     ${content}
     ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}
   </div>`;

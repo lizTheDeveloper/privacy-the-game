@@ -2,6 +2,18 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.34.1 (2026-11-19): A district's next mission is on the first screen
+
+On a phone, a district's bright START (the one thing to tap next, since 7.33.0) often sat under the intro, the tabs and the missions already done, so you had to scroll to find it. Liz: "district yes if its nav".
+
+- **Next up, at the top of the tab.** When the bright button takes you somewhere (the next mission's START or CONTINUE, or Phishing training once The Perimeter's missions are done) and it would be off the first screen, it comes up under the tab bar with the mission's name. On a district without tabs (The Perimeter, The Reclamation and the others) it's under the fill bar. Simple mode reads "Next: Breach Recon: Apple ID"; Advanced keeps a NEXT UP label.
+- **Only when it's needed.** If the mission's own button is already on the first screen, nothing changes. The page checks again when pictures finish loading, so a list that gets pushed down still gets Next up.
+- **Still one bright button.** While Next up shows, the mission's row in the list keeps its lit edge and has an outlined START. Nothing was removed: the whole list is where it was.
+- **The Survey's DONE WITH SURVEY — START RECON stays on screen** at the bottom of a phone while you answer, like SUBMIT REPORT does. It stays after your answers, not above them.
+- **Buttons that do something in place don't move.** TURN ON THE FIELD, the switches and the survey chips stay where they are.
+- **Fixed along the way:** a tab whose first mission was behind "Complete RECON first" lit nothing, even with other missions ready. Now the first mission you can start is lit. Missions for accounts you added yourself no longer each get a bright START when the game's own list already has one.
+- Nothing new is tracked or sent.
+
 ## 7.34.0 (2026-11-19): Focus music pops out on a computer
 
 Focus music used to play inside the game's page: a reload stopped it, and outside a mission there was no button to turn it off.

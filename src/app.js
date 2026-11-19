@@ -21,7 +21,7 @@ import { DISTRICTS } from './data/districts.js';
 import { hasInterior } from './data/interiors/index.js';
 import { generateMilestoneCard, shareMilestoneCard, shareStatCard, shareStatusText } from './utils/milestone-card.js';
 import { renderCityMap } from './screens/city-map.js';
-import { renderDistrict } from './screens/district.js';
+import { renderDistrict, settleNextUp } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
 import { renderSaints, saintsOrigin } from './screens/saints.js';
 import { renderPrism } from './screens/prism.js';
@@ -378,6 +378,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     // Arriving forgets the folds the player set by hand on the last screen.
     if (tracksPageview(cause)) handFolds = new Map();
     applyOpenDesktop(app, isDesktopWide(), handFolds);
+    // A district's Next up stays only when the list's own bright button is off the first screen.
+    if (route.screen === 'district') settleNextUp(app, window.innerHeight);
     initDecks(app, decksBefore);
     syncNowPlaying(route);
     // The Big Check's line is drawn once the data is in; then it's seen.
@@ -1938,9 +1940,20 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
+// A district's Next up is measured against the first screen; a picture landing (a building) can move
+// the list down after the draw, so measure again, unless the player has already scrolled.
+let nextUpFrame = 0;
+function resettleNextUp() {
+  if (nextUpFrame || parseRoute(location.hash).screen !== 'district' || window.scrollY > 8) return;
+  nextUpFrame = requestAnimationFrame(() => { nextUpFrame = 0; settleNextUp(app, window.innerHeight); });
+}
+app.addEventListener('load', resettleNextUp, true);
+window.addEventListener('resize', resettleNextUp);
+
 // Web fonts landing can move the header; the phone's map is sized from where it starts, so measure again.
 document.fonts?.addEventListener?.('loadingdone', () => {
   if (parseRoute(location.hash).screen === 'broker-map') renderCurrentRoute();
+  resettleNextUp();
 });
 
 // The streak check runs once as the game opens; what it finds is a labelled WELCOME BACK
