@@ -64,8 +64,11 @@ self.addEventListener('fetch', (e) => {
 
   // The page: from the network, kept as the offline copy of index.html, so
   // offline it is the newest page that loaded and asks for that release's files.
+  // The focus-music pop-out is a page of its own: kept under its own name, so opening it never
+  // replaces the game's offline copy.
   if (e.request.mode === 'navigate') {
-    e.respondWith(networkFirst(e.request, './index.html'));
+    const key = /\/focus-music\.html$/.test(url.pathname) ? './focus-music.html' : './index.html';
+    e.respondWith(networkFirst(e.request, key));
     return;
   }
 

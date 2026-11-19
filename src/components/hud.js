@@ -3,6 +3,7 @@ import { isCabinetMode } from '../utils/cabinet.js';
 import { bugButtonHtml } from './bug-reporter.js';
 import { displayStreak } from '../state.js';
 import { readLevel, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { isPlaying } from '../utils/focus-music.js';
 
 // Link home to the studio. The utm tags let the studio site count visits from the game.
 export const STUDIO_URL = 'https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=';
@@ -25,6 +26,9 @@ export function renderHud(state, { tools = '', nextLink = true } = {}) {
   // Simple mode: What's next, from any screen (Liz 2026-11-18: "from the top thing, it can help
   // them orient to the next thing").
   const whatsNext = !tools && nextLink && readLevel(state) === 'simplest' ? '<a class="hud-next" href="#/next">What’s next &#9654;</a>' : '';
+  // Focus music plays on through every screen (Liz 2026-11-19), so while it is on every screen
+  // can stop it. Mission screens have the full button in their tools row.
+  const musicButton = !tools && isPlaying() ? '<button type="button" class="hud-music" data-action="focus-music" aria-pressed="true" aria-label="Focus music (on): stop" title="Focus music is on. Click to stop."><span aria-hidden="true">&#9835;</span><span class="hud-music-label" aria-hidden="true"> Music on</span></button>' : '';
   const modeButton = tools ? '' : `<button type="button" class="hud-mode" data-action="read-level" data-level="${other}" aria-label="Switch to ${READ_LEVEL_LABELS[other]}">${READ_LEVEL_LABELS[other]}</button>`;
   return `
   <div${tools ? ' class="hud-bar hud-bar--tools"' : ''} style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;${tools ? ' flex-wrap: wrap; row-gap: 8px;' : ''} background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
@@ -47,7 +51,7 @@ export function renderHud(state, { tools = '', nextLink = true } = {}) {
         <span class="stat-label">STREAK</span>
       </div>
       ${bugButtonHtml()}
-      ${whatsNext}
+      ${whatsNext}${musicButton}
       ${modeButton}
       ${supportBlock}
     </div>${tools ? `
