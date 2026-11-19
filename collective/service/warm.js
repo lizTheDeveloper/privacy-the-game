@@ -12,8 +12,10 @@
 //
 // It spends from the same ElevenLabs quota as the service, so it checks what is left first and
 // stops before the quota drops under --reserve characters (default 100,000), leaving room for
-// players' first listens and the next text change. --max-chars caps one run. Requests go two at a
-// time with a pause between them, and back off on 429 or 5xx.
+// players' first listens and the next text change. --max-chars caps one run. If the plan can't be
+// read, or any limit isn't a number, it records nothing (fails closed); --allow-unknown-budget
+// with --max-chars N spends at most N anyway. Requests go two at a time with a pause between
+// them, and back off on 429 or 5xx.
 import { readFile, writeFile, rename, mkdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +38,9 @@ export async function recordingState(file, minBytes = MIN_BYTES) {
   return looksLikeMp3(head) ? 'ok' : 'bad';
 }
 
+// A NaN or negative allowance is 0.
+const safe = (n) => (Number.isNaN(n) || n < 0 ? 0 : n);
+
 function statusOf(err) {
   const m = /elevenlabs (\d{3})/.exec(String(err?.message || ''));
   return m ? Number(m[1]) : 0;
@@ -45,9 +50,10 @@ export async function warm({
   lines,
   cacheDir,
   synth,
-  remaining = async () => Infinity, // characters left on the ElevenLabs plan
+  remaining = async () => null, // characters left on the ElevenLabs plan; null = unknown
   reserve = 100_000,
   maxChars = Infinity,
+  allowUnknownBudget = false, // spend up to maxChars (which must be finite) when the plan can't be read
   concurrency = 2,
   pauseMs = 250,
   minBytes = MIN_BYTES,
@@ -68,9 +74,26 @@ export async function warm({
   log(`${counts.lines} lines: ${counts.ok} recorded, ${counts.missing} missing, ${counts.bad} bad (${counts.todoChars} characters to record)`);
   if (dryRun || !todo.length) return counts;
 
-  let left = await remaining();
-  log(`ElevenLabs characters left: ${left === Infinity ? 'unknown' : left}; keeping ${reserve} in reserve`);
-  let allowance = Math.min(maxChars, left - reserve);
+  // Fails closed: an unreadable plan, a NaN or a negative number all mean nothing is spent.
+  if (!Number.isFinite(reserve) || reserve < 0 || Number.isNaN(maxChars) || maxChars < 0) {
+    counts.stopped = 'bad limits';
+    log('reserve and max chars must be numbers >= 0; recording nothing');
+    return counts;
+  }
+  const budgetFrom = (left) => {
+    if (Number.isFinite(left)) return safe(Math.min(maxChars, left - reserve));
+    if (allowUnknownBudget && Number.isFinite(maxChars)) return safe(maxChars);
+    return null;
+  };
+  const left = await remaining();
+  let allowance = budgetFrom(left);
+  if (allowance === null) {
+    counts.stopped = 'budget unknown';
+    log('could not read the ElevenLabs plan; recording nothing (--allow-unknown-budget with --max-chars N overrides)');
+    return counts;
+  }
+  log(`ElevenLabs characters left: ${Number.isFinite(left) ? left : 'unknown'}; keeping ${reserve} in reserve; this run may spend ${allowance}`);
+  if (allowance === 0) { counts.stopped = 'no budget'; return counts; }
   await mkdir(cacheDir, { recursive: true });
 
   let next = 0;
@@ -80,7 +103,7 @@ export async function warm({
   async function worker() {
     while (!stop && next < todo.length) {
       const item = todo[next++];
-      if (item.text.length > allowance) { counts.skippedForBudget++; continue; }
+      if (!(allowance > 0) || !(item.text.length <= allowance)) { counts.skippedForBudget++; continue; }
       allowance -= item.text.length;
       let body = null;
       for (let attempt = 0; attempt < 6 && !body; attempt++) {
@@ -107,8 +130,10 @@ export async function warm({
       // Re-check the plan now and then: players are spending from it too.
       if (++sinceCheck >= 200) {
         sinceCheck = 0;
-        left = await remaining();
-        allowance = Math.min(allowance, left - reserve);
+        const now = budgetFrom(await remaining());
+        if (now === null) { stop = true; counts.stopped = 'budget unknown'; log('lost the ElevenLabs plan; stopping'); }
+        else allowance = Math.min(allowance, now);
+        if (allowance === 0) { stop = true; counts.stopped = 'no budget'; }
       }
       await sleep(pauseMs);
     }
@@ -118,23 +143,32 @@ export async function warm({
   return counts;
 }
 
-export async function charactersLeft(apiKey) {
+// Characters left on the plan, or null when that can't be known (any field missing or not a number).
+export async function charactersLeft(apiKey, fetchImpl = fetch) {
   try {
-    const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+    const res = await fetchImpl('https://api.elevenlabs.io/v1/user/subscription', {
       headers: { 'xi-api-key': apiKey },
       signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) return null;
     const s = await res.json();
-    return Number(s.character_limit) - Number(s.character_count);
+    const { character_limit: limit, character_count: count } = s || {};
+    if (typeof limit !== 'number' || typeof count !== 'number') return null;
+    const left = limit - count;
+    return Number.isFinite(left) ? left : null;
   } catch {
     return null;
   }
 }
 
-function arg(name, fallback) {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 && process.argv[i + 1] !== undefined ? Number(process.argv[i + 1]) : fallback;
+// A numeric flag: absent → fallback; present → a finite number >= 0, or the run refuses to start.
+export function numberArg(argv, name, fallback) {
+  const i = argv.indexOf(`--${name}`);
+  if (i < 0) return fallback;
+  const raw = argv[i + 1];
+  const n = raw === undefined || raw.trim() === '' ? NaN : Number(raw);
+  if (!Number.isFinite(n) || n < 0) throw new Error(`--${name} needs a number >= 0, got ${JSON.stringify(raw ?? '')}`);
+  return n;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -144,24 +178,32 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const dryRun = process.argv.includes('--dry-run');
   const log = (m) => console.log(`${new Date().toISOString()} ${m}`);
   if (!apiKey && !dryRun) { log('no ELEVENLABS_API_KEY'); process.exit(1); }
+  let opts;
+  try {
+    opts = {
+      reserve: numberArg(process.argv, 'reserve', 100_000),
+      maxChars: numberArg(process.argv, 'max-chars', Infinity),
+      concurrency: Math.max(1, Math.floor(numberArg(process.argv, 'concurrency', 2))),
+      pauseMs: numberArg(process.argv, 'pause-ms', 250),
+      // If the plan can't be read (say, a key without user_read), nothing is recorded unless this
+      // is given together with --max-chars N, which is then the whole budget.
+      allowUnknownBudget: process.argv.includes('--allow-unknown-budget'),
+    };
+    if (opts.allowUnknownBudget && !Number.isFinite(opts.maxChars)) throw new Error('--allow-unknown-budget needs --max-chars N');
+  } catch (err) {
+    log(err.message);
+    process.exit(1);
+  }
   const lines = JSON.parse(await readFile(linesFile, 'utf8'));
-  // If the plan can't be read (a key without user_read), cap the run at one day's service budget.
-  const unknownCap = Number(process.env.VOICE_DAILY_CHARS || 150_000);
   const counts = await warm({
+    ...opts,
     lines,
     cacheDir,
     dryRun,
     log,
     synth: (text) => elevenLabs(text, apiKey),
-    remaining: async () => {
-      const left = await charactersLeft(apiKey);
-      return left ?? unknownCap + arg('reserve', 100_000);
-    },
-    reserve: arg('reserve', 100_000),
-    maxChars: arg('max-chars', Infinity),
-    concurrency: arg('concurrency', 2),
-    pauseMs: arg('pause-ms', 250),
+    remaining: () => charactersLeft(apiKey),
   });
   log(JSON.stringify(counts));
-  process.exit(counts.failed ? 2 : 0);
+  process.exit(counts.failed || counts.stopped ? 2 : 0);
 }
