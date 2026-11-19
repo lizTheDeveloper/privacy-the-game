@@ -49,3 +49,86 @@ describe('focus music', () => {
     }
   });
 });
+
+// Liz, 2026-11-19: on a computer, pop the music out into a window of its own so the same music
+// plays on through the whole game. The page and the window talk over a BroadcastChannel.
+function fakeChannels() {
+  const all = [];
+  class FakeChannel {
+    constructor(name) { this.name = name; this.sent = []; this.onmessage = null; all.push(this); }
+    postMessage(m) { this.sent.push(m); }
+    close() {}
+  }
+  vi.stubGlobal('BroadcastChannel', FakeChannel);
+  return all;
+}
+
+const desktop = (on) => vi.fn((q) => ({ matches: on && /min-width: 900px/.test(q) && /pointer: fine/.test(q), addEventListener() {} }));
+
+describe('focus music pops out on a computer', () => {
+  it('a tap on a computer opens the pop-out window instead of playing in the page', async () => {
+    const made = fakeAudio();
+    fakeChannels();
+    vi.stubGlobal('matchMedia', desktop(true));
+    const h = await bootApp({ state: createInitialState(), hash: '#/mission/fitness-audit-data-sharing/briefing' });
+    h.window.self = h.window; h.window.top = h.window;
+    h.window.open.mockReturnValue({ focus() {} });
+    h.clearEgress();
+    await h.click('focus-music', {});
+    expect(h.window.open).toHaveBeenCalledTimes(1);
+    const [url, name, features] = h.window.open.mock.calls[0];
+    expect(url).toMatch(/^focus-music\.html\?track=0&t=0$/);
+    expect(name).toBe('reclaim-city-focus-music');
+    expect(features).toMatch(/popup/);
+    expect(made.reduce((n, a) => n + a.plays, 0)).toBe(0);
+    expect(h.egress()).toEqual([]);
+  });
+
+  it('a blocked pop-up plays in the page instead', async () => {
+    const made = fakeAudio();
+    fakeChannels();
+    vi.stubGlobal('matchMedia', desktop(true));
+    const h = await bootApp({ state: createInitialState(), hash: '#/mission/fitness-audit-data-sharing/briefing' });
+    h.window.self = h.window; h.window.top = h.window;
+    h.window.open.mockReturnValue(null);
+    await h.click('focus-music', {});
+    expect(made[0].plays).toBe(1);
+  });
+
+  it('a phone plays in the page, never a pop-up', async () => {
+    const made = fakeAudio();
+    fakeChannels();
+    vi.stubGlobal('matchMedia', desktop(false));
+    const h = await bootApp({ state: createInitialState(), hash: '#/mission/fitness-audit-data-sharing/briefing' });
+    h.window.self = h.window; h.window.top = h.window;
+    await h.click('focus-music', {});
+    expect(h.window.open).not.toHaveBeenCalled();
+    expect(made[0].plays).toBe(1);
+  });
+
+  it('with the pop-out open, the button pauses and plays it over the channel; every screen shows Music on', async () => {
+    fakeAudio();
+    const chans = fakeChannels();
+    vi.stubGlobal('matchMedia', desktop(true));
+    const h = await bootApp({ state: createInitialState(), hash: '#/city' });
+    const ch = chans.find((c) => c.name === 'reclaim-city-focus-music');
+    expect(ch.sent).toContainEqual({ type: 'hello' });
+    // The pop-out (left open from before a reload) says it is playing.
+    ch.onmessage({ data: { type: 'state', playing: true } });
+    await h.settle(10);
+    expect(h.app.innerHTML).toContain('class="hud-music"');
+    await h.click('focus-music', {});
+    expect(ch.sent.at(-1)).toEqual({ type: 'pause' });
+    ch.onmessage({ data: { type: 'state', playing: false } });
+    await h.settle(10);
+    expect(h.app.innerHTML).not.toContain('class="hud-music"');
+    await h.click('focus-music', {});
+    expect(ch.sent.at(-1)).toEqual({ type: 'play' });
+    // Closed: the next tap opens a fresh window.
+    ch.onmessage({ data: { type: 'closed' } });
+    h.window.self = h.window; h.window.top = h.window;
+    h.window.open.mockReturnValue({ focus() {} });
+    await h.click('focus-music', {});
+    expect(h.window.open).toHaveBeenCalledWith(expect.stringMatching(/^focus-music\.html/), 'reclaim-city-focus-music', expect.any(String));
+  });
+});

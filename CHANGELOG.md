@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.34.0 (2026-11-19): Focus music pops out on a computer
+
+Focus music used to play inside the game's page: a reload stopped it, and outside a mission there was no button to turn it off.
+
+- **On a computer, Focus music opens a small window of its own.** The music lives there, so the same music keeps playing on every screen, through a reload, and while you're in another tab doing a step. The window has play/pause, previous/next track, volume, and a button back to the game. Close it to stop. Your computer's media keys work too.
+- **The game's buttons follow the window.** Focus music shows "(on)" while the window plays, and tapping it pauses or plays the window's music. While music is on, every screen's top bar has a **Music on** button that stops it.
+- **Phones play in the page, as before**, with the step on the lock screen. So does a computer that blocks pop-ups, and the campus cabinet.
+- **The music window never replaces the game's offline copy.** The service worker saved every page it loaded as the game's offline page; the music window is now kept under its own name.
+- Nothing new is tracked or sent: the game and the window talk inside your browser. Only the window's volume is remembered, on your computer.
+
 ## 7.33.2 (2026-11-19): No part with only one mission
 
 The What's next bar counts one part of a district at a time (7.30.1). Some parts had only one mission, so one tap filled the whole bar, which felt empty, and it made "PART 1 OF N" bigger than it needed to be.

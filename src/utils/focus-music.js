@@ -22,8 +22,104 @@ export const PLAYLIST = [
   'We Are All In This Together.mp3',
 ].map((f) => COTB + encodeURIComponent(f));
 
+// Each track's name, for the pop-out player and the computer's media keys.
+export const TRACK_NAMES = [
+  'Focus and Mine',
+  'Mine Quietly',
+  'The Cosmos is Peaceful',
+  'You Make Progress Over Time',
+  'Space is Deep',
+  'Begin Slowly',
+  'We Are All In This Together',
+];
+
+// On a computer the music pops out into a small window of its own (Liz, 2026-11-19: "pop it out
+// on the desktop into a separate window ... the same music play throughout"). That window holds
+// the music, so it keeps playing on every screen, through a reload, and while the player is in
+// another tab doing a step. The game's buttons talk to it over a BroadcastChannel, which never
+// leaves this browser. A phone (or a blocked pop-up, or the campus cabinet) plays in the page.
+export const POPOUT_URL = 'focus-music.html';
+export const POPOUT_NAME = 'reclaim-city-focus-music';
+export const CHANNEL = 'reclaim-city-focus-music';
+const POPOUT_FEATURES = 'popup,width=360,height=300';
+
 let audio = null;
 let track = 0;
+// What the pop-out window last told us. alive: a pop-out is open; playing: its music is on.
+const popout = { alive: false, playing: false };
+let channel = null;
+const listeners = new Set();
+
+function notify() { for (const fn of listeners) { try { fn(); } catch { /* a listener's own problem */ } } }
+
+// The game re-draws its buttons when the pop-out starts, stops or closes.
+export function onMusicChange(fn) {
+  listeners.add(fn);
+  connect();
+  return () => listeners.delete(fn);
+}
+
+function connect() {
+  if (channel || typeof BroadcastChannel !== 'function') return channel;
+  try { channel = new BroadcastChannel(CHANNEL); } catch { return null; }
+  channel.onmessage = (e) => {
+    const m = e?.data;
+    if (!m || typeof m !== 'object') return;
+    if (m.type === 'state') {
+      popout.alive = true;
+      popout.playing = Boolean(m.playing);
+      // One music at a time: the pop-out playing silences the page.
+      if (popout.playing) audio?.pause();
+      notify();
+    } else if (m.type === 'closed') {
+      popout.alive = false;
+      popout.playing = false;
+      notify();
+    }
+  };
+  // A pop-out left open from before this page loaded (a reload) answers with its state.
+  try { channel.postMessage({ type: 'hello' }); } catch { /* closed */ }
+  return channel;
+}
+
+// A computer with a mouse and room for a second window, not inside the campus iframe.
+export function popoutSuits(win = globalThis.window) {
+  try {
+    if (!win || typeof win.open !== 'function' || win.self !== win.top) return false;
+    const mm = typeof win.matchMedia === 'function' ? win.matchMedia.bind(win) : globalThis.matchMedia;
+    return typeof mm === 'function' && mm('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches;
+  } catch {
+    return false;
+  }
+}
+
+// The Focus music button. On a computer it opens (or plays, or pauses) the pop-out; elsewhere,
+// or when the pop-up is blocked, the music plays in the page as before.
+export async function toggleMusic() {
+  connect();
+  if (popout.alive && channel) {
+    channel.postMessage({ type: popout.playing ? 'pause' : 'play' });
+    if (!popout.playing) focusPopout();
+    return;
+  }
+  if (isPlayingHere()) { pauseMusic(); return; }
+  if (popoutSuits()) {
+    // Pick up where the page's music was, if it had been playing.
+    const at = audio ? Math.floor(audio.currentTime || 0) : 0;
+    const win = window.open(`${POPOUT_URL}?track=${track}&t=${at}`, POPOUT_NAME, POPOUT_FEATURES);
+    if (win) {
+      audio?.pause();
+      popout.alive = true;
+      popout.playing = true; // until the window says otherwise
+      return;
+    }
+  }
+  await playMusic();
+}
+
+function focusPopout() {
+  try { window.open('', POPOUT_NAME)?.focus?.(); } catch { /* blocked: the window is still there */ }
+}
 
 function el() {
   if (audio || typeof Audio === 'undefined') return audio;
@@ -55,7 +151,13 @@ export function pauseMusic() {
   audio?.pause();
 }
 
+// Music is on: in this page or in the pop-out window.
 export function isPlaying() {
+  return isPlayingHere() || popout.playing;
+}
+
+// Music is on in this page (the phone's lock screen belongs to the page that plays).
+export function isPlayingHere() {
   return Boolean(audio && !audio.paused);
 }
 

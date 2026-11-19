@@ -59,7 +59,7 @@ import { setPasswordPlaces } from './utils/password-places.js';
 import { readLevel, setReadLevel, readAloudOn, setReadAloud, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
 import { stopSpeaking, sayNow, unlockAudio, audioUnlocked, prefetch } from './utils/read-aloud.js';
-import { playMusic, pauseMusic, isPlaying, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
+import { playMusic, pauseMusic, isPlayingHere, toggleMusic, onMusicChange, nowPlayingText, showNowPlaying } from './utils/focus-music.js';
 import { stepKey } from './utils/reading.js';
 import { markOpened } from './utils/opened-steps.js';
 import { renderStats } from './screens/stats.js';
@@ -1333,9 +1333,9 @@ app.addEventListener('click', async (e) => {
       renderCurrentRoute();
     }
   } else if (action === 'focus-music') {
-    // Nothing is sent: the loop is a file in the game, played by the browser.
-    if (isPlaying()) pauseMusic();
-    else await playMusic();
+    // Nothing is sent: the loop is a file in the game, played by the browser. On a computer it
+    // pops out into a window of its own that plays on through every screen (utils/focus-music.js).
+    await toggleMusic();
     renderCurrentRoute();
   } else if (action === 'read-aloud') {
     // A switch (Liz 2026-11-18): on, Scout reads this screen now and each one after it as it
@@ -1983,10 +1983,14 @@ app.addEventListener('toggle', (e) => {
   if (e.target?.matches?.('details[data-why]') && e.target.open) setState(recordSignal(state, 'why'));
 }, true);
 
+// The pop-out music window started, stopped or closed: re-draw so the Focus music buttons say so.
+onMusicChange(() => renderCurrentRoute());
+
 // While focus music plays, the phone's lock screen shows the mission's next step, and its "next"
 // button ticks that step (utils/focus-music.js). Elsewhere in the game it just says Reclaim City.
 function syncNowPlaying(route) {
-  if (!isPlaying()) return;
+  // The pop-out window shows its own track on the computer's media keys.
+  if (!isPlayingHere()) return;
   const mission = (route.screen === 'briefing' || route.screen === 'debrief') ? findMission(state, route.params.id) : null;
   if (!mission) {
     showNowPlaying({ title: 'Focus music', artist: 'Reclaim City' }, { onPlay: () => playMusic(), onPause: () => pauseMusic() });
