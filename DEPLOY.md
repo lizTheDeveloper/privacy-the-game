@@ -106,7 +106,7 @@ scripts/warm-voice.sh               # records them in the background (unit rc-vo
 ssh games journalctl -u rc-voice-warm -f
 ```
 
-It runs `collective/service/warm.js` in the service's image (same voice, model and key) without restarting the service. It records only lines with no recording, or with a bad one (not an mp3, or under ~0.2s); a recorded line is never sent again. Ids are a hash of the spoken text, so a changed line is a new id and the old recording just stays on disk, unused. It checks the ElevenLabs plan first and stops before fewer than 100,000 characters would be left (`--reserve N`; `--max-chars N` caps a run).
+It runs `collective/service/warm.js` in the service's image (same voice, model and key) without restarting the service. It records only lines with no recording, or with a bad one (not an mp3, or under ~0.2s); a recorded line is never sent again. Ids are a hash of the spoken text, so a changed line is a new id and the old recording just stays on disk, unused. It checks the ElevenLabs plan first and stops before fewer than 100,000 characters would be left (`--reserve N`; `--max-chars N` caps a run). If it can't read the plan, or a limit isn't a number, it records nothing; `--allow-unknown-budget --max-chars N` spends at most N anyway.
 
 A line is also recorded the first time a player asks for it and kept in `/opt/reclaim-city-collective/voice-cache/`. `VOICE_DAILY_CHARS` (default 150,000) caps new recording per day; past it, and for any line not on the list, the game reads with the browser's own voice. The key is `ELEVENLABS_API_KEY` in `/opt/reclaim-city-collective/voice.env` (root, 600).
 
