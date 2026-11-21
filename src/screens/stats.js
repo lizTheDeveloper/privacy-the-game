@@ -17,6 +17,7 @@ import {
 import { displayStreak } from '../state.js';
 import { readLevel } from '../utils/reading.js';
 import { nextUp, simpleTitle } from './next.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const RING_SIZE = 120;
 const RING_RADIUS = 45;
@@ -67,6 +68,9 @@ function districtRow(state, district) {
     <span aria-hidden="true" style="flex-shrink: 0; font-size: 18px; line-height: 1; color: var(--cyan);">&rsaquo;</span>
   </a>`;
 }
+
+// Simple's one sentence: what this screen is, and why it matters to you.
+export const STATS_LEAD = 'This is your city at a glance: how safe your accounts are now, and the next thing to do.';
 
 // The districts in chapter order (the list in data/districts.js is not).
 export const DISTRICTS_BY_CHAPTER = [...DISTRICTS].sort((a, b) => a.chapter - b.chapter);
@@ -170,14 +174,16 @@ function podPicker(collective) {
     .join('')}</div>`;
 }
 
-export function renderWhoamiPanel(view = {}) {
+// primary: the panel's button is the screen's one bright button (Simple's GO GHOST, step 1).
+export function renderWhoamiPanel(view = {}, { primary = false } = {}) {
   const who = view.whoami || { status: 'idle' };
+  const btn = primary ? 'btn-primary' : 'btn-secondary';
   if (who.status === 'loading') {
     return whoamiShell(`<div style="${WHOAMI_TEXT}">Asking our analytics&hellip;</div>`);
   }
   if (who.status === 'error') {
     return whoamiShell(`<div style="${WHOAMI_TEXT}">We couldn't reach our analytics just now. Nothing was sent.</div>
-      <button class="btn-secondary" data-action="whoami-open">TRY AGAIN</button>`);
+      <button class="${btn}" data-action="whoami-open">TRY AGAIN</button>`);
   }
   if (who.status === 'local' && (isAnalyticsOff() || hasGoneGhost())) {
     // Sharing is off: nothing was sent. What this browser hands any site, read here.
@@ -190,7 +196,7 @@ export function renderWhoamiPanel(view = {}) {
   }
   if (who.status !== 'ready') {
     return whoamiShell(`<div style="${WHOAMI_TEXT}">Our analytics can see a few things about every visit. Want to see exactly what they see about you?</div>
-      <button class="btn-secondary" data-action="whoami-open">SHOW ME</button>`);
+      <button class="${btn}" data-action="whoami-open">SHOW ME</button>`);
   }
 
   const d = who.data || {};
@@ -224,7 +230,7 @@ export function renderWhoamiPanel(view = {}) {
       <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
     </div>`
     : `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-      <button class="btn-secondary" data-action="whoami-confirm">THAT'S RIGHT</button>
+      <button class="${btn}" data-action="whoami-confirm">THAT'S RIGHT</button>
       <button class="btn-secondary" data-action="pod-pick-open">PUT ME SOMEWHERE ELSE</button>
     </div>`;
 
@@ -247,7 +253,6 @@ function playStatsText() {
 export function renderStats(state, view = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
-  const findings = calcFindings(state);
   const simple = readLevel(state) === 'simplest';
   // A new player's exposure ring is full and magenta: say how it goes down.
   const anyDone = Object.values(state.missions || {}).some((m) => m?.status === 'completed');
@@ -263,6 +268,7 @@ export function renderStats(state, view = {}) {
     <a href="#/city-together" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: #00E5FF; text-decoration: none;">THE WHOLE CITY →</a>
   </div>
   <div style="padding: 20px 24px 32px;">
+    ${simple ? simpleLead(STATS_LEAD) : ''}
     ${nextButton(state)}
     <div class="stats-dials">
       ${statCard({
@@ -309,6 +315,16 @@ export function renderStats(state, view = {}) {
         ${DISTRICTS_BY_CHAPTER.map((d) => districtRow(state, d)).join('')}
       </div>
     </div>
+    ${simple ? seeEverything('stats', statsRest(state, view, simple)) : statsRest(state, view, simple)}
+  </div>
+</div>`;
+}
+
+// Below the district bars: the findings, what our analytics can see, and the sharing switch. In
+// Simple they wait behind "See everything".
+function statsRest(state, view, simple) {
+  const findings = calcFindings(state);
+  return `
     <div class="panel" style="padding: 20px 24px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 16px;">FINDINGS LOG</div>
       <div class="stats-findings">
@@ -326,7 +342,5 @@ export function renderStats(state, view = {}) {
       <button class="btn-secondary" data-action="toggle-analytics">${isAnalyticsOff() ? 'TURN SHARING ON' : 'TURN SHARING OFF'}</button>
       ${renderDeletionBlock(view.collective, { requireLoaded: true })}
       ${renderNotice(view.notice)}
-    </div>
-  </div>
-</div>`;
+    </div>`;
 }

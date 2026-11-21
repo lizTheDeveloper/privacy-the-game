@@ -68,6 +68,7 @@ import { renderGhost, renderGhostDone, renderGhostEarly } from './screens/ghost.
 import { isCityComplete, hasGoneGhost, markGoneGhost, clearGhost, getGhostInfo, isGhostPending, notYetRun } from './utils/ghost.js';
 import { renderMilestone } from './screens/milestone.js';
 import { renderNext } from './screens/next.js';
+import { toggleSeeEverything } from './components/see-everything.js';
 import { renderPasswordFinder } from './screens/password-finder.js';
 import { setFinderAnswer, finderBack } from './data/password-finder.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
@@ -1843,6 +1844,13 @@ app.addEventListener('click', async (e) => {
     if (!have) state.customAccounts[districtId].push(name);
     setState(state);
     renderCurrentRoute();
+  } else if (action === 'see-everything') {
+    // Simple's "See everything" (components/see-everything.js): opens or folds in place, no re-draw.
+    // Kept in memory for this visit; never tracked.
+    const on = toggleSeeEverything(el.dataset.foldKey);
+    el.setAttribute('aria-expanded', String(on));
+    const body = app.querySelector(`#see-all-${CSS.escape(el.dataset.foldKey)}`);
+    if (body) body.hidden = !on;
   } else if (action === 'show-all-missions' || action === 'show-fewer-missions') {
     // The rest of the list opens (or folds back) in place: the page re-draws where it is.
     if (action === 'show-all-missions') openLists.add(el.dataset.list);

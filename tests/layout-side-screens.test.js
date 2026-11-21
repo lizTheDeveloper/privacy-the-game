@@ -284,7 +284,8 @@ describe('The Whole City', () => {
     expect(primaries(html)).toBe(1);
     const m = nextBreachCheck(s);
     expect(html).toMatch(new RegExp(`class="btn-primary" data-your-part-go href="#/mission/${m.id}/briefing"`));
-    expect(html.indexOf('CITY FORTIFIED')).toBeLessThan(html.indexOf('data-your-part'));
+    expect(html.indexOf('LEAKED EMAILS FIXED')).toBeGreaterThan(-1);
+    expect(html.indexOf('LEAKED EMAILS FIXED')).toBeLessThan(html.indexOf('data-your-part'));
     expect(html.indexOf('data-your-part')).toBeLessThan(html.indexOf('PLACES'));
     // What we know about you is a way to Your City, not the next thing: outlined.
     expect(html).toMatch(/class="btn-secondary scout-action" href="#\/stats"/);

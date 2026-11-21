@@ -53,7 +53,7 @@ describe('broker filing privacy', () => {
 describe('district done row', () => {
   it('keeps RE-CHECK at full opacity while the rest of the row is dimmed', () => {
     const src = readFileSync('src/screens/district.js', 'utf8');
-    const row = src.slice(src.indexOf('const missionRows = missions.map((m) => {', src.indexOf('renderFacilitySection')));
+    const row = src.slice(src.indexOf('const missionRows = ', src.indexOf('renderFacilitySection')));
     expect(row).not.toMatch(/border-bottom: 1px solid rgba\(0,229,255,0\.04\); \$\{done \? 'opacity: 0\.5;'/);
     expect(row).toContain('const dim');
   });

@@ -9,6 +9,8 @@ import { isAnalyticsOff } from '../utils/analytics-pref.js';
 import { MISSIONS } from '../data/missions.js';
 import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
 import { whatYouCanDo } from '../components/what-you-can-do.js';
+import { readLevel } from '../utils/reading.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const LABEL = 'color: rgba(0,229,255,0.4); margin-bottom: 16px;';
@@ -66,6 +68,17 @@ function ghostPanel(state, view, notice) {
   </div>`;
 }
 
+// Simple's one sentence, and the one SHARE for the page: it shares the first of the city's numbers.
+export const TOGETHER_LEAD = 'This is everyone playing Reclaim City, together. Every account you fix moves the city’s ring.';
+export const SIMPLE_PANELS = 2;
+
+function pageShare(stats) {
+  const st = stats[0];
+  if (!st) return '';
+  return `<div data-page-share style="margin: 0 0 16px;"><button class="btn-secondary" data-action="share-stat" data-stat="${st.key}" style="min-height: 44px;">SHARE</button>
+    <div data-share-status="${st.key}" role="status" aria-live="polite" style="${MUTED} margin-top: 8px; color: var(--cyan);"></div></div>`;
+}
+
 function shell(inner, state) {
   return `
 <div class="scanlines">
@@ -75,13 +88,14 @@ function shell(inner, state) {
     <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">THE WHOLE CITY</div>
   </div>
   <div style="padding: 20px 24px 32px;">
-    <div style="${MUTED} margin-bottom: 20px;">Everyone playing Reclaim City, together. No one is ranked.</div>
+    ${readLevel(state) === 'simplest' ? simpleLead(TOGETHER_LEAD) : `<div style="${MUTED} margin-bottom: 20px;">Everyone playing Reclaim City, together. No one is ranked.</div>`}
     ${inner}
   </div>
 </div>`;
 }
 
-function cityScore(city) {
+// simple: the ring's label in plain words (what it counts), not FORTIFIED.
+function cityScore(city, { simple = false } = {}) {
   const f = city.fortified;
   if (!f || !isNum(f.pct)) {
     return `<div class="panel" style="padding: 24px; margin-bottom: 16px; text-align: center;"><div style="${MUTED}">Not enough players yet to say.</div></div>`;
@@ -89,7 +103,7 @@ function cityScore(city) {
   return `
   <div class="panel" style="padding: 24px; margin-bottom: 16px; text-align: center; border-color: rgba(198,255,0,0.1);">
     ${ringChart({ fraction: f.pct / 100, color: '#C6FF00', glow: 'rgba(198,255,0,0.4)', track: 'rgba(198,255,0,0.08)', value: `${fmt(f.pct)}%`, unit: '' })}
-    <div style="font-family: var(--font-display); font-size: 8px; font-weight: 600; color: rgba(198,255,0,0.5); letter-spacing: 2px;">CITY FORTIFIED</div>
+    <div style="font-family: var(--font-display); font-size: 8px; font-weight: 600; color: rgba(198,255,0,0.5); letter-spacing: 2px;">${simple ? 'LEAKED EMAILS FIXED' : 'CITY FORTIFIED'}</div>
     <details class="phone-fold fortified-what" data-fold="fortified-what" data-open-desktop><summary>What's this?</summary><div style="${MUTED} margin-top: 10px;">Of email addresses found in a known breach by everyone in places with enough players to count, this share has been fixed.</div></details>
   </div>`;
 }
@@ -151,7 +165,8 @@ export function cityStats(city) {
   }));
 }
 
-function statPanel(st) {
+// share: false in Simple, where the page has one SHARE (pageShare) instead of one per panel.
+function statPanel(st, { share = true } = {}) {
   const [hex, rgba] = COLORS[st.color];
   const sub = st.sub ? `<div style="${MUTED} margin-top: 4px;">${esc(st.sub)}</div>` : '';
   return `
@@ -160,13 +175,14 @@ function statPanel(st) {
       <div style="font-family: var(--font-display); font-size: 34px; font-weight: 800; line-height: 1.1; color: ${hex}; text-shadow: 0 0 18px ${rgba}0.4);">${esc(st.big)}</div>
       <div style="${MUTED} margin-top: 8px;">${esc(st.what)}</div>
       ${sub}
-      <button class="btn-secondary" data-action="share-stat" data-stat="${st.key}" style="margin-top: 14px;">SHARE</button>
-      <div data-share-status="${st.key}" role="status" aria-live="polite" style="${MUTED} margin-top: 8px; color: var(--cyan);"></div>
+      ${share ? `<button class="btn-secondary" data-action="share-stat" data-stat="${st.key}" style="margin-top: 14px;">SHARE</button>
+      <div data-share-status="${st.key}" role="status" aria-live="polite" style="${MUTED} margin-top: 8px; color: var(--cyan);"></div>` : ''}
     </div>`;
 }
 
-function cityNumbers(city) {
-  const panels = cityStats(city).map(statPanel).join('');
+// stats: which of the city's numbers (Simple shows two up top and the rest behind See everything).
+function cityNumbers(city, { stats = cityStats(city), share = true } = {}) {
+  const panels = stats.map((st) => statPanel(st, { share })).join('');
   if (!panels) return '';
   return `
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px;">${panels}
@@ -284,6 +300,30 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
   const city = data.city || {};
   const yoursId = displayPodId(data, whoami?.data);
   const yoursPod = findPod(data, yoursId);
+  const checking = breachCheckShows(state);
+  const missions = whatYouCanDo(state, cityMissionIds(state), { primary: !checking, lede: 'Each of these moves one of the city\'s numbers, and yours.' });
+  if (readLevel(state) === 'simplest') {
+    // Simple: the ring, your part (with the one bright button), two of the numbers and one SHARE;
+    // everything else behind See everything. With every breach check done, the first mission in
+    // What you can do is the bright one, so it stays up top.
+    const stats = cityStats(city);
+    const rest = `
+    ${explainer()}
+    ${yourPodCard(data, whoami)}
+    ${cityNumbers(city, { stats: stats.slice(SIMPLE_PANELS), share: false })}
+    ${board(data, yoursId)}
+    ${breachMap(city)}
+    ${checking ? missions : ''}
+    ${ghost}
+    ${footer(data)}`;
+    return shell(`
+    ${cityScore(city, { simple: true })}
+    ${yourPartPanel(state, yoursPod?.label)}
+    ${checking ? '' : missions}
+    ${cityNumbers(city, { stats: stats.slice(0, SIMPLE_PANELS), share: false })}
+    ${pageShare(stats)}
+    ${seeEverything('together', rest)}`, state);
+  }
   return shell(`
     ${explainer()}
     ${cityScore(city)}
@@ -292,7 +332,7 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
     ${cityNumbers(city)}
     ${board(data, yoursId)}
     ${breachMap(city)}
-    ${whatYouCanDo(state, cityMissionIds(state), { primary: !breachCheckShows(state), lede: 'Each of these moves one of the city\'s numbers, and yours.' })}
+    ${missions}
     ${ghost}
     ${footer(data)}`, state);
 }

@@ -714,10 +714,14 @@ export function facilityLeadId(state, district) {
   return (begun || open.find((m) => m.id === next?.id) || open[0])?.id || null;
 }
 
-function renderFacilitySection(state, facilityId, district, leadId = null, hoisted = false) {
+// only: Simple's short list (a Set of mission ids): just those rows, and nothing when none of them
+// is in this facility. The facility's bar and count still say the whole of it.
+function renderFacilitySection(state, facilityId, district, leadId = null, hoisted = false, only = null) {
   const account = ACCOUNTS[facilityId];
   if (!account) return '';
   const missions = getMissionsForDistrict(district.id).filter((m) => m.accountId === facilityId && !m.legacy);
+  const rowsShown = only ? missions.filter((m) => only.has(m.id)) : missions;
+  if (!rowsShown.length) return '';
   const completed = missions.filter((m) => isMissionDoneIn(state, m)).length;
   const total = missions.length;
   const allDone = total > 0 && completed === total;
@@ -729,7 +733,7 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
   const statusText = facilityBadge(completed, total);
   const simple = isSimple(state);
 
-  const missionRows = missions.map((m) => {
+  const missionRows = rowsShown.map((m) => {
     const record = state.missions[m.id];
     const done = isMissionDone(record);
     const skipped = record?.status === 'skipped';
@@ -782,9 +786,48 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
       <div>
         ${missionRows}
       </div>
-      ${facilityId === 'scam_defense' ? renderQuizPanel(state, !leadId, hoisted) : ''}
+      ${facilityId === 'scam_defense' && (!only || only.has(QUIZ_ROW)) ? renderQuizPanel(state, !leadId, hoisted) : ''}
     </div>
   </div>`;
+}
+
+// The phishing training panel under Scam Defense, as a row of Simple's short list.
+const QUIZ_ROW = 'scam_defense:quiz';
+
+// Simple mode's facility district (The Perimeter, The Reclamation, The Clinic, The Trail, The Field),
+// like a tabbed district's list (simpleFolded, 7.39.0): the lit mission and the next two not done,
+// each under its facility's name; "Show all N" opens every facility in place, and the done ones wait
+// in a folded "Done (N)". Nothing is removed: every mission is one tap away.
+function facilityShortList(state, district, facilityOrder, leadId, hoisted, showAll) {
+  const key = listKey(district.id, 'facilities');
+  const rows = facilityOrder.flatMap((id) => getMissionsForDistrict(district.id).filter((m) => m.accountId === id && !m.legacy));
+  const total = rows.length;
+  const section = (id, only) => renderFacilitySection(state, id, district, leadId, hoisted, only);
+  if (showAll) {
+    return `<div data-facility-list="all">${facilityOrder.map((id) => section(id, null)).join('')}
+      <div style="padding: 0 16px;"><button type="button" class="list-more" data-action="show-fewer-missions" data-list="${key}" aria-expanded="true">Show fewer</button></div></div>`;
+  }
+  const done = rows.filter((m) => isMissionDoneIn(state, m));
+  const open = rows.filter((m) => !isMissionDoneIn(state, m));
+  const at = open.findIndex((m) => m.id === leadId);
+  const order = at > -1 ? [...open.slice(at), ...open.slice(0, at)] : open;
+  const shown = new Set(order.slice(0, SIMPLE_LIST_SHOWN).map((m) => m.id));
+  // With every mission done, the phishing training is what's left to do here.
+  if (!open.length && facilityOrder.includes('scam_defense')) shown.add(QUIZ_ROW);
+  const list = open.length || shown.size
+    ? facilityOrder.map((id) => section(id, shown)).join('')
+    : '<div class="list-all-done" data-list-all-done style="padding: 0 24px;">You did every mission here.</div>';
+  const more = open.length > shown.size || done.length
+    ? `<button type="button" class="list-more" data-action="show-all-missions" data-list="${key}" aria-expanded="false">Show all ${total}</button>`
+    : '';
+  const doneIds = new Set(done.map((m) => m.id));
+  const doneFold = done.length
+    ? `<details class="done-fold" data-fold="done:${key}" data-done-fold>
+        <summary>Done (${done.length})</summary>
+        <div style="margin-top: 8px;">${facilityOrder.map((id) => section(id, doneIds)).join('')}</div>
+      </details>`
+    : '';
+  return `<div class="mission-list--folded" data-facility-list="folded">${list}<div style="padding: 0 16px;">${more}${doneFold}</div></div>`;
 }
 
 // Scout's reaction to the report just filed (app.js passes it on the landing
@@ -859,7 +902,7 @@ function facilityNextUp(state, district, facilityOrder, leadId) {
   return '';
 }
 
-function renderFacilityDistrict(state, district, reaction, notMine, firstVisit) {
+function renderFacilityDistrict(state, district, reaction, notMine, firstVisit, openLists = null) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictSecured(state, district.id);
 
@@ -872,9 +915,11 @@ function renderFacilityDistrict(state, district, reaction, notMine, firstVisit) 
   // Off, an opt-in district's one bright button is TURN ON: it acts in place, so it stays put.
   const off = district.optIn && !isDistrictOn(state, district.id);
   const nextUp = off ? '' : facilityNextUp(state, district, facilityOrder, leadId);
-  const facilities = facilityOrder
-    .map((id) => renderFacilitySection(state, id, district, leadId, Boolean(nextUp)))
-    .join('');
+  const facilities = isSimple(state)
+    ? facilityShortList(state, district, facilityOrder, leadId, Boolean(nextUp), Boolean(openLists?.has?.(listKey(district.id, 'facilities'))))
+    : facilityOrder
+      .map((id) => renderFacilitySection(state, id, district, leadId, Boolean(nextUp)))
+      .join('');
 
   return `
   <div class="scanlines district-page">
@@ -985,7 +1030,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const first = firstVisit ?? !districtVisited(state, districtId);
 
   if (district.type === 'facility') {
-    return renderFacilityDistrict(state, district, reaction, notMine, first);
+    return renderFacilityDistrict(state, district, reaction, notMine, first, openLists);
   }
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
