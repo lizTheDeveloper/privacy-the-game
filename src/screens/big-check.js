@@ -12,6 +12,7 @@ import { bigCheckGroups, filterBigCheck } from '../utils/big-check.js';
 import { MISSIONS } from '../data/missions.js';
 import { localDay } from '../state.js';
 import { deck, splitWords } from '../components/deck.js';
+import { fillBar } from '../components/fill-bar.js';
 
 const BACK = '<a class="back-link" href="#/reclamation/map">← THE MAP</a>';
 const NOTE = "Optional. It never counts toward your districts, your city lights or the city's totals.";
@@ -40,7 +41,18 @@ const STYLE = `<style>
 .big-check-row .star-card-note,.big-check-row .star-card-owned{font-size:12px;color:rgba(237,239,243,0.75)}
 .big-check-row .star-card-list{margin:0;padding-left:18px}
 .big-check-row .star-card-list a{display:inline-flex;align-items:center;min-height:44px}
-.big-check-mission{margin:4px 0}
+/* One line of text: the link runs on after "Covered by:" (wrapping like words, never dropping below it); its padding makes the tap 44px tall. */
+.big-check-mission{display:block;box-sizing:border-box;min-height:44px;margin:4px 0;padding:10px 0;line-height:24px}
+.big-check-mission a{display:inline;padding:14px 0;min-height:44px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.big-check summary .big-check-sum{display:inline}
+.big-check summary .big-check-of{font-family:var(--font-body,system-ui,sans-serif);font-size:13px;font-weight:500;letter-spacing:0;color:var(--offwhite)}
+.big-check summary .fill-bar{margin:8px 0 2px}
+.big-check .big-check-start{border-color:rgba(0,229,255,0.45)}
+.big-check .big-check-start>summary{color:var(--offwhite);font-size:14px}
+.big-check .big-check-start .big-check-of .big-check-dot{display:none}
+.big-check .big-check-start .big-check-of{display:block;margin-top:4px}
+.big-check .big-check-start .big-check-kind{display:block;margin-top:2px;font-family:var(--font-mono);font-size:11px;font-weight:400;color:var(--cyan)}
+.big-check-start-why{margin:0;padding:0 14px 8px;font-size:14px;line-height:1.5;color:var(--offwhite)}
 .big-check-mission-go{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;min-height:44px}
 .big-check-mission-go a{display:inline-flex;align-items:center;min-height:44px;min-width:0}
 .big-check-ticked{font-size:12px;color:var(--lime)}
@@ -56,11 +68,12 @@ const saysNote = (line) => typeof line === 'string' && line.includes('never coun
 
 const missionTitle = (id) => MISSIONS.find((m) => m.id === id)?.title ?? id;
 
+// A row a mission covers: one line, "Covered by: <mission> ›".
 function missionLine(id, state) {
   const done = state?.missions?.[id]?.status === 'completed';
   return done
-    ? `<div class="big-check-mission">In a mission:<div class="big-check-mission-go">${esc(missionTitle(id))} · <a href="#/mission/${esc(id)}/recheck">RE-CHECK</a></div></div>`
-    : `<div class="big-check-mission">In a mission:<div class="big-check-mission-go"><a href="#/mission/${esc(id)}/briefing">${esc(missionTitle(id))}</a></div></div>`;
+    ? `<div class="big-check-mission">Covered by: ${esc(missionTitle(id))} ✓ · <a href="#/mission/${esc(id)}/recheck">RE-CHECK ›</a></div>`
+    : `<div class="big-check-mission">Covered by: <a href="#/mission/${esc(id)}/briefing">${esc(missionTitle(id))} ›</a></div>`;
 }
 
 // We couldn't confirm the broker's opt-out page: there's nowhere sure to file, so the row says
@@ -91,12 +104,25 @@ function rowHtml(r, b, map, byId, state) {
 // A row has a box of its own: not in a mission, and somewhere to file (or already ticked).
 const hasBox = (r, byId) => !r.mission && (r.ticked || !unconfirmedPage(byId.get(r.id)));
 
+// Where to start (Liz 2026-11-20): people-search sites sell your address, so their group opens first
+// with that said; the other groups start folded.
+export const START_KIND = 'people-search';
+export const START_HEAD = 'Start here: these sell your address';
+
 function groupHtml(g, map, byId, state) {
   const own = g.rows.filter((r) => hasBox(r, byId));
   const ticked = own.filter((r) => r.ticked).length;
-  const count = own.length ? ` · <span data-big-check-count>${ticked}</span>/${own.length}` : '';
+  // The count is a bar that fills (app.js moves it with each tick), with the numbers beside the name.
+  const count = own.length
+    ? ` <span class="big-check-of"><span class="big-check-dot">· </span><span data-big-check-count>${ticked}</span> of ${own.length} ticked</span>${fillBar({ key: `big-check:${g.kind}`, done: ticked, total: own.length, size: 'small', label: `${g.label}: ${ticked} of ${own.length} ticked` })}`
+    : '';
   const rows = g.rows.map((r) => rowHtml(r, byId.get(r.id), map, byId, state)).join('');
-  return `<details><summary>${esc(g.label)}${count}</summary><ul class="big-check-rows">${rows}</ul></details>`;
+  if (g.kind === START_KIND) {
+    return `<details class="big-check-start" data-start-here open><summary><span class="big-check-sum">${esc(START_HEAD)}<span class="big-check-kind">${esc(g.label.toUpperCase())}</span></span>${count}</summary>`
+      + '<p class="big-check-start-why">Opting out of each one takes your listing down.</p>'
+      + `<ul class="big-check-rows">${rows}</ul></details>`;
+  }
+  return `<details><summary><span class="big-check-sum">${esc(g.label)}</span>${count}</summary><ul class="big-check-rows">${rows}</ul></details>`;
 }
 
 // Scout's first-visit line, in a bubble that looks like the map's (its own class: in the page's flow).
@@ -117,7 +143,8 @@ function loadedView(state, { map }, today, query, scoutLine) {
     + (saysNote(scoutLine) ? '' : `<p class="big-check-note">${esc(NOTE)}</p>`)
     + scoutBubble(scoutLine)
     + `<input type="search" data-big-check-filter class="big-check-filter" placeholder="Filter by name" aria-label="Filter brokers by name" autocomplete="off" value="${esc(query)}">`
-    + groups.map((g) => groupHtml(g, map, byId, state)).join('')
+    // The people-search group first, open; the rest in their order, folded.
+    + [...groups.filter((g) => g.kind === START_KIND), ...groups.filter((g) => g.kind !== START_KIND)].map((g) => groupHtml(g, map, byId, state)).join('')
     + empty;
 }
 

@@ -181,6 +181,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2022,
     summary: 'Amazon\'s Ring gave police video without a warrant or the owner\'s consent "11 times" in 2022 by July, in what Ring called emergencies. Ring ended its police Request for Assistance tool in January 2024. In September 2025 it launched Community Requests with Axon: police post a request in the Neighbors app, and shared videos go "directly into Axon Evidence" along with the owner\'s home address and email. Ring signed on with Flock Safety in October 2025 and dropped Flock in February 2026 before any video was sent.',
     accounts: ['smart_camera', 'amazon'],
+    missions: ['smart_camera-fortify-police', 'smart_camera-recon-access'],
     sources: [
       { label: 'EFF (2022): Ring Reveals They Give Videos to Police Without User Consent or a Warrant', url: 'https://www.eff.org/deeplinks/2022/07/ring-reveals-they-give-videos-police-without-user-consent-or-warrant' },
       { label: 'Ring (2025): Ring Launches Community Requests: A New Way to Help Your Community', url: 'https://blog.ring.com/about-ring/ring-launches-community-requests-a-new-way-to-help-your-community/' },
@@ -211,6 +212,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2023,
     summary: 'The FTC charged that Ring let "any employee or contractor" access customers\' private videos. One employee watched "thousands of video recordings belonging to female users", including cameras in bathrooms and bedrooms, and was stopped only when a coworker noticed. Ring had no monitoring to tell how many others did the same. Ring paid $5.8 million to settle in 2023.',
     accounts: ['smart_camera', 'amazon'],
+    missions: ['smart_camera-recon-access', 'smart_camera-reclaim-storage'],
     sources: [
       { label: 'FTC (2023): FTC Says Ring Employees Illegally Surveilled Customers, Failed to Stop Hackers from Taking Control of Users\' Cameras', url: 'https://www.ftc.gov/news-events/news/press-releases/2023/05/ftc-says-ring-employees-illegally-surveilled-customers-failed-stop-hackers-taking-control-users' },
       { label: 'Wikipedia: Ring (company)', url: 'https://en.wikipedia.org/wiki/Ring_(company)' },
@@ -236,6 +238,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2023,
     summary: 'The FTC and the Justice Department charged that Amazon "retained children\'s recordings indefinitely" from Alexa and "kept sensitive voice and geolocation data for years". Amazon used that data "to help improve its Alexa algorithm" and kept some transcripts even after parents asked for deletion. Amazon agreed to a $25 million civil penalty in 2023.',
     accounts: ['voice_assistant', 'amazon'],
+    missions: ['voice_assistant-recon-recordings', 'ai_amazon-optout', 'voice_assistant-fortify-sensitivity'],
     sources: [
       { label: 'FTC (2023): FTC and DOJ Charge Amazon with Violating Children\'s Privacy Law by Keeping Kids\' Alexa Voice Recordings Forever and Undermining Parents\' Deletion Requests', url: 'https://www.ftc.gov/news-events/news/press-releases/2023/05/ftc-doj-charge-amazon-violating-childrens-privacy-law-keeping-kids-alexa-voice-recordings-forever' },
       { label: 'U.S. Department of Justice (2023): Amazon Agrees to Injunctive Relief and $25 Million Civil Penalty for Alleged Violations of Children\'s Privacy Law', url: 'https://www.justice.gov/archives/opa/pr/amazon-agrees-injunctive-relief-and-25-million-civil-penalty-alleged-violations-childrens' },
@@ -286,6 +289,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2024,
     summary: 'GM collected precise location and driving behavior from "millions of vehicles", sometimes "every three seconds", through OnStar Smart Driver. It sold the data to LexisNexis and Verisk, whose reports insurers used "to deny insurance and set rates". The FTC ordered GM in January 2026 to stop sharing that data with consumer reporting agencies for five years and to get drivers\' consent first.',
     accounts: ['car_gm', 'car_broker_lexisnexis', 'car_broker_verisk'],
+    missions: ['car_broker_lexisnexis-optout', 'car_broker_verisk-optout', 'enterprise_data-fortify-lexisnexis', 'car_gm-optout-app'],
     sources: [
       { label: 'FTC (2025): FTC Takes Action Against General Motors for Sharing Drivers\' Precise Location and Driving Behavior Data Without Consent', url: 'https://www.ftc.gov/news-events/news/press-releases/2025/01/ftc-takes-action-against-general-motors-sharing-drivers-precise-location-driving-behavior-data' },
       { label: 'FTC (2026): FTC finalizes order settling allegations GM and OnStar collected and sold geolocation data without consumers\' informed consent', url: 'https://www.ftc.gov/news-events/news/press-releases/2026/01/ftc-finalizes-order-settling-allegations-gm-onstar-collected-sold-geolocation-data-without-consumers' },
@@ -312,6 +316,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2024,
     summary: 'Senators Wyden and Markey found that Hyundai shared data from 1.7 million vehicles with Verisk for just over $1 million, and Honda shared data from 97,000 vehicles for just under $26,000. Verisk turned it into driving-behavior reports and sold them to insurance companies. The senators asked the FTC to hold the companies and their executives accountable.',
     accounts: ['car_hyundai', 'car_honda', 'car_broker_verisk'],
+    missions: ['car_broker_verisk-optout', 'car_hyundai-optout-privacy', 'car_honda-optout-app'],
     sources: [
       { label: 'Senator Ron Wyden (2024): Wyden investigation reveals new details about automakers\' sharing of driver information with data brokers', url: 'https://www.wyden.senate.gov/news/press-releases/wyden-investigation-reveals-new-details-about-automakers-sharing-of-driver-information-with-data-brokers-wyden-and-markey-urge-ftc-to-crack-down-on-disclosures-of-americans-data-without-drivers-consent' },
       { label: 'Fortune / AP (2024): General Motors, Honda, and Hyundai are accused of inappropriately selling customer data', url: 'https://www.fortune.com/2024/07/26/general-motors-honda-and-hyundai-are-accused-of-inappropriately-selling-customer-data/' },
@@ -416,6 +421,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2020,
     summary: 'EFF and the University of Nevada, Reno\'s Reynolds School of Journalism map which police use which surveillance technology, city by city. It covers drones, body cameras, face recognition, cell-site simulators, license plate readers, predictive policing, camera registries and gunshot detection. It holds "more than 15,000 datapoints in 6,000-plus jurisdictions". Look up your own city.',
     accounts: ['smart_camera'],
+    missions: ['smart_camera-fortify-police'],
     sources: [
       { label: 'EFF: Atlas of Surveillance', url: 'https://www.atlasofsurveillance.org/' },
       { label: 'EFF: Atlas of Surveillance, About', url: 'https://www.atlasofsurveillance.org/about' },
@@ -443,6 +449,7 @@ export const LEAKS_COURTS = Object.freeze([
     year: 2023,
     summary: 'Between 2019 and 2022, Tesla employees shared "sometimes highly invasive" videos and images recorded by customers\' car cameras in internal chats, nine former employees told Reuters. One showed a man approaching a car completely naked; another, a Tesla hitting a child on a bike. "We could see inside people\'s garages and their private properties," one said. Tesla\'s privacy notice says recordings "remain anonymous and are not linked to you or your vehicle".',
     accounts: ['car_tesla'],
+    missions: ['car_tesla-optout-privacy', 'car_tesla-reclaim-delete'],
     sources: [
       { label: 'Reuters (2023): Tesla workers shared sensitive images recorded by customer cars', url: 'https://www.reuters.com/technology/tesla-workers-shared-sensitive-images-recorded-by-customer-cars-2023-04-06/' },
       { label: 'NBC News (2023, from Reuters): Tesla workers shared sensitive images recorded by customer cars', url: 'https://www.nbcnews.com/business/business-news/tesla-workers-shared-sensitive-images-recorded-by-customer-cars-rcna78502' },

@@ -7,6 +7,7 @@ import { ladder } from '../../src/utils/sky-ladder.js';
 import { brokerLighting } from '../../src/utils/broker-lighting.js';
 import { fitView } from '../../src/utils/broker-view.js';
 import { setHome, setPrescreen } from '../../src/utils/broker-state.js';
+import { setReadLevel } from '../../src/utils/reading.js';
 import { createInitialState } from '../../src/state.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
 
@@ -16,7 +17,8 @@ const data = { map, layout };
 const T = '2026-10-29';
 const memory = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
 beforeEach(() => { globalThis.localStorage = memory(); });
-const draw = (state, opts = {}) => renderBrokerMap(state, { status: 'ready', data, today: T, ...opts });
+// Advanced: the full-height sky with the ladder beside it (Simple's banner and next-rung card: tests/side-reshape.test.js).
+const draw = (state, opts = {}) => renderBrokerMap(setReadLevel(state, 'full'), { status: 'ready', data, today: T, ...opts });
 const rungsFor = (state) => ladder(map, state, brokerLighting(map, state, T));
 
 describe('the ladder on the sky', () => {
@@ -25,7 +27,8 @@ describe('the ladder on the sky', () => {
     const list = h.slice(h.indexOf('<ol class="sky-rungs">'));
     expect(list.indexOf('California DROP')).toBeLessThan(list.indexOf('Global Privacy Control'));
     expect(h).toMatch(/<span class="sky-rung-next">NEXT<\/span> Global Privacy Control/);
-    expect(h).toContain('NEXT: Global Privacy Control');
+    // The phone sheet's header (Advanced): "Next: <rung> ›".
+    expect(h).toContain('Next: Global Privacy Control ›');
     expect(h).toContain('603 stars · <span class="sky-rung-status">California only</span>');
   });
 

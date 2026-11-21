@@ -3,6 +3,7 @@
 // Rung buttons carry a list index, never a broker id; nothing here is tracked or put in a URL.
 import { LADDER_COPY, PRESCREEN_LINKS, GPC_STATES } from '../data/sky-ladder.js';
 import { nextRung } from '../utils/sky-ladder.js';
+import { MISSIONS } from '../data/missions.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -61,20 +62,71 @@ export function rungCard(r, { home = null } = {}) {
 
 // rungs: ladder(). selected: the open rung's index or null. open: the phone sheet is pulled up.
 // top: the location quiz, shown above the list until it's answered (it decides what the rungs say).
-export function ladderPanel(rungs, { selected = null, open = false, home = null, top = '' } = {}) {
+// inline: Simple's list under the next-rung card, in the page rather than a sheet over it.
+export function ladderPanel(rungs, { selected = null, open = false, home = null, top = '', inline = false } = {}) {
   const next = nextRung(rungs);
   const nextIndex = next ? rungs.indexOf(next) : -1;
   const sel = Number.isInteger(selected) && rungs[selected] ? rungs[selected] : null;
-  const barText = sel ? sel.label : top ? 'WHERE DO YOU LIVE?' : next ? `NEXT: ${next.label}` : 'ALL DONE';
+  const barText = sel ? sel.label : inline ? 'EVERY OPT-OUT, BIGGEST FIRST' : top ? 'WHERE DO YOU LIVE?' : next ? `Next: ${next.label} ›` : 'ALL DONE';
   const bar = `<button type="button" class="sky-ladder-bar" data-action="ladder-toggle" aria-expanded="${open || sel ? 'true' : 'false'}">`
     + `<span class="sky-ladder-grab" aria-hidden="true"></span><span>${esc(barText)}</span></button>`;
   const body = sel
     ? `<div class="sky-rung-card" role="region" aria-labelledby="sky-rung-title" tabindex="-1">${rungCard(sel, { home })}</div>`
     : `${top}<div class="label">BIGGEST FIRST</div><ol class="sky-rungs">${rungs.map((r, i) => rungRow(r, i, i === nextIndex)).join('')}</ol>`;
-  return `<section class="sky-ladder${open || sel ? ' is-open' : ''}" aria-label="Opt-outs, biggest first">${bar}<div class="sky-ladder-body">${body}</div></section>`;
+  return `<section class="sky-ladder${inline ? ' sky-ladder--inline' : ''}${open || sel ? ' is-open' : ''}" aria-label="Opt-outs, biggest first">${bar}<div class="sky-ladder-body">${body}</div></section>`;
+}
+
+const missionTitle = (id) => MISSIONS.find((m) => m.id === id)?.title ?? '';
+
+// Simple's next step under the sky, holding the screen's one bright button: the location question
+// while it's unanswered (quiz: its markup), else the biggest opt-out left.
+export function nextRungCard(rungs, { quiz = '' } = {}) {
+  if (quiz) {
+    // The quiz carries its own WHERE DO YOU LIVE? heading.
+    return `<section class="sky-next" data-sky-next>${quiz}</section>`;
+  }
+  const next = nextRung(rungs);
+  if (!next) {
+    return '<section class="sky-next sky-next--done" data-sky-next><div class="label">THE LADDER</div><p class="sky-next-done">Every opt-out on the ladder is done ✓</p></section>';
+  }
+  const index = rungs.indexOf(next);
+  const parts = ['<div class="label">NEXT: THE BIGGEST OPT-OUT LEFT</div>', `<h2>${esc(next.label)}</h2>`, `<p class="sky-rung-meta">${esc(rungCount(next))}</p>`];
+  if (next.kind === 'gpc') parts.push(`<p>${esc(LADDER_COPY.gpc.body)}</p>`);
+  else if (next.text) parts.push(`<p>${esc(next.text)}</p>`);
+  const go = (href, label, opens) => `<a class="btn-primary sky-next-go" href="${esc(href)}">${esc(label)} ›</a><p class="sky-next-opens">${esc(opens)}</p>`;
+  if (next.kind === 'prescreen') {
+    const [first, ...rest] = PRESCREEN_LINKS;
+    parts.push(`<a class="btn-primary sky-next-go" href="${esc(first.url)}" target="_blank" rel="noopener">OPT OUT AT OPTOUTPRESCREEN.COM ›</a>`
+      + '<p class="sky-next-opens">Opens OptOutPrescreen.com in a new tab; come back and tick it.</p>'
+      + `<ul class="star-card-list">${rest.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a></li>`).join('')}</ul>`
+      + `<button type="button" class="btn-secondary sky-rung-did" data-action="prescreen-did">${esc(LADDER_COPY.prescreen.did)}</button>`);
+  } else if (next.mission) {
+    const title = missionTitle(next.mission);
+    const opens = title ? `Opens the “${title}” mission.` : 'Opens its mission.';
+    parts.push(next.status === 'amber' ? go(`#/mission/${next.mission}/recheck`, 'RE-CHECK', opens) : go(`#/mission/${next.mission}/briefing`, next.kind === 'drop' ? 'FILE DROP' : 'START', opens));
+  }
+  parts.push(`<button type="button" class="btn-secondary sky-next-see" data-action="select-rung" data-rung="${index}">SEE IT ON THE SKY</button>`);
+  return `<section class="sky-next" data-sky-next>${parts.join('')}</section>`;
 }
 
 export const LADDER_CSS = `
+.sky-next{margin-top:12px;padding:14px 16px;background:#11151F;border:1px solid rgba(0,229,255,0.45);border-left:3px solid var(--cyan);border-radius:8px;font-size:15px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
+.sky-next .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin:0 0 6px}
+.sky-next h2{margin:0;font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:1px;color:var(--offwhite)}
+.sky-next p{margin:6px 0}
+.sky-next .sky-rung-meta{font-size:13px;color:var(--offwhite)}
+.sky-next-go{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;margin-top:8px;text-decoration:none}
+.sky-next .sky-next-opens{font-size:14px;color:var(--offwhite)}
+.sky-next-see,.sky-next .sky-rung-did{display:inline-flex;align-items:center;min-height:44px;margin:8px 8px 0 0}
+.sky-next .residency .map-panel{margin-top:0;padding:0;background:none;border:0}
+.sky-next .residency .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan)}
+.sky-next--done{border-color:rgba(198,255,0,0.45);border-left-color:var(--lime)}
+.sky-next-done{color:var(--lime);font-weight:700}
+.sky-ladder--inline{margin-top:12px}
+.sky-ladder--inline .sky-ladder-bar{position:static;display:flex;flex-direction:row;justify-content:space-between;align-items:center;width:100%;min-height:44px;margin:0;padding:0;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--cyan);background:transparent;border:0;cursor:pointer}
+.sky-ladder--inline .sky-ladder-bar::after{content:'▾'}.sky-ladder--inline.is-open .sky-ladder-bar::after{content:'▴'}
+.sky-ladder--inline .sky-ladder-grab{display:none}
+.sky-ladder--inline:not(.is-open) .sky-ladder-body{display:none}
 .sky-ladder{padding:12px 14px;background:#11151F;border:1px solid rgba(198,255,0,0.25);border-radius:8px;font-size:13px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
 .sky-ladder .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(198,255,0,0.7);margin:0 0 6px}
 .sky-ladder-bar{display:none}
@@ -108,4 +160,7 @@ export const LADDER_CSS = `
 .sky-ladder:not(.is-open){padding-bottom:env(safe-area-inset-bottom)}
 .sky-ladder-bar{background:#11151F}
 .sky-ladder-body .residency .label{display:none}
+.sky-ladder.sky-ladder--inline{position:static;max-height:none;overflow:visible;padding:0 14px 6px;border:1px solid rgba(0,229,255,0.25);border-radius:8px;box-shadow:none}
+.sky-ladder.sky-ladder--inline .sky-ladder-bar{width:100%;margin:0;padding:0;background:transparent}
+.broker-map--simple{padding-bottom:24px}
 }`;

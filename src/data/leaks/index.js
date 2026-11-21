@@ -18,6 +18,8 @@ const PRISM_ENTRY = Object.freeze({
   year: 2013,
   summary: PRISM_COPY.what,
   accounts: Object.freeze(PRISM_PROVIDERS.flatMap((p) => p.accounts)),
+  // The five companies on the slides that run accounts in this city, each one's privacy review.
+  missions: Object.freeze(['google-reclaim-privacy', 'facebook-reclaim-privacy', 'microsoft-reclaim-privacy', 'apple_id-reclaim-privacy', 'yahoo-reclaim-privacy']),
   sources: Object.freeze([PRISM_SOURCES.guardian, PRISM_SOURCES.wapo, PRISM_SOURCES.slides, PRISM_SOURCES.wikiPrism, PRISM_SOURCES.eff702, PRISM_SOURCES.wiki702]),
   flow: Object.freeze({
     data: 'Audio and video chats, photographs, e-mails, documents and connection logs',

@@ -6,6 +6,9 @@ import { renderScout } from '../components/scout.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
 import { readLevel } from '../utils/reading.js';
+import { leakById } from '../data/leaks/index.js';
+import { leakMissionIds } from '../data/leaks/actions.js';
+import { whatYouCanDo } from '../components/what-you-can-do.js';
 import { PRISM_PROVIDERS, PRISM_PLANNED, PRISM_SOURCES, PRISM_COPY, NOT_AN_ACCOUNT } from '../data/prism.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -42,6 +45,10 @@ const STYLE = `<style>
 .prism-panel a.btn-primary{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;color:#090B10}
 .prism-yours{margin:4px 0 0;font-size:16px;line-height:1.5;color:var(--offwhite)}
 .prism-cables{color:#FF2D9B;font-size:13px}
+.prism-panel .prism-opens{margin:6px 0 0;font-size:13px;color:var(--offwhite)}
+.prism-panel .wycd a{color:var(--offwhite)}
+.prism-panel .wycd a.btn-secondary .wycd-name{color:var(--cyan)}
+.prism-panel .wycd a.wycd-done .wycd-name{color:var(--lime)}
 </style>`;
 
 // Nine beams from the companies on the left into a prism, one bright beam out to the NSA. A company
@@ -99,6 +106,8 @@ function cables(state) {
   return `<div class="prism-panel"><div class="label">EVERYTHING ELSE: THE CABLES</div><p>${esc(PRISM_COPY.cables)}</p>${list}</div>`;
 }
 
+export const PRISM_WYCD_LEDE = 'In this city: the privacy review for each company on the slides.';
+
 // How many of the nine companies on the slides run an account on the player's list.
 const companiesOnList = (state) => PRISM_PROVIDERS.filter((p) => p.accounts.some((id) => mine(state, id))).length;
 
@@ -111,7 +120,10 @@ export function renderPrism(state) {
   const scout = `<div style="margin-bottom: 10px;">${renderScout(esc(PRISM_COPY.scout), { feeling: 'thinkingA' })}</div>`;
   const slides = `<div class="prism-panel"><div class="label">WHO WAS ON THE SLIDES</div>${companies(state)}</div>`;
   // The one thing to do on this page: the filled button.
-  const defend = `<div class="prism-panel prism-defend"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="btn-primary" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a></div>`;
+  // PRISM BREAK stays the one bright button (encryption is what a pipe can't read); the companies'
+  // privacy reviews in this city follow it, outlined.
+  const missions = whatYouCanDo(state, leakMissionIds(leakById('prism')), { primary: false, label: '', className: 'wycd--inline', lede: PRISM_WYCD_LEDE });
+  const defend = `<div class="prism-panel prism-defend"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="btn-primary" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a><p class="prism-opens">Opens prism-break.org in a new tab.</p>${missions}</div>`;
   const rest = `<div class="prism-panel"><div class="label">WHAT IT WAS</div><p>${esc(PRISM_COPY.what)}</p><p>${link(PRISM_SOURCES.guardian)} · ${link(PRISM_SOURCES.wapo)}</p></div>`
     + `<div class="prism-panel"><div class="label">IT'S IN EVERYTHING</div><p>${esc(PRISM_COPY.everything)}</p><p>${esc(PRISM_COPY.you)}</p><p>${link(PRISM_SOURCES.xkeyscore)} · ${link(PRISM_SOURCES.eff702)} · ${link(PRISM_SOURCES.wikiUpstream)} · ${link(PRISM_SOURCES.collectAll)} · <a href="#/saints">Saint Mark Klein</a></p></div>`
     + cables(state)

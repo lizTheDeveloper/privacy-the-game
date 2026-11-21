@@ -22,11 +22,12 @@ export function homeLabel(home) {
   return STATE_NAME[home] ?? null;
 }
 
-const btn = (action, label, extra = '') => `<button type="button" class="btn-secondary residency-btn" data-action="${action}"${extra}>${label}</button>`;
+const btn = (action, label, extra = '', primary = false) => `<button type="button" class="${primary ? 'btn-primary' : 'btn-secondary'} residency-btn" data-action="${action}"${extra}>${label}</button>`;
 
 // home: homeOf(state). guess: guessFromWhoami(). guessAllowed: the player hasn't turned sharing
 // off or gone ghost (then nothing is looked up until they ask). guessStatus: whoami's status.
-export function locationQuiz({ home = null, guess = null, editing = false, guessAllowed = true, guessStatus = 'idle' } = {}) {
+// primary: the quiz is the screen's next thing (Simple's card): its answer button is the bright one.
+export function locationQuiz({ home = null, guess = null, editing = false, guessAllowed = true, guessStatus = 'idle', primary = false } = {}) {
   if (home && !editing) {
     const change = home === 'outside-us' || home === 'unsaid' ? 'CHANGE' : `NOT IN ${esc(homeLabel(home).toUpperCase())}? CHANGE`;
     return `<div class="residency"><div class="map-panel"><div>Where you live: <strong>${esc(homeLabel(home))}</strong></div>`
@@ -36,7 +37,7 @@ export function locationQuiz({ home = null, guess = null, editing = false, guess
   if (guess) {
     const where = guess === 'outside-us' ? 'outside the US' : `in ${homeLabel(guess)}`;
     parts.push(`<p class="residency-guess">Looks like you're ${esc(where)}. Is that right?</p>`
-      + `<div class="residency-buttons">${btn('quiz-yes', 'YES', ` data-value="${esc(guess)}"`)}</div>`
+      + `<div class="residency-buttons">${btn('quiz-yes', 'YES', ` data-value="${esc(guess)}"`, primary)}</div>`
       + `<p class="residency-note">${esc(SKY_LADDER_DIALOGUE.quizWhyGuess)}</p>`);
   } else if (guessStatus === 'loading') {
     parts.push('<p class="residency-guess" role="status">Guessing…</p>');
@@ -45,7 +46,7 @@ export function locationQuiz({ home = null, guess = null, editing = false, guess
   }
   const options = US_STATES.map(([code, name]) => `<option value="${code}"${code === guess ? ' selected' : ''}>${esc(name)}</option>`).join('');
   parts.push(`<div class="residency-pick"><select class="residency-select" aria-label="Your state"><option value="">${guess ? 'No, I live in…' : 'Choose your state…'}</option>${options}</select>`
-    + `${btn('quiz-pick', "THAT'S ME")}</div>`
+    + `${btn('quiz-pick', "THAT'S ME", '', primary && !guess)}</div>`
     + `<div class="residency-buttons">${btn('quiz-outside', 'OUTSIDE THE US')}${btn('quiz-unsaid', 'RATHER NOT SAY')}</div>`);
   return `<div class="residency"><div class="map-panel">${parts.join('')}</div></div>`;
 }
