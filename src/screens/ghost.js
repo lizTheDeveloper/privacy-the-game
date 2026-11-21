@@ -53,6 +53,11 @@ export function renderGhost(state, view = {}) {
 
 // Going ghost before the city is taken back: tonight's run deletes what this
 // browser sent, like turning sharing off, and counts one more ghost.
+// What going ghost early does, before the button that does it: off-white, one line each.
+function earlyBullets() {
+  return `<ul data-ghost-early-what style="margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.55; color: var(--offwhite);">${GHOST_DIALOGUE.earlyBullets.map((b) => `<li style="margin: 0 0 8px;">${b}</li>`).join('')}</ul>`;
+}
+
 export function renderGhostEarly(state, view = {}) {
   if (hasGoneGhost()) return renderGhostDone(state, view);
   if (isCityComplete(state)) return renderGhost(state, view);
@@ -69,7 +74,7 @@ export function renderGhostEarly(state, view = {}) {
     <div class="panel" style="padding: 20px 24px; margin-top: 24px;">
       <div style="display: flex; gap: 10px; align-items: flex-start; margin: 0 0 18px;">
         ${smallScout('worried')}
-        <p style="${MUTED} margin: 0;">${off ? GHOST_DIALOGUE.alreadyOff : GHOST_DIALOGUE.early}</p>
+        ${off ? `<p style="${MUTED} margin: 0;">${GHOST_DIALOGUE.alreadyOff}</p>` : earlyBullets()}
       </div>
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
         ${action}
@@ -123,7 +128,7 @@ export function renderGhostDone(state, view = {}) {
     <div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>
   </div>
   <div style="max-width: 640px; margin: 32px auto 0; padding: 0 24px;">
-    ${renderScout(GHOST_DIALOGUE.done, { feeling: feelingForGhostDone(info) })}
+    ${renderScout(info?.early ? GHOST_DIALOGUE.doneEarly : GHOST_DIALOGUE.done, { feeling: feelingForGhostDone(info) })}
     ${renderDeletionBlock(view.collective)}
     ${renderNotice(view.notice)}
     <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 28px;">

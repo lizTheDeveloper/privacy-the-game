@@ -14,6 +14,8 @@ import {
   calcFindings,
 } from '../utils/calc.js';
 import { displayStreak } from '../state.js';
+import { readLevel } from '../utils/reading.js';
+import { nextUp, simpleTitle } from './next.js';
 
 const RING_SIZE = 120;
 const RING_RADIUS = 45;
@@ -46,19 +48,34 @@ function districtRow(state, district) {
   const progress = calcDistrictProgress(state, district.id);
   const locked = progress.total === 0;
   const accent = progress.percent === 100 ? '#C6FF00' : progress.percent > 0 ? '#00E5FF' : 'rgba(237,239,243,0.5)';
-  const nameColor = locked ? 'rgba(237,239,243,0.3)' : accent;
+  const nameColor = locked ? 'var(--text-quiet)' : accent;
+  // The Freeway isn't locked: it opens when a car is in the Garage, so it says so and goes there.
+  const garage = locked && district.hasGarage;
+  const lockedText = district.optIn ? 'OPTIONAL · TURN IT ON IN THE DISTRICT' : garage ? 'ADD A CAR IN THE GARAGE TO OPEN IT' : 'LOCKED CONTENT';
   const bar = locked
-    ? `<div style="flex: 1; display: flex; align-items: center; height: 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: rgba(237,239,243,0.2);">${district.optIn ? 'OPTIONAL · TURN IT ON IN THE DISTRICT' : 'LOCKED CONTENT'}</div>`
+    ? `<div style="flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; line-height: 1.4; color: ${garage ? 'var(--text-strong)' : 'var(--text-dim)'};">${lockedText}</div>`
     : `<div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"><div style="width: ${progress.percent}%; height: 100%; background: linear-gradient(90deg, #00E5FF, #C6FF00); box-shadow: 0 0 6px rgba(0,229,255,0.2);"></div></div>`;
   return `
-  <a href="#/district/${district.id}" style="display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit;">
-    <div style="width: 160px; flex-shrink: 0;">
+  <a href="${garage ? '#/garage' : `#/district/${district.id}`}" data-district-row="${district.id}" style="display: flex; align-items: center; gap: 14px; min-height: 44px; text-decoration: none; color: inherit;">
+    <div style="width: 140px; flex-shrink: 0;">
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 1px; color: ${nameColor};">${district.name.toUpperCase()}</div>
-      <div style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; color: rgba(237,239,243,0.25); margin-top: 3px;">CH ${district.chapter}</div>
+      <div style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; color: var(--text-dim); margin-top: 3px;">CH ${district.chapter}</div>
     </div>
     ${bar}
-    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 44px; text-align: right; color: ${locked ? 'rgba(237,239,243,0.2)' : accent};">${locked ? '' : `${progress.percent}%`}</div>
+    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 40px; text-align: right; color: ${locked ? 'rgba(237,239,243,0.2)' : accent};">${locked ? '' : `${progress.percent}%`}</div>
+    <span aria-hidden="true" style="flex-shrink: 0; font-size: 18px; line-height: 1; color: var(--cyan);">&rsaquo;</span>
   </a>`;
+}
+
+// The districts in chapter order (the list in data/districts.js is not).
+export const DISTRICTS_BY_CHAPTER = [...DISTRICTS].sort((a, b) => a.chapter - b.chapter);
+
+// The one bright button: the same mission What's next shows.
+function nextButton(state) {
+  const up = nextUp(state);
+  if (!up) return '';
+  const verb = up.kind === 'resume' ? 'Keep going' : 'Next';
+  return `<div style="margin: 0 0 18px;"><a class="btn-primary" data-stats-next href="#/mission/${up.mission.id}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 1px; font-size: 13px;">${verb}: ${esc(simpleTitle(up.mission))} &#9654;</a></div>`;
 }
 
 function findingCard({ label, value, color, tint }) {
@@ -129,7 +146,8 @@ export function renderDeletionBlock(collectiveView, { requireLoaded = false } = 
   return '';
 }
 
-const WHOAMI_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; margin-bottom: 10px;';
+// What our analytics can see is the point of this panel: off-white, not a grey side note.
+const WHOAMI_TEXT = 'font-size: 14px; color: var(--offwhite); line-height: 1.6; margin-bottom: 10px;';
 
 function whoamiShell(inner) {
   return `
@@ -229,6 +247,10 @@ export function renderStats(state, view = {}) {
   const integrity = calcIntegrity(state);
   const exposure = calcExposure(state);
   const findings = calcFindings(state);
+  const simple = readLevel(state) === 'simplest';
+  // A new player's exposure ring is full and magenta: say how it goes down.
+  const anyDone = Object.values(state.missions || {}).some((m) => m?.status === 'completed');
+  const exposureNote = anyDone ? '' : '<p data-exposure-note style="margin: -4px 0 16px; font-size: 14px; line-height: 1.5; color: var(--text-strong); text-align: center;"><span style="color: #FF2D9B;">EXPOSURE</span> goes down as you finish missions.</p>';
 
   return `
 <div class="scanlines stats-page">
@@ -240,6 +262,7 @@ export function renderStats(state, view = {}) {
     <a href="#/city-together" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: #00E5FF; text-decoration: none;">THE WHOLE CITY →</a>
   </div>
   <div style="padding: 20px 24px 32px;">
+    ${nextButton(state)}
     <div class="stats-dials">
       ${statCard({
         label: 'INTEGRITY',
@@ -278,10 +301,11 @@ export function renderStats(state, view = {}) {
         </div>`,
       })}
     </div>
+    ${exposureNote}
     <div class="panel" style="padding: 20px 24px; margin-bottom: 16px;">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 16px;">DISTRICT PROGRESS</div>
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        ${DISTRICTS.map((d) => districtRow(state, d)).join('')}
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        ${DISTRICTS_BY_CHAPTER.map((d) => districtRow(state, d)).join('')}
       </div>
     </div>
     <div class="panel" style="padding: 20px 24px;">
@@ -289,7 +313,7 @@ export function renderStats(state, view = {}) {
       <div class="stats-findings">
         ${findingCard({ label: 'ADDRESSES IN A BREACH', value: findings.breachesFound, color: '#FF2D9B', tint: 'rgba(255,45,155,0.1)' })}
         ${findingCard({ label: 'PASSWORDS RESET', value: findings.passwordsReset, color: '#00E5FF', tint: 'rgba(0,229,255,0.1)' })}
-        ${findingCard({ label: '2FA ENABLED', value: findings.twoFactorEnabled, color: '#C6FF00', tint: 'rgba(198,255,0,0.1)' })}
+        ${findingCard({ label: simple ? 'TWO-STEP SIGN-IN ON' : '2FA ENABLED', value: findings.twoFactorEnabled, color: '#C6FF00', tint: 'rgba(198,255,0,0.1)' })}
         ${findingCard({ label: 'OPT-OUTS FILED', value: findings.optOutsFiled, color: '#FF9F00', tint: 'rgba(255,159,0,0.1)' })}
       </div>
     </div>

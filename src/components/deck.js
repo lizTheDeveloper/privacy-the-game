@@ -108,13 +108,9 @@ export function progressWidth(index, count) {
   return `${((index + 1) / count) * 100}%`;
 }
 
-// The visible mark on a named dot: initials, without a "Saint" in front.
-export function initials(name) {
-  return String(name ?? '').replace(/^Saint\s+/, '').split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).join('').slice(0, 3);
-}
-
 // names: one per slide. Each dot is then a button labelled with its name (a screen reader
-// hears the name; a tap goes there), on its own row, even past DOTS_MAX.
+// hears the name; a tap goes there), on its own row, even past DOTS_MAX. On screen it is a dot
+// (letters like "AS" meant nothing to a reader), with "1 of 9" beside BACK / NEXT.
 export function deck(slides, { label, className = '', names = null } = {}) {
   const list = (slides || []).filter(Boolean);
   if (list.length === 0) return '';
@@ -127,7 +123,7 @@ export function deck(slides, { label, className = '', names = null } = {}) {
     .join('');
   const named = Array.isArray(names) && names.length === m;
   const dots = named
-    ? list.map((_, i) => `<button type="button" class="deck-dot deck-dot--named${i === 0 ? ' is-current' : ''}" data-deck-to="${i}" aria-label="${attr(names[i])}"${i === 0 ? ' aria-current="true"' : ''}><span aria-hidden="true">${attr(initials(names[i]))}</span></button>`).join('')
+    ? list.map((_, i) => `<button type="button" class="deck-dot deck-dot--named${i === 0 ? ' is-current' : ''}" data-deck-to="${i}" aria-label="${attr(names[i])}"${i === 0 ? ' aria-current="true"' : ''}><span class="deck-dot-mark" aria-hidden="true"></span></button>`).join('')
     : list.map((_, i) => `<span class="deck-dot${i === 0 ? ' is-current' : ''}"></span>`).join('');
   // Past DOTS_MAX slides the dots wrap; a thin bar says the same thing in one line.
   const progress = named

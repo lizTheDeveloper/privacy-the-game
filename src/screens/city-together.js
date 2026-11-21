@@ -6,6 +6,8 @@ import { deck, splitWords } from '../components/deck.js';
 import { isCityComplete, getGhostInfo, isGhostPending } from '../utils/ghost.js';
 import { COLLECTIVE_DIALOGUE } from '../data/dialogue.js';
 import { isAnalyticsOff } from '../utils/analytics-pref.js';
+import { MISSIONS } from '../data/missions.js';
+import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const LABEL = 'color: rgba(0,229,255,0.4); margin-bottom: 16px;';
@@ -38,7 +40,8 @@ export function explainerSlides(text = COLLECTIVE_DIALOGUE.explainer) {
 
 function explainer() {
   const body = deck(explainerSlides(), { label: 'How we know any of this', className: 'explainer-deck' });
-  return `<div style="margin-bottom: 16px;">${renderScout(body, { feeling: 'thinkingA', actionText: 'WHAT WE KNOW ABOUT YOU', actionHref: '#/stats' })}</div>`;
+  // A way to Your City, not the next thing to do here: outlined (the breach check is the bright one).
+  return `<div style="margin-bottom: 16px;">${renderScout(body, { feeling: 'thinkingA', actionText: 'WHAT WE KNOW ABOUT YOU', actionHref: '#/stats', actionClass: 'btn-secondary' })}</div>`;
 }
 
 // GO GHOST for everyone: the final mission once the city is taken back, the
@@ -176,7 +179,7 @@ function board(data, yoursId) {
     const players = isNum(p.players) ? `${fmt(p.players)} players` : '';
     return `
     <div ${yours ? 'data-yours="true"' : ''} style="display: flex; gap: 14px; align-items: center; padding: 8px 10px; ${yours ? 'border: 1px solid rgba(255,45,155,0.4); background: rgba(255,45,155,0.05);' : ''}">
-      <div style="flex: 1; font-family: var(--font-display); font-size: 10px; letter-spacing: 1px; color: ${yours ? '#FF2D9B' : '#00E5FF'};">${esc(p.label)}</div>
+      <div style="flex: 1; font-family: var(--font-display); font-size: 10px; letter-spacing: 1px; color: ${yours ? '#FF2D9B' : 'var(--offwhite)'};">${esc(p.label)}</div>
       <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4);">${players}</div>
       <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 48px; text-align: right; color: #C6FF00;">${pct}</div>
     </div>`;
@@ -204,19 +207,29 @@ function breachMap(city) {
   </div>`;
 }
 
+// The first breach check the player hasn't done, for "Your part".
+export function nextBreachCheck(state) {
+  return MISSIONS.find((m) => /-recon-breach$/.test(m.id) && isMissionInPlay(state, m) && !isMissionDoneIn(state, m)) || null;
+}
+
 function yourPartPanel(state, podLabel) {
   const { found, fixed } = yourPart(state);
   let body;
+  let go = '';
   if (found === 0) {
     body = 'Run a breach check in The Master Keys to add yourself to the map.';
+    // The one thing to do on this page.
+    const m = nextBreachCheck(state);
+    if (m) go = `<a class="btn-primary" data-your-part-go href="#/mission/${esc(m.id)}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; margin-top: 14px; text-decoration: none;">RUN A BREACH CHECK &#9654;</a>`;
   } else {
     body = `You found ${found} email ${plural(found, 'address', 'addresses')} in a known breach and fixed ${fixed}.`;
     if (found > fixed) body += ` Fixing the rest moves ${esc(podLabel || 'the city')} too.`;
   }
   return `
-  <div class="panel" style="padding: 20px 24px; margin-bottom: 16px; border-color: rgba(255,159,0,0.15);">
+  <div class="panel" data-your-part style="padding: 20px 24px; margin-bottom: 16px; border-color: rgba(255,159,0,0.15);">
     <div class="section-label" style="color: rgba(255,159,0,0.5); margin-bottom: 12px;">YOUR PART</div>
-    <div style="${MUTED}">${body}</div>
+    <div style="font-size: 15px; color: var(--offwhite); line-height: 1.6;">${body}</div>
+    ${go}
   </div>`;
 }
 
@@ -262,11 +275,11 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
   return shell(`
     ${explainer()}
     ${cityScore(city)}
+    ${yourPartPanel(state, yoursPod?.label)}
     ${yourPodCard(data, whoami)}
     ${cityNumbers(city)}
     ${board(data, yoursId)}
     ${breachMap(city)}
-    ${yourPartPanel(state, yoursPod?.label)}
     ${ghost}
     ${footer(data)}`, state);
 }

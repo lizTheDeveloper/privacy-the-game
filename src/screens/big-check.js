@@ -23,6 +23,8 @@ const STYLE = `<style>
 .big-check{padding:0 16px 24px;max-width:720px;margin:0 auto;box-sizing:border-box;overflow-wrap:anywhere}
 .big-check .back-link{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);text-decoration:none}
 .big-check .big-check-head{font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--lime);letter-spacing:2px;margin:12px 0 2px}
+.big-check .big-check-head--none{color:var(--offwhite)}
+.big-check-no-page{font-weight:600}
 .big-check .big-check-note{font-size:12px;line-height:1.5;color:rgba(237,239,243,0.55);margin:0 0 12px}
 .big-check .big-check-filter{display:block;width:100%;box-sizing:border-box;min-height:44px;margin:0 0 12px;padding:0 12px;font-family:var(--font-mono);font-size:16px;color:var(--offwhite);background:rgba(26,31,43,0.7);border:1px solid rgba(0,229,255,0.3);border-radius:6px}
 .big-check .big-check-filter:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
@@ -61,7 +63,20 @@ function missionLine(id, state) {
     : `<div class="big-check-mission">In a mission:<div class="big-check-mission-go"><a href="#/mission/${esc(id)}/briefing">${esc(missionTitle(id))}</a></div></div>`;
 }
 
+// We couldn't confirm the broker's opt-out page: there's nowhere sure to file, so the row says
+// so instead of offering "I filed with them" (a tick already saved keeps its box).
+export function unconfirmedPage(b) {
+  const o = b?.optOut;
+  return o !== null && typeof o === 'object' && o.method !== 'none' && o.status !== 'verified';
+}
+
+const NO_PAGE = 'No working opt-out page right now.';
+
 function rowHtml(r, b, map, byId, state) {
+  if (!r.mission && unconfirmedPage(b)) {
+    const box = r.ticked ? bigCheckTick(r.id, true, r.name, { frozen: r.frozen }) : '';
+    return `<li class="big-check-row${r.ticked ? '' : ' big-check-row-nopage'}"><p class="big-check-name">${esc(r.name)}</p><p class="big-check-no-page">${NO_PAGE}</p>${ownedRoutesBlock(map, b, byId)}${box}</li>`;
+  }
   // A tick from before a dataset release put this broker in a mission stays recorded (and lit),
   // and its box stays beside the mission link so it can be unticked. A mission row counts for
   // nothing in its group's count (class big-check-row-mission; app.js's live count skips it).
@@ -73,8 +88,11 @@ function rowHtml(r, b, map, byId, state) {
 
 // "<label> · <ticked>/<tickable>": only rows with a box of their own (no mission) count, so a
 // completionist can reach N/N. A group with nothing to tick shows just its label.
+// A row has a box of its own: not in a mission, and somewhere to file (or already ticked).
+const hasBox = (r, byId) => !r.mission && (r.ticked || !unconfirmedPage(byId.get(r.id)));
+
 function groupHtml(g, map, byId, state) {
-  const own = g.rows.filter((r) => !r.mission);
+  const own = g.rows.filter((r) => hasBox(r, byId));
   const ticked = own.filter((r) => r.ticked).length;
   const count = own.length ? ` · <span data-big-check-count>${ticked}</span>/${own.length}` : '';
   const rows = g.rows.map((r) => rowHtml(r, byId.get(r.id), map, byId, state)).join('');
@@ -92,7 +110,9 @@ function loadedView(state, { map }, today, query, scoutLine) {
   const groups = filterBigCheck(bigCheckGroups(map, lighting), query);
   const byId = new Map(map.brokers.map((b) => [b.id, b]));
   const empty = `<p class="big-check-empty" role="status"${groups.length ? ' hidden' : ''}>No brokers match</p>`;
-  return '<h1 class="big-check-head">THE BIG CHECK</h1>'
+  // The title is lime (done, good) only once something is ticked.
+  const anyTicked = groups.some((g) => g.rows.some((r) => r.ticked));
+  return `<h1 class="big-check-head${anyTicked ? '' : ' big-check-head--none'}">THE BIG CHECK</h1>`
     // Scout's first-visit line says the note too: then it is said once, by Scout.
     + (saysNote(scoutLine) ? '' : `<p class="big-check-note">${esc(NOTE)}</p>`)
     + scoutBubble(scoutLine)

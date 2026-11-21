@@ -26,7 +26,7 @@ import { renderBuildingInterior } from './screens/building.js';
 import { renderSaints, saintsOrigin } from './screens/saints.js';
 import { renderPrism } from './screens/prism.js';
 import { renderGovernment } from './screens/government.js';
-import { renderLeak } from './screens/leak.js';
+import { renderLeak, leakOrigin } from './screens/leak.js';
 import { leakById, GOV_DATA } from './data/leaks/index.js';
 import { renderBrokerMap } from './screens/broker-map.js';
 import { renderBigCheck } from './screens/big-check.js';
@@ -71,7 +71,7 @@ import { renderNext } from './screens/next.js';
 import { renderPasswordFinder } from './screens/password-finder.js';
 import { setFinderAnswer, finderBack } from './data/password-finder.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
-import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage } from './screens/phishing-quiz.js';
+import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage, keepPracticing, showsCuratedResult } from './screens/phishing-quiz.js';
 import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from './screens/garage.js';
 import { renderTimeline, renderSocialForm, renderEraQuestions } from './screens/timeline.js';
 import { socialProfileFromForm } from './utils/social-timeline.js';
@@ -118,6 +118,9 @@ let briefingPeek = null;
 // The last route drawn, and the building #/saints was opened from (memory only).
 let lastRoute = null;
 let saintsFrom = null;
+let leakFrom = null;
+// The garage car whose REMOVE is asking "are you sure?" (in memory; gone on leaving the garage).
+let garageAsk = null;
 // The broker map's view state (memory only, never in the URL).
 let selectedId = null;
 let view = null;
@@ -218,7 +221,7 @@ const screens = {
   saints: () => renderSaints(state, { from: saintsFrom }),
   prism: () => renderPrism(state),
   government: () => renderGovernment(state, GOV_DATA, { selected: govSelected }),
-  leak: ({ id }) => renderLeak(state, leakById(id)),
+  leak: ({ id }) => renderLeak(state, leakById(id), { from: leakFrom }),
   'broker-map': () => {
     if (brokerDataStatus() === 'idle') loadBrokerMapData();
     const data = brokerDataStatus() === 'ready' ? brokerData() : null;
@@ -254,7 +257,7 @@ const screens = {
   milestone: ({ districtId }) => renderMilestone(state, districtId),
   quickquest: () => renderQuickQuest(state),
   phishing: () => renderPhishingQuiz(state),
-  garage: () => renderGarage(state),
+  garage: () => renderGarage(state, { confirmRemove: garageAsk }),
   timeline: () => renderTimeline(state),
   together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView, notice: currentNotice() }),
   ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed }),
@@ -362,6 +365,14 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     // The saints gallery's back link: the building it was opened from. Kept
     // in memory only, never in the URL (pageviews read the URL).
     if (route.screen !== 'briefing' || route.params?.id !== briefingPeek) briefingPeek = null;
+    // A leak page's back link: the screen its badge was on (like the saints gallery's, below).
+    leakFrom = leakOrigin(route, lastRoute, leakFrom);
+    if (route.screen !== 'garage') garageAsk = null;
+    // The phishing set's result is shown once: leaving it, the quiz goes on to practice mode.
+    if (lastRoute?.screen === 'phishing' && route.screen !== 'phishing' && state.phishingQuiz && showsCuratedResult(state.phishingQuiz)) {
+      keepPracticing(state);
+      setState(state);
+    }
     saintsFrom = saintsOrigin(route, lastRoute, saintsFrom);
     if (route.screen !== 'bank-notes') bankForm = {};
     lastRoute = route;
@@ -875,6 +886,8 @@ function bigCheckChange(e) {
     const details = box.closest('details');
     const count = details?.querySelector('[data-big-check-count]');
     if (count) count.textContent = String(details.querySelectorAll('.big-check-row:not(.big-check-row-mission) [data-big-check]:checked').length);
+    // The title turns lime with the first tick, neutral again with none.
+    app.querySelector('.big-check-head')?.classList.toggle('big-check-head--none', !app.querySelector('.big-check [data-big-check]:checked'));
   } else if (screen === 'broker-map') {
     // The re-draw builds a new card: keep the sheet where it was, so the tapped box stays in view.
     const scrollTop = app.querySelector('.star-card')?.scrollTop ?? 0;
@@ -1615,9 +1628,14 @@ app.addEventListener('click', async (e) => {
     if (!recordQuizVerdict(state, bank ? 'bank' : 'curated', msgId, el.dataset.verdict, tell)) return;
     setState(state);
     renderCurrentRoute();
-    app.querySelector('[data-quiz-reveal]')?.scrollIntoView?.({ block: 'nearest' });
+    // The verdict, the tells and NEXT, from the top of the verdict: NEXT was below the screen.
+    app.querySelector('[data-quiz-reveal]')?.scrollIntoView?.({ block: 'start' });
   } else if (action === 'quiz-next' || action === 'quiz-bank-next') {
     nextQuizMessage(state);
+    setState(state);
+    renderCurrentRoute();
+  } else if (action === 'quiz-keep-practicing') {
+    keepPracticing(state);
     setState(state);
     renderCurrentRoute();
   } else if (action === 'add-custom-account') {
@@ -1656,6 +1674,9 @@ app.addEventListener('click', async (e) => {
     const container = app.querySelector('#add-form-container');
     if (container) {
       container.innerHTML = renderAddForm();
+      // The form is open: the ADD VEHICLE card that opened it goes until CANCEL.
+      const card = app.querySelector('[data-add-vehicle-card]');
+      if (card) { card.hidden = true; card.style.display = 'none'; }
       container.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // Picking a make fills THREAT ASSESSMENT from the car data; "Other" asks for its name.
       const makeSelect = container.querySelector('#vehicle-make');
@@ -1673,6 +1694,8 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'cancel-add-vehicle') {
     const container = app.querySelector('#add-form-container');
     if (container) container.innerHTML = '';
+    const card = app.querySelector('[data-add-vehicle-card]');
+    if (card) { card.hidden = false; card.style.display = 'flex'; }
   } else if (action === 'add-vehicle') {
     const val = (sel) => app.querySelector(sel)?.value ?? '';
     const result = vehicleFromForm({ make: val('#vehicle-make'), otherMake: val('#vehicle-make-other'), model: val('#vehicle-model'), year: val('#vehicle-year'), nickname: val('#vehicle-nickname') });
@@ -1694,8 +1717,16 @@ app.addEventListener('click', async (e) => {
     // A make the game doesn't list is the player's own words: it is sent as "Other".
     track('vehicle-added', { make: mfr ? make : 'Other', year });
     renderCurrentRoute();
+  } else if (action === 'remove-vehicle-ask') {
+    garageAsk = Number(el.dataset.index);
+    renderCurrentRoute();
+    app.querySelector('[data-remove-confirm] button')?.focus();
+  } else if (action === 'remove-vehicle-keep') {
+    garageAsk = null;
+    renderCurrentRoute();
   } else if (action === 'remove-vehicle') {
     const index = Number(el.dataset.index);
+    garageAsk = null;
     if (state.vehicles && state.vehicles[index]) {
       state.vehicles.splice(index, 1);
       setState(state);

@@ -3,6 +3,7 @@ import { CAR_MANUFACTURERS } from '../data/accounts-freeway.js';
 import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { getBuildingState } from '../utils/calc.js';
+import { fillBar } from '../components/fill-bar.js';
 
 function esc(value) {
   return String(value)
@@ -73,7 +74,27 @@ function badge(text, rgb, color) {
   return `<div style="position: absolute; top: 12px; right: 12px;"><span data-vehicle-status style="font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; padding: 3px 8px; border: 1px solid rgba(${rgb},0.2); color: ${color}; background: rgba(${rgb},0.1);">${text}</span></div>`;
 }
 
-export function renderVehicleCard(state, vehicle, index) {
+// A car's opt-outs: its maker's building and the two driving-data brokers.
+export function carOptOuts(state, mfr) {
+  const ids = [mfr.id, ...BROKERS];
+  return { done: ids.filter((id) => isSecured(getBuildingState(state, id))).length, total: ids.length };
+}
+
+// REMOVE asks first, on the card itself (no browser dialog).
+function removeControls(index, asking) {
+  if (!asking) {
+    return `<button type="button" class="btn-secondary" data-action="remove-vehicle-ask" data-index="${index}" style="min-height: 44px; padding: 0 16px;">REMOVE</button>`;
+  }
+  return `<div data-remove-confirm style="flex-basis: 100%; text-align: center;">
+      <div style="font-size: 14px; color: var(--offwhite); margin-bottom: 8px;">Take this car out of your garage?</div>
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary" data-action="remove-vehicle" data-index="${index}" style="min-height: 44px; padding: 0 16px; color: var(--magenta); border-color: rgba(255,45,155,0.6);">YES, REMOVE IT</button>
+        <button type="button" class="btn-secondary" data-action="remove-vehicle-keep" style="min-height: 44px; padding: 0 16px;">KEEP IT</button>
+      </div>
+    </div>`;
+}
+
+export function renderVehicleCard(state, vehicle, index, { confirmRemove = false } = {}) {
   const mfr = findManufacturer(vehicle.make);
   let picture;
   let status;
@@ -84,7 +105,13 @@ export function renderVehicleCard(state, vehicle, index) {
     const bState = getBuildingState(state, mfr.id);
     secured = isSecured(bState);
     picture = renderBuilding(mfr.id, bState, 64);
-    status = secured ? badge('SECURED', '198,255,0', '#C6FF00') : badge('IN PROGRESS', '255,159,0', '#FF9F00');
+    if (secured) status = badge('SECURED', '198,255,0', '#C6FF00');
+    else {
+      // How far along, as a bar that fills: "1 of 3 opt-outs".
+      const { done, total } = carOptOuts(state, mfr);
+      status = '';
+      note = `<div data-vehicle-progress style="margin-top: 10px;">${fillBar({ key: `car:${index}:${mfr.id}`, done, total, size: 'small', label: `${done} of ${total} opt-outs` })}<div style="font-size: 13px; color: var(--offwhite); margin-top: 6px;">${done} of ${total} opt-outs</div></div>`;
+    }
   } else {
     // No maker in the game: what's left to do is the two broker opt-outs, so the card says that.
     secured = BROKERS.every((id) => isSecured(getBuildingState(state, id)));
@@ -106,16 +133,16 @@ export function renderVehicleCard(state, vehicle, index) {
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(237,239,243,0.3); margin-top: 4px;">Added ${new Date(vehicle.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
       ${note}
     </div>
-    <div style="margin-top: 14px; display: flex; gap: 8px; justify-content: center;">
-      <a href="${missionsHref}" style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #00E5FF; padding: 6px 12px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08);">MISSIONS</a>
-      <span data-action="remove-vehicle" data-index="${index}" style="cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.3); padding: 6px 12px; border: 1px solid rgba(255,255,255,0.08);">REMOVE</span>
+    <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+      <a class="btn-secondary" href="${missionsHref}" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; text-decoration: none;">MISSIONS</a>
+      ${removeControls(index, confirmRemove)}
     </div>
   </div>`;
 }
 
 function renderAddCard() {
   return `
-  <div data-action="show-add-vehicle" style="background: rgba(26,31,43,0.3); border: 2px dashed rgba(0,229,255,0.2); padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; cursor: pointer;">
+  <div data-action="show-add-vehicle" data-add-vehicle-card role="button" tabindex="0" style="background: rgba(26,31,43,0.3); border: 2px dashed rgba(0,229,255,0.2); padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; cursor: pointer;">
     <div style="width: 64px; height: 64px; border: 2px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.04); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
         <line x1="16" y1="6" x2="16" y2="26" stroke="#00E5FF" stroke-width="2" stroke-linecap="round"></line>
@@ -127,6 +154,9 @@ function renderAddCard() {
   </div>`;
 }
 
+// Form labels: words to read, not decoration.
+const LABEL = 'font-size: 13px; font-weight: 600; color: var(--offwhite); display: block; margin-bottom: 8px;';
+
 export function renderAddForm() {
   const makes = allMakes();
   const options = makes.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
@@ -134,29 +164,29 @@ export function renderAddForm() {
   return `
   <div id="add-vehicle-form" style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.25); padding: 24px; margin-top: 16px; box-shadow: 0 0 30px rgba(0,229,255,0.05);">
     <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; margin-bottom: 20px;">ADD A VEHICLE</div>
-    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
       <div>
-        <label style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.5); display: block; margin-bottom: 8px;">MAKE</label>
-        <select id="vehicle-make" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #EDEFF3; appearance: none;">
+        <label for="vehicle-make" style="${LABEL}">Make</label>
+        <select id="vehicle-make" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #EDEFF3; appearance: none;">
           <option value="">Select make...</option>
           ${options}
           <option value="Other">Other</option>
         </select>
-        <input id="vehicle-make-other" type="text" hidden placeholder="Type the make" aria-label="The make, if it isn’t listed" style="width: 100%; margin-top: 8px; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #EDEFF3;">
+        <input id="vehicle-make-other" type="text" hidden placeholder="Type the make" aria-label="The make, if it isn’t listed" style="width: 100%; margin-top: 8px; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #EDEFF3;">
       </div>
       <div>
-        <label style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.5); display: block; margin-bottom: 8px;">MODEL</label>
-        <input id="vehicle-model" type="text" placeholder="e.g. Civic, Camry, Model 3" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #EDEFF3;">
+        <label for="vehicle-model" style="${LABEL}">Model</label>
+        <input id="vehicle-model" type="text" placeholder="e.g. Civic, Camry, Model 3" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #EDEFF3;">
       </div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
       <div>
-        <label style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.5); display: block; margin-bottom: 8px;">YEAR</label>
-        <input id="vehicle-year" type="number" min="1900" max="${new Date().getFullYear() + 1}" placeholder="2024" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #EDEFF3;">
+        <label for="vehicle-year" style="${LABEL}">Year</label>
+        <input id="vehicle-year" type="number" min="1900" max="${new Date().getFullYear() + 1}" placeholder="e.g. 2019" style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 12px 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #EDEFF3;">
       </div>
       <div>
-        <label style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.5); display: block; margin-bottom: 8px;">NICKNAME <span style="color: rgba(237,239,243,0.25);">(OPTIONAL)</span></label>
-        <input id="vehicle-nickname" type="text" placeholder='e.g. "Daily Driver"' style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #EDEFF3;">
+        <label for="vehicle-nickname" style="${LABEL}">Nickname <span style="color: var(--text-quiet); font-weight: 400;">(optional)</span></label>
+        <input id="vehicle-nickname" type="text" placeholder='e.g. "Daily Driver"' style="width: 100%; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 12px 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #EDEFF3;">
       </div>
     </div>
     <div id="threat-preview" hidden style="background: rgba(255,45,155,0.04); border: 1px solid rgba(255,45,155,0.15); padding: 14px 16px; margin-bottom: 20px;">
@@ -164,17 +194,18 @@ export function renderAddForm() {
       <div id="threat-text" style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;"></div>
     </div>
     <div data-vehicle-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;"></div>
-    <div style="display: flex; gap: 16px; align-items: center;">
-      <span data-action="add-vehicle" style="cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #090B10; background: #00E5FF; padding: 14px 28px; letter-spacing: 2px; box-shadow: 0 0 20px rgba(0,229,255,0.35), 0 4px 0 #009bb3;">ADD TO GARAGE</span>
-      <span data-action="cancel-add-vehicle" style="cursor: pointer; font-size: 13px; color: rgba(237,239,243,0.35);">CANCEL</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
+      <button type="button" class="btn-primary" data-action="add-vehicle" style="min-height: 44px;">ADD TO GARAGE</button>
+      <button type="button" class="btn-secondary" data-action="cancel-add-vehicle" style="min-height: 44px;">CANCEL</button>
     </div>
   </div>`;
 }
 
-export function renderGarage(state) {
+// confirmRemove: the index of the car whose REMOVE was tapped (app.js, in memory).
+export function renderGarage(state, { confirmRemove = null } = {}) {
   const vehicles = state.vehicles || [];
 
-  const cards = vehicles.map((v, i) => renderVehicleCard(state, v, i)).join('');
+  const cards = vehicles.map((v, i) => renderVehicleCard(state, v, i, { confirmRemove: confirmRemove === i })).join('');
 
   return `
   <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">

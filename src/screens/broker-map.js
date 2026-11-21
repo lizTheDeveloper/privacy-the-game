@@ -40,7 +40,7 @@ const STYLE = `<style>
 .map-stage{position:relative;width:100%;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab;height:calc(100svh - 150px);min-height:320px;border-radius:8px;overflow:hidden;background:#090B10}
 .map-stage>svg.constellation{width:100%;height:100%;border-radius:8px}
 .map-stage:focus{outline:none}.map-stage:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-.star-card{padding:14px 16px;background:rgba(17,21,31,0.96);border:1px solid rgba(0,229,255,0.3);border-radius:8px;font-size:13px;line-height:1.6;color:var(--offwhite);overflow-wrap:anywhere;outline:none}
+.star-card{padding:14px 16px;background:#11151F;border:1px solid rgba(0,229,255,0.3);border-radius:8px;font-size:13px;line-height:1.6;color:var(--offwhite);overflow-wrap:anywhere;outline:none}
 .star-card h2{margin:0;font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:1px;color:var(--offwhite)}
 .star-card p{margin:4px 0}
 .star-card .star-card-full,.star-card .star-card-parent{font-size:12px;color:rgba(237,239,243,0.6)}
@@ -56,6 +56,8 @@ const STYLE = `<style>
 .star-card-list li{margin:3px 0}
 .star-card-claim{display:block;font-size:12px;color:rgba(237,239,243,0.7)}
 .star-card-src{display:block;font-size:11px}
+/* Source links and the DROP line's link: whole tap targets, not 14px of text. */
+.star-card-src a,.star-card .star-card-list a,.sky-rung-card .star-card-list a,.map-drop a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
 .star-card-close{min-height:44px;margin-top:12px;padding:0 18px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);background:transparent;border:1px solid rgba(0,229,255,0.4);border-radius:6px;cursor:pointer}
 .star-card-close:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 @media (max-width:899.98px){.star-card{background:#11151F;position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:60svh;overflow-y:auto;overscroll-behavior:contain;padding-top:0;padding-bottom:calc(14px + env(safe-area-inset-bottom));border-radius:14px 14px 0 0;border-bottom:0;box-shadow:0 -8px 32px rgba(0,0,0,0.6)}

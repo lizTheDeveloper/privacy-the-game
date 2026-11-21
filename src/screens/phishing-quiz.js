@@ -1,5 +1,6 @@
 import { CURATED_MESSAGES, MESSAGE_BANK, TYPE_LABELS, DIFFICULTY_COLORS } from '../data/phishing.js';
 import { renderHud } from '../components/hud.js';
+import { fillBar } from '../components/fill-bar.js';
 
 function esc(value) {
   return String(value)
@@ -50,6 +51,47 @@ export function recordQuizVerdict(state, mode, msgId, verdict, tell = '') {
   }
   quiz.revealing = { mode, id: msgId };
   return true;
+}
+
+// KEEP PRACTICING on the curated set's result: quiz mode from here on.
+export function keepPracticing(state) {
+  getQuizState(state).practicing = true;
+}
+
+// After the curated set, its result shows until the player picks KEEP PRACTICING. A save that
+// already answered quiz-mode messages (from before the result existed) goes straight on.
+export function showsCuratedResult(quiz) {
+  const done = Object.keys(quiz.curated || {}).length >= CURATED_MESSAGES.length;
+  return done && !quiz.practicing && Object.keys(quiz.quizAnswers || {}).length === 0;
+}
+
+// Plain words for each kind of message, for "the kinds you missed".
+const TYPE_WORDS = { email: 'Emails', sms: 'Text messages', call: 'Phone calls', push: 'Pop-up alerts on your phone', chat: 'Chat messages' };
+
+// The curated set's result: the score as a bar, the kinds of message missed, and back to The
+// Perimeter (the next thing) or more practice.
+function curatedResult(quiz) {
+  const { correct, total } = getCuratedProgress(quiz);
+  const missed = CURATED_MESSAGES.filter((m) => quiz.curated[m.id] && !quiz.curated[m.id].correct);
+  const kinds = [...new Set(missed.map((m) => m.type))];
+  const missedHtml = kinds.length
+    ? `<div style="font-size: 15px; color: var(--offwhite); margin-top: 18px;">The kinds you missed:</div>
+      <ul data-quiz-missed style="margin: 8px 0 0; padding-left: 20px; font-size: 15px; line-height: 1.6; color: var(--offwhite);">${kinds.map((t) => {
+        const n = missed.filter((m) => m.type === t).length;
+        return `<li>${esc(TYPE_WORDS[t] || TYPE_LABELS[t] || t)}: ${n} missed</li>`;
+      }).join('')}</ul>`
+    : '<div style="font-size: 15px; color: var(--offwhite); margin-top: 18px;">You didn’t miss one.</div>';
+  return `
+      <section data-quiz-result style="max-width: 560px;">
+        <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: 3px; color: var(--offwhite);">YOUR RESULT</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--offwhite); margin: 12px 0 10px;">You got ${correct} of ${total} right.</div>
+        ${fillBar({ key: 'phishing:curated', done: correct, total, size: 'big', label: `${correct} of ${total} right` })}
+        ${missedHtml}
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px;">
+          <a class="btn-primary" href="#/district/perimeter" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none;">BACK TO THE PERIMETER</a>
+          <button type="button" class="btn-secondary" data-action="quiz-keep-practicing" style="min-height: 44px;">KEEP PRACTICING</button>
+        </div>
+      </section>`;
 }
 
 // NEXT: the revealed message goes away and the next one is drawn.
@@ -194,7 +236,7 @@ function renderReveal(msg, record) {
   }
 
   return `
-  <div data-quiz-reveal="${msg.id}" role="status" style="margin-top: 16px; padding: 16px; background: ${correctBg}; border: 1px solid ${correctBorder};">
+  <div data-quiz-reveal="${msg.id}" role="status" style="scroll-margin-top: 12px; margin-top: 16px; padding: 16px; background: ${correctBg}; border: 1px solid ${correctBorder};">
     <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: ${correctColor}; letter-spacing: 2px;">
       ${isCorrect ? '✓ CORRECT' : '✗ WRONG'} — THIS IS ${answerLabel}
     </div>
@@ -279,6 +321,8 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
       <div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${progress.answered + 1} OF ${progress.total}</div>
       ${renderMessageCard(msg)}
       ${verdictForm(msg, 'curated')}`;
+  } else if (showsCuratedResult(quiz)) {
+    content = curatedResult(quiz);
   } else {
     const current = currentBankMessage(quiz, random);
     if (!current) {
@@ -307,7 +351,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
       <div style="display: flex; gap: 12px; align-items: center;">
         <div class="hud-stat hud-stat--amber" style="flex-shrink: 0;">
           <span class="stat-value" style="color: var(--amber); text-shadow: 0 0 8px rgba(255,159,0,0.3);">${quiz.streak}</span>
-          <span class="stat-label" style="color: rgba(255,159,0,0.5);">STREAK</span>
+          <span class="stat-label" style="color: rgba(255,159,0,0.5);">IN A ROW</span>
         </div>
         ${quiz.bestStreak > 0 ? `<div class="hud-stat hud-stat--lime" style="flex-shrink: 0;">
           <span class="stat-value" style="color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.3);">${quiz.bestStreak}</span>
@@ -319,7 +363,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
     <div style="padding: 0 24px 12px;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <img src="assets/characters/scout_0.png" style="width: 40px; height: 40px;">
-        <div style="flex: 1; font-size: 13px; color: rgba(237,239,243,0.55); font-style: italic; line-height: 1.5;">"${curatedDone ? "You cleared the curated set. Quiz mode pulls from a bigger bank — no tells this time. Trust your instincts." : esc(scoutIntro)}"</div>
+        <div data-quiz-scout style="flex: 1; font-size: 14px; color: var(--offwhite); line-height: 1.5;">"${curatedDone ? "You cleared the curated set. Quiz mode pulls from a bigger bank — no tells this time. Trust your instincts." : esc(scoutIntro)}"</div>
       </div>
       ${!curatedDone ? `<div style="margin-bottom: 8px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
         <div style="width: ${Math.round((progress.answered / progress.total) * 100)}%; height: 100%; background: var(--cyan); transition: width 300ms;"></div>

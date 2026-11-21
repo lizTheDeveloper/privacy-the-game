@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-// CHAPTER 13: THE FIELD  (opt-in)
+// CHAPTER 14: THE FIELD  (opt-in)
 // Field Opsec: procedures for people whose work makes them a target.
 // Source: The Multiverse School's Field Opsec playbooks. Every mission carries
 // `playbooks` (which ones it comes from); nothing here is in none of them.

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-// CHAPTER 12: THE TRAIL
+// CHAPTER 13: THE TRAIL
 // Passive data you leave behind just by existing.
 // Photos, loyalty cards, payment records, browser fingerprints.
 // ══════════════════════════════════════════════════════

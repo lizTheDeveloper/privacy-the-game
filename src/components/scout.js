@@ -79,7 +79,7 @@ export function scoutSprite(feeling, { size = 64, style = '', attrs = '' } = {})
 
 export function renderScout(message, options = {}) {
   const action = options.actionText && options.actionHref
-    ? `<a class="btn-primary scout-action" href="${options.actionHref}">${options.actionText}</a>`
+    ? `<a class="${options.actionClass || 'btn-primary'} scout-action" href="${options.actionHref}">${options.actionText}</a>`
     : '';
   const sprite = isFeeling(options.feeling)
     ? scoutSprite(options.feeling, { size: 64, style: 'filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));' })
