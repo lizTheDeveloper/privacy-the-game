@@ -5,6 +5,10 @@
 import { renderHud } from '../components/hud.js';
 import { buildGovGraph } from '../utils/gov-graph.js';
 import { authorityNames, agencyName } from '../data/leaks/index.js';
+import { readLevel } from '../utils/reading.js';
+import { GOV_MISSIONS, GOV_BROKER_MISSION } from '../data/leaks/actions.js';
+import { whatYouCanDo, missionById } from '../components/what-you-can-do.js';
+import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const arr = (v) => (Array.isArray(v) ? v : v ? [v] : []);
@@ -57,6 +61,21 @@ export const GOV_CSS = `<style>
 @keyframes gov-unredact{0%,25%{transform:scaleX(1)}100%{transform:scaleX(0)}}}
 .gov-file .close{min-height:44px;margin-top:10px;padding:0 16px;font-family:inherit;font-size:13px;font-weight:700;color:#1d1d1b;background:transparent;border:2px solid #1d1d1b;cursor:pointer}
 @media (max-width:520px){.gov-file{padding:18px 14px}.gov-file dl{grid-template-columns:1fr}.gov-file .stamp{position:static;display:inline-block;margin:0 0 8px;transform:rotate(-3deg)}}
+.gov-file .gov-file-x{display:none}
+.gov-file .gov-file-go{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;box-sizing:border-box;margin:12px 0 4px;padding:10px 14px;color:#1d1d1b;background:rgba(255,255,255,0.35);border:2px solid #0b3a8a;text-decoration:none}
+.gov-file .gov-file-go b{color:#0b3a8a}
+.gov-file .gov-file-go span{font-size:13px}
+.gov-file .gov-file-go.is-done{border-color:#2d6a12}.gov-file .gov-file-go.is-done b{color:#2d6a12}
+.gov-sheet-shade{display:none}
+/* Phones: the file is a sheet over the map, so tapping an agency never sends the page 2,500px down. */
+@media (max-width:700px){
+.gov-sheet-shade{display:block;position:fixed;inset:0;z-index:49;background:rgba(0,0,0,0.55);border:0;padding:0;cursor:pointer}
+.gov-file{position:fixed;left:0;right:0;bottom:0;z-index:50;margin:0;max-height:85svh;overflow-y:auto;overscroll-behavior:contain;padding-top:0;padding-bottom:calc(18px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,0.7)}
+.gov-file .gov-file-x{position:sticky;top:0;z-index:1;display:flex;justify-content:flex-end;margin:0 -14px 4px;padding:0 4px;background:linear-gradient(180deg,#dcdad3 70%,rgba(220,218,211,0))}
+.gov-file .gov-file-x button{width:44px;height:44px;font-family:inherit;font-size:26px;line-height:1;color:#1d1d1b;background:transparent;border:0;cursor:pointer}
+.gov-file .stamp{position:static;display:inline-block;margin:0 0 8px;transform:rotate(-3deg)}
+}
+.gov-pick{margin:10px 0 0;font-size:15px;line-height:1.5;color:var(--offwhite)}
 .gov-section{margin-top:34px}
 .gov-section h2{margin:0 0 4px;font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:1px;color:${PALE}}
 .gov-section .sub{margin:0 0 12px;font-size:14px;color:rgba(237,239,243,0.6)}
@@ -114,14 +133,29 @@ const fmt = (v) => (v >= 1e9 ? `${n(v / 1e9)} billion` : v >= 1e6 ? `${n(v / 1e6
 
 // fs: label font size in map units (bigger on the phone's copy, which is drawn smaller).
 // The phone's copy: the same system as a vertical flow, boxes two to a row, tier by tier.
-function tierSvg(graph, selected) {
+// Simple (focus is { ids } or null): where data leaves you and the pipes first; the agencies (and who
+// checks) only once an origin or pipe is picked, just the ones it reaches, one to a row with full names.
+function reachOf(graph, id) {
+  const pipes = graph.pipes.some((p) => p.id === id) ? [id] : graph.pipes.filter((p) => p.origins.includes(id)).map((p) => p.id);
+  const out = new Set();
+  for (const e of graph.edges) if (pipes.includes(e.from) && e.kind === 'takes') out.add(e.to);
+  for (const e of graph.edges) if (pipes.includes(e.to) && e.kind === 'checks') out.add(e.from);
+  return out;
+}
+
+function tierSvg(graph, selected, { simple = false, focus = null } = {}) {
   const W = 420;
   const cols = 2;
+  const reach = simple && focus ? reachOf(graph, focus) : null;
+  const full = (a) => (simple && a.short && a.short !== a.name ? a.name : null);
+  const agencyTiers = [
+    ...graph.rows.filter((r) => r.agencies.length).map((r) => ({ label: r.label.toUpperCase(), one: simple, nodes: r.agencies.map((a) => ({ id: a.id, label: a.short || a.name, kind: a.kind, note: full(a) })) })),
+    { label: 'WHO CHECKS', one: simple, nodes: graph.oversight.map((a) => ({ id: a.id, label: a.short || a.name, kind: 'oversight', note: full(a) })) },
+  ].map((t) => (reach ? { ...t, nodes: t.nodes.filter((nd) => reach.has(nd.id)) } : t)).filter((t) => t.nodes.length);
   const tiers = [
     { label: 'WHERE IT LEAVES YOU', nodes: graph.origins.map((o) => ({ ...o, kind: 'origin' })) },
     { label: 'THE PIPES', nodes: graph.pipes.map((p) => ({ ...p, kind: 'pipe', note: `${(graph.entriesByPipe[p.id] ?? []).length} on file` })) },
-    ...graph.rows.filter((r) => r.agencies.length).map((r) => ({ label: r.label.toUpperCase(), nodes: r.agencies.map((a) => ({ id: a.id, label: a.short || a.name, kind: a.kind })) })),
-    { label: 'WHO CHECKS', nodes: graph.oversight.map((a) => ({ id: a.id, label: a.short || a.name, kind: 'oversight' })) },
+    ...(simple && !focus ? [] : agencyTiers),
   ];
   const bw = (W - 44) / cols;
   const bh = 46;
@@ -131,12 +165,14 @@ function tierSvg(graph, selected) {
   for (const t of tiers) {
     heads.push(`<text x="${W / 2}" y="${y}" font-size="11" letter-spacing="3" text-anchor="middle" fill="${CYAN}" fill-opacity="0.55">${esc(t.label)}</text>`);
     y += 12;
+    const c = t.one ? 1 : cols;
+    const w = t.one ? W - 32 : bw;
     t.nodes.forEach((node, i) => {
-      const inRow = Math.min(cols, t.nodes.length - Math.floor(i / cols) * cols);
-      const x0 = (W - inRow * bw - (inRow - 1) * 12) / 2;
-      pos.set(node.id, { ...node, x: x0 + (i % cols) * (bw + 12), y: y + Math.floor(i / cols) * (bh + 10), w: bw, h: bh });
+      const inRow = Math.min(c, t.nodes.length - Math.floor(i / c) * c);
+      const x0 = (W - inRow * w - (inRow - 1) * 12) / 2;
+      pos.set(node.id, { ...node, x: x0 + (i % c) * (w + 12), y: y + Math.floor(i / c) * (bh + 10), w, h: bh, wide: t.one });
     });
-    y += Math.ceil(t.nodes.length / cols) * (bh + 10) + 30;
+    y += Math.ceil(t.nodes.length / c) * (bh + 10) + 30;
   }
   const core = `<circle cx="${W / 2}" cy="40" r="26" fill="rgba(0,229,255,0.08)" stroke="${CYAN}" stroke-width="1.5"/><text x="${W / 2}" y="45" font-size="14" font-weight="700" text-anchor="middle" fill="${PALE}" letter-spacing="3">YOU</text>`;
   const edges = [...graph.origins.map((o) => ({ from: 'core', to: o.id, kind: 'feeds', refs: [] })), ...graph.edges];
@@ -173,7 +209,7 @@ function tierSvg(graph, selected) {
       + `<rect class="gov-node-box" x="${n(p.x)}" y="${n(p.y)}" width="${n(p.w)}" height="${p.h}" rx="2" fill="rgba(9,11,16,0.94)" stroke="${colour}" stroke-opacity="${on ? 1 : 0.55}" stroke-width="${on ? 2.2 : 1.2}"/>`
       + `<rect x="${n(p.x)}" y="${n(p.y)}" width="3" height="${p.h}" fill="${colour}"/>`
       + `<text x="${n(p.x + 11)}" y="${n(p.y + (p.note ? 20 : 28))}" font-size="${p.label.length > 17 ? 12 : 13.5}" font-weight="700" fill="${on ? LIME : colour}">${esc(p.label)}</text>`
-      + (p.note ? `<text x="${n(p.x + 11)}" y="${n(p.y + 37)}" font-size="10" fill="rgba(237,239,243,0.55)">${esc(String(p.note).length > 24 ? `${String(p.note).slice(0, 23)}…` : p.note)}</text>` : '')
+      + (p.note ? `<text x="${n(p.x + 11)}" y="${n(p.y + 37)}" font-size="${p.wide ? 12 : 10}" fill="${p.wide ? PALE : 'rgba(237,239,243,0.55)'}">${esc(!p.wide && String(p.note).length > 24 ? `${String(p.note).slice(0, 23)}…` : p.note)}</text>` : '')
       + '</g>';
   }).join('');
   return `<svg viewBox="0 0 ${W} ${n(y)}" role="group" aria-label="Map of who gets your data, top to bottom: where it leaves you, the pipes, the agencies, and who checks" xmlns="http://www.w3.org/2000/svg">${core}${heads.join('')}${paths.join('')}${packets.join('')}${boxes}</svg>`;
@@ -247,6 +283,8 @@ function mapSvg(graph, selected, fs) {
     + `<circle r="700" fill="url(#gov-glow)"/>${grid}${paths.join('')}${packets.join('')}${core}${nodes}</svg>`;
 }
 
+const fileName = (id, data, graph) => graph.origins.find((o) => o.id === id)?.label ?? graph.pipes.find((p) => p.id === id)?.label ?? data.agencies.find((a) => a.id === id)?.name ?? '';
+
 const redact = (html) => `<span class="redact">${html}</span>`;
 
 function sourcesHtml(list) {
@@ -256,16 +294,25 @@ function sourcesHtml(list) {
 
 const badge = (e) => `<a class="badge-link" href="#/leak/${esc(e.id)}">◈ ${esc(e.badge)}</a>`;
 
-function fileFor(id, data, graph) {
+// The location-broker opt-out, on the two files about bought data (Your apps, Buying your data).
+export function brokerOptOut(state) {
+  const m = missionById(GOV_BROKER_MISSION);
+  if (!m || !isMissionInPlay(state, m)) return '';
+  const done = isMissionDoneIn(state, m);
+  return `<a class="gov-file-go${done ? ' is-done' : ''}" data-gov-broker href="#/mission/${esc(m.id)}/briefing"><b>${done ? '✓ ' : ''}Opt out of location brokers ›</b><span>${done ? 'Done. ' : ''}Opens the “${esc(m.title)}” mission${done ? ' again' : ''}.</span></a>`;
+}
+
+function fileFor(id, data, graph, state) {
   const origin = graph.origins.find((o) => o.id === id);
   const pipe = graph.pipes.find((p) => p.id === id);
   const agency = data.agencies.find((a) => a.id === id);
   const close = '<button type="button" class="close" data-action="gov-close">CLOSE THE FILE</button>';
+  const buying = id === 'o-apps' || id === 'p-buying' ? brokerOptOut(state) : '';
   if (origin) {
     const feeds = graph.pipes.filter((p) => p.origins.includes(id));
     return `<h2>${esc(origin.label)}</h2><p class="kind">WHERE IT COMES FROM</p><p>${redact(esc(origin.note))}</p>`
       + `<div class="row"><b>TAKEN BY</b><p>${feeds.map((p) => `${esc(p.label)}: ${esc(p.note)}`).join('<br>')}</p></div>`
-      + '<p><a href="#/prism">See which of your accounts are labelled →</a></p>' + close;
+      + buying + '<p><a href="#/prism">See which of your accounts are labelled →</a></p>' + close;
   }
   if (pipe) {
     const entries = graph.entriesByPipe[id] ?? [];
@@ -273,7 +320,7 @@ function fileFor(id, data, graph) {
       + (e.flow?.authority ? `<br>Under: ${redact(esc(e.flow.authority))}` : '')
       + (e.flow?.checkedBy ? `<br>Checked by: ${redact(esc(e.flow.checkedBy))}` : '')
       + (e.scale ? `<br>Scale: ${esc(fmt(e.scale.value))} ${esc(e.scale.unit)} ${esc(e.scale.what ?? '')}` : '') + '</div>').join('');
-    return `<h2>${esc(pipe.label)}</h2><p class="kind">A PIPE · ${entries.length} ON FILE</p><p>${esc(pipe.note)}</p>${rows}` + close;
+    return `<h2>${esc(pipe.label)}</h2><p class="kind">A PIPE · ${entries.length} ON FILE</p><p>${esc(pipe.note)}</p>${buying}${rows}` + close;
   }
   if (agency) {
     const inbound = graph.edges.filter((e) => e.to === id && e.kind === 'takes');
@@ -317,10 +364,19 @@ function ruler(items) {
   return `<div class="gov-ruler">${axis}<ol>${head}</ol>${rest ? `<details><summary>Show all ${pts.length}</summary><ol>${rest}</ol></details>` : ''}</div>`;
 }
 
-export function renderGovernment(state, data, { selected = null } = {}) {
+// focus: the origin or pipe Simple last opened (app.js memory), so its agencies stay on the map
+// after its file is closed.
+export function renderGovernment(state, data, { selected = null, focus = null } = {}) {
   const graph = buildGovGraph(data);
   const known = new Set([...graph.origins, ...graph.pipes, ...data.agencies].map((x) => x.id));
   const sel = known.has(selected) ? selected : null;
+  const simple = readLevel(state) === 'simplest';
+  const isFlow = (id) => graph.origins.some((o) => o.id === id) || graph.pipes.some((p) => p.id === id);
+  const picked = isFlow(sel) ? sel : isFlow(focus) ? focus : null;
+  // Simple's agencies: the ones the picked origin or pipe reaches (an agency opened from the list shows too).
+  const pick = simple ? (picked
+    ? '<p class="gov-pick" data-gov-pick>The agencies below are the ones it reaches. Tap one to open its file.</p>'
+    : '<p class="gov-pick" data-gov-pick>Start with where your data leaves you, or a pipe. Tap one and the agencies it reaches appear.</p>') : '';
   const scaled = [
     ...data.entries.map((e) => ({ name: e.badge, scale: e.scale, href: `#/leak/${e.id}` })),
     ...data.channels.map((c) => ({ name: `${c.from === 'COMPANIES' ? 'companies' : c.from === 'DATA_BROKERS' ? 'brokers' : agencyName(c.from)} → ${agencyName(c.to)}`, scale: c.scale })),
@@ -334,9 +390,12 @@ export function renderGovernment(state, data, { selected = null } = {}) {
     + '<div class="gov-banner"><s>TOP SECRET//SI//ORCON//NOFORN</s><b>PUBLIC RECORD</b></div>'
     + '<h1>Who gets your data</h1>'
     + '<p class="gov-lede">Not a van, and not a they. Named agencies, named pipes, a law for each, and a paper trail. Tap anything on the map to open its file.</p>'
-    + `<div class="gov-map"><div class="wide">${mapSvg(graph, sel, 17)}</div><div class="narrow">${tierSvg(graph, sel)}</div></div>`
+    + pick
+    + `<div class="gov-map"><div class="wide">${mapSvg(graph, sel, 17)}</div><div class="narrow">${tierSvg(graph, sel, { simple, focus: picked })}</div></div>`
     + '<ul class="gov-legend"><li><i style="background:#EDEFF3"></i>Rings out from you: where it leaves you, the pipes, the agencies, and below them who checks</li><li><i style="background:#FF2D9B"></i>What an agency takes</li><li><i style="background:#FF9F00"></i>What agencies pass to each other</li><li><i class="dash"></i>Who checks</li></ul>'
-    + (sel ? `<section class="gov-file" aria-live="polite" tabindex="-1">${fileFor(sel, data, graph)}</section>` : '')
+    + (sel ? '<button type="button" class="gov-sheet-shade" data-action="gov-close" aria-label="Close the file" tabindex="-1"></button>'
+      + `<section class="gov-file" role="dialog" aria-label="${esc(fileName(sel, data, graph))}" tabindex="-1"><div class="gov-file-x"><button type="button" data-action="gov-close" aria-label="Close the file">×</button></div>${fileFor(sel, data, graph, state)}</section>` : '')
+    + whatYouCanDo(state, GOV_MISSIONS, { lede: 'Agencies buy location data from brokers and ask for doorbell video. These missions cut off some of it.' })
     + `<div class="gov-section"><h2>The scale</h2><p class="sub">Every number on this page, on one ruler. Each step is ten times the last.</p>${ruler(scaled)}</div>`
     + (myths ? `<div class="gov-section"><h2>The movie, and the paperwork</h2><p class="sub">The myth does the agencies' work for them. The records are smaller, duller, and fixable.</p><div class="gov-myths">${myths}</div></div>` : '')
     + `<div class="gov-section"><h2>Everything on the map</h2><div class="gov-list">${everything}</div></div>`

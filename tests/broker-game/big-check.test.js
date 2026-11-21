@@ -12,6 +12,7 @@ import { restoreEvents } from '../../src/utils/restore.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
 import { DISTRICTS } from '../../src/data/districts.js';
 import { MISSIONS } from '../../src/data/missions.js';
+import { setReadLevel } from '../../src/utils/reading.js';
 import { createInitialState } from '../../src/state.js';
 
 beforeEach(() => {
@@ -72,7 +73,7 @@ describe('the Big Check', () => {
     const html = render(fresh());
     expect(html).not.toContain('data-big-check="whitepages"');
     expect(html).toContain(`href="#/mission/${WF}/briefing"`);
-    expect(html).toContain('In a mission:');
+    expect(html).toContain('Covered by: <a');
     expect(html).toContain('data-big-check="tail-1"');
     expect(html).toContain('I filed with them');
   });
@@ -96,7 +97,7 @@ describe('the Big Check', () => {
     expect(groups.flatMap((g) => g.rows).find((r) => r.id === 'tail-1').ticked).toBe(true);
     const html = render(s);
     expect(html).toMatch(/data-big-check="tail-1"[^>]*checked/);
-    expect(summaries(html)).toContain('Not yet classified · 1/2');
+    expect(summaries(html)).toContain('Not yet classified · 1 of 2 ticked');
   });
 
   it('groups come in the fixed order with their labels, rows by name', () => {
@@ -165,15 +166,18 @@ describe('the Big Check', () => {
     const s = { ...fresh(), missions: { [WF]: { status: 'completed', completedAt: '2026-10-01T12:00:00.000Z' } } };
     const html = render(s);
     expect(html).toContain(`href="#/mission/${WF}/recheck"`);
-    expect(html).toMatch(new RegExp(`href="#/mission/${WF}/recheck"[^>]*>RE-CHECK<`));
+    expect(html).toMatch(new RegExp(`href="#/mission/${WF}/recheck"[^>]*>RE-CHECK ›<`));
     expect(html).not.toContain(`href="#/mission/${WF}/briefing"`);
   });
 
-  it('every group starts closed', () => {
+  it('People search opens first, headed "Start here"; every other group starts closed', () => {
     const html = render(fresh(), map);
-    expect(html).toContain('<details');
-    expect(html).not.toMatch(/<details[^>]*\sopen/);
-    expect(summaries(html).find((t) => t.startsWith('Not yet classified'))).toMatch(/^Not yet classified · 0\/\d+$/);
+    const opened = [...html.matchAll(/<details[^>]*\sopen[^>]*>/g)];
+    expect(opened).toHaveLength(1);
+    expect(opened[0][0]).toContain('data-start-here');
+    expect(html.indexOf('<details')).toBe(html.indexOf('<details class="big-check-start"'));
+    expect(summaries(html)[0]).toMatch(/^Start here: these sell your addressPEOPLE SEARCH/);
+    expect(summaries(html).find((t) => t.startsWith('Not yet classified'))).toMatch(/^Not yet classified · 0 of \d+ ticked$/);
   });
 
   it('the screen keeps to a phone: no wide fixed widths, no nowrap, 44px targets', () => {
@@ -210,7 +214,7 @@ describe('the Big Check', () => {
   });
 
   it('the map links to the Big Check, and so do its no-mission rows', () => {
-    const html = renderBrokerMap(fresh(), { status: 'ready', data: { map, layout }, today: T });
+    const html = renderBrokerMap(setReadLevel(fresh(), 'full'), { status: 'ready', data: { map, layout }, today: T });
     expect(html).toMatch(/<a [^>]*href="#\/reclamation\/big-check"[^>]*>THE BIG CHECK →<\/a>/);
     const left = html.slice(html.indexOf('map-whats-left'));
     expect(left).toMatch(/href="#\/reclamation\/big-check"[^>]*>[^<]*· reach/);
@@ -231,14 +235,16 @@ describe('the Big Check', () => {
     expect(focus).toBeGreaterThan(restore);
   });
 
-  it('"In a mission:" always puts its link on a line of its own', () => {
+  it('a mission row reads "Covered by: <mission> ›" on one line, 44px tall', () => {
     const done = { ...fresh(), missions: { [WF]: { status: 'completed', completedAt: '2026-10-01T12:00:00.000Z' } } };
     for (const s of [fresh(), done]) {
-      const lines = [...render(s).matchAll(/<div class="big-check-mission">In a mission:<div class="big-check-mission-go">([\s\S]*?)<\/div><\/div>/g)];
+      const lines = [...render(s).matchAll(/<div class="big-check-mission">Covered by: ([^<]*)<a href="#\/mission\/[^"]+\/(briefing|recheck)">([^<]*)<\/a><\/div>/g)];
       expect(lines.length).toBeGreaterThan(0);
-      for (const [, go] of lines) expect(go).toMatch(/<a href="#\/mission\/[^"]+\/(briefing|recheck)">/);
+      for (const [, , , text] of lines) expect(text).toMatch(/›$/);
     }
-    expect(render(fresh())).toMatch(/\.big-check-mission-go\{[^}]*min-height:44px/);
+    // The line is 44px tall and its link, inline so it runs on after "Covered by:", is padded to it.
+    expect(render(fresh())).toMatch(/\.big-check-mission\{[^}]*min-height:44px/);
+    expect(render(fresh())).toMatch(/\.big-check-mission a\{display:inline;padding:14px 0/);
   });
 
   it('the tick wiring stays in memory and never tracks', () => {
@@ -275,13 +281,13 @@ describe('final review fixes', () => {
 
   it('M1: a group counts only the rows it can tick', () => {
     const html = render(setBigCheck(fresh(), 'tail-1', true, T));
-    expect(summaries(html)).toContain('Not yet classified · 1/2');
+    expect(summaries(html)).toContain('Not yet classified · 1 of 2 ticked');
     // People search is all mission rows in the mini map: nothing to tick, so no count.
-    expect(summaries(html)).toContain('People search');
-    expect(summaries(html).find((t) => t.startsWith('Risk and identity'))).toBe('Risk and identity · 0/1');
+    expect(summaries(html)).toContain('Start here: these sell your addressPEOPLE SEARCH');
+    expect(summaries(html).find((t) => t.startsWith('Risk and identity'))).toBe('Risk and identity · 0 of 1 ticked');
     // A stale tick on a mission row doesn't count either.
     const stale = render(setBigCheck(fresh(), 'whitepages', true, T));
-    expect(summaries(stale)).toContain('People search');
+    expect(summaries(stale)).toContain('Start here: these sell your addressPEOPLE SEARCH');
     expect(stale).toMatch(/<li class="big-check-row big-check-row-mission">/);
   });
 

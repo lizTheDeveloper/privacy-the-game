@@ -111,6 +111,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
       'The agencies also pull the profiles that mobile ad companies build, which can include age, gender, income, ethnicity, sexual orientation and location; a GCHQ report shows how to pluck them from Angry Birds. ' +
       'A 2008 document says "anyone using Google Maps on a smartphone is working in support of a GCHQ system."',
     accounts: ['facebook', 'twitter', 'linkedin', 'google', 'ad_trackers'],
+    missions: ['device_security-reclaim-app-permissions', 'photo_metadata-fortify-strip', 'ad_trackers-fortify-bulk'],
     flow: {
       data: 'Address books, buddy lists, phone logs, photo geotags, location, ad profiles (age, gender, income, sexual orientation)',
       from: ['Facebook', 'Twitter', 'LinkedIn', 'Flickr', 'Google Maps', 'Angry Birds', 'mobile ad companies', 'cable taps and mobile networks'],
@@ -169,6 +170,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
       'In QUANTUMHAND the NSA disguises itself as a fake Facebook server to infect a computer when its owner logs in. ' +
       'At Menwith Hill in England, run with GCHQ, the NSA tested QUANTUM attacks against users of Yahoo and Hotmail.',
     accounts: ['facebook', 'yahoo', 'outlook'],
+    missions: ['device_security-fortify-computer'],
     flow: {
       data: 'Files from hard drives, audio recorded through the computer',
       from: ['Facebook (impersonated)', 'Yahoo', 'Hotmail', 'internet cables'],
@@ -197,6 +199,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
       'Its selectors include the unique cookies that Google, Facebook, Hotmail, Yahoo and Twitter send to a user\'s computer, and Google advertising cookies that track browsing habits. ' +
       'The NSA\'s Special Source Operations shared "logins, cookies, and GooglePREFID" with its hacking division and with GCHQ.',
     accounts: ['google', 'facebook', 'outlook', 'yahoo', 'twitter', 'ad_trackers'],
+    missions: ['browser_fingerprint-fortify-harden', 'ad_trackers-fortify-bulk'],
     flow: {
       data: 'Login cookies, Google PREF IDs, advertising cookies',
       from: ['Google', 'Facebook', 'Hotmail', 'Yahoo', 'Twitter', 'advertising cookies', 'internet cables'],
@@ -485,6 +488,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
       'The NSA set up task forces to break into Apple\'s iPhone and iOS and Google\'s Android, and GCHQ assigned a team to crack the BlackBerry. ' +
       'The NSA has small programs that spy on 38 different features of iOS, and it reads contacts, location, photos and the Facebook and Yahoo Messenger apps on a phone.',
     accounts: ['apple_id', 'google', 'facebook', 'yahoo'],
+    missions: ['device_security-fortify-phone'],
     flow: {
       data: 'Contacts, location, photos, app data from Facebook and Yahoo Messenger',
       from: ['iPhone (iOS)', 'Android', 'BlackBerry'],
@@ -515,6 +519,7 @@ export const LEAKS_SNOWDEN = Object.freeze([
       'DROPOUTJEEP is an implant for the Apple iPhone that pulls files, text messages and the contact list off the phone. ' +
       'Many of the tools install "remotely", over the internet, and some survive a wiped hard drive and a fresh operating system.',
     accounts: ['apple_id', 'smart_network', 'device_security'],
+    missions: ['smart_network-recon-router', 'device_security-fortify-phone', 'device_security-fortify-computer'],
     flow: {
       data: 'Full control of the device: files, texts, contacts, network traffic',
       from: ['Apple iPhone', 'Cisco, Juniper and Huawei routers and firewalls', 'Dell computers', 'hard drives'],

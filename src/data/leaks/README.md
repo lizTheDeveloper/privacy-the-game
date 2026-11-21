@@ -18,6 +18,7 @@ account, and every badge has its own page of sources at `#/leak/<id>`.
   year: 2013,                  // the year it became public
   summary: '…',                // 2–4 plain sentences, see Copy
   accounts: ['gmail', 'yahoo'],// ids from src/data/accounts.js (accounts.js, accounts-*.js)
+  missions: ['…'],             // optional: mission ids for "What you can do", best first (see below)
   sources: [{ label: 'The Washington Post (2013): …', url: 'https://…' }], // ≥ 2, best first
   // Who gets what, how (Liz: "make the government not a nebulous they"). Every value sourced.
   flow: {
@@ -47,6 +48,14 @@ Agency names in `to`/`sharedWith` use these ids so the diagram can draw them: NS
 Only label an account when a source names that company, service or device (or, for a device type
 such as a smart TV, router or car, the device type). A company that owns a named service today
 counts (Microsoft owns LinkedIn and GitHub; Meta owns Instagram and WhatsApp).
+
+## What you can do
+
+Every badge page ends with up to three missions (components/what-you-can-do.js). They come from the
+entry's `missions` first, then from each account's one data mission (`ACCOUNT_MISSIONS` in
+`actions.js`). Add `missions` only for a mission whose subject is the entry's company, its data or
+its broker (the GM Smart Driver page links the LexisNexis and Verisk opt-outs because GM sold to
+them). Never a mission that would claim to undo the program. A test checks every id exists.
 
 ## URLs
 

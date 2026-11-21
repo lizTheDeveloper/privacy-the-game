@@ -88,7 +88,9 @@ describe('open on desktop, by script', () => {
   it('every open-on-desktop details carries data-open-desktop', () => {
     const map = JSON.parse(readFileSync('src/data/broker-map.json', 'utf8'));
     const layout = JSON.parse(readFileSync('src/data/broker-layout.json', 'utf8'));
-    expect(renderBrokerMap(createInitialState(), { status: 'ready', data: { map, layout } })).toMatch(/<details class="map-key" data-open-desktop>/);
+    expect(renderBrokerMap(setReadLevel(createInitialState(), 'full'), { status: 'ready', data: { map, layout } })).toMatch(/<details class="map-key" data-open-desktop>/);
+    // Simple shows four rows of the key; the rest of it opens on desktop too.
+    expect(renderBrokerMap(createInitialState(), { status: 'ready', data: { map, layout } })).toMatch(/<details class="map-key-more" data-open-desktop>/);
     expect(renderDebrief(createInitialState(), 'gmail-recon-login')).toMatch(/<details class="scout-remind" data-open-desktop>/);
     // "More intel" is the Full intel level's fold (Short and Simplest put the intel under "Why it matters").
     const withMore = MISSIONS.map((m) => renderBriefing(setReadLevel(createInitialState(), 'full'), m.id)).find((h) => h.includes('brief-more'));

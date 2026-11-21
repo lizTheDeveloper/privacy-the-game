@@ -78,6 +78,10 @@ const archivedLinks = (sources) => (Array.isArray(sources) ? sources : [])
   .filter((s) => isObj(s) && typeof s.archived === 'string' && s.archived.startsWith('https://web.archive.org/'))
   .map((s) => ext(s.archived, 'archived ↗'));
 
+// What an opt-out link opens, said before the tap (Liz: tell people what will happen).
+const possessive = (name) => (/s$/i.test(name) ? `${name}’` : `${name}’s`);
+export const opensForm = (b) => `Opens ${esc(possessive(shortName(b?.name ?? b?.id ?? '')))} form in a new tab; come back and tick it.`;
+
 export function optOutBlock(b) {
   const o = b.optOut;
   if (!isObj(o)) return `<p>We don't know an opt-out route for this one yet.</p>`;
@@ -94,9 +98,9 @@ export function optOutBlock(b) {
       const bare = isBareHomepage(u);
       const insecure = u.protocol === 'http:' ? `<p class="star-card-note">Their page isn't on a secure (https) link.</p>` : '';
       if (bare) {
-        return `<p class="star-card-go">${ext(o.url, THEIR_SITE_TEXT)}</p><p class="star-card-note">We haven't found a direct opt-out page. Look for "Do Not Sell" or "Privacy" on their site.</p>${insecure}${email}`;
+        return `<p class="star-card-go">${ext(o.url, THEIR_SITE_TEXT)}</p><p class="star-card-opens">Opens ${esc(possessive(shortName(b.name ?? b.id)))} site in a new tab.</p><p class="star-card-note">We haven't found a direct opt-out page. Look for "Do Not Sell" or "Privacy" on their site.</p>${insecure}${email}`;
       }
-      return `<p class="star-card-go">${ext(o.url, OPT_OUT_TEXT)}</p>${insecure}${email}`;
+      return `<p class="star-card-go">${ext(o.url, OPT_OUT_TEXT)}</p><p class="star-card-opens">${opensForm(b)}</p>${insecure}${email}`;
     }
     if (email) return `<p>Opt out by email: ${esc(o.email)}</p>`;
     return `<p>We don't know an opt-out route for this one yet.</p>`;

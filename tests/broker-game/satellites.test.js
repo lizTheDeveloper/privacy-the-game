@@ -7,6 +7,7 @@ import { brokerLighting } from '../../src/utils/broker-lighting.js';
 import { setHome } from '../../src/utils/broker-state.js';
 import { satelliteView, VIEW_BOUNDS } from '../../src/utils/broker-view.js';
 import { renderBrokerMap } from '../../src/screens/broker-map.js';
+import { setReadLevel } from '../../src/utils/reading.js';
 import { createInitialState } from '../../src/state.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
 
@@ -100,7 +101,7 @@ describe('government satellites', () => {
   });
 
   it('the screen shows a satellite card in the star card slot, and its clicks stay private', () => {
-    const h = renderBrokerMap(createInitialState(), { status: 'ready', data: { map, layout }, today: T, selectedSat: 1 });
+    const h = renderBrokerMap(setReadLevel(createInitialState(), 'full'), { status: 'ready', data: { map, layout }, today: T, selectedSat: 1 });
     expect(h).toContain('class="star-card satellite-card"');
     expect(h).not.toContain('<section class="sky-ladder');
     for (const m of ['section.star-card.satellite-card > button.satellite-broker', 'button.constellation-zoom'])

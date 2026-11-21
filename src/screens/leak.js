@@ -6,6 +6,8 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
 import { agencyName } from '../data/leaks/index.js';
 import { DISTRICTS } from '../data/districts.js';
+import { leakMissionIds } from '../data/leaks/actions.js';
+import { whatYouCanDo } from '../components/what-you-can-do.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const mine = (state, id) => Boolean(state?.accounts?.[id]?.enabled);
@@ -34,6 +36,9 @@ export const LEAK_CSS = `<style>
 .leak-saint .label{color:rgba(198,255,0,0.75)}
 @media (max-width:520px){.leak-flow{grid-template-columns:1fr}.leak-flow dt{padding-top:6px}}
 </style>`;
+
+// Said once above the buttons: what the missions have in common with the page, and no more.
+export const LEAK_WYCD_LEDE = 'These missions work on the same companies and data as this page.';
 
 const list = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
@@ -102,6 +107,8 @@ export function renderLeak(state, entry, { from = null } = {}) {
     + `<div class="leak-panel"><div class="label">WHAT IT IS</div><p style="margin: 0;">${esc(entry.summary)}</p></div>`
     + flowBlock(entry.flow)
     + accountsBlock(state, entry)
+    // What you can do: before the sources, with the page's one bright button.
+    + whatYouCanDo(state, leakMissionIds(entry), { lede: LEAK_WYCD_LEDE })
     + saint
     + `<div class="leak-panel"><div class="label">SOURCES · ${list(entry.sources).length}</div><div class="leak-sources">${sources}</div></div>`
     + '</div>';

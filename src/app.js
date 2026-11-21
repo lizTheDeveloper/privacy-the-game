@@ -73,7 +73,7 @@ import { setFinderAnswer, finderBack } from './data/password-finder.js';
 import { renderQuickQuest } from './screens/quick-quest.js';
 import { renderPhishingQuiz, recordQuizVerdict, nextQuizMessage, keepPracticing, showsCuratedResult } from './screens/phishing-quiz.js';
 import { renderGarage, renderAddForm, threatAssessment, vehicleFromForm } from './screens/garage.js';
-import { renderTimeline, renderSocialForm, renderEraQuestions } from './screens/timeline.js';
+import { renderTimeline, renderEraQuestions, getEras } from './screens/timeline.js';
 import { socialProfileFromForm } from './utils/social-timeline.js';
 import { CAR_MANUFACTURERS } from './data/accounts-freeway.js';
 import { initErrorTracking, captureError, captureStorageWriteError } from './utils/errors.js';
@@ -121,6 +121,9 @@ let saintsFrom = null;
 let leakFrom = null;
 // The garage car whose REMOVE is asking "are you sure?" (in memory; gone on leaving the garage).
 let garageAsk = null;
+// The Social Timeline's open form (Advanced), Simple's one-question-at-a-time steps and its chips.
+// In memory only; forgotten on leaving the screen.
+let timelineUi = {};
 // The broker map's view state (memory only, never in the URL).
 let selectedId = null;
 let view = null;
@@ -148,6 +151,9 @@ let ladderOpen = false;
 let selectedSat = null;
 // The government map's open file (a node id). Memory only, never the URL.
 let govSelected = null;
+// Simple's last-opened origin or pipe (its agencies stay drawn), and the node a file was opened from.
+let govFocus = null;
+let govReturn = null;
 // When the player last saw the city map before this visit (Scout waves after a while away).
 let cityArrival;
 // The welcome-back note about the streak, for the first city visit after the game opens.
@@ -225,7 +231,7 @@ const screens = {
   building: ({ id }) => renderBuildingInterior(state, id),
   saints: () => renderSaints(state, { from: saintsFrom }),
   prism: () => renderPrism(state),
-  government: () => renderGovernment(state, GOV_DATA, { selected: govSelected }),
+  government: () => renderGovernment(state, GOV_DATA, { selected: govSelected, focus: govFocus }),
   leak: ({ id }) => renderLeak(state, leakById(id), { from: leakFrom }),
   'broker-map': () => {
     if (brokerDataStatus() === 'idle') loadBrokerMapData();
@@ -263,7 +269,7 @@ const screens = {
   quickquest: () => renderQuickQuest(state),
   phishing: () => renderPhishingQuiz(state),
   garage: () => renderGarage(state, { confirmRemove: garageAsk }),
-  timeline: () => renderTimeline(state),
+  timeline: () => renderTimeline(state, timelineUi),
   together: () => renderCityTogether(state, { collective: collectiveView, whoami: whoamiView, notice: currentNotice() }),
   ghost: () => renderGhost(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed }),
   'ghost-done': () => renderGhostDone(state, { whoami: whoamiView, collective: collectiveView, podPickerOpen, whoamiConfirmed, notice: currentNotice() }),
@@ -300,6 +306,121 @@ function saveBankForm() {
   setState(result.state);
   renderCurrentRoute();
   (app.querySelector('[data-bank-back].btn-primary') || app.querySelector('form[data-bank-note-form] [data-field="name"]'))?.focus({ preventScroll: true });
+}
+
+// The Social Timeline. Advanced: SET UP/EDIT opens the whole form inside that card. Simple: chips for
+// which platforms, then one question at a time inside the card. Saved exactly as before
+// (socialProfileFromForm); nothing here is tracked.
+function saveTimeline(platformId, year, values) {
+  const result = socialProfileFromForm(year, values);
+  if (result.error) return result;
+  if (!state.socialHistory) state.socialHistory = {};
+  state.socialHistory[platformId] = result.profile;
+  setState(state);
+  return result;
+}
+
+function timelineAction(action, el) {
+  const card = (id) => app.querySelector(`[data-timeline-card="${id}"]`);
+  const sayMissing = (text) => {
+    const msg = app.querySelector('[data-social-msg]');
+    if (msg) { msg.textContent = text; msg.hidden = false; }
+    app.querySelector('#social-join-year')?.focus();
+  };
+  const show = (id) => {
+    renderCurrentRoute();
+    const c = card(id);
+    c?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    c?.querySelector('#social-join-year, input[type="radio"], [data-action="tl-next"]')?.focus({ preventScroll: true });
+  };
+  const simple = readLevel(state) === 'simplest';
+  const id = el.dataset.platform;
+  if (action === 'edit-social-profile') {
+    const profile = state.socialHistory?.[id];
+    timelineUi = simple
+      ? { ...timelineUi, wiz: { queue: [id], at: 0, step: 'year', draft: { joinYear: profile?.joinYear ?? null, eras: [...(profile?.eras || [])] } }, edit: null }
+      : { ...timelineUi, edit: id, wiz: null };
+    show(id);
+  } else if (action === 'tl-pick') {
+    const picked = new Set(timelineUi.picked || []);
+    if (picked.has(id)) picked.delete(id); else picked.add(id);
+    timelineUi = { ...timelineUi, picked: [...picked] };
+    renderCurrentRoute();
+    app.querySelector(`[data-action="tl-pick"][data-platform="${id}"]`)?.focus({ preventScroll: true });
+  } else if (action === 'tl-start') {
+    const queue = (timelineUi.picked || []).filter((p) => state.accounts[p]?.enabled && !state.socialHistory?.[p]?.joinYear);
+    if (!queue.length) return;
+    timelineUi = { ...timelineUi, wiz: { queue, at: 0, step: 'year', draft: { joinYear: null, eras: [] } } };
+    show(queue[0]);
+  } else if (action === 'tl-back') {
+    const wiz = timelineUi.wiz;
+    if (!wiz) return;
+    const i = typeof wiz.step === 'number' ? wiz.step : 0;
+    timelineUi = { ...timelineUi, wiz: { ...wiz, step: i === 0 ? 'year' : i - 1 } };
+    show(wiz.queue[wiz.at]);
+  } else if (action === 'tl-next') {
+    const wiz = timelineUi.wiz;
+    if (!wiz) return;
+    const pid = wiz.queue[wiz.at];
+    const draft = { ...wiz.draft, eras: [...(wiz.draft.eras || [])] };
+    let step = wiz.step;
+    if (step === 'year') {
+      const year = parseInt(app.querySelector('#social-join-year')?.value, 10);
+      if (!year) { sayMissing('Pick the year you joined first. The questions after it come from it.'); return; }
+      // A different year means different eras: the answers for the old ones don't carry over.
+      if (year !== draft.joinYear) draft.eras = [];
+      draft.joinYear = year;
+      step = getEras(year).length ? 0 : 'save';
+    } else {
+      // A question left blank stays blank: never saved as an answer the player didn't give.
+      draft.eras[step] = app.querySelector(`input[name="era-${step}"]:checked`)?.value ?? null;
+      step = step + 1 < getEras(draft.joinYear).length ? step + 1 : 'save';
+    }
+    if (step !== 'save') {
+      timelineUi = { ...timelineUi, wiz: { ...wiz, step, draft } };
+      show(pid);
+      return;
+    }
+    const eras = getEras(draft.joinYear);
+    saveTimeline(pid, String(draft.joinYear), eras.map((_, i) => draft.eras[i] ?? null));
+    const at = wiz.at + 1;
+    if (at < wiz.queue.length) {
+      timelineUi = { ...timelineUi, wiz: { ...wiz, at, step: 'year', draft: { joinYear: null, eras: [] } } };
+      show(wiz.queue[at]);
+    } else {
+      timelineUi = { picked: [] };
+      renderCurrentRoute();
+      card(pid)?.querySelector('[data-action="edit-social-profile"]')?.focus({ preventScroll: true });
+    }
+  } else if (action === 'cancel-social-profile') {
+    const open = timelineUi.edit || timelineUi.wiz?.queue?.[timelineUi.wiz.at] || id;
+    timelineUi = { ...timelineUi, edit: null, wiz: null };
+    renderCurrentRoute();
+    card(open)?.querySelector('[data-action="edit-social-profile"]')?.focus({ preventScroll: true });
+  } else if (action === 'save-social-profile') {
+    const yearSelect = app.querySelector('#social-join-year');
+    const eraCount = app.querySelectorAll('#era-container [data-era]').length;
+    // An era left blank stays blank: never saved as an answer the player didn't give.
+    const values = Array.from({ length: eraCount }, (_, i) => app.querySelector(`input[name="era-${i}"]:checked`)?.value ?? null);
+    const result = saveTimeline(id, yearSelect?.value, values);
+    if (result.error) { sayMissing(result.error); return; }
+    timelineUi = { ...timelineUi, edit: null };
+    renderCurrentRoute();
+    card(id)?.querySelector('[data-action="edit-social-profile"]')?.focus({ preventScroll: true });
+  }
+}
+
+// Advanced: a new join year redraws its era questions, keeping the saved answers for the saved year.
+function timelineYearChange(e) {
+  const select = e.target;
+  if (!(select instanceof HTMLSelectElement) || select.id !== 'social-join-year' || !select.closest('#social-profile-form')) return;
+  const year = parseInt(select.value, 10);
+  const eraDiv = app.querySelector('#era-questions');
+  const eraContainer = app.querySelector('#era-container');
+  if (!eraDiv || !eraContainer) return;
+  const profile = state.socialHistory?.[select.dataset.platform];
+  eraContainer.innerHTML = year ? renderEraQuestions(year, year === profile?.joinYear ? profile.eras : []) : '';
+  eraDiv.hidden = !year;
 }
 
 // Simple mode or Advanced mode: the same as the switch in the top bar, so it can change any time.
@@ -373,6 +494,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     // A leak page's back link: the screen its badge was on (like the saints gallery's, below).
     leakFrom = leakOrigin(route, lastRoute, leakFrom);
     if (route.screen !== 'garage') garageAsk = null;
+    if (route.screen !== 'timeline') timelineUi = {};
     // The phishing set's result is shown once: leaving it, the quiz goes on to practice mode.
     if (lastRoute?.screen === 'phishing' && route.screen !== 'phishing' && state.phishingQuiz && showsCuratedResult(state.phishingQuiz)) {
       keepPracticing(state);
@@ -466,7 +588,7 @@ function startScreenVisit(route) {
   if (route.screen !== 'city' || welcomeBackShown) welcomeBack = null;
   if (route.screen === 'city' && welcomeBack) welcomeBackShown = true;
   // Each visit to the map opens fresh: zoomed in on the player's stars, nothing selected.
-  if (route.screen === 'government') govSelected = null;
+  if (route.screen === 'government') { govSelected = null; govFocus = null; govReturn = null; }
   if (route.screen === 'broker-map') {
     selectedId = null;
     cardReturn = null;
@@ -517,7 +639,9 @@ function afterBrokerMapRender(renderFn, params) {
   const w = stage.clientWidth;
   const top = stage.getBoundingClientRect().top + window.scrollY;
   const fill = window.innerHeight - top - 8;
-  const h = Math.round(Math.max(320, window.innerWidth >= 900 ? Math.min(fill, w) : fill));
+  // Simple on a phone: a short banner (about 220px), with the next opt-out under it.
+  const banner = readLevel(state) === 'simplest' && window.innerWidth < 900;
+  const h = banner ? 220 : Math.round(Math.max(320, window.innerWidth >= 900 ? Math.min(fill, w) : fill));
   if (w > 0 && (!mapStage || Math.abs(mapStage.w - w) > 1 || Math.abs(mapStage.h - h) > 1)) {
     mapStage = { w, h };
     if (view) view = withRatio(view, h / w);
@@ -890,7 +1014,20 @@ function bigCheckChange(e) {
     // Recounted from the boxes: only rows without a mission count (a stale mission-row tick doesn't).
     const details = box.closest('details');
     const count = details?.querySelector('[data-big-check-count]');
-    if (count) count.textContent = String(details.querySelectorAll('.big-check-row:not(.big-check-row-mission) [data-big-check]:checked').length);
+    const ticked = details?.querySelectorAll('.big-check-row:not(.big-check-row-mission) [data-big-check]:checked').length ?? 0;
+    if (count) count.textContent = String(ticked);
+    // Its bar fills from where it was to where it is now.
+    const bar = details?.querySelector('summary .fill-bar');
+    if (bar) {
+      const total = Number(bar.getAttribute('aria-valuemax')) || 0;
+      const pct = total ? `${Math.round((ticked / total) * 1000) / 10}%` : '0%';
+      bar.style.setProperty('--from', bar.style.getPropertyValue('--to') || '0%');
+      bar.style.setProperty('--to', pct);
+      bar.setAttribute('aria-valuenow', String(ticked));
+      bar.classList.toggle('is-full', total > 0 && ticked >= total);
+      bar.classList.toggle('is-empty', ticked <= 0);
+      bar.classList.toggle('has-some', ticked > 0 && ticked < total);
+    }
     // The title turns lime with the first tick, neutral again with none.
     app.querySelector('.big-check-head')?.classList.toggle('big-check-head--none', !app.querySelector('.big-check [data-big-check]:checked'));
   } else if (screen === 'broker-map') {
@@ -1018,10 +1155,26 @@ function ladderAction(action, el, data) {
 }
 
 // The government map: open or close a node's file. In memory only; no track(), nothing in the URL.
+// On a phone the file is a sheet over the map: the page stays where it was, and closing it puts focus
+// back on the node that opened it.
 function govAction(action, el) {
-  govSelected = action === 'gov-select' && el.dataset.node !== govSelected ? el.dataset.node : null;
+  const opening = action === 'gov-select' && el.dataset.node !== govSelected;
+  if (opening) {
+    govReturn = { node: el.dataset.node, inList: Boolean(el.closest('.gov-list')) };
+    if (/^[op]-/.test(el.dataset.node)) govFocus = el.dataset.node;
+  }
+  govSelected = opening ? el.dataset.node : null;
+  const phone = window.matchMedia?.('(max-width: 700px)').matches;
+  const y = window.scrollY;
   renderCurrentRoute();
-  if (govSelected) app.querySelector('.gov-file')?.focus({ preventScroll: false });
+  if (phone) window.scrollTo?.(0, y);
+  if (govSelected) { app.querySelector('.gov-file')?.focus({ preventScroll: Boolean(phone) }); return; }
+  const back = govReturn;
+  govReturn = null;
+  if (!back) return;
+  const sel = `[data-node="${CSS.escape(back.node)}"]`;
+  const target = back.inList ? app.querySelector(`.gov-list ${sel}`) : app.querySelector(`.gov-map ${phone ? '.narrow' : '.wide'} ${sel}`) || app.querySelector(`.gov-list ${sel}`);
+  target?.focus({ preventScroll: Boolean(phone) });
 }
 
 const MAP_ACTIONS = new Set(['map-zoom', 'select-star', 'close-star', 'map-list', 'dismiss-scout', 'select-sat', 'close-sat', 'map-sats', ...QUIZ_ACTIONS, ...LADDER_ACTIONS]);
@@ -1762,48 +1915,9 @@ app.addEventListener('click', async (e) => {
       setState(state);
       renderCurrentRoute();
     }
-  } else if (action === 'edit-social-profile') {
-    const container = app.querySelector('#social-form-container');
-    const platformId = el.dataset.platform;
-    if (container) {
-      container.innerHTML = renderSocialForm(platformId);
-      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const yearSelect = app.querySelector('#social-join-year');
-      if (yearSelect) {
-        const profile = state.socialHistory?.[platformId];
-        if (profile?.joinYear) yearSelect.value = String(profile.joinYear);
-        yearSelect.addEventListener('change', () => {
-          const year = parseInt(yearSelect.value, 10);
-          const eraDiv = app.querySelector('#era-questions');
-          const eraContainer = app.querySelector('#era-container');
-          if (year && eraDiv && eraContainer) {
-            eraContainer.innerHTML = renderEraQuestions(year, year === profile?.joinYear ? profile.eras : []);
-            eraDiv.hidden = false;
-          }
-        });
-        if (profile?.joinYear) yearSelect.dispatchEvent(new Event('change'));
-      }
-    }
-  } else if (action === 'cancel-social-profile') {
-    const container = app.querySelector('#social-form-container');
-    if (container) container.innerHTML = '';
-  } else if (action === 'save-social-profile') {
-    const platformId = el.dataset.platform;
-    const yearSelect = app.querySelector('#social-join-year');
-    const eraCount = app.querySelectorAll('#era-container [data-era]').length;
-    // An era left blank stays blank: never saved as an answer the player didn't give.
-    const values = Array.from({ length: eraCount }, (_, i) => app.querySelector(`input[name="era-${i}"]:checked`)?.value ?? null);
-    const result = socialProfileFromForm(yearSelect?.value, values);
-    if (result.error) {
-      const msg = app.querySelector('[data-social-msg]');
-      if (msg) { msg.textContent = result.error; msg.hidden = false; }
-      yearSelect?.focus();
-      return;
-    }
-    if (!state.socialHistory) state.socialHistory = {};
-    state.socialHistory[platformId] = result.profile;
-    setState(state);
-    renderCurrentRoute();
+  } else if (action === 'edit-social-profile' || action === 'tl-pick' || action === 'tl-start' || action === 'tl-next' || action === 'tl-back'
+    || action === 'cancel-social-profile' || action === 'save-social-profile') {
+    timelineAction(action, el);
   } else if (action === 'begin-game') {
     // PLAY asks which mode first; picking one starts the game in it.
     if (!el.dataset.level) {
@@ -1909,6 +2023,11 @@ app.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target?.id?.startsWith?.('pm-cat-num-')) {
     const btn = e.target.closest('[data-pm-category]')?.querySelector('[data-action="pm-cat-flag"], [data-action="pm-cat-changed"]');
     if (btn) { e.preventDefault(); btn.click(); }
+    return;
+  }
+  if (e.key === 'Escape' && govSelected && app.querySelector('.gov-file')) {
+    e.preventDefault();
+    govAction('gov-close', e.target);
     return;
   }
   if (e.key === 'Escape' && selectedRung !== null && app.querySelector('.sky-rung-card')) {
@@ -2017,6 +2136,7 @@ app.addEventListener('submit', (e) => {
 app.addEventListener('change', refreshDebriefForm);
 app.addEventListener('input', refreshDebriefForm);
 app.addEventListener('change', bigCheckChange);
+app.addEventListener('change', timelineYearChange);
 app.addEventListener('input', bigCheckFilter);
 
 window.reclaimCity = {

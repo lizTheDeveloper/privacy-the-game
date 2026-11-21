@@ -8,6 +8,7 @@ import { COLLECTIVE_DIALOGUE } from '../data/dialogue.js';
 import { isAnalyticsOff } from '../utils/analytics-pref.js';
 import { MISSIONS } from '../data/missions.js';
 import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
+import { whatYouCanDo } from '../components/what-you-can-do.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const LABEL = 'color: rgba(0,229,255,0.4); margin-bottom: 16px;';
@@ -212,6 +213,17 @@ export function nextBreachCheck(state) {
   return MISSIONS.find((m) => /-recon-breach$/.test(m.id) && isMissionInPlay(state, m) && !isMissionDoneIn(state, m)) || null;
 }
 
+// What you can do: the missions behind the city's own numbers (TWO-FACTOR ON, CREDIT FROZEN, DATA
+// BROKERS). The first two-step sign-in the player hasn't set up, a credit freeze, a broker purge.
+export function cityMissionIds(state) {
+  const twoFa = MISSIONS.filter((m) => /-fortify-2fa$/.test(m.id) && isMissionInPlay(state, m));
+  const first2fa = twoFa.find((m) => !isMissionDoneIn(state, m)) || twoFa[0];
+  return [first2fa?.id, 'credit_freeze-fortify-equifax', 'people_search-fortify-web-forms'].filter(Boolean);
+}
+
+// Your part's breach check is the page's bright button while it shows.
+const breachCheckShows = (state) => yourPart(state).found === 0 && Boolean(nextBreachCheck(state));
+
 function yourPartPanel(state, podLabel) {
   const { found, fixed } = yourPart(state);
   let body;
@@ -280,6 +292,7 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
     ${cityNumbers(city)}
     ${board(data, yoursId)}
     ${breachMap(city)}
+    ${whatYouCanDo(state, cityMissionIds(state), { primary: !breachCheckShows(state), lede: 'Each of these moves one of the city\'s numbers, and yours.' })}
     ${ghost}
     ${footer(data)}`, state);
 }

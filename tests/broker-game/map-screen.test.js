@@ -12,6 +12,7 @@ const oldAnswer = (s, v) => ({ ...s, caResident: v });
 import { BROKER_MAP_DIALOGUE } from '../../src/data/dialogue.js';
 import { isPrivateBreadcrumb } from '../../src/utils/errorNoise.js';
 import { DISTRICTS } from '../../src/data/districts.js';
+import { setReadLevel } from '../../src/utils/reading.js';
 import { createInitialState } from '../../src/state.js';
 
 const map = JSON.parse(readFileSync('src/data/broker-map.json', 'utf8'));
@@ -34,7 +35,8 @@ beforeEach(() => {
 });
 
 const fresh = () => createInitialState();
-const draw = (state, opts = {}) => renderBrokerMap(state, { status: 'ready', data, today: T, ...opts });
+// Advanced: the full-height sky with the ladder beside it (Simple's banner and next-rung card: tests/side-reshape.test.js).
+const draw = (state, opts = {}) => renderBrokerMap(setReadLevel(state, 'full'), { status: 'ready', data, today: T, ...opts });
 const withLines = (state, missionId, lines) => ({ ...state, brokerFiled: { ...(state.brokerFiled ?? {}), [missionId]: { lines, since: '2026-10-01' } } });
 const filedState = () => withLines(fresh(), WF, { spokeo: '2026-10-01', whitepages: '2026-10-01' });
 // The header's text, its no-wrap spans removed.
@@ -122,10 +124,12 @@ describe('the map screen', () => {
 
   it('DROP reads lit, ask and off', () => {
     const dropped = withLines(fresh(), STRAG, { drop: '2026-10-01' });
-    expect(draw(setHome(dropped, 'US-CA'))).toContain('DROP: filed. It lights the brokers registered in California.');
-    expect(draw(dropped)).toContain('DROP: filed. Tell the map where you live to light it.');
-    expect(html).toContain('DROP: not filed yet.');
-    expect(html).toContain('href="#/mission/people_search-reclaim-stragglers/briefing"');
+    // One line says what DROP is, in every state; not filed, it's a button that says what it opens.
+    const line = "<strong>DROP</strong> is California's one form that asks every registered broker to delete you.";
+    expect(draw(setHome(dropped, 'US-CA'))).toContain(`${line}</p><p class="map-drop-state">Filed. It lights the brokers registered in California.`);
+    expect(draw(dropped)).toContain(`${line}</p><p class="map-drop-state">Filed. Tell the map where you live to light it.`);
+    expect(html).toContain(`${line}</p><p class="map-drop-state">Not filed yet.</p><a class="btn-secondary" data-drop-go href="#/mission/people_search-reclaim-stragglers/briefing">FILE DROP ›</a>`);
+    expect(html).toMatch(/FILE DROP ›<\/a><p class="star-card-opens">Opens the “[^”]+” mission\.<\/p>/);
   });
 
   it('the pending nudge links each pending mission\'s re-check', () => {

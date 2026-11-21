@@ -14,7 +14,10 @@ import { localDay } from '../state.js';
 import { locationQuiz, QUIZ_CSS } from '../components/location-quiz.js';
 import { homeOf } from '../utils/broker-state.js';
 import { ladder } from '../utils/sky-ladder.js';
-import { ladderPanel, LADDER_CSS } from '../components/sky-ladder.js';
+import { ladderPanel, nextRungCard, LADDER_CSS } from '../components/sky-ladder.js';
+import { readLevel } from '../utils/reading.js';
+import { fillBar } from '../components/fill-bar.js';
+import { opensForm, isBareHomepage } from '../components/star-card.js';
 import { satelliteCard, SATELLITE_CARD_CSS } from '../components/satellite-card.js';
 import { satelliteBand, satelliteLines } from '../utils/satellites.js';
 import { SKY_LADDER_DIALOGUE } from '../data/dialogue.js';
@@ -46,6 +49,7 @@ const STYLE = `<style>
 .star-card .star-card-full,.star-card .star-card-parent{font-size:12px;color:rgba(237,239,243,0.6)}
 .star-card .star-card-state{color:var(--lime)}
 .star-card .star-card-note{font-size:12px;color:rgba(237,239,243,0.75)}
+.star-card-opens{margin:2px 0 6px;font-size:13px;color:var(--offwhite)}
 .star-card .star-card-none{color:#FF2D9B;font-weight:700}
 .star-card .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(0,229,255,0.6);margin:12px 0 4px}
 .star-card a{color:var(--cyan)}
@@ -88,6 +92,14 @@ const STYLE = `<style>
 .map-whats-left .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);border:0}
 .map-left .none-mark{margin-left:4px;color:rgba(237,239,243,0.45)}
 .map-left a{display:inline-flex;align-items:center;min-height:44px}
+.map-drop-line{margin:0 0 8px;font-size:14px;color:var(--offwhite)}
+.map-drop .btn-secondary{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;text-decoration:none}
+.map-left .map-left-first{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;margin:4px 0 2px;padding:0 14px;text-decoration:none;color:var(--cyan)}
+.map-left .map-left-opens{display:block;margin:0 0 4px;font-size:13px;color:var(--offwhite)}
+.map-reach-bar{margin:4px 0 6px}
+.map-key-more>summary{display:inline-flex;align-items:center;min-height:44px;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--cyan)}
+@media (max-width:899.98px){.broker-map--simple .map-stage{height:220px;min-height:0}}
+.broker-map--simple .constellation-scout{position:static;margin:8px 0 0}
 .map-big-check{display:inline-flex;align-items:center;min-height:44px;margin-top:14px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--cyan);text-decoration:none}
 .map-big-check:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 ${TICK_CSS}
@@ -126,13 +138,17 @@ export const controlsFor = (stage) => (stage?.w > 0 && stage.w + GUTTER < NARROW
 // The legend's "browser only" row describes stars the sweeps light; with no sweep members, none do.
 export const hasSweepMembers = (map) => Object.values(map?.sweeps ?? {}).some((s) => Array.isArray(s?.members) && s.members.length > 0);
 
+// What DROP is, in one line, wherever it's named (California only).
+export const DROP_LINE = "California's one form that asks every registered broker to delete you";
+
 function dropBlock(drop, resident) {
+  const line = `<p class="map-drop-line"><strong>DROP</strong> is ${esc(DROP_LINE)}.</p>`;
   const text = {
-    lit: 'DROP: filed. It lights the brokers registered in California.',
+    lit: 'Filed. It lights the brokers registered in California.',
     'not-resident': esc(resident === 'unsaid' ? BROKER_MAP_DIALOGUE.dropUnsaid : BROKER_MAP_DIALOGUE.dropNotResident),
-    ask: 'DROP: filed. Tell the map where you live to light it.',
-  }[drop] ?? `DROP: not filed yet. <a href="#/mission/${DROP_MISSION}/briefing">File it</a>`;
-  return `<div class="map-panel map-drop">${text}</div>`;
+    ask: 'Filed. Tell the map where you live to light it.',
+  }[drop] ?? `Not filed yet.</p><a class="btn-secondary" data-drop-go href="#/mission/${DROP_MISSION}/briefing">FILE DROP ›</a><p class="star-card-opens">Opens the “${esc(missionTitle(DROP_MISSION))}” mission.`;
+  return `<div class="map-panel map-drop">${line}<p class="map-drop-state">${text}</p></div>`;
 }
 
 const missionTitle = (id) => MISSIONS.find((m) => m.id === id)?.title ?? id;
@@ -147,12 +163,29 @@ function nudgeBlock(pending) {
 const NO_MISSION = 'No mission covers this one yet: file with them, then tick it in the Big Check';
 const NONE_MARK = '<span class="none-mark" aria-hidden="true">*</span>';
 
-function leftBlock(rows) {
-  const items = rows.map((r) => {
-    const text = `${esc(r.name)} · reach ${r.reach}`;
-    return r.mission
-      ? `<li><a href="#/mission/${esc(r.mission)}/briefing">${text}</a></li>`
-      : `<li><a href="${BIG_CHECK_HASH}">${text}<span class="sr-only"> (no mission yet)</span>${NONE_MARK}</a></li>`;
+// A row's broker's own form, when the checker verified one (not a bare homepage), else null.
+function formOf(b) {
+  const o = b?.optOut;
+  if (!o || o.status !== 'verified' || typeof o.url !== 'string') return null;
+  try {
+    const u = new URL(o.url);
+    return (u.protocol === 'https:' || u.protocol === 'http:') && !isBareHomepage(u) ? o.url : null;
+  } catch { return null; }
+}
+
+function leftBlock(rows, { map = null, simple = false } = {}) {
+  const byId = new Map((map?.brokers ?? []).map((b) => [b.id, b]));
+  const items = rows.map((r, i) => {
+    const text = simple ? esc(r.name) : `${esc(r.name)} · reach ${r.reach}`;
+    const cls = i === 0 ? ' class="btn-secondary map-left-first"' : '';
+    if (r.mission) {
+      return `<li><a${cls} href="#/mission/${esc(r.mission)}/briefing">${text}</a><span class="map-left-opens">Opens the “${esc(missionTitle(r.mission))}” mission.</span></li>`;
+    }
+    const form = formOf(byId.get(r.id));
+    if (form) {
+      return `<li><a${cls} href="${esc(form)}" target="_blank" rel="noopener noreferrer">${text} ↗<span class="sr-only"> (no mission yet)</span>${NONE_MARK}</a><span class="map-left-opens">${opensForm(byId.get(r.id))}</span></li>`;
+    }
+    return `<li><a${cls} href="${BIG_CHECK_HASH}">${text}<span class="sr-only"> (no mission yet)</span>${NONE_MARK}</a><span class="map-left-opens">Opens the Big Check, where you tick it once you've filed.</span></li>`;
   }).join('');
   const note = rows.some((r) => !r.mission) ? `<span class="none">${NONE_MARK} ${NO_MISSION}</span>` : '';
   return `<div class="map-panel map-whats-left"><div class="label">WHAT'S LEFT THAT MATTERS</div>${note}<ul class="map-left">${items}</ul></div>`
@@ -198,10 +231,11 @@ export function renderBrokerMap(state, {
   const body = status === 'ready' && data
     ? loadedView(state, data, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen, selectedSat })
     : brokerDataStatusBlock(status);
-  return `${renderHud(state)}${STYLE}<div class="screen broker-map">${BACK}${body}</div>`;
+  return `${renderHud(state)}${STYLE}<div class="screen broker-map${readLevel(state) === 'simplest' ? ' broker-map--simple' : ''}">${BACK}${body}</div>`;
 }
 
 function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit, stage, firstVisit, scoutLine, cardScoutLine, editingResidency, listOpen, quiz, rung, ladderOpen, selectedSat }) {
+  const simple = readLevel(state) === 'simplest';
   const lighting = brokerLighting(map, state, today);
   const ratio = stage?.w > 0 && stage?.h > 0 ? stage.h / stage.w : 1;
   const v = view ?? initialView(map, layout, lighting, ratio);
@@ -210,7 +244,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   // the ladder; after, the answer and its CHANGE sit below the sky.
   const home = homeOf(state);
   const asking = home === null || editingResidency;
-  const quizHtml = locationQuiz({ ...quiz, home, editing: editingResidency });
+  const quizHtml = locationQuiz({ ...quiz, home, editing: editingResidency, primary: simple && asking });
   const sat = Number.isInteger(selectedSat) && !selectedId && satelliteBand()[selectedSat] ? selectedSat : null;
   const open = Number.isInteger(rung) && rungs[rung] && !selectedId && sat === null ? rungs[rung] : null;
   const shimmer = rungs.find((r) => r.kind === 'gpc')?.status === 'done' || open?.kind === 'gpc';
@@ -222,10 +256,16 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
     const info = satelliteLines(map, lighting)[satelliteBand()[sat].id];
     return info.cut > 0 ? SKY_LADDER_DIALOGUE.firstCut : SKY_LADDER_DIALOGUE.satellites;
   };
+  // Simple: the ladder is a list in the page under the next-rung card, not a sheet over the sky.
   const card = selected
     ? starCard(map, lighting, selectedId, state, { scoutLine: cardScoutLine })
     : sat !== null ? satelliteCard(map, layout, lighting, sat, { scoutLine: satScout() })
+    : simple ? ''
     : ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state), top: asking ? quizHtml : '' });
+  const simpleNext = simple
+    ? nextRungCard(rungs, { quiz: asking ? quizHtml : '' })
+      + ladderPanel(rungs, { selected: open ? rung : null, open: ladderOpen, home: homeOf(state), inline: true })
+    : '';
   const height = stage?.h > 0 ? ` style="height:${Math.round(stage.h)}px"` : '';
   // Scout's line (the first visit's, else this visit's one-time line) floats over the top of the
   // sky (dismissable), so the map keeps the phone's height; it leaves the zoom buttons' corner clear.
@@ -233,22 +273,37 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   const scout = line
     ? `<div class="constellation-scout" role="note">${smallScout('thinkingA', 28)}<p>${esc(line)}</p><button type="button" class="constellation-scout-x" data-action="dismiss-scout" aria-label="Dismiss">×</button></div>`
     : '';
-  // Each half keeps to one line, so a phone never breaks "HUBS LIT" from its count.
-  return `<h1 class="map-head">${fieldHeader(fieldCoverage(map, lighting)).split(' · ').map((part) => `<span class="nw">${esc(part)}</span>`).join(' · ')}</h1>`
-    + '<p class="map-sub">estimated share of the field your opt-outs reach</p>'
-    + `<div class="constellation-wrap has-side${selected || sat !== null ? ' has-card' : ''}"><div class="map-col">`
-    + `<div class="map-stage" tabindex="-1"${height}>${svg}${scout}<div class="constellation-controls">`
+  const coverage = fieldCoverage(map, lighting);
+  // Simple: what the number means, in words, and a bar that fills. Advanced: the field's numbers.
+  const shown = coverage.percent === 0 && coverage.anyLit ? 'under 1' : coverage.percent;
+  const head = simple
+    ? `<h1 class="map-head" data-reach-head>Brokers you've reached</h1><div class="map-reach-bar">${fillBar({ key: 'broker-map:reach', done: coverage.percent, total: 100, size: 'mid', label: `About ${shown}% of the field` })}</div>`
+      + `<p class="map-sub" style="color: var(--offwhite); font-size: 14px;">Your opt-outs reach about ${shown}% of the brokers' field so far.</p>`
+    // Each half keeps to one line, so a phone never breaks "HUBS LIT" from its count.
+    : `<h1 class="map-head">${fieldHeader(coverage).split(' · ').map((part) => `<span class="nw">${esc(part)}</span>`).join(' · ')}</h1>`
+      + '<p class="map-sub">estimated share of the field your opt-outs reach</p>';
+  const legend = LEGEND.filter(([, , needs]) => needs !== 'sweeps' || hasSweepMembers(map)).map(([icon, label]) => `<li>${icon}${label}</li>`);
+  // Simple: the key open with its first four rows; the rest one tap away.
+  const key = simple
+    ? `<div class="map-key map-key--simple"><ul class="map-legend">${legend.slice(0, 4).join('')}</ul><details class="map-key-more" data-open-desktop><summary>More of the key (${legend.length - 4})</summary><ul class="map-legend">${legend.slice(4).join('')}</ul></details></div>`
+    : `<details class="map-key" data-open-desktop><summary>KEY</summary><ul class="map-legend">${legend.join('')}</ul></details>`;
+  return head
+    + `<div class="constellation-wrap${!simple || selected || sat !== null ? ' has-side' : ''}${selected || sat !== null ? ' has-card' : ''}"><div class="map-col">`
+    + `<div class="map-stage" tabindex="-1"${height}>${svg}${simple ? '' : scout}<div class="constellation-controls">`
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="in" aria-label="Zoom in">+</button>'
     + '<button type="button" class="constellation-zoom" data-action="map-zoom" data-dir="out" aria-label="Zoom out">−</button>'
     + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-zoom" data-dir="reset" aria-label="Reset the view">RESET</button>'
     + '<button type="button" class="constellation-zoom constellation-zoom--reset" data-action="map-sats" aria-label="Show the government satellites">↓ GOV</button>'
     + '</div></div>'
+    // Simple: Scout's line sits under the short sky rather than over it.
+    + (simple ? scout : '')
     + `<p class="constellation-pick" aria-live="polite">${selected ? esc(shortName(selected.name)) : ''}</p>`
+    + simpleNext
     + starList(map, layout, lighting, selectedId, listOpen)
     + `</div>${card}</div>`
-    + `<details class="map-key" data-open-desktop><summary>KEY</summary><ul class="map-legend">${LEGEND.filter(([, , needs]) => needs !== 'sweeps' || hasSweepMembers(map)).map(([icon, label]) => `<li>${icon}${label}</li>`).join('')}</ul></details>`
+    + key
     + nudgeBlock(lighting.pending)
     + (asking ? '' : quizHtml)
     + dropBlock(lighting.drop, state.caResident)
-    + leftBlock(whatsLeft(map, lighting));
+    + leftBlock(whatsLeft(map, lighting), { map, simple });
 }

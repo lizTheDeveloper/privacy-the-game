@@ -33,6 +33,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'By the end of 2016 the CIA\'s hacking division had "over 5000 registered users" and "more than a thousand" hacking systems, trojans and viruses. ' +
       'In July 2022 a jury convicted former CIA software engineer Joshua Schulte of leaking the documents to WikiLeaks; in February 2024 he was sentenced to 40 years in prison.',
     accounts: ['apple_id', 'google', 'microsoft', 'smart_tv'],
+    missions: ['device_security-fortify-phone', 'device_security-fortify-computer', 'smart_tv-fortify-apps'],
     sources: [
       S.yearZero,
       S.guardian,
@@ -67,6 +68,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       "It puts the TV in a \"Fake-Off\" mode: the owner believes the TV is off while it records conversations in the room through the built-in microphone and sends them over the internet to a covert CIA server. " +
       'An agent installs it on the TV with a USB stick.',
     accounts: ['smart_tv'],
+    missions: ['smart_tv-fortify-apps'],
     sources: [
       { label: "WikiLeaks (2017): Vault 7: Weeping Angel", url: v7('Weeping Angel') },
       { label: 'WikiLeaks (2017): Extending - User Guide (the Weeping Angel manual)', url: 'https://wikileaks.org/vault7/document/EXTENDING_User_Guide/' },
@@ -100,6 +102,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'The CIA listed hundreds of router models it targeted, from brands including D-Link, Linksys and 3Com; on some routers the CIA installs it over a wireless firmware upgrade, with no physical access. ' +
       'The infected router, a "FlyTrap", copies a target\'s traffic, scans it for email addresses, chat usernames and VoIP numbers, and redirects the target\'s browser.',
     accounts: ['smart_network'],
+    missions: ['smart_network-recon-router', 'smart_network-reclaim-dns'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Cherry Blossom', url: v7('Cherry Blossom') },
       { label: 'WikiLeaks (2017): CherryBlossom -- Quick Start Guide', url: 'https://wikileaks.org/vault7/document/SRI-SLO-FF-2012-177-CherryBlossom_QuickStartGuide_SLO-FF-2012-170/' },
@@ -131,6 +134,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       '"Sonic Screwdriver" hides in an Apple Thunderbolt-to-Ethernet adapter and boots CIA software on a Mac "even when a firmware password is enabled". ' +
       'NightSkies 1.2, a "beacon/loader/implant tool" for the iPhone, is "expressly designed to be physically installed onto factory fresh iPhones": the CIA has been infecting the iPhone supply chain of its targets since at least 2008.',
     accounts: ['apple_id'],
+    missions: ['device_security-fortify-computer', 'device_security-fortify-phone'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Dark Matter', url: v7('Dark Matter') },
       { label: 'Fortune (2017): WikiLeaks Says CIA Has Targeted iPhone Supply Chain Since 2008', url: 'https://fortune.com/2017/03/23/apple-wikileaks-iphone/' },
@@ -161,6 +165,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       "An infected phone sends the CIA the user's geolocation, audio and text communications, and turns on the phone's camera and microphone. " +
       'As of 2016 the CIA had 24 "weaponized" Android zero-days, developed itself and obtained from GCHQ, the NSA and cyber arms contractors; a separate CIA unit builds malware for iPhones and iPads.',
     accounts: ['apple_id', 'google'],
+    missions: ['device_security-fortify-phone', 'device_security-reclaim-app-permissions'],
     sources: [S.yearZero, S.guardian, S.wiki, S.ciaStatement],
     scale: { value: 24, unit: 'Android zero-days', what: 'the CIA held as of 2016', source: 0 },
     flow: {
@@ -186,6 +191,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       "The apps' encryption is not broken. The CIA takes the message off the phone itself, before the app encrypts it, by capturing what you type and touch. " +
       'The CIA takes control of the entire phone; reading the encrypted chats is "simply one of many" things that control gives it.',
     accounts: ['whatsapp', 'signal', 'telegram'],
+    missions: ['device_security-fortify-phone'],
     sources: [
       S.yearZero,
       { label: "The Intercept (2017): The CIA Didn't Break Signal or WhatsApp, Despite What You've Heard", url: 'https://theintercept.com/2017/03/07/the-cia-didnt-break-signal-or-whatsapp-despite-what-youve-heard/' },
@@ -214,6 +220,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'HighRise is a CIA app for Android 4.0 to 4.3 that intercepts SMS text messages and passes them over the internet to a CIA listening post. ' +
       'It is disguised as an app called "TideCheck" and is installed by hand on the phone.',
     accounts: ['google', 'phone_carrier'],
+    missions: ['device_security-fortify-phone'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Highrise', url: v7('Highrise') },
       { label: 'WikiLeaks (2017): HighRise 2.0 Users Guide', url: 'https://wikileaks.org/vault7/document/HighRise-2_0-Users_Guide/' },
@@ -243,6 +250,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'Scribbles hides "Web beacon"-style tags in Microsoft Office documents "likely to be copied by Insiders, Whistleblowers, Journalists or others". ' +
       'When the document is opened, the tag calls a CIA server and reports that it was opened and the IP address of the computer that opened it.',
     accounts: ['microsoft'],
+    missions: ['the_crew-fortify-paper-trail'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Scribbles', url: v7('Scribbles') },
       { label: 'WikiLeaks (2017): Scribbles v1.0 RC1 - User Guide', url: 'https://wikileaks.org/vault7/document/Scribbles_v1_0_RC1-User_Guide/' },
@@ -275,6 +283,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'Once installed it beacons to the CIA, loads payloads into memory for specific tasks, and moves files to and from the computer. ' +
       'It is loaded by an asset, by a remote operator, or through the supply chain.',
     accounts: ['microsoft'],
+    missions: ['device_security-fortify-computer'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Athena', url: v7('Athena') },
       { label: 'SecurityWeek (2017): WikiLeaks Details Malware Made by CIA and U.S. Security Firm', url: 'https://www.securityweek.com/wikileaks-details-malware-made-cia-and-us-security-firm/' },
@@ -305,6 +314,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'It surveys the target first, checking the Windows version and which antivirus runs, so the payload installs "only if the target has the right configuration" and antivirus does not see it. ' +
       'One way it hides on a computer, "Stolen Goods", is taken from Carberp, criminal banking malware.',
     accounts: ['microsoft'],
+    missions: ['device_security-fortify-computer'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Grasshopper', url: v7('Grasshopper') },
       { label: 'CSO Online (2017): WikiLeaks: CIA used bits of Carberp Trojan code for malware deployment', url: 'https://www.csoonline.com/article/561043/wikileaks-cia-used-bits-of-carberp-trojan-code-for-malware-deployment.html' },
@@ -336,6 +346,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'AfterMidnight disguises itself as a Windows service and calls a CIA listening post on a schedule for new "Gremlins": hidden payloads that subvert software, survey the target and take its data. ' +
       'Assassin runs inside a Windows service and beacons to the CIA for tasks and to deliver what it collected.',
     accounts: ['microsoft'],
+    missions: ['device_security-fortify-computer'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: AfterMidnight', url: v7('AfterMidnight') },
       { label: 'Threatpost (2017): WikiLeaks Reveals Two CIA Malware Frameworks', url: 'https://threatpost.com/wikileaks-reveals-two-cia-malware-frameworks/125701/' },
@@ -366,6 +377,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'It records the name, MAC address and signal strength of every Wi-Fi network in range, even when the laptop is not connected, and looks up the position in public geolocation databases from Google and Microsoft. ' +
       'The CIA turns the log into "a tracking profile of the target device".',
     accounts: ['microsoft', 'google'],
+    missions: ['device_security-fortify-computer'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: Elsa', url: v7('Elsa') },
       { label: "SecurityWeek (2017): 'Elsa' Tool Allows CIA to Locate Users via Wi-Fi", url: 'https://www.securityweek.com/elsa-tool-allows-cia-locate-users-wi-fi/' },
@@ -395,6 +407,7 @@ export const LEAKS_VAULT7 = Object.freeze([
       'It saves the stream as video, or saves a still image each time the picture changes. ' +
       'It needs the stream\'s address and runs inside a CIA in-memory loader.',
     accounts: ['smart_camera'],
+    missions: ['smart_camera-recon-access', 'smart_network-fortify-isolation'],
     sources: [
       { label: 'WikiLeaks (2017): Vault 7: CouchPotato', url: v7('CouchPotato') },
       { label: 'WikiLeaks (2017): CouchPotato v1.0 -- User Guide', url: 'https://wikileaks.org/vault7/document/Couch_Potato-1_0-User_Guide/' },
