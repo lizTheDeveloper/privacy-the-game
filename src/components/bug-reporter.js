@@ -48,9 +48,9 @@ export function reportBody(slug, text, { hash, doc } = {}) {
   return body;
 }
 
-// The HUD's button. data-bug-report (not data-action) keeps it out of app.js's screen actions.
+// The top bar's More menu item. data-bug-report (not data-action) keeps it out of app.js's screen actions.
 export function bugButtonHtml() {
-  return `<button type="button" class="hud-bug" data-bug-report aria-label="Report a bug" title="Report a bug">🐞</button>`;
+  return `<button type="button" class="hud-menu-item" data-bug-report><span aria-hidden="true">🐞</span> Report a bug</button>`;
 }
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -82,11 +82,6 @@ export function dialogHtml() {
 }
 
 export const STYLE = `
-.hud-bug { font-size: 11px; line-height: 1; padding: 2px; cursor: pointer; background: none; border: 0; opacity: 0.55;
-  transition: opacity 150ms ease; }
-.hud-bug:hover, .hud-bug:focus-visible { opacity: 1; }
-/* Phones: a full 44px tap target, pulled in by negative margins so the header doesn't grow. */
-@media (max-width: 768px) { .hud-bug { min-width: 44px; min-height: 44px; margin: -14px -12px; } }
 .bug-dialog { margin: auto; inset: 0; width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px;
   background: #0E121A; color: var(--offwhite); border: 1px solid rgba(0,229,255,0.35); box-shadow: 0 0 40px rgba(0,229,255,0.12); }
 .bug-dialog::backdrop { background: rgba(5,6,10,0.75); }

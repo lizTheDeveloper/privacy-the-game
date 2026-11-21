@@ -7,6 +7,8 @@ import { calcDistrictSecured, calcIntegrity, isCoreMission } from '../utils/calc
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 import { currentBurst, isHeldBack, returnPacingLine, PM_BURST_ID } from '../utils/bursts.js';
 import { renderHud } from '../components/hud.js';
+import { nextUp, simpleTitle } from './next.js';
+import { readLevel } from '../utils/reading.js';
 import { renderScout } from '../components/scout.js';
 import { GHOST_DIALOGUE } from '../data/dialogue.js';
 import { isCityComplete, hasGoneGhost } from '../utils/ghost.js';
@@ -344,8 +346,10 @@ export function nextDistrictId(state) {
   return mission ? missionDistrict(mission) : null;
 }
 
+// Simple mode: bars, not numbers (no "0/28 MISSIONS + 22 BONUS"), and no D-0x codes.
 function renderDistrictLabels(state, startHere) {
   const nextId = nextDistrictId(state);
+  const simple = readLevel(state) === 'simplest';
   return BLOCK_DEFS.map((def) => {
     const district = DISTRICTS.find((d) => d.id === def.district);
     const { percent, completed, total, bonusTotal, bonusCompleted } = calcDistrictSecured(state, district.id);
@@ -373,7 +377,7 @@ function renderDistrictLabels(state, startHere) {
     <a href="#/district/${district.id}" class="${classes.join(' ')}" style="${posStyle}">
       <span class="city-label__tick"></span>
       <div class="city-label__head">
-        <span class="city-label__code">${code}</span>
+        ${simple ? '<span></span>' : `<span class="city-label__code">${code}</span>`}
         <span class="city-label__status">${statusWord}</span>
       </div>
       <div class="city-label__name">${name}</div>
@@ -381,7 +385,7 @@ function renderDistrictLabels(state, startHere) {
         <div class="city-label__bar" role="img" aria-label="${percent}%">${cells}</div>
         <span class="city-label__pct" aria-hidden="true">${percent}%</span>
       </div>
-      <div class="city-label__sub">${total ? `${completed}/${total} MISSIONS${bonus}` : 'SURVEY TO UNLOCK'}</div>
+      ${!total ? '<div class="city-label__sub">SURVEY TO UNLOCK</div>' : simple ? '' : `<div class="city-label__sub">${completed}/${total} MISSIONS${bonus}</div>`}
       ${startTag}
     </a>`;
   }).join('');
@@ -414,45 +418,52 @@ function renderWelcomeBack(text, where) {
   return `<div data-welcome-back class="welcome-back welcome-back--${where}" style="margin: 8px 20px 0; padding: 8px 14px; background: rgba(9,11,16,0.92); border: 1px solid rgba(255,159,0,0.3); font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.5;"><span style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--amber); margin-right: 8px;">WELCOME BACK</span>${escAttr(text)}</div>`;
 }
 
+// The city's one bright button names the mission it opens (Liz 2026-11-20: "one way forward"):
+// "START: GMAIL ▶" on a phone, "NEXT MISSION: GMAIL ▶" over the map on a computer. The short
+// name, as What's next has it ("Breach Recon: Gmail" is "Gmail"); Scout's line says the full one.
+function goText(mission, verb = 'START', wide = 'NEXT MISSION') {
+  const name = escAttr(simpleTitle(mission).toUpperCase());
+  const lead = verb === wide ? verb : `<span class="go-phone">${verb}</span><span class="go-wide">${wide}</span>`;
+  return `${lead}: ${name} &#9654;`;
+}
+
+// The new player's first line: one sentence up front, the rest behind Scout's ▾.
+export const CITY_FIRST_LINE = 'We start with your email: take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first.';
+export const CITY_FIRST_MORE = 'The whole city is occupied, and every building here is holding your data. Your email is where everything connects, and everything else in the city builds on it.';
+
 // feeling: Scout's feeling for this visit (utils/scout-feelings.js), on every line.
+// The button goes where What's next goes (nextUp: a half-done mission first, then the next one).
 function renderCityScout(state, feeling, lastVisit) {
   const say = (message, options = {}) => renderScout(message, { ...options, feeling });
   if (isCityComplete(state) && !hasGoneGhost()) {
     return say(GHOST_DIALOGUE.unlock, { actionText: 'ONE LAST JOB', actionHref: '#/ghost' });
   }
   const anyComplete = Object.values(state.missions).some((m) => m.status === 'completed');
-  const next = nextAvailableMission(state);
+  const up = nextUp(state);
+  const go = up
+    ? { actionText: goText(up.mission, up.kind === 'resume' ? 'KEEP GOING' : 'START', up.kind === 'resume' ? 'KEEP GOING' : 'NEXT MISSION'), actionHref: `#/mission/${up.mission.id}/briefing` }
+    : { actionText: 'VIEW STATS', actionHref: '#/stats' };
 
   // Half-way through a mission's steps: that comes first, so nobody loses their place.
-  const resume = resumeLine(state);
-  if (resume) return say(resume.text, { actionText: 'CONTINUE', actionHref: `#/mission/${resume.id}/briefing` });
+  if (up?.kind === 'resume') {
+    const resume = resumeLine(state);
+    return say(resume && resume.id === up.mission.id ? resume.text : `Pick up where you left off: <strong class="say-name">${escAttr(up.mission.title)}</strong>.`, go);
+  }
 
   const pacing = returnPacingLine(state);
-  if (pacing) return say(pacing, { actionText: 'NEXT THREE', actionHref: `#/mission/${PM_BURST_ID}/briefing` });
+  const burst = pacing && findMission(state, PM_BURST_ID);
+  if (burst) return say(pacing, { actionText: goText(burst), actionHref: `#/mission/${PM_BURST_ID}/briefing` });
 
   const returnLine = getReturnLine(lastVisit);
-  if (returnLine && anyComplete) {
-    return say(
-      returnLine,
-      next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : { actionText: 'VIEW STATS', actionHref: '#/stats' },
-    );
-  }
+  if (returnLine && anyComplete) return say(returnLine, go);
 
-  if (!anyComplete) {
-    return say(
-      'The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first — everything else in the city builds on it.',
-      next ? { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` } : {},
-    );
-  }
-  if (next) {
-    return say(
-      `Ready for the next one? <strong class="say-name">${next.title}</strong> — about ${next.estimatedMinutes} minutes.`,
-      { actionText: 'NEXT MISSION', actionHref: `#/mission/${next.id}/briefing` },
-    );
+  if (!anyComplete) return say(CITY_FIRST_LINE, up ? { ...go, more: CITY_FIRST_MORE } : { more: CITY_FIRST_MORE });
+  if (up) {
+    return say(`Ready for the next one? <strong class="say-name">${escAttr(up.mission.title)}</strong> — about ${up.mission.estimatedMinutes} minutes.`, go);
   }
   return say(
     'Every mission complete. The city is yours again. Go see what you built.',
-    { actionText: 'VIEW STATS', actionHref: '#/stats' },
+    go,
   );
 }
 
@@ -652,7 +663,8 @@ const STYLE = `
         linear-gradient(var(--c), var(--c)) right bottom / 22px 1px no-repeat,
         linear-gradient(var(--c), var(--c)) right bottom / 1px 22px no-repeat;
     }
-    .city-readout { position: absolute; top: 66px; left: 20px; z-index: 30; display: flex; align-items: center; gap: 10px;
+    /* Bottom left, above Scout (Advanced mode's score strip is under the top bar). */
+    .city-readout { position: absolute; bottom: 122px; left: 40px; z-index: 30; display: flex; align-items: center; gap: 10px;
       font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
     .city-readout b { color: var(--text-quiet); font-weight: 600; }
     .city-readout .sep { color: var(--text-dim); }
@@ -660,7 +672,7 @@ const STYLE = `
     .city-readout__dot.is-secured { background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: none; }
     @keyframes cityBlink { to { visibility: hidden; } }
 
-    .city-actions { position: absolute; top: 62px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 420px); }
+    .city-actions { position: absolute; top: 92px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 40px); }
     .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
@@ -776,7 +788,11 @@ const STYLE = `
       50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 14px rgba(0,229,255,0.06); }
     }
 
-    .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 30; }
+    /* Above the place buttons, so the More panel opens over them. */
+    .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 40; }
+    .city-actions__head { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    /* The one bright button names its mission: "START: GMAIL" on a phone, "NEXT MISSION: GMAIL" over the map. */
+    .go-phone { display: none; }
     .city-scout { position: absolute; bottom: 0; left: 0; right: 0; z-index: 30; }
 
     /* ---------- narrower desktops (the app is capped at 960px): shrink the city so the label columns stay clear ---------- */
@@ -788,20 +804,24 @@ const STYLE = `
     @media (max-width: 768px) {
       .welcome-back--top { display: block; }
       .welcome-back--scout { display: none; }
+      .go-phone { display: inline; }
+      .go-wide { display: none; }
+      /* One way forward (Liz 2026-11-20): Scout's line and the one bright button, the district cards,
+         the map, then More places. The page reads in that order too. */
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
-      /* Scout starts you out: right under the top bar, before the buttons and the map (Liz 2026-11-17). */
-      .city-hud { order: -2; }
-      .city-scout { order: -1; }
-      .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
-      .city-readout { position: relative; top: auto; left: auto; padding: 8px 14px 0; flex-wrap: wrap; row-gap: 4px; }
-      .city-skyline { position: relative; height: 420px; margin-top: -60px; }
+      .city-scout .scout-action { white-space: normal; font-size: 13px; line-height: 1.35; padding: 14px 16px; }
+      .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-start; flex-wrap: wrap; row-gap: 8px; padding: 4px 14px 28px; }
+      .city-actions__head { position: static; width: 100%; height: auto; margin: 0 0 2px; overflow: visible; clip: auto; white-space: normal; font-family: var(--font-body); font-size: 16px; font-weight: 700; letter-spacing: 0; color: var(--text-strong); }
+      .city-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-size: 10px; }
+      .city-readout { position: relative; top: auto; bottom: auto; left: auto; padding: 4px 14px 0; flex-wrap: wrap; row-gap: 4px; }
+      .city-skyline { position: relative; height: 420px; margin-top: -40px; }
       .city-iso { top: ${ORIGIN_TOP - 40}px; transform: scale(0.8); }
       .city-frame, .city-fade, .city-vignette { display: none; }
       .city-floor { top: 170px; }
       .city-horizon { top: 150px; }
       .city-scan { z-index: 3; }
-      .city-labels { position: relative; inset: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 14px 18px; margin-top: -10px; }
+      .city-labels { position: relative; inset: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 4px 14px 10px; }
       .city-label { position: relative !important; top: auto !important; left: auto !important; right: auto !important; width: auto; opacity: 1; }
       .city-label__tick { display: none; }
       .city-label--master { grid-column: 1 / -1; }
@@ -815,7 +835,6 @@ const STYLE = `
       .city-iso { top: ${ORIGIN_TOP - 90}px; transform: scale(0.54); }
       .city-floor { top: 120px; }
       .city-horizon { top: 105px; }
-      .city-labels { margin-top: -20px; }
     }
     /* On a phone the bar says the percentage (its name, for a screen reader, at every width; the
        written one is aria-hidden so it is heard once); the missions count sits under it. */
@@ -825,6 +844,26 @@ const STYLE = `
       .city-scan { display: none; }
     }
   </style>`;
+
+// Advanced mode's readout, counting what the map shows: its districts, how many are secured, and
+// how many more open from inside the game (Freeway, Foundry…; the Field once it is on). Simple
+// mode has the cards' bars instead.
+function renderReadout(state, active) {
+  if (readLevel(state) === 'simplest') return '';
+  const onMap = BLOCK_DEFS.map((def) => def.district);
+  const secured = onMap.filter((id) => calcDistrictSecured(state, id).percent >= 100).length;
+  const beyond = active.filter((d) => !onMap.includes(d.id)).length;
+  return `<div class="city-readout">
+    <span class="city-readout__dot ${secured === onMap.length ? 'is-secured' : ''}"></span>
+    <span>SECTOR MAP <b>LIVE</b></span>
+    <span class="sep">//</span>
+    <span>DISTRICTS <b>${onMap.length}</b></span>
+    <span class="sep">//</span>
+    <span>SECURED <b>${secured}</b></span>${beyond ? `
+    <span class="sep">//</span>
+    <span>+<b>${beyond}</b> OFF THE MAP</span>` : ''}
+  </div>`;
+}
 
 export function renderCityMap(state, { collective, whoami, arrival, welcomeBack } = {}) {
   if (Object.values(state.accounts).every((a) => !a.enabled)) {
@@ -836,7 +875,6 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
   const active = activeDistricts(state);
   const progress = active.map((d) => calcDistrictSecured(state, d.id).percent);
-  const securedCount = progress.filter((p) => p >= 100).length;
   const avg = progress.reduce((sum, p) => sum + p, 0) / progress.length / 100;
   const hazeMagenta = (0.22 * (1 - avg)).toFixed(3);
   const hazeCyan = (0.05 + 0.2 * avg).toFixed(3);
@@ -852,23 +890,12 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
     radial-gradient(ellipse 34% 20% at 50% ${ORIGIN_TOP + plaza.y}px, rgba(0,229,255,${hazeCyan}) 0%, transparent 70%);"></div>
   <div class="city-floor"></div>
   ${renderStreams()}
-  <div class="city-hud">${renderHud(state)}${renderWelcomeBack(welcomeBack, 'top')}</div>
-  <div class="city-readout">
-    <span class="city-readout__dot ${securedCount === active.length ? 'is-secured' : ''}"></span>
-    <span>SECTOR MAP <b>LIVE</b></span>
-    <span class="sep">//</span>
-    <span>DISTRICTS <b>${active.length}</b></span>
-    <span class="sep">//</span>
-    <span>SECURED <b>${securedCount}</b></span>
+  <div class="city-hud">${renderHud(state, { quietNext: true })}${renderWelcomeBack(welcomeBack, 'top')}</div>
+  <div class="city-scout">${renderWelcomeBack(welcomeBack, 'scout')}${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
+  <div class="city-labels">
+    ${renderDistrictLabels(state, startHere)}
   </div>
-  <div class="city-actions">
-    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
-    <a href="#/stats" class="city-btn">STATS</a>
-    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
-    <a href="#/prism" class="city-btn">◈ PRISM</a>
-    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
-    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
-  </div>
+  ${renderReadout(state, active)}
   <div class="city-skyline">
     <div class="city-horizon"></div>
     <div class="city-iso">
@@ -882,10 +909,15 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   <div class="city-fade"></div>
   <div class="city-scan"></div>
   <div class="city-frame"></div>
-  <div class="city-labels">
-    ${renderDistrictLabels(state, startHere)}
-  </div>
-  <div class="city-scout">${renderWelcomeBack(welcomeBack, 'scout')}${renderCityScout(state, feelingForCity(state, arrival, Date.now(), { cityComplete: isCityComplete(state) }), arrival ? arrival.before : state.lastCityVisit)}</div>
+  <nav class="city-actions" aria-labelledby="city-more-places">
+    <h2 class="city-actions__head" id="city-more-places">More places</h2>
+    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
+    <a href="#/stats" class="city-btn">STATS</a>
+    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
+    <a href="#/prism" class="city-btn">◈ PRISM</a>
+    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
+    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
+  </nav>
 </div>`;
 }
 

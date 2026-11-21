@@ -101,7 +101,9 @@ describe('getting there', () => {
 
   it('a finished district’s celebration carries on to What’s next in Simple mode', () => {
     expect(renderMilestone(simple(), 'master-keys')).toContain('href="#/next"');
-    expect(renderMilestone(setReadLevel(createInitialState(), 'full'), 'master-keys')).not.toContain('href="#/next"');
+    // The page's own button (the top bar's progress chip goes to What's next in every mode).
+    const page = renderMilestone(setReadLevel(createInitialState(), 'full'), 'master-keys').replace(/<header class="hud"[\s\S]*?<\/header>/, '');
+    expect(page).not.toContain('href="#/next"');
   });
 });
 

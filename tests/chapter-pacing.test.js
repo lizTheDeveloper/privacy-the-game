@@ -58,7 +58,8 @@ describe('MUL-38 Chapter 1 core/bonus split', () => {
   });
 
   it('city map advertises the core count, not 49', () => {
-    const html = renderCityMap(createInitialState());
+    // Advanced mode: Simple mode's cards show bars, not numbers (7.35.0).
+    const html = renderCityMap({ ...createInitialState(), reading: { level: 'full' } });
     expect(html).toContain('0/28 MISSIONS');
     expect(html).not.toContain('0/49 MISSIONS');
   });

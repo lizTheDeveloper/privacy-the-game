@@ -79,7 +79,8 @@
         linear-gradient(var(--c), var(--c)) right bottom / 22px 1px no-repeat,
         linear-gradient(var(--c), var(--c)) right bottom / 1px 22px no-repeat;
     }
-    .city-readout { position: absolute; top: 66px; left: 20px; z-index: 30; display: flex; align-items: center; gap: 10px;
+    /* Bottom left, above Scout (Advanced mode's score strip is under the top bar). */
+    .city-readout { position: absolute; bottom: 122px; left: 40px; z-index: 30; display: flex; align-items: center; gap: 10px;
       font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
     .city-readout b { color: var(--text-quiet); font-weight: 600; }
     .city-readout .sep { color: var(--text-dim); }
@@ -87,7 +88,7 @@
     .city-readout__dot.is-secured { background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: none; }
     @keyframes cityBlink { to { visibility: hidden; } }
 
-    .city-actions { position: absolute; top: 62px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 420px); }
+    .city-actions { position: absolute; top: 92px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 40px); }
     .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
@@ -203,7 +204,11 @@
       50% { border-color: rgba(0,229,255,0.95); box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 14px rgba(0,229,255,0.06); }
     }
 
-    .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 30; }
+    /* Above the place buttons, so the More panel opens over them. */
+    .city-hud { position: absolute; top: 0; left: 0; right: 0; z-index: 40; }
+    .city-actions__head { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    /* The one bright button names its mission: "START: GMAIL" on a phone, "NEXT MISSION: GMAIL" over the map. */
+    .go-phone { display: none; }
     .city-scout { position: absolute; bottom: 0; left: 0; right: 0; z-index: 30; }
 
     /* ---------- narrower desktops (the app is capped at 960px): shrink the city so the label columns stay clear ---------- */
@@ -215,20 +220,24 @@
     @media (max-width: 768px) {
       .welcome-back--top { display: block; }
       .welcome-back--scout { display: none; }
+      .go-phone { display: inline; }
+      .go-wide { display: none; }
+      /* One way forward (Liz 2026-11-20): Scout's line and the one bright button, the district cards,
+         the map, then More places. The page reads in that order too. */
       .city-map { height: auto; display: flex; flex-direction: column; }
       .city-hud, .city-scout { position: relative; }
-      /* Scout starts you out: right under the top bar, before the buttons and the map (Liz 2026-11-17). */
-      .city-hud { order: -2; }
-      .city-scout { order: -1; }
-      .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-end; flex-wrap: wrap; row-gap: 8px; padding: 8px 14px 0; }
-      .city-readout { position: relative; top: auto; left: auto; padding: 8px 14px 0; flex-wrap: wrap; row-gap: 4px; }
-      .city-skyline { position: relative; height: 420px; margin-top: -60px; }
+      .city-scout .scout-action { white-space: normal; font-size: 13px; line-height: 1.35; padding: 14px 16px; }
+      .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-start; flex-wrap: wrap; row-gap: 8px; padding: 4px 14px 28px; }
+      .city-actions__head { position: static; width: 100%; height: auto; margin: 0 0 2px; overflow: visible; clip: auto; white-space: normal; font-family: var(--font-body); font-size: 16px; font-weight: 700; letter-spacing: 0; color: var(--text-strong); }
+      .city-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-size: 10px; }
+      .city-readout { position: relative; top: auto; bottom: auto; left: auto; padding: 4px 14px 0; flex-wrap: wrap; row-gap: 4px; }
+      .city-skyline { position: relative; height: 420px; margin-top: -40px; }
       .city-iso { top: 192px; transform: scale(0.8); }
       .city-frame, .city-fade, .city-vignette { display: none; }
       .city-floor { top: 170px; }
       .city-horizon { top: 150px; }
       .city-scan { z-index: 3; }
-      .city-labels { position: relative; inset: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 14px 18px; margin-top: -10px; }
+      .city-labels { position: relative; inset: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 4px 14px 10px; }
       .city-label { position: relative !important; top: auto !important; left: auto !important; right: auto !important; width: auto; opacity: 1; }
       .city-label__tick { display: none; }
       .city-label--master { grid-column: 1 / -1; }
@@ -242,7 +251,6 @@
       .city-iso { top: 142px; transform: scale(0.54); }
       .city-floor { top: 120px; }
       .city-horizon { top: 105px; }
-      .city-labels { margin-top: -20px; }
     }
     /* On a phone the bar says the percentage (its name, for a screen reader, at every width; the
        written one is aria-hidden so it is heard once); the missions count sits under it. */
@@ -345,50 +353,156 @@
   <div class="city-floor"></div>
   <span class="city-stream city-stream--cyan" style="left: 9%; animation-duration: 7.5s; animation-delay: 0s; z-index: 1;"></span><span class="city-stream city-stream--cyan" style="left: 21%; animation-duration: 11s; animation-delay: -4s; z-index: 1;"></span><span class="city-stream city-stream--lime" style="left: 37%; animation-duration: 9s; animation-delay: -7s; z-index: 1;"></span><span class="city-stream city-stream--cyan" style="left: 58%; animation-duration: 12.5s; animation-delay: -2s; z-index: 1;"></span><span class="city-stream city-stream--magenta" style="left: 74%; animation-duration: 8s; animation-delay: -5.5s; z-index: 1;"></span><span class="city-stream city-stream--cyan" style="left: 88%; animation-duration: 10s; animation-delay: -1s; z-index: 1;"></span><span class="city-stream city-stream--cyan" style="left: 46%; animation-duration: 14s; animation-delay: -9s; z-index: 11;"></span><span class="city-stream city-stream--cyan" style="left: 66%; animation-duration: 13s; animation-delay: -3s; z-index: 11;"></span>
   <div class="city-hud">
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.7) 70%, transparent 100%); border-bottom: 1px solid rgba(0,229,255,0.1);">
-    <div>
-      <div class="hud-brand">RECLAIM CITY</div>
-      <div class="hud-tagline">TAKE BACK YOUR DATA</div>
-      <a class="hud-studio" href="https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=hud" target="_blank" rel="noopener" data-studio-link="hud">BY MULTIVERSE GAMES&nbsp;&#8599;</a>
+  <header class="hud" data-hud>
+    <div class="hud-bar">
+      <div class="hud-brand">RECLAIM CITY<span class="hud-tagline"> TAKE BACK YOUR DATA</span></div>
+      <div class="hud-way"><a class="hud-next hud-next--quiet" href="#/next">What’s next &#9654;</a></div>
+      <div class="hud-end">
+        
+        <div class="hud-more-wrap">
+          <button type="button" class="hud-more" data-hud-more aria-expanded="false" aria-controls="hud-menu">More <span class="hud-more-caret" aria-hidden="true">&#9662;</span></button>
+          <div class="hud-menu" id="hud-menu" data-hud-menu hidden>
+        <div class="hud-menu-modes" role="group" aria-label="Simple mode or Advanced mode"><div class="read-levels"><button type="button" class="read-level is-on" data-action="read-level" data-level="simplest" aria-pressed="true">Simple mode</button><button type="button" class="read-level" data-action="read-level" data-level="full" aria-pressed="false">Advanced mode</button></div></div>
+        <button type="button" class="hud-menu-item" data-action="focus-music" aria-pressed="false"><span aria-hidden="true">&#9835;</span> Focus music</button>
+        <button type="button" class="hud-menu-item" data-bug-report><span aria-hidden="true">🐞</span> Report a bug</button>
+        <a class="hud-menu-item hud-support-link" href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener"><span class="hud-dollar" aria-hidden="true">$</span>Support us</a>
+        <a class="hud-menu-item hud-patreon" href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener">Or any amount on Patreon</a>
+        <a class="hud-menu-item hud-studio" href="https://multiversegames.ai/?utm_source=reclaim-city&utm_medium=game&utm_content=hud" target="_blank" rel="noopener" data-studio-link="hud">Reclaim City is by Multiverse Games&nbsp;&#8599;</a>
+      </div>
+        </div>
+      </div>
     </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <div class="hud-stat hud-stat--lime">
-        <span class="stat-value">0%</span>
-        <span class="stat-label">INTEGRITY</span>
+  </header></div>
+  <div class="city-scout">
+  <div style="background: linear-gradient(180deg, transparent 0%, rgba(9,11,16,0.92) 25%, rgba(9,11,16,0.99) 100%); padding: 18px 20px 14px; border-top: 1px solid rgba(0,229,255,0.08);">
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+      <div style="flex-shrink: 0; text-align: center;">
+        <img src="assets/characters/scout_0.png" style="width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+        <div class="scout-name">SCOUT</div>
       </div>
-      <div class="hud-stat hud-stat--magenta">
-        <span class="stat-value">1000</span>
-        <span class="stat-label">EXPOSURE</span>
+      <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
+        <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">We start with your email: take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first.</div>
+        <details class="scout-more" data-fold="scout-more"><summary class="scout-more-toggle">Tell me more <span class="scout-more-caret" aria-hidden="true">&#9662;</span></summary><div class="scout-more-text">The whole city is occupied, and every building here is holding your data. Your email is where everything connects, and everything else in the city builds on it.</div></details>
       </div>
-      <div class="hud-stat hud-stat--amber">
-        <span class="stat-value">0d</span>
-        <span class="stat-label">STREAK</span>
-      </div>
-      <button type="button" class="hud-bug" data-bug-report aria-label="Report a bug" title="Report a bug">🐞</button>
-      <a class="hud-next" href="#/next">What’s next &#9654;</a>
-      <button type="button" class="hud-mode" data-action="read-level" data-level="full" aria-label="Switch to Advanced mode">Advanced mode</button>
-      <div class="hud-support">
-        <a class="hud-support-link" href="https://buy.stripe.com/6oU8wOa387If097aKl6c00o" target="_blank" rel="noopener"><span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>
-        <a class="hud-patreon" href="https://www.patreon.com/lizthedeveloper" target="_blank" rel="noopener">or any amount on Patreon</a>
-      </div>
+      <a class="btn-primary scout-action" href="#/mission/gmail-recon-breach/briefing"><span class="go-phone">START</span><span class="go-wide">NEXT MISSION</span>: GMAIL &#9654;</a>
     </div>
   </div></div>
-  <div class="city-readout">
-    <span class="city-readout__dot "></span>
-    <span>SECTOR MAP <b>LIVE</b></span>
-    <span class="sep">//</span>
-    <span>DISTRICTS <b>13</b></span>
-    <span class="sep">//</span>
-    <span>SECURED <b>0</b></span>
+  <div class="city-labels">
+    
+    <a href="#/district/master-keys" class="city-label is-occupied city-label--right city-label--master city-label--next city-start-pulse" style="top: 464px; right: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">MASTER KEYS</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      <div class="city-label__start">▶ START HERE</div>
+    </a>
+    <a href="#/district/vault" class="city-label is-occupied city-label--left city-label--rest" style="top: 468px; left: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">VAULT</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/square" class="city-label is-occupied city-label--right city-label--rest" style="top: 360px; right: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">SQUARE</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/archives" class="city-label is-occupied city-label--left city-label--rest" style="top: 364px; left: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">ARCHIVES</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/marketplace" class="city-label is-occupied city-label--right city-label--rest" style="top: 256px; right: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">MARKETPLACE</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/capitol" class="city-label is-occupied city-label--left city-label--rest" style="top: 260px; left: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">CAPITOL</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/perimeter" class="city-label is-occupied city-label--right city-label--rest" style="top: 152px; right: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">PERIMETER</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
+    <a href="#/district/reclamation" class="city-label is-occupied city-label--left city-label--rest" style="top: 156px; left: 28px">
+      <span class="city-label__tick"></span>
+      <div class="city-label__head">
+        <span></span>
+        <span class="city-label__status">OCCUPIED</span>
+      </div>
+      <div class="city-label__name">RECLAMATION</div>
+      <div class="city-label__meter">
+        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+        <span class="city-label__pct" aria-hidden="true">0%</span>
+      </div>
+      
+      
+    </a>
   </div>
-  <div class="city-actions">
-    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
-    <a href="#/stats" class="city-btn">STATS</a>
-    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
-    <a href="#/prism" class="city-btn">◈ PRISM</a>
-    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
-    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
-  </div>
+  
   <div class="city-skyline">
     <div class="city-horizon"></div>
     <div class="city-iso">
@@ -519,133 +633,13 @@
   <div class="city-fade"></div>
   <div class="city-scan"></div>
   <div class="city-frame"></div>
-  <div class="city-labels">
-    
-    <a href="#/district/master-keys" class="city-label is-occupied city-label--right city-label--master city-label--next city-start-pulse" style="top: 464px; right: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-01</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">MASTER KEYS</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/28 MISSIONS <span class="city-label__bonus">+ 22 BONUS</span></div>
-      <div class="city-label__start">▶ START HERE</div>
-    </a>
-    <a href="#/district/vault" class="city-label is-occupied city-label--left city-label--rest" style="top: 468px; left: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-02</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">VAULT</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/18 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/square" class="city-label is-occupied city-label--right city-label--rest" style="top: 360px; right: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-03</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">SQUARE</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/40 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/archives" class="city-label is-occupied city-label--left city-label--rest" style="top: 364px; left: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-04</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">ARCHIVES</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/8 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/marketplace" class="city-label is-occupied city-label--right city-label--rest" style="top: 256px; right: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-05</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">MARKETPLACE</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/14 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/capitol" class="city-label is-occupied city-label--left city-label--rest" style="top: 260px; left: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-06</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">CAPITOL</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/11 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/perimeter" class="city-label is-occupied city-label--right city-label--rest" style="top: 152px; right: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-07</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">PERIMETER</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/15 MISSIONS</div>
-      
-    </a>
-    <a href="#/district/reclamation" class="city-label is-occupied city-label--left city-label--rest" style="top: 156px; left: 28px">
-      <span class="city-label__tick"></span>
-      <div class="city-label__head">
-        <span class="city-label__code">D-08</span>
-        <span class="city-label__status">OCCUPIED</span>
-      </div>
-      <div class="city-label__name">RECLAMATION</div>
-      <div class="city-label__meter">
-        <div class="city-label__bar" role="img" aria-label="0%"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
-        <span class="city-label__pct" aria-hidden="true">0%</span>
-      </div>
-      <div class="city-label__sub">0/30 MISSIONS</div>
-      
-    </a>
-  </div>
-  <div class="city-scout">
-  <div style="background: linear-gradient(180deg, transparent 0%, rgba(9,11,16,0.92) 25%, rgba(9,11,16,0.99) 100%); padding: 18px 20px 14px; border-top: 1px solid rgba(0,229,255,0.08);">
-    <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
-      <div style="flex-shrink: 0; text-align: center;">
-        <img src="assets/characters/scout_0.png" style="width: 64px; height: 64px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
-        <div class="scout-name">SCOUT</div>
-      </div>
-      <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
-        <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">The whole city is occupied, and every building here is holding your data. We start where everything connects: your email. Take back the <a class="say-link" href="#/district/master-keys">Master Keys</a> district first — everything else in the city builds on it.</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(237,239,243,0.35);"></div>
-      </div>
-      <a class="btn-primary scout-action" href="#/mission/gmail-recon-breach/briefing">NEXT MISSION</a>
-    </div>
-  </div></div>
+  <nav class="city-actions" aria-labelledby="city-more-places">
+    <h2 class="city-actions__head" id="city-more-places">More places</h2>
+    <a href="#/quickquest" class="city-btn">⚡ QUICK QUEST</a>
+    <a href="#/stats" class="city-btn">STATS</a>
+    <a href="#/reclamation/map" class="city-btn">↑ LOOK UP</a>
+    <a href="#/prism" class="city-btn">◈ PRISM</a>
+    <a href="#/government" class="city-btn">◎ WHO GETS IT</a>
+    <a href="#/city-together" class="city-btn">WHOLE CITY</a>
+  </nav>
 </div>

@@ -4,7 +4,7 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { calcIntegrity, calcDistrictSecured, getBuildingState, districtBreachedAddresses } from '../utils/calc.js';
 import { activeDistricts } from '../utils/opt-in.js';
 import { fillBar } from '../components/fill-bar.js';
-import { renderHud } from '../components/hud.js';
+import { renderHud, supportNote } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { scoutSprite } from '../components/scout.js';
 
@@ -27,9 +27,9 @@ export function renderMilestone(state, districtId) {
 
   if (!district) {
     return `
-  <div class="scanlines" style="min-height: 100vh; background: var(--midnight); padding: 0 16px;">
+  <div class="scanlines milestone-page" style="min-height: 100vh; background: var(--midnight);">
     ${renderHud(state)}
-    <div style="position: relative; display: flex; justify-content: center; padding: 80px 0;">
+    <div class="milestone-body" style="position: relative; display: flex; justify-content: center; padding: 80px 16px;">
       <div class="panel" style="padding: 48px 64px; text-align: center;">
         <div style="font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 4px; color: var(--magenta); text-shadow: 0 0 15px rgba(255,45,155,0.4);">DISTRICT NOT FOUND</div>
         <div style="margin-top: 28px;">
@@ -67,7 +67,7 @@ export function renderMilestone(state, districtId) {
 
   return `
   <div class="scanlines milestone-page" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0a1020 30%, #121828 100%); padding: 0 0 60px; overflow: clip;">
-    ${renderHud(state)}
+    ${renderHud(state, { stats: false, quietNext: simple })}
     <div class="milestone-body" style="position: relative; padding: 0 24px;">
     <div style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, rgba(198,255,0,0.03) 40%, transparent 70%); pointer-events: none;"></div>
     <div class="milestone-top" style="position: relative; text-align: center; padding-top: 44px;">
@@ -111,6 +111,7 @@ export function renderMilestone(state, districtId) {
         <span style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 3px; color: var(--text-dim);">CARD PREVIEW</span>
       </div>
     </div>
+    ${supportNote('milestone')}
     </div>
   </div>`;
 }

@@ -106,9 +106,12 @@ describe('The Field is opt-in', () => {
   });
 
   it("the city map counts it only once it's on", () => {
+    // Advanced mode's readout counts the map's 8 districts and the ones off the map (7.35.0).
     const n = DISTRICTS.length;
-    expect(renderCityMap(createInitialState())).toContain(`DISTRICTS <b>${n - 1}</b>`);
-    expect(renderCityMap(setDistrictOn(createInitialState(), 'field', true))).toContain(`DISTRICTS <b>${n}</b>`);
+    const adv = (s) => ({ ...s, reading: { level: 'full' } });
+    expect(renderCityMap(adv(createInitialState()))).toContain(`DISTRICTS <b>8</b>`);
+    expect(renderCityMap(adv(createInitialState()))).toContain(`+<b>${n - 1 - 8}</b> OFF THE MAP`);
+    expect(renderCityMap(adv(setDistrictOn(createInitialState(), 'field', true)))).toContain(`+<b>${n - 8}</b> OFF THE MAP`);
   });
 
   it('stats call it optional, not locked, while it is off', () => {

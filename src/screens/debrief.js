@@ -3,7 +3,7 @@ import { topTools } from '../components/top-tools.js';
 import { missionDistrict } from '../data/missions.js';
 import { findMission } from '../data/custom-missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
-import { renderHud } from '../components/hud.js';
+import { renderHud, supportNote } from '../components/hud.js';
 import { DISTRICT_DIALOGUE, PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, pick } from '../data/dialogue.js';
 import { calcDistrictProgress, isEmailBreachCheck } from '../utils/calc.js';
 import { questionOptions, prefillAnswer, visibleQuestions, canRecheck, isSkipOption } from '../utils/debrief.js';
@@ -530,7 +530,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
         // Simple's home is What's next, where Scout says what to do now (not the district's tabs).
         ? '<a href="#/next" class="btn-primary" style="text-decoration: none;">WHAT’S NEXT &#9654;</a>'
         : `<a href="#/district/${districtId}${targetTab}" class="btn-primary" style="text-decoration: none;">BACK TO DISTRICT</a>`}
-    </div>`
+    </div>${supportNote('debrief')}`
     : recheck
       ? `<div data-recheck-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">A re-check keeps this filed as it was. Pick an answer, or go back.</div>
     <button class="btn-primary" data-action="submit-recheck" data-mission="${mission.id}">SAVE RE-CHECK</button>`

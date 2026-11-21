@@ -11,7 +11,7 @@ describe('link home to Multiverse Games', () => {
     expect(STUDIO_URL.startsWith('https://multiversegames.ai/?')).toBe(true);
     expect(html).toMatch(/href="https:\/\/multiversegames\.ai\/[^"]*hud" target="_blank" rel="noopener"/);
     expect(html).toContain('data-studio-link="hud"');
-    expect(html).toContain('BY MULTIVERSE GAMES');
+    expect(html).toContain('Reclaim City is by Multiverse Games');
   });
 
   it('the welcome screen links home too', () => {
