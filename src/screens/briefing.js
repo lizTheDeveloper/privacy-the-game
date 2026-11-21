@@ -34,7 +34,7 @@ function notFound(state) {
     <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px;">
       <div class="panel" style="padding: 36px 40px; text-align: center; max-width: 440px;">
         <div class="section-label" style="color: var(--magenta); margin-bottom: 14px;">SIGNAL LOST</div>
-        <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--offwhite); letter-spacing: 2px; margin-bottom: 12px;">MISSION NOT FOUND</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 20px; font-weight: 800; color: var(--offwhite); letter-spacing: 0.5px; margin-bottom: 12px;">MISSION NOT FOUND</div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.5); line-height: 1.6; margin-bottom: 24px;">No mission matches that call sign. Return to the city map to pick one up.</div>
         <a href="#/city" class="btn-secondary" style="text-decoration: none;">BACK TO CITY</a>
       </div>
@@ -130,7 +130,7 @@ export function renderBriefing(state, missionId, opts = {}) {
 
   const header = `
         ${missionTrail(started ? 'steps' : 'brief', progress)}
-        <div style="font-family: var(--font-display); font-size: 26px; font-weight: 800; line-height: 1.4; letter-spacing: 1px; margin-bottom: 14px; color: var(--offwhite);">
+        <div style="font-family: var(--font-title); font-size: 26px; font-weight: 800; line-height: 1.4; letter-spacing: 0.5px; margin-bottom: 14px; color: var(--offwhite);">
           ${titleTop ? `${titleTop}<br>` : ''}<span class="brief-title-name">${titleBottom}</span>
         </div>
 

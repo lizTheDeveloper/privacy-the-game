@@ -12,7 +12,8 @@ function memoryStorage() {
 }
 
 // Today's map (captured from 08cfee2 before the broader city was added; re-captured
-// with the city lights' stylesheet, the only change for a fresh save).
+// with the city lights' stylesheet, the only change for a fresh save; district names in the
+// IBM Plex Sans title font in 7.46.0).
 const TODAY = readFileSync(new URL('./fixtures/city-map-no-data.html', import.meta.url), 'utf8');
 
 const POD = (id, label, players, pct) => ({ id, label, level: 'city', players, ...(pct === undefined ? {} : { fortified: { pct } }) });

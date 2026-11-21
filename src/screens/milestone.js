@@ -31,7 +31,7 @@ export function renderMilestone(state, districtId) {
     ${renderHud(state)}
     <div class="milestone-body" style="position: relative; display: flex; justify-content: center; padding: 80px 16px;">
       <div class="panel" style="padding: 48px 64px; text-align: center;">
-        <div style="font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 4px; color: var(--magenta); text-shadow: 0 0 15px rgba(255,45,155,0.4);">DISTRICT NOT FOUND</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; color: var(--magenta); text-shadow: 0 0 15px rgba(255,45,155,0.4);">DISTRICT NOT FOUND</div>
         <div style="margin-top: 28px;">
           <a class="btn-secondary" href="#/city" style="display: inline-block; text-decoration: none;">RETURN TO CITY</a>
         </div>
@@ -75,8 +75,8 @@ export function renderMilestone(state, districtId) {
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">
-      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">${resetsLeft ? 'MISSIONS DONE' : 'LIBERATED'}</div>
-      <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${resetsLeft ? '' : `${district.name.toUpperCase()} IS SECURE`}</div>
+      <div class="milestone-word" style="font-family: var(--font-title); font-size: 56px; font-weight: 900; letter-spacing: 0.5px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">${resetsLeft ? 'MISSIONS DONE' : 'LIBERATED'}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; color: rgba(237,239,243,0.75); margin-top: 12px;">${resetsLeft ? '' : `${district.name.toUpperCase()} IS SECURE`}</div>
       ${resetsLeft ? `<div data-resets-left style="font-size: 17px; font-weight: 600; color: var(--offwhite); margin-top: 4px;">${resetsLeft.charAt(0).toUpperCase()}${resetsLeft.slice(1)}. They’re on the district page.</div>` : ''}
       <div style="font-size: 13px; color: var(--text-quiet); margin-top: 8px;">${district.description}</div>
     </div>

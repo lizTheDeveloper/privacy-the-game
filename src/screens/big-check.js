@@ -25,7 +25,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 const STYLE = `<style>
 .big-check{padding:0 16px 24px;max-width:720px;margin:0 auto;box-sizing:border-box;overflow-wrap:anywhere}
 .big-check .back-link{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);text-decoration:none}
-.big-check .big-check-head{font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--lime);letter-spacing:2px;margin:12px 0 2px}
+.big-check .big-check-head{font-family:var(--font-title);line-height:1.2;font-size:14px;font-weight:800;color:var(--lime);letter-spacing:0.5px;margin:12px 0 2px}
 .big-check .big-check-head--none{color:var(--offwhite)}
 .big-check-no-page{font-weight:600}
 .big-check .big-check-note{font-size:12px;line-height:1.5;color:rgba(237,239,243,0.55);margin:0 0 12px}

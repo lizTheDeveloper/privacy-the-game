@@ -33,7 +33,7 @@ const STYLE = `<style>
 #app.map-refresh>*{animation:none}
 .broker-map{padding:0 16px 24px;max-width:960px;margin:0 auto;box-sizing:border-box}
 .broker-map .back-link{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);text-decoration:none}
-.broker-map .map-head{font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--lime);letter-spacing:2px;margin:12px 0 2px;overflow-wrap:anywhere}.broker-map .map-head .nw{display:inline-block}
+.broker-map .map-head{font-family:var(--font-title);line-height:1.2;font-size:14px;font-weight:800;color:var(--lime);letter-spacing:0.5px;margin:12px 0 2px;overflow-wrap:anywhere}.broker-map .map-head .nw{display:inline-block}
 .broker-map .map-sub{font-size:12px;color:rgba(237,239,243,0.55);margin:0 0 10px}
 .constellation-scout{position:absolute;top:8px;left:8px;right:68px;display:flex;gap:8px;align-items:flex-start;padding:6px 4px 6px 8px;background:rgba(9,11,16,0.86);border:1px solid rgba(0,229,255,0.3);border-radius:8px;cursor:default}
 /* A long line scrolls inside its box (at most about seven lines), so it never covers most of the sky; the × stays beside it. */
@@ -45,7 +45,7 @@ const STYLE = `<style>
 .map-stage>svg.constellation{width:100%;height:100%;border-radius:8px}
 .map-stage:focus{outline:none}.map-stage:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .star-card{padding:14px 16px;background:#11151F;border:1px solid rgba(0,229,255,0.3);border-radius:8px;font-size:13px;line-height:1.6;color:var(--offwhite);overflow-wrap:anywhere;outline:none}
-.star-card h2{margin:0;font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:1px;color:var(--offwhite)}
+.star-card h2{margin:0;font-family:var(--font-title);line-height:1.2;font-size:16px;font-weight:800;letter-spacing:0.5px;color:var(--offwhite)}
 .star-card p{margin:4px 0}
 .star-card .star-card-full,.star-card .star-card-parent{font-size:12px;color:rgba(237,239,243,0.6)}
 .star-card .star-card-state{color:var(--lime)}

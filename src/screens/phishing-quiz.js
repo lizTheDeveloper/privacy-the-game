@@ -85,7 +85,7 @@ function curatedResult(quiz) {
     : '<div style="font-size: 15px; color: var(--offwhite); margin-top: 18px;">You didn’t miss one.</div>';
   return `
       <section data-quiz-result style="max-width: 560px;">
-        <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: 3px; color: var(--offwhite);">YOUR RESULT</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; color: var(--offwhite);">YOUR RESULT</div>
         <div style="font-size: 20px; font-weight: 700; color: var(--offwhite); margin: 12px 0 10px;">You got ${correct} of ${total} right.</div>
         ${fillBar({ key: 'phishing:curated', done: correct, total, size: 'big', label: `${correct} of ${total} right` })}
         ${missedHtml}
@@ -335,7 +335,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
       const answers = Object.values(quiz.quizAnswers);
       content = `
       <div style="text-align: center; padding: 32px;">
-        <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--lime); letter-spacing: 3px;">TRAINING COMPLETE</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 16px; font-weight: 800; color: var(--lime); letter-spacing: 0.5px;">TRAINING COMPLETE</div>
         <div style="font-size: 14px; color: rgba(237,239,243,0.55); margin-top: 12px;">You've answered every message in the bank. ${answers.filter((a) => a.correct).length}/${answers.length} correct.</div>
       </div>`;
     } else {
@@ -352,7 +352,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
       <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/district/perimeter">← PERIMETER</a>
       <div style="flex: 1;">
-        <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 16px rgba(0,229,255,0.3);">SCAM DEFENSE TRAINING</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 16px rgba(0,229,255,0.3);">SCAM DEFENSE TRAINING</div>
       </div>
       <div style="display: flex; gap: 12px; align-items: center;">
         <div class="hud-stat hud-stat--amber" style="flex-shrink: 0;">

@@ -471,7 +471,7 @@ function renderAllOffline() {
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
     <div class="panel" style="max-width: 480px; margin: 48px 24px; padding: 48px 32px; text-align: center;">
-      <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">ALL ACCOUNTS OFFLINE</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">ALL ACCOUNTS OFFLINE</div>
       <div style="font-size: 13px; line-height: 1.6; color: rgba(237,239,243,0.55); margin-top: 14px;">Enable some accounts in Survey to get started.</div>
       <div style="margin-top: 28px;">
         <a class="btn-primary" style="text-decoration: none;" href="#/district/master-keys?tab=survey">OPEN SURVEY</a>
@@ -759,7 +759,7 @@ const STYLE = `
     .is-occupied .city-label__status::before { background: var(--magenta); }
     .is-contested .city-label__status::before { background: var(--cyan); }
     .is-secured .city-label__status { color: var(--lime); }
-    .city-label__name { margin-top: 5px; font-family: var(--font-display); font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: var(--text-strong);
+    .city-label__name { margin-top: 5px; font-family: var(--font-title); line-height: 1.2; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-strong);
       white-space: nowrap; }
     .city-label--master .city-label__name { font-size: 10.5px; }
     /* The district the next mission is in: the one lit card. The rest are quiet until they are done. */

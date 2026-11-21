@@ -28,7 +28,7 @@ export const GOV_CSS = `<style>
 .gov-banner{position:relative;margin:10px 0 0;padding:6px 10px;text-align:center;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:2px;color:#0b2a12;background:#3ccf5a;overflow:hidden}
 .gov-banner s{text-decoration-thickness:2px}
 .gov-banner b{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(-4deg);padding:1px 8px;font-size:11px;color:#b3001e;border:2px solid #b3001e;background:rgba(255,255,255,0.75)}
-.gov h1{margin:22px 0 6px;font-family:var(--font-display);font-size:clamp(28px,6vw,54px);font-weight:800;line-height:1;letter-spacing:2px;color:${PALE}}
+.gov h1{margin:22px 0 6px;font-family:var(--font-title);font-size:clamp(28px,6vw,54px);font-weight:800;line-height:1;letter-spacing:0.5px;color:${PALE}}
 .gov .gov-lede{max-width:62ch;margin:0 0 18px;font-size:16px;line-height:1.6;color:rgba(237,239,243,0.78)}
 .gov-map{position:relative;margin:0 -4px;border:1px solid rgba(0,229,255,0.25);background:radial-gradient(ellipse at 50% 30%,#0f1626 0%,#06080d 75%);box-shadow:inset 0 0 80px rgba(0,229,255,0.06)}
 .gov-map svg{display:block;width:100%;height:auto}
@@ -78,7 +78,7 @@ export const GOV_CSS = `<style>
 }
 .gov-pick{margin:10px 0 0;font-size:15px;line-height:1.5;color:var(--offwhite)}
 .gov-section{margin-top:34px}
-.gov-section h2{margin:0 0 4px;font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:1px;color:${PALE}}
+.gov-section h2{margin:0 0 4px;font-family:var(--font-title);line-height:1.2;font-size:20px;font-weight:800;letter-spacing:0.5px;color:${PALE}}
 .gov-section .sub{margin:0 0 12px;font-size:14px;color:rgba(237,239,243,0.6)}
 .gov-ruler{margin:8px 0 0}
 .gov-ruler ol{list-style:none;margin:0;padding:0}
@@ -95,7 +95,7 @@ export const GOV_CSS = `<style>
 @media (max-width:520px){.gov-ruler li{grid-template-columns:1fr;grid-template-areas:'num' 'bar' 'what'}.gov-axis{margin-left:0}}
 .gov-myths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
 .gov-myth{display:grid;grid-template-rows:auto 1fr;border:1px solid rgba(255,45,155,0.3)}
-.gov-myth .movie{padding:12px 14px;font-family:var(--font-display);font-size:15px;font-weight:800;letter-spacing:1px;color:${MAGENTA};background:rgba(255,45,155,0.07)}
+.gov-myth .movie{padding:12px 14px;font-family:var(--font-title);line-height:1.2;font-size:15px;font-weight:800;letter-spacing:0.5px;color:${MAGENTA};background:rgba(255,45,155,0.07)}
 .gov-myth .real{padding:12px 14px;color:#1d1d1b;background:#d8d6cf;font-family:'Courier New',Courier,monospace;font-size:14px;line-height:1.5}
 .gov-myth .real a{display:inline-block;margin-top:4px;font-size:12px;color:#0b3a8a}
 .gov-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}

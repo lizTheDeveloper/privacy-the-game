@@ -114,7 +114,7 @@ export function nextRungCard(rungs, { quiz = '' } = {}) {
 export const LADDER_CSS = `
 .sky-next{margin-top:12px;padding:14px 16px;background:#11151F;border:1px solid rgba(0,229,255,0.45);border-left:3px solid var(--cyan);border-radius:8px;font-size:15px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
 .sky-next .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin:0 0 6px}
-.sky-next h2{margin:0;font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:1px;color:var(--offwhite)}
+.sky-next h2{margin:0;font-family:var(--font-title);line-height:1.2;font-size:18px;font-weight:800;letter-spacing:0.5px;color:var(--offwhite)}
 .sky-next p{margin:6px 0}
 .sky-next .sky-rung-meta{font-size:13px;color:var(--offwhite)}
 .sky-next-go{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;margin-top:8px;text-decoration:none}
@@ -142,7 +142,7 @@ export const LADDER_CSS = `
 .sky-rung--amber .sky-rung-status{color:var(--amber)}
 .sky-rung--preview .sky-rung-name{color:rgba(237,239,243,0.75)}
 .sky-rung-next{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:#090B10;background:var(--lime);padding:1px 5px;border-radius:3px}
-.sky-rung-card h2{margin:0;font-family:var(--font-display);font-size:16px;font-weight:800;letter-spacing:1px}
+.sky-rung-card h2{margin:0;font-family:var(--font-title);line-height:1.2;font-size:16px;font-weight:800;letter-spacing:0.5px}
 .sky-rung-card p{margin:6px 0}
 .sky-rung-card a{color:var(--cyan)}
 .sky-rung-card .star-card-go a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--cyan);border-radius:6px;text-decoration:none}

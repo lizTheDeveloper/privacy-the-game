@@ -51,10 +51,10 @@ export function generateMilestoneCard(districtName, stats) {
 
   let nameSize = 32;
   ctx.fillStyle = '#EDEFF3';
-  ctx.font = `700 ${nameSize}px Orbitron, sans-serif`;
+  ctx.font = `700 ${nameSize}px "IBM Plex Sans", sans-serif`;
   while (name && ctx.measureText(name).width > 520 && nameSize > 16) {
     nameSize -= 2;
-    ctx.font = `700 ${nameSize}px Orbitron, sans-serif`;
+    ctx.font = `700 ${nameSize}px "IBM Plex Sans", sans-serif`;
   }
   ctx.fillText(name, 300, 152);
 

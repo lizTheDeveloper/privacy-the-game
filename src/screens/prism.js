@@ -19,7 +19,7 @@ const mine = (state, id) => Boolean(state?.accounts?.[id]?.enabled);
 const STYLE = `<style>
 .prism{max-width:860px;margin:0 auto;padding:0 16px 32px;box-sizing:border-box;color:var(--offwhite)}
 .prism .back-link{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);text-decoration:none}
-.prism h1{margin:8px 0 2px;font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:8px;color:#FF2D9B;text-shadow:0 0 22px rgba(255,45,155,0.45)}
+.prism h1{margin:8px 0 2px;font-family:var(--font-title);line-height:1.2;font-size:30px;font-weight:800;letter-spacing:0.5px;color:#FF2D9B;text-shadow:0 0 22px rgba(255,45,155,0.45)}
 .prism .prism-sub{margin:0 0 14px;font-family:var(--font-mono);font-size:11px;letter-spacing:2px;color:rgba(237,239,243,0.55)}
 .prism-diagram{display:block;width:100%;height:auto;margin:6px 0 4px;background:radial-gradient(ellipse at 60% 50%,#151a28 0%,#090B10 70%);border:1px solid rgba(255,45,155,0.2);border-radius:8px}
 .prism-diagram text{font-family:'JetBrains Mono',ui-monospace,monospace}

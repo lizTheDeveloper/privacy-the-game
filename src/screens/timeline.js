@@ -55,7 +55,7 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
       <div style="display: flex; align-items: center; gap: 14px;">
         ${platformIcon(platform, bState)}
         <div style="flex: 1;">
-          <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(platform.name)}</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(platform.name)}</div>
           ${profile?.joinYear ? `<div style="font-size: 13px; color: var(--offwhite); margin-top: 3px;">Editing your answers</div>` : ''}
         </div>
         ${closeBtn(platform)}
@@ -88,7 +88,7 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
       <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
         ${platformIcon(platform, bState)}
         <div style="flex: 1;">
-          <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(platform.name)}</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(platform.name)}</div>
           <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(0,229,255,0.6); margin-top: 3px;">Joined ${profile.joinYear} · ${yearsOn} year${yearsOn === 1 ? '' : 's'} of history</div>
         </div>
         <button type="button" class="btn-secondary" data-action="edit-social-profile" data-platform="${platform.id}" style="min-height: 44px; padding: 0 16px;">EDIT</button>
@@ -106,7 +106,7 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
     <div style="display: flex; align-items: center; gap: 14px;">
       ${platformIcon(platform, bState)}
       <div style="flex: 1;">
-        <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(platform.name)}</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(platform.name)}</div>
       </div>
       <button type="button" class="${lead ? 'btn-primary' : 'btn-secondary'}" data-action="edit-social-profile" data-platform="${platform.id}" style="flex-shrink: 0; min-height: 44px; padding: 0 18px;">SET UP</button>
     </div>
@@ -138,7 +138,7 @@ export function renderSocialForm(platformId, profile = null) {
   const year = profile?.joinYear ?? null;
   return `
   <div id="social-profile-form" data-platform="${platformId}" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,229,255,0.2);">
-    <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; margin-bottom: 16px;">YOUR ${esc(platform.name.toUpperCase())} HISTORY</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 0.5px; margin-bottom: 16px;">YOUR ${esc(platform.name.toUpperCase())} HISTORY</div>
 
     <div style="margin-bottom: 20px;">
       <label for="social-join-year" style="${FORM_LABEL}">What year did you join?</label>
@@ -270,7 +270,7 @@ export function renderTimeline(state, ui = {}) {
       <div style="display: flex; align-items: center; gap: 16px;">
         <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
-          <div style="font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
           ${simple ? '' : '<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>'}
         </div>
       </div>

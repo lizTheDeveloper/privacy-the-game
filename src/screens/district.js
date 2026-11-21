@@ -224,7 +224,7 @@ function renderNotFound() {
   return `
   <div class="scanlines">
     <div class="panel" style="margin: 48px 24px; padding: 48px 24px; text-align: center;">
-      <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">DISTRICT NOT FOUND</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">DISTRICT NOT FOUND</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.5); margin-top: 12px;">This part of the city does not exist yet.</div>
       <div style="margin-top: 28px;">
         <a class="btn-secondary" style="text-decoration: none;" href="#/city">← CITY</a>
@@ -254,7 +254,7 @@ function renderDisabledPanel(districtId) {
   return `
   <div style="padding: 12px 24px 24px;">
     <div class="panel" style="padding: 32px; text-align: center;">
-      <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">ALL ACCOUNTS FOR THIS DISTRICT ARE DISABLED</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">ALL ACCOUNTS FOR THIS DISTRICT ARE DISABLED</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.55); margin-top: 12px;">Re-enable them in <a href="#/district/${districtId}?tab=survey" style="color: var(--cyan); font-weight: 600;">Survey</a>.</div>
     </div>
   </div>`;
@@ -692,7 +692,7 @@ function renderQuizPanel(state, lead = false, hoisted = false) {
   return `
       <div data-quiz-panel style="padding: 16px; text-align: center; border-top: 1px solid rgba(0,229,255,0.08);">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-          <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">PHISHING TRAINING</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">PHISHING TRAINING</div>
           ${statusTag(badge, statusColor, ' data-quiz-badge')}
         </div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
@@ -776,7 +776,7 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
       <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
         <span class="facility-icon">${renderBuilding(facilityId, buildingState, 40)}</span>
         <div style="flex: 1; min-width: 0;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId, { simple })}</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(account.name)}${prismTag(facilityId, { simple })}</div>
           <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
             <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
           </div>
@@ -873,7 +873,7 @@ function renderOptInPanel(district) {
   return `
   <div style="padding: 12px 24px 24px;">
     <div class="panel" style="padding: 28px; max-width: 640px; margin: 0 auto;">
-      <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">${esc(district.optInQuestion.toUpperCase())}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">${esc(district.optInQuestion.toUpperCase())}</div>
       <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6; margin-top: 12px;">${esc(district.optInWho)}</div>
       <div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.6; margin-top: 10px;">The Field is optional. Until you turn it on, it never counts toward your city. You can turn it off again and keep your progress.</div>
       <div style="margin-top: 18px;"><button class="btn-primary" data-action="district-opt-in" data-district="${esc(district.id)}">TURN ON ${esc(district.name.toUpperCase())}</button></div>
@@ -1065,7 +1065,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     content = `
     <div style="padding: 12px 24px 24px;">
       <div class="panel" style="padding: 32px; text-align: center;">
-        <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 12px;">VEHICLE GARAGE</div>
+        <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; margin-bottom: 12px;">VEHICLE GARAGE</div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 20px;">${vehicleCount > 0 ? `You have ${vehicleCount} vehicle${vehicleCount === 1 ? '' : 's'} in your garage. Add more or start missions.` : 'Add your vehicles to see what data they collect and how to opt out.'}</div>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
           <a class="btn-primary" style="text-decoration: none;" href="#/garage">OPEN GARAGE</a>
@@ -1079,7 +1079,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     <div style="padding: 12px 24px 0;">
       <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 200px;">
-          <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 2px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. ${esc(TIMELINE_DOES)}` : `Map your social media history first. ${esc(TIMELINE_DOES)}`}</div>
         </div>
         <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>

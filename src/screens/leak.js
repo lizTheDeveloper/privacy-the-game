@@ -22,7 +22,7 @@ export const LEAK_LABEL = Object.freeze({
 export const LEAK_CSS = `<style>
 .leak{max-width:820px;margin:0 auto;padding:0 16px 32px;box-sizing:border-box;color:var(--offwhite)}
 .leak .back-link{display:inline-flex;align-items:center;min-height:44px;margin:4px 14px 0 0;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);text-decoration:none}
-.leak h1{margin:8px 0 2px;font-family:var(--font-display);font-size:24px;font-weight:800;letter-spacing:4px;color:#FF2D9B;overflow-wrap:anywhere}
+.leak h1{margin:8px 0 2px;font-family:var(--font-title);line-height:1.2;font-size:24px;font-weight:800;letter-spacing:0.5px;color:#FF2D9B;overflow-wrap:anywhere}
 .leak .leak-meta{margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:rgba(237,239,243,0.6)}
 .leak-panel{margin-top:14px;padding:14px 16px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.65;overflow-wrap:anywhere}
 .leak-panel .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,45,155,0.75);margin-bottom:6px}
