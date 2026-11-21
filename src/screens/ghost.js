@@ -12,7 +12,7 @@ import { fillBar } from '../components/fill-bar.js';
 import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
-const STEP = 'font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--cyan); margin-bottom: 12px;';
+const STEP = 'font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); margin-bottom: 12px;';
 
 function shell(state, inner) {
   return `
@@ -62,7 +62,7 @@ function simpleGhost(state, view) {
     </div>`;
   return shell(state, `
   <div style="max-width: 640px; margin: 0 auto; padding: 18px 24px 0;">
-    <div style="font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: 3px; color: var(--cyan); text-shadow: 0 0 24px rgba(0,229,255,0.5);">GO GHOST</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 28px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 24px rgba(0,229,255,0.5);">GO GHOST</div>
     ${simpleLead(GHOST_LEADS.ghost)}
     <div data-ghost-steps style="margin: 0 0 4px;">
       <div style="font-size: 15px; font-weight: 600; color: var(--offwhite); margin-bottom: 6px;">Step ${step} of 2${one ? ': Turn us off' : ': See what we can see'}</div>
@@ -82,7 +82,7 @@ export function renderGhost(state, view = {}) {
   return shell(state, `
   <div style="text-align: center; padding: 44px 24px 0;">
     <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px;">ONE LAST JOB</div>
-    <div style="font-family: var(--font-display); font-size: 48px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 48px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
     ${renderScout(GHOST_DIALOGUE.briefing, { feeling: 'thinkingB' })}
@@ -116,7 +116,7 @@ export function renderGhostEarly(state, view = {}) {
   return shell(state, `
   <div style="text-align: center; padding: 44px 24px 0;">
     <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--magenta); letter-spacing: 4px;">BEFORE THE CITY IS YOURS</div>
-    <div style="font-family: var(--font-display); font-size: 48px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 48px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
     ${readLevel(state) === 'simplest' ? simpleLead(GHOST_LEADS.early) : ''}
@@ -173,7 +173,7 @@ export function renderGhostDone(state, view = {}) {
   const info = getGhostInfo();
   return shell(state, `
   <div style="text-align: center; padding: 56px 24px 0;">
-    <div style="font-family: var(--font-display); font-size: 44px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5);">YOU HAVE GONE GHOST</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 44px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5);">YOU HAVE GONE GHOST</div>
     ${readLevel(state) === 'simplest' ? `<p class="simple-lead" data-simple-lead style="margin-top: 16px;">${countsLine(view, info)}</p>` : `<div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>`}
   </div>
   <div style="max-width: 640px; margin: 32px auto 0; padding: 0 24px;">

@@ -47,7 +47,7 @@ function renderQuestCard(state, quest) {
   return `
   <a href="${esc(to.href)}" class="panel" data-quest="${esc(quest.id)}" style="display: block; padding: 18px 20px; text-decoration: none; border: 1px solid rgba(0,229,255,0.12); transition: border-color 0.15s, background 0.15s;">
     <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
-      <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(quest.title)}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(quest.title)}</div>
       <div class="badge" style="letter-spacing: 1px; font-size: 8px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15); flex-shrink: 0;">${districtLabel(quest)}</div>
     </div>
     <div style="font-size: 12px; line-height: 1.5; color: rgba(237,239,243,0.5);">${esc(quest.description)}</div>
@@ -71,7 +71,7 @@ export function renderQuickQuest(state) {
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
         <a class="btn-secondary" style="flex-shrink: 0; display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
         <div>
-          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">QUICK QUEST</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">QUICK QUEST</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Something urgent? Pick your problem and we'll take you where you need to go.</div>
         </div>
       </div>

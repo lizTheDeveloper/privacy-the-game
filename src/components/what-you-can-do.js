@@ -83,7 +83,7 @@ export const WYCD_CSS = `<style>
 .wycd-all-done{color:var(--lime);font-weight:700}
 .wycd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .wycd .wycd-go,.wycd .wycd-done{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:44px;box-sizing:border-box;padding:10px 14px;text-align:left;text-decoration:none;letter-spacing:0;overflow-wrap:anywhere}
-.wycd .wycd-name{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px}
+.wycd .wycd-name{font-family:var(--font-title);line-height:1.2;font-size:13px;font-weight:700;letter-spacing:0.5px}
 .wycd .wycd-opens{font-family:var(--font-body,system-ui,sans-serif);font-size:14px;font-weight:500;letter-spacing:0;text-transform:none}
 .wycd a.btn-primary,.wycd a.btn-primary .wycd-opens{color:#090B10}
 .wycd a.btn-secondary{color:var(--offwhite)}

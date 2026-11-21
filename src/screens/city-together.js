@@ -85,7 +85,7 @@ function shell(inner, state) {
   ${renderHud(state)}
   <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
     <a href="#/city" class="btn-secondary" style="display: inline-block; text-decoration: none;">← CITY</a>
-    <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">THE WHOLE CITY</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">THE WHOLE CITY</div>
   </div>
   <div style="padding: 20px 24px 32px;">
     ${readLevel(state) === 'simplest' ? simpleLead(TOGETHER_LEAD) : `<div style="${MUTED} margin-bottom: 20px;">Everyone playing Reclaim City, together. No one is ranked.</div>`}

@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.46.0 (2026-11-21): Titles in IBM Plex Sans
+
+Players said the titles were hard to read. The game's titles and headings were in Orbitron, a wide, square display font. They're now in **IBM Plex Sans**, a plain font that's easy to read, in both Simple and Advanced.
+
+- **What changed:** district titles (THE MASTER KEYS), the district names on the city map, building titles (GMAIL), mission titles in a briefing and on What's next, and screen headings: LIBERATED, GO GHOST, PRISM, Who gets it, the broker sky, Quick Quest, Your City, the garage and the timeline. Building names in a district, the Scout's "Nice work!" and the bug reporter's title changed too. The share card's district name is in Plex now. The card still says DISTRICT LIBERATED.
+- **Closer letters.** Orbitron was spaced 2–8px apart. The titles are now 0.5px, so a word reads as one word. THE MASTER KEYS fits on one line on a phone now, so the district's bright button is 26px higher.
+- **The same:** the words, capital letters, colours and glow. Small labels, badges, buttons and the RECLAIM CITY name stay in Orbitron for now.
+- Nothing new is tracked or sent.
+
 ## 7.45.2 (2026-11-21): SEAL IT on the first screen when the open door is further down
 
 7.45.1 put a building's bright button on a phone's first screen in almost every case. Twelve were left: you set up two-step sign-in before checking for breaches, so the open door is the 2nd or 3rd in the list, and its SEAL IT ended 861 to 899px down a 390x844 phone.

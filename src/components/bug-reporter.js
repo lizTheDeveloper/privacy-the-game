@@ -87,7 +87,7 @@ export const STYLE = `
 .bug-dialog::backdrop { background: rgba(5,6,10,0.75); }
 .bug-dialog__close { position: absolute; top: 8px; right: 8px; min-width: 44px; min-height: 44px; background: none; border: 0;
   color: rgba(237,239,243,0.6); font-size: 24px; cursor: pointer; }
-.bug-dialog__title { font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: 3px; color: var(--cyan); margin: 0 40px 4px 0; }
+.bug-dialog__title { font-family: var(--font-title); line-height: 1.2; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; color: var(--cyan); margin: 0 40px 4px 0; }
 .bug-dialog__sub { font-size: 13px; color: rgba(237,239,243,0.7); margin: 0 0 14px; }
 .bug-cat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .bug-cat { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 10px; text-align: left; cursor: pointer;

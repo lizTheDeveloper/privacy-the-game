@@ -60,7 +60,7 @@ function districtRow(state, district) {
   return `
   <a href="${garage ? '#/garage' : `#/district/${district.id}`}" data-district-row="${district.id}" style="display: flex; align-items: center; gap: 14px; min-height: 44px; text-decoration: none; color: inherit;">
     <div style="width: 140px; flex-shrink: 0;">
-      <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 1px; color: ${nameColor};">${district.name.toUpperCase()}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: ${nameColor};">${district.name.toUpperCase()}</div>
       <div style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; color: var(--text-dim); margin-top: 3px;">CH ${district.chapter}</div>
     </div>
     ${bar}
@@ -263,7 +263,7 @@ export function renderStats(state, view = {}) {
   ${renderHud(state)}
   <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
     <a href="#/city" class="btn-secondary" style="display: inline-block; text-decoration: none;">← CITY</a>
-    <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">YOUR CITY</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 700; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(0,229,255,0.3);">YOUR CITY</div>
     <div style="flex: 1;"></div>
     <a href="#/city-together" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: #00E5FF; text-decoration: none;">THE WHOLE CITY →</a>
   </div>

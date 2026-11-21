@@ -132,7 +132,7 @@ export function renderVehicleCard(state, vehicle, index, { confirmRemove = false
       ${picture}
     </div>
     <div style="text-align: center;">
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #EDEFF3; letter-spacing: 1px;">${esc(vehicle.year)} ${esc(makeLabel(vehicle.make))} ${esc(vehicle.model)}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: #EDEFF3; letter-spacing: 0.5px;">${esc(vehicle.year)} ${esc(makeLabel(vehicle.make))} ${esc(vehicle.model)}</div>
       ${vehicle.nickname ? `<div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(0,229,255,0.6); margin-top: 4px;">"${esc(vehicle.nickname)}"</div>` : ''}
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(237,239,243,0.3); margin-top: 4px;">Added ${new Date(vehicle.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
       ${note}
@@ -258,7 +258,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
     ${renderHud(state)}
     <div style="padding: 20px 24px 0;">
       <a href="#/district/freeway" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4); margin-top: 14px;">YOUR GARAGE</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4); margin-top: 14px;">YOUR GARAGE</div>
       ${simpleLead(GARAGE_LEAD)}
       ${simpleGo(state)}
     </div>
@@ -276,7 +276,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
       <div style="display: flex; align-items: center; gap: 16px;">
         <a href="#/district/freeway" style="flex-shrink: 0; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
-          <div style="font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">VEHICLE GARAGE</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">VEHICLE GARAGE</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Your connected vehicles. Add cars to see what data they share and opt out.</div>
         </div>
       </div>

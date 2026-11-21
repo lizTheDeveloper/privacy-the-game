@@ -245,7 +245,7 @@ export function renderBankNotesScreen(state, { from = null, editId = null, error
     ${renderHud(state)}
     <div class="bank-notes" style="max-width: 720px; margin: 0 auto; padding: 16px;">
       <div style="margin-bottom: 16px;">${back}</div>
-      <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px;">YOUR BANK NOTES</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px;">YOUR BANK NOTES</div>
       <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6; margin-top: 8px;">Reclaim City can’t know which banks you use. Write down where each one logs in and resets its password, and the Vault’s missions link straight there. You don’t have to: every mission also has steps that work at any bank.</div>
       ${renderManagerPointer(state, { tail: MANAGER_POINTER_TAIL })}
       ${notes.length ? `<div class="panel" data-bank-saved style="padding: 16px 20px; margin-top: 20px;">
