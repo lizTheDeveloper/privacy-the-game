@@ -311,7 +311,7 @@ function actorLines(actor) {
 
 // first: the first door still to close, unfolded at every width; lit: its button is the screen's
 // one bright button. Every other SEAL IT is outlined.
-function entry(state, accountId, e, sealing, { first: isFirst = false, lit = false } = {}) {
+function entry(state, accountId, e, sealing, { first: isFirst = false, lit = false, simple = false } = {}) {
   const s = entryState(state, accountId, e);
   const target = entryTarget(state, accountId, e);
   const filled = lit ? 'interior-btn btn-primary' : 'interior-btn interior-btn--quiet btn-secondary';
@@ -331,6 +331,9 @@ function entry(state, accountId, e, sealing, { first: isFirst = false, lit = fal
   const first = actors[0].split(/\s+/).length > 6 ? `${actors[0].split(/[,(]/)[0].trim()}…` : actors[0];
   const who = `${first}${actors.length > 1 ? ` +${actors.length - 1}` : ''}`;
   const label = STATE_LABEL[s.state] ?? 'Not checked yet';
+  // Simple: an open door's fix and its SEAL IT come before how they get in, so the button is on
+  // a phone's first screen even when this door is 2nd or 3rd. The same words, reordered.
+  const sealFirst = simple && s.state === 'open' && Boolean(e.fix || target);
   const icon = ICON[s.state] ?? '?';
   return `
       <div class="entry entry--${s.state}${sealing.has(e.id) ? ' entry--sealing' : ''}${isFirst ? ' entry--first' : ''}" data-entry="${esc(e.id)}" data-state="${s.state}">
@@ -341,8 +344,9 @@ function entry(state, accountId, e, sealing, { first: isFirst = false, lit = fal
           <div class="entry-where">${esc(METAPHOR[e.metaphor] ?? e.metaphor)}</div>
           <div class="entry-actors">${actorLines(e.actor)}</div>
           ${e.actorNote ? `<div class="dim entry-note">${esc(e.actorNote)}</div>` : ''}
-          <div class="entry-how">${esc(e.how)}</div>
-          ${status}
+          ${sealFirst ? `${status}
+          ` : ''}<div class="entry-how">${esc(e.how)}</div>
+          ${sealFirst ? '' : status}
           ${sourceLinks(e.sources)}
         </div>
         </div></details>
@@ -352,7 +356,7 @@ function entry(state, accountId, e, sealing, { first: isFirst = false, lit = fal
 function ground(ctx, interior, sealing, plan) {
   const { state, accountId } = ctx;
   return floor(ctx, 'ground', '▼ Ground floor · Entries', interior.entries
-    .map((e) => entry(state, accountId, e, sealing, { first: e.id === plan.firstDoor?.id, lit: plan.doorLit && e.id === plan.firstDoor?.id }))
+    .map((e) => entry(state, accountId, e, sealing, { first: e.id === plan.firstDoor?.id, lit: plan.doorLit && e.id === plan.firstDoor?.id, simple: ctx.simple }))
     .join(''));
 }
 
