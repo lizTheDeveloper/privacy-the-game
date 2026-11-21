@@ -56,7 +56,9 @@ export function renderMilestone(state, districtId) {
   const left = calcDistrictSecured(state, districtId).resets.left;
   const resetsLeft = left > 0 ? `${left} password${left === 1 ? '' : 's'} still to change` : '';
   // Simple mode carries on from What's next (one card), not the next district's tabs.
-  const go = resetsLeft ? 'btn-secondary' : 'btn-primary';
+  // The buttons and links are the same whatever the flags are (security review, 2026-11-20): which
+  // link is bright, or there at all, would steer the next pageview by the password answer.
+  const go = 'btn-primary';
   const continueLink = simple
     ? '<a class="' + go + '" href="#/next" style="display: inline-block; text-decoration: none;">WHAT’S NEXT &rarr;</a>'
     : nextDistrict
@@ -75,7 +77,7 @@ export function renderMilestone(state, districtId) {
     <div style="position: relative; text-align: center; margin-top: 16px;">
       <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">${resetsLeft ? 'MISSIONS DONE' : 'LIBERATED'}</div>
       <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${resetsLeft ? '' : `${district.name.toUpperCase()} IS SECURE`}</div>
-      ${resetsLeft ? `<div data-resets-left style="font-size: 17px; font-weight: 600; color: var(--offwhite); margin-top: 4px;">${resetsLeft.charAt(0).toUpperCase()}${resetsLeft.slice(1)}.</div>` : ''}
+      ${resetsLeft ? `<div data-resets-left style="font-size: 17px; font-weight: 600; color: var(--offwhite); margin-top: 4px;">${resetsLeft.charAt(0).toUpperCase()}${resetsLeft.slice(1)}. They’re on the district page.</div>` : ''}
       <div style="font-size: 13px; color: var(--text-quiet); margin-top: 8px;">${district.description}</div>
     </div>
     <div class="milestone-buildings" style="position: relative; display: flex; gap: 4px; align-items: flex-end; justify-content: center; margin: 44px 0 10px;">
@@ -99,7 +101,7 @@ export function renderMilestone(state, districtId) {
     ${simple ? `<div class="milestone-city-wrap" style="position: relative; max-width: 512px; margin: -20px auto 24px;">${cityBar(state)}</div>` : ''}
     <div class="pin-bottom milestone-actions" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
       <button class="btn-secondary" data-action="share-card" data-district="${districtId}">SHARE CARD</button>
-      ${resetsLeft ? `<a class="btn-primary" href="#/district/${districtId}" style="display: inline-block; text-decoration: none;">CHANGE THEM &rarr;</a>` : ''}
+      <a class="btn-secondary" data-milestone-back href="#/district/${districtId}" style="display: inline-block; text-decoration: none; text-transform: none;">&larr; Back to ${district.name}</a>
       ${continueLink}
     </div>
     <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin: 12px 0 20px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--offwhite);"></div>

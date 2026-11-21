@@ -105,6 +105,14 @@ describe('flagged passwords never change what is tracked', () => {
     return JSON.parse(JSON.stringify({ rows, arrivals }));
   }
 
+  // Every link and button on a screen, in order: tag, class, where it goes, what it does.
+  const controls = (html) => [...html.matchAll(/<(a|button)\b([^>]*)>/g)].map(([, tag, attrs]) => ({
+    tag,
+    cls: attrs.match(/class="([^"]*)"/)?.[1] ?? '',
+    href: attrs.match(/href="([^"]*)"/)?.[1] ?? null,
+    action: attrs.match(/data-action="([^"]*)"/)?.[1] ?? null,
+  }));
+
   async function playthrough(flagged) {
     const { MISSIONS: ALL } = await import('../../src/data/missions.js');
     const last = ALL.find((m) => m.id === 'credit_card-fortify-alerts') ?? ALL.find((m) => m.id.startsWith('credit_card-fortify'));
@@ -159,7 +167,11 @@ describe('flagged passwords never change what is tracked', () => {
     // What is shown does differ: the milestone and the district say the passwords are left.
     expect(none.shown.milestone).toContain('LIBERATED');
     expect(two.shown.milestone).toContain('MISSIONS DONE');
-    expect(two.shown.milestone).toContain('2 passwords still to change.');
+    expect(two.shown.milestone).toContain('2 passwords still to change. They’re on the district page.');
+    // Its buttons and links: the same targets, classes and order either way (security review).
+    expect(controls(two.shown.milestone)).toEqual(controls(none.shown.milestone));
+    expect(controls(none.shown.milestone).filter((c) => /btn-primary/.test(c.cls))).toHaveLength(1);
+    expect(controls(none.shown.milestone).some((c) => c.href === '#/district/vault')).toBe(true);
     expect(two.shown.milestone).not.toContain('LIBERATED');
     expect(none.shown.before).toBe(100);
     expect(two.shown.before).toBeLessThan(100);
