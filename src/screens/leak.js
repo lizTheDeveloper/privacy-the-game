@@ -5,6 +5,7 @@ import { renderHud } from '../components/hud.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
 import { agencyName } from '../data/leaks/index.js';
+import { DISTRICTS } from '../data/districts.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const mine = (state, id) => Boolean(state?.accounts?.[id]?.enabled);
@@ -61,9 +62,34 @@ function accountsBlock(state, entry) {
   return `<div class="leak-panel"><div class="label">IN YOUR CITY</div><div class="leak-accts">${items}</div></div>`;
 }
 
-export function renderLeak(state, entry) {
+// The screen a badge was tapped on, kept by app.js in memory (never in the URL) while the player
+// stays on leak pages; gone on leaving them. Like the saints gallery's saintsOrigin.
+const ORIGINS = new Set(['building', 'prism', 'government', 'district', 'saints', 'city']);
+export function leakOrigin(route, lastRoute, current = null) {
+  if (route?.screen !== 'leak') return null;
+  if (lastRoute && lastRoute.screen !== 'leak' && ORIGINS.has(lastRoute.screen)) {
+    return { screen: lastRoute.screen, id: typeof lastRoute.params?.id === 'string' ? lastRoute.params.id : null };
+  }
+  return current;
+}
+
+// Back to where the badge was tapped, then the government map and PRISM, each once.
+function backLinks(state, from) {
+  const link = (href, text, back = false) => `<a class="back-link"${back ? ' data-leak-back' : ''} href="${href}">${text}</a>`;
+  const gov = (back) => link('#/government', `${back ? '←' : '◎'} WHO GETS YOUR DATA`, back);
+  const prism = (back) => link('#/prism', `${back ? '←' : '◈'} PRISM`, back);
+  if (from?.screen === 'prism') return prism(true) + gov(false);
+  let back = '';
+  if (from?.screen === 'building' && from.id && ACCOUNTS[from.id] && hasInterior(from.id)) back = link(`#/building/${esc(from.id)}`, `← ${esc(ACCOUNTS[from.id].name.toUpperCase())}`, true);
+  else if (from?.screen === 'district' && DISTRICTS.some((d) => d.id === from.id)) back = link(`#/district/${esc(from.id)}`, `← ${esc(DISTRICTS.find((d) => d.id === from.id).name.toUpperCase())}`, true);
+  else if (from?.screen === 'saints') back = link('#/saints', '← SAINTS', true);
+  else if (from?.screen === 'city') back = link('#/city', '← THE CITY', true);
+  return back ? back + gov(false) + prism(false) : gov(true) + prism(false);
+}
+
+export function renderLeak(state, entry, { from = null } = {}) {
   if (!entry) {
-    return `${renderHud(state)}${LEAK_CSS}<div class="screen leak"><a class="back-link" href="#/government">← WHO GETS YOUR DATA</a><h1>NOT FOUND</h1><p>That badge isn't in the city's records.</p></div>`;
+    return `${renderHud(state)}${LEAK_CSS}<div class="screen leak">${backLinks(state, from)}<h1>NOT FOUND</h1><p>That badge isn't in the city's records.</p></div>`;
   }
   const meta = [entry.agency, entry.year, LEAK_LABEL[entry.leak] ?? ''].filter(Boolean).join(' · ');
   const saint = entry.leak === 'snowden' || entry.leak === 'prism'
@@ -71,7 +97,7 @@ export function renderLeak(state, entry) {
     : '';
   const sources = list(entry.sources).map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join('');
   return `${renderHud(state)}${LEAK_CSS}<div class="screen leak">`
-    + '<a class="back-link" href="#/government">← WHO GETS YOUR DATA</a><a class="back-link" href="#/prism">◈ PRISM</a>'
+    + backLinks(state, from)
     + `<h1>${esc(entry.title)}</h1><p class="leak-meta">${esc(meta.toUpperCase())}</p>`
     + `<div class="leak-panel"><div class="label">WHAT IT IS</div><p style="margin: 0;">${esc(entry.summary)}</p></div>`
     + flowBlock(entry.flow)

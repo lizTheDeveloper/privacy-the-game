@@ -1,4 +1,4 @@
-// The Field (chapter 13): Field Opsec as an OPT-IN district. It starts off, never
+// The Field (chapter 14): Field Opsec as an OPT-IN district. It starts off, never
 // counts toward the city until a player turns it on, keeps progress when turned off,
 // covers every course playbook, and links (shares) rather than repeats what other
 // districts already teach.
@@ -40,9 +40,9 @@ function everythingElseDone() {
 }
 
 describe('The Field is opt-in', () => {
-  it('is a chapter-13 facility district flagged optIn, with nine buildings in order', () => {
+  it('is a chapter-14 facility district flagged optIn, with nine buildings in order', () => {
     expect(FIELD).toBeTruthy();
-    expect(FIELD.chapter).toBe(13);
+    expect(FIELD.chapter).toBe(14);
     expect(FIELD.type).toBe('facility');
     expect(OPT_IN_DISTRICTS.has('field')).toBe(true);
     expect(FIELD.facilityOrder).toEqual(fieldAccounts.map(([id]) => id));

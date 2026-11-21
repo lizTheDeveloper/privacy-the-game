@@ -3,6 +3,7 @@ import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { getBuildingState } from '../utils/calc.js';
 import { getEras } from '../utils/social-timeline.js';
+import { fillBar } from '../components/fill-bar.js';
 
 function esc(v) {
   return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -34,7 +35,8 @@ function platformIcon(platform, bState) {
   return `<span class="tl-icon${same ? ' tl-icon--same' : ''}">${renderBuilding(platform.id, bState, 48)}</span>`;
 }
 
-function renderPlatformCard(state, platform) {
+// lead: the first platform not set up yet, the page's one bright button.
+function renderPlatformCard(state, platform, lead = false) {
   const account = ACCOUNTS[platform.id];
   if (!account || !state.accounts[platform.id]?.enabled) return '';
 
@@ -68,7 +70,7 @@ function renderPlatformCard(state, platform) {
           <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(platform.name)}</div>
           <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(0,229,255,0.6); margin-top: 3px;">Joined ${profile.joinYear} · ${yearsOn} year${yearsOn === 1 ? '' : 's'} of history</div>
         </div>
-        <span data-action="edit-social-profile" data-platform="${platform.id}" style="cursor: pointer; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.35); padding: 6px 12px; border: 1px solid rgba(255,255,255,0.08);">EDIT</span>
+        <button type="button" class="btn-secondary" data-action="edit-social-profile" data-platform="${platform.id}" style="min-height: 44px; padding: 0 16px;">EDIT</button>
       </div>
       <div style="font-family: var(--font-display); font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
       ${eraRows}
@@ -85,7 +87,7 @@ function renderPlatformCard(state, platform) {
       <div style="flex: 1;">
         <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(platform.name)}</div>
       </div>
-      <span data-action="edit-social-profile" data-platform="${platform.id}" style="cursor: pointer; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); box-shadow: 0 0 10px rgba(0,229,255,0.1);">SET UP</span>
+      <button type="button" class="${lead ? 'btn-primary' : 'btn-secondary'}" data-action="edit-social-profile" data-platform="${platform.id}" style="flex-shrink: 0; min-height: 44px; padding: 0 18px;">SET UP</button>
     </div>
   </div>`;
 }
@@ -160,8 +162,15 @@ export { getEras };
 export function renderTimeline(state) {
   const platforms = SOCIAL_PLATFORMS.filter((p) => state.accounts[p.id]?.enabled);
 
-  const cards = platforms.map((p) => renderPlatformCard(state, p)).join('');
-  const unconfigured = platforms.filter((p) => !state.socialHistory?.[p.id]?.joinYear).length;
+  const isSet = (p) => Boolean(state.socialHistory?.[p.id]?.joinYear);
+  const lead = platforms.find((p) => !isSet(p))?.id ?? null;
+  const cards = platforms.map((p) => renderPlatformCard(state, p, p.id === lead)).join('');
+  const unconfigured = platforms.filter((p) => !isSet(p)).length;
+  const done = platforms.length - unconfigured;
+  // How many are set up, as a bar that fills.
+  const progress = platforms.length
+    ? `<div data-timeline-progress style="margin-bottom: 16px;"><div style="font-size: 14px; font-weight: 600; color: var(--offwhite); margin-bottom: 6px;">${done} of ${platforms.length} set up</div>${fillBar({ key: 'timeline:setup', done, total: platforms.length, size: 'mid', label: `${done} of ${platforms.length} set up` })}</div>`
+    : '';
 
   return `
   <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
@@ -182,6 +191,7 @@ export function renderTimeline(state) {
         </div>
       ` : ''}
       ${unconfigured > 0 ? `<div data-setup-note style="font-size: 11px; color: rgba(237,239,243,0.4); margin-bottom: 10px;">Tell us about your history here to plan your review.</div>` : ''}
+      ${progress}
       ${cards}
       <div id="social-form-container"></div>
     </div>

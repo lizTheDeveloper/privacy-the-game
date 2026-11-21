@@ -1,4 +1,4 @@
-// The Field (chapter 13): one building per unit of the Field Opsec course.
+// The Field (chapter 14): one building per unit of the Field Opsec course.
 // `playbooks` lists the course playbooks each building's missions come from;
 // tests/the-field.test.js checks every playbook 01-29 is covered somewhere.
 const occ = 'assets/buildings/iso_occupied.png';

@@ -6,6 +6,7 @@ import { renderStats } from '../src/screens/stats.js';
 import { DISTRICTS } from '../src/data/districts.js';
 import { ACCOUNTS } from '../src/data/accounts.js';
 import { createInitialState } from '../src/state.js';
+import { setReadLevel } from '../src/utils/reading.js';
 import { indefinite } from '../src/utils/article.js';
 
 beforeEach(() => {
@@ -86,7 +87,9 @@ describe('Stats draws it tighter on phones', () => {
     const html = renderStats(createInitialState());
     expect(html).toContain('class="stats-dials"');
     expect(html).toContain('class="stats-findings"');
-    for (const w of ['INTEGRITY', 'EXPOSURE', 'STREAK', 'BEST', 'ADDRESSES IN A BREACH', 'PASSWORDS RESET', '2FA ENABLED', 'OPT-OUTS FILED']) expect(html).toContain(w);
+    // Simple (the default) says "two-step sign-in"; Advanced keeps 2FA.
+    for (const w of ['INTEGRITY', 'EXPOSURE', 'STREAK', 'BEST', 'ADDRESSES IN A BREACH', 'PASSWORDS RESET', 'TWO-STEP SIGN-IN ON', 'OPT-OUTS FILED']) expect(html).toContain(w);
+    expect(renderStats(setReadLevel(createInitialState(), 'full'))).toContain('2FA ENABLED');
     const phone = css.slice(css.indexOf('/* stats: start */'), css.indexOf('/* stats: end */'));
     expect(phone).toMatch(/@media \(max-width: 899px\)/);
     expect(phone).toMatch(/\.stats-dials \{[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);

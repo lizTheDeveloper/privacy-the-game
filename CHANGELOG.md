@@ -2,6 +2,24 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.37.0 (2026-11-20): The side screens, questioned one by one
+
+The same screen-by-screen look at the layout, on the screens off to the side: PRISM, going ghost, the phishing quiz, the broker sky, Your City, the government map, a badge's page, the garage, the social timeline, the Big Check, the saints and The Whole City.
+
+- **PRISM.** PRISM BREAK and LIGHT A CANDLE had cyan words on a lime button, almost impossible to read; the words are dark now. PRISM BREAK is the page's one bright button. In Advanced, WHAT YOU CAN DO comes right after the list of companies instead of at the very bottom. In Simple, the page goes: the picture, "5 of your companies were on the slides", what you can do, then the rest. Reddit isn't listed twice under the cables, and those names are plain words, not boxes that looked like buttons. The magenta key says "a company that runs accounts on your list", which is true before and after you change your list.
+- **Going ghost.** Going ghost early no longer ends with "Not the brokers… the city's yours": Scout says the brokers are still out there and your missions are waiting. Before GO GHOST NOW, three readable lines say what it does, including that you can't undo it once tonight's run has deleted your data (you can still cancel before then). What our analytics can see about you is readable, not grey.
+- **The phishing quiz.** After you answer, the page scrolls to the verdict so NEXT is on screen. Finishing the twelve now shows your result: a bar for how many you got right, the kinds of message you missed, BACK TO THE PERIMETER and KEEP PRACTICING. The quiz's count is "IN A ROW", so it isn't confused with your daily streak, and Scout's line is easy to read.
+- **The broker sky.** The list that slides up on a phone is solid, so the map's labels don't show through it. "WHERE DO YOU LIVE?" is said once. The "archived" source links and "File it" are full-size tap targets.
+- **Your City.** The districts are in chapter order. The Foundry and The Grid were both chapter 10; now The Foundry is 10, The Grid 11, The Clinic 12, The Trail 13 and The Field 14, the order you play them in (and finishing The Foundry now leads on to The Grid). The Freeway says "Add a car in the Garage to open it" and goes to the garage, instead of "LOCKED CONTENT". There's a bright "Next:" button for your next mission, the same one What's next shows. Each district row is a full-size tap target with a ›. Simple says "Two-step sign-in" instead of 2FA, and a new player is told that exposure goes down as you finish missions.
+- **Who gets your data** has a way back to the city, and says the myth does the agencies' work for them.
+- **A badge's page** goes back to where you tapped the badge (a building, PRISM, a district), not always to the government map. The government map and PRISM links are still there.
+- **The garage.** The form's labels are readable, the year says "e.g. 2019" so it doesn't look filled in, and the model's example isn't cut off. ADD TO GARAGE and CANCEL are real buttons. The ADD VEHICLE card hides while the form is open. REMOVE asks "Take this car out of your garage?" on the card before it does anything. A car's IN PROGRESS is a bar: "1 of 3 opt-outs".
+- **The social timeline.** SET UP is a real, full-size button, the first one not set up is the bright one, and a bar shows how many are set up.
+- **The Big Check.** The title is lime only once you've ticked something. A broker whose opt-out page we couldn't confirm says "No working opt-out page right now" instead of offering "I filed with them" (a tick you already saved stays, so you can untick it).
+- **The saints.** The letters under each saint (AS, ES…) are dots now, with "1 of 9"; each saint's name is still read out to a screen reader.
+- **The Whole City.** "Your part" is under the ring, with RUN A BREACH CHECK as the page's bright button. WHAT WE KNOW ABOUT YOU is outlined. Place names aren't cyan, because you can't tap them.
+- Nothing was removed, and nothing new is tracked or sent.
+
 ## 7.36.0 (2026-11-20): The next thing first, on the main screens
 
 Liz asked for a screen-by-screen look at the layout, from a Simple player's side and an Advanced player's side. These are the fixes on the main screens: the districts, What's next, the milestone, the bank notes and the warning bar.

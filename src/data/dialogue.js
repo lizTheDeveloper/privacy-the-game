@@ -522,7 +522,7 @@ export const DISTRICT_DIALOGUE = {
     ],
   },
 
-  // The Field (chapter 13, opt-in): Field Opsec. No numbers here on purpose: every
+  // The Field (chapter 14, opt-in): Field Opsec. No numbers here on purpose: every
   // figure Scout says in a late district must already be in its missions.
   'field': {
     intro: `The rest of the city is about everyday privacy. This district is for when somebody is actually looking for you: a doxxer with a grudge, a company's investigator, the police, a government. You don't have to be a genius to be safe here. You have to follow the checklist, and practise it before the day you need it. Welcome to The Field.`,
@@ -602,7 +602,14 @@ export const GHOST_DIALOGUE = {
   whatHappens: `From the moment you go ghost, this device sends us nothing. Everything you already did stays in the city's totals — you earned that — and tonight you'll be counted as one more person who has gone ghost. We keep nothing new about you after that.`,
   alreadyOff: `You'd already switched us off, so there was nothing left for us to stop.`,
   done: `No more watchers. Not the brokers, not the data farms, not us. The city's yours and nobody's taking notes. If you ever want to help us count again, the switch is on Your City. Until then — enjoy the quiet. You earned it.`,
-  early: `Going ghost now switches us off for good. Tonight we delete what this browser sent us this month from the connection you're on now — your missions leave the city's totals tomorrow — and you're added to the ghost count. (Ghosts who take back the whole city first keep their place in the totals.)`,
+  // An early ghost's done line: the city isn't taken back, so it never says the brokers stopped.
+  doneEarly: `You've gone ghost. This device sends us nothing now. The brokers are still out there selling what they hold on you, and your missions are right where you left them. Take back the rest whenever you're ready.`,
+  // What going ghost early does, one line each (#/ghost/early), above the button.
+  earlyBullets: [
+    `This device stops sending us anything, and you're counted as one more ghost.`,
+    `Tonight we delete what this browser sent us this month from the connection you're on now, so your missions leave the city's totals tomorrow. Take back the whole city first and you keep your place in them.`,
+    `You can't undo this once tonight's run has deleted it. Until then, you can still cancel.`,
+  ],
   pending: `Your ghost is pending until tonight's run. Changed your mind?`,
   cancelNote: `Cancel from this browser and connection — that's how our analytics recognise you.`,
   cancelFailed: `We couldn't reach our analytics to cancel. Tonight's run may still delete your data.`,

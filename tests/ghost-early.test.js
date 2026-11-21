@@ -95,8 +95,12 @@ describe('#/ghost/early', () => {
 
   it('explains what happens and offers the switch', () => {
     const html = txt(renderGhostEarly(createInitialState(), {}));
-    expect(GHOST_DIALOGUE.early).toBe("Going ghost now switches us off for good. Tonight we delete what this browser sent us this month from the connection you're on now — your missions leave the city's totals tomorrow — and you're added to the ghost count. (Ghosts who take back the whole city first keep their place in the totals.)");
-    expect(html).toContain(GHOST_DIALOGUE.early);
+    // Three off-white lines before the button that can't be taken back (layout audit 2026-11-20).
+    expect(GHOST_DIALOGUE.earlyBullets).toHaveLength(3);
+    for (const b of GHOST_DIALOGUE.earlyBullets) expect(html).toContain(b);
+    expect(html).toContain("You can't undo this");
+    expect(html).toContain("from the connection you're on now");
+    expect(html).toContain('keep your place in them');
     expect(html).toContain('data-action="go-ghost-early"');
     expect(html).toContain('GO GHOST NOW');
     expect(html).toMatch(/href="#\/city-together"[^>]*>NOT YET</);
@@ -132,7 +136,9 @@ describe('early ghost finale', () => {
     expect(html).not.toMatch(/Chicago/);
     expect(html).toContain(PENDING);
     expect(html).toContain('data-action="ghost-cancel"');
-    expect(html).toContain(GHOST_DIALOGUE.done);
+    // An early ghost hasn't taken back the city: Scout doesn't say the brokers stopped.
+    expect(html).toContain(GHOST_DIALOGUE.doneEarly);
+    expect(html).not.toContain(GHOST_DIALOGUE.done);
   });
 
   it('pending without numbers', () => {

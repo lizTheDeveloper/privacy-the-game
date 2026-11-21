@@ -93,9 +93,11 @@ describe('the PRISM map', () => {
   it('every other account the player has is listed under the cables', () => {
     const h = renderPrism(withAccounts('gmail', 'signal', 'amazon'));
     const cables = h.slice(h.indexOf('EVERYTHING ELSE: THE CABLES'), h.indexOf('STILL RUNNING'));
-    expect(cables).toContain('>Signal<');
-    expect(cables).toContain('>Amazon<');
-    expect(cables).not.toContain('>Gmail<');
+    // Plain words, not chips that look like buttons.
+    expect(cables).toMatch(/<p class="prism-cables">[^<]*Signal[^<]*<\/p>/);
+    expect(cables).toMatch(/<p class="prism-cables">[^<]*Amazon[^<]*<\/p>/);
+    expect(cables).not.toContain('Gmail');
+    expect(cables).not.toContain('dashed');
   });
 
   it('nothing on the page puts an account in a URL, and its clicks stay private', () => {

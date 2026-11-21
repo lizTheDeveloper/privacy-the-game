@@ -330,7 +330,7 @@ export function renderGovernment(state, data, { selected = null } = {}) {
   const myths = data.paperwork.map((m) => `<div class="gov-myth"><div class="movie">“${esc(m.myth)}”</div><div class="real">${esc(m.reality)}${arr(m.sources).map((s) => `<br><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join('')}</div></div>`).join('');
   const everything = [...graph.origins, ...graph.pipes, ...data.agencies].map((x) => `<button type="button" data-action="gov-select" data-node="${esc(x.id)}" aria-pressed="${x.id === sel}">${esc(x.short || x.label || x.name)}</button>`).join('');
   return `${renderHud(state)}${GOV_CSS}<div class="screen gov">`
-    + '<a class="back-link" href="#/prism">◈ PRISM</a><a class="back-link" href="#/reclamation/map">↑ THE BROKER SKY</a>'
+    + '<a class="back-link" href="#/city">← THE CITY</a><a class="back-link" href="#/prism">◈ PRISM</a><a class="back-link" href="#/reclamation/map">↑ THE BROKER SKY</a>'
     + '<div class="gov-banner"><s>TOP SECRET//SI//ORCON//NOFORN</s><b>PUBLIC RECORD</b></div>'
     + '<h1>Who gets your data</h1>'
     + '<p class="gov-lede">Not a van, and not a they. Named agencies, named pipes, a law for each, and a paper trail. Tap anything on the map to open its file.</p>'
@@ -338,7 +338,7 @@ export function renderGovernment(state, data, { selected = null } = {}) {
     + '<ul class="gov-legend"><li><i style="background:#EDEFF3"></i>Rings out from you: where it leaves you, the pipes, the agencies, and below them who checks</li><li><i style="background:#FF2D9B"></i>What an agency takes</li><li><i style="background:#FF9F00"></i>What agencies pass to each other</li><li><i class="dash"></i>Who checks</li></ul>'
     + (sel ? `<section class="gov-file" aria-live="polite" tabindex="-1">${fileFor(sel, data, graph)}</section>` : '')
     + `<div class="gov-section"><h2>The scale</h2><p class="sub">Every number on this page, on one ruler. Each step is ten times the last.</p>${ruler(scaled)}</div>`
-    + (myths ? `<div class="gov-section"><h2>The movie, and the paperwork</h2><p class="sub">The myth does their work for them. The records are smaller, duller, and fixable.</p><div class="gov-myths">${myths}</div></div>` : '')
+    + (myths ? `<div class="gov-section"><h2>The movie, and the paperwork</h2><p class="sub">The myth does the agencies' work for them. The records are smaller, duller, and fixable.</p><div class="gov-myths">${myths}</div></div>` : '')
     + `<div class="gov-section"><h2>Everything on the map</h2><div class="gov-list">${everything}</div></div>`
     + '</div>';
 }

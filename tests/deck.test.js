@@ -424,8 +424,10 @@ describe('named dots (the saints)', () => {
     // The dots are on their own row, readable: not aria-hidden.
     expect(html).toMatch(/<span class="deck-dots deck-dots--named">/);
     expect(html).toContain('deck-controls deck-controls--named');
-    // The visible mark: initials, without "Saint".
-    expect(html).toContain('<span aria-hidden="true">PA</span>');
+    // The visible mark is a dot, not initials ("AS" meant nothing to a reader); the name is the label.
+    expect(html).toContain('<span class="deck-dot-mark" aria-hidden="true"></span>');
+    expect(html).not.toContain('<span aria-hidden="true">PA</span>');
+    expect(html).toContain('1 of 9');
   });
 
   it('a named dot moves the deck to its slide and keeps focus on the dot', () => {

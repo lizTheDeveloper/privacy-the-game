@@ -5,6 +5,7 @@ import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
+import { readLevel } from '../utils/reading.js';
 import { PRISM_PROVIDERS, PRISM_PLANNED, PRISM_SOURCES, PRISM_COPY, NOT_AN_ACCOUNT } from '../data/prism.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -35,6 +36,12 @@ const STYLE = `<style>
 .prism-saint{border-color:rgba(198,255,0,0.25)}
 .prism-saint .label{color:rgba(198,255,0,0.75)}
 .prism-go{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;padding:0 16px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--lime);border-radius:6px;text-decoration:none}
+/* .prism-panel a (cyan) is more specific than .prism-go and .btn-primary: without these the
+   buttons' words were cyan on lime (1.1:1). Dark words on a filled button. */
+.prism-panel .prism-go{color:#090B10}
+.prism-panel a.btn-primary{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;color:#090B10}
+.prism-yours{margin:4px 0 0;font-size:16px;line-height:1.5;color:var(--offwhite)}
+.prism-cables{color:#FF2D9B;font-size:13px}
 </style>`;
 
 // Nine beams from the companies on the left into a prism, one bright beam out to the NSA. A company
@@ -82,35 +89,51 @@ function companies(state) {
   return `<ul class="prism-companies">${rows}${next}</ul><p class="prism-key">${esc(PRISM_COPY.next)}</p>`;
 }
 
-// Every other account the player has: all of it over the tapped cables.
+// Every other account the player has: all of it over the tapped cables. Plain words, not chips:
+// nothing here is tapped. One name once (Reddit is an account in two districts).
 function cables(state) {
   const named = new Set([...PRISM_PROVIDERS.flatMap((p) => p.accounts), ...PRISM_PLANNED.accounts]);
   const theirs = Object.keys(ACCOUNTS).filter((id) => !named.has(id) && !NOT_AN_ACCOUNT.has(id) && mine(state, id));
-  const list = theirs.length
-    ? `<p>${theirs.map((id) => `<span class="acct acct--mine" style="display: inline-flex; margin: 2px 4px 2px 0; padding: 2px 8px; font-size: 12px; border: 1px dashed rgba(255,45,155,0.6); color: #FF2D9B; border-radius: 4px;">${esc(ACCOUNTS[id].name)}</span>`).join('')}</p>`
-    : '';
+  const names = [...new Set(theirs.map((id) => ACCOUNTS[id].name))];
+  const list = names.length ? `<p class="prism-cables">${names.map(esc).join(' · ')}</p>` : '';
   return `<div class="prism-panel"><div class="label">EVERYTHING ELSE: THE CABLES</div><p>${esc(PRISM_COPY.cables)}</p>${list}</div>`;
 }
+
+// How many of the nine companies on the slides run an account on the player's list.
+const companiesOnList = (state) => PRISM_PROVIDERS.filter((p) => p.accounts.some((id) => mine(state, id))).length;
 
 export function renderPrism(state) {
   const yours = PRISM_PROVIDERS.flatMap((p) => p.accounts).filter((id) => mine(state, id)).length;
   const sources = Object.values(PRISM_SOURCES).map(link).join('');
-  return `${renderHud(state)}${STYLE}<div class="screen prism">`
-    + '<a class="back-link" href="#/city">← THE CITY</a>'
-    + '<a class="back-link" href="#/government" style="margin-left: 16px;">◎ WHO GETS YOUR DATA</a>'
-    + `<h1>${esc(PRISM_COPY.title)}</h1><p class="prism-sub">${esc(PRISM_COPY.sub.toUpperCase())}</p>`
-    + `<div style="margin-bottom: 10px;">${renderScout(esc(PRISM_COPY.scout), { feeling: 'thinkingA' })}</div>`
-    + diagram(state)
-    + `<p class="prism-key">${yours ? `Magenta ◂: a company you told the city you have ${yours === 1 ? 'an account' : 'accounts'} with.` : 'Tell the city which accounts you have (in Master Keys) and yours light up here.'}</p>`
-    + `<div class="prism-panel"><div class="label">WHO WAS ON THE SLIDES</div>${companies(state)}</div>`
-    + `<div class="prism-panel"><div class="label">WHAT IT WAS</div><p>${esc(PRISM_COPY.what)}</p><p>${link(PRISM_SOURCES.guardian)} · ${link(PRISM_SOURCES.wapo)}</p></div>`
+  // "Yours" is the accounts on the player's list, which starts filled in: true before and after
+  // they change it.
+  const key = `<p class="prism-key">${yours ? `Magenta ◂: a company that runs ${yours === 1 ? 'an account' : 'accounts'} on your list.` : 'Tell the city which accounts you have (in Master Keys) and yours light up here.'}</p>`;
+  const scout = `<div style="margin-bottom: 10px;">${renderScout(esc(PRISM_COPY.scout), { feeling: 'thinkingA' })}</div>`;
+  const slides = `<div class="prism-panel"><div class="label">WHO WAS ON THE SLIDES</div>${companies(state)}</div>`;
+  // The one thing to do on this page: the filled button.
+  const defend = `<div class="prism-panel prism-defend"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="btn-primary" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a></div>`;
+  const rest = `<div class="prism-panel"><div class="label">WHAT IT WAS</div><p>${esc(PRISM_COPY.what)}</p><p>${link(PRISM_SOURCES.guardian)} · ${link(PRISM_SOURCES.wapo)}</p></div>`
     + `<div class="prism-panel"><div class="label">IT'S IN EVERYTHING</div><p>${esc(PRISM_COPY.everything)}</p><p>${esc(PRISM_COPY.you)}</p><p>${link(PRISM_SOURCES.xkeyscore)} · ${link(PRISM_SOURCES.eff702)} · ${link(PRISM_SOURCES.wikiUpstream)} · ${link(PRISM_SOURCES.collectAll)} · <a href="#/saints">Saint Mark Klein</a></p></div>`
     + cables(state)
-    + `<div class="prism-panel"><div class="label">STILL RUNNING</div><p>${esc(PRISM_COPY.status)}</p><p>${link(PRISM_SOURCES.wiki702)} · ${link(PRISM_SOURCES.brennan702)} · ${link(PRISM_SOURCES.eff702)}</p></div>`
-    + `<div class="prism-panel"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="prism-go" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a></div>`
-    + `<div class="prism-panel prism-saint"><div class="label">SAINT EDWARD SNOWDEN</div><p>${esc(PRISM_COPY.snowdenTribute)}</p>`
+    + `<div class="prism-panel"><div class="label">STILL RUNNING</div><p>${esc(PRISM_COPY.status)}</p><p>${link(PRISM_SOURCES.wiki702)} · ${link(PRISM_SOURCES.brennan702)} · ${link(PRISM_SOURCES.eff702)}</p></div>`;
+  const tail = `<div class="prism-panel prism-saint"><div class="label">SAINT EDWARD SNOWDEN</div><p>${esc(PRISM_COPY.snowdenTribute)}</p>`
     + `<p>${link(PRISM_SOURCES.snowden)} · ${link(PRISM_SOURCES.wikiSnowden)} · ${link(PRISM_SOURCES.wikiCitizenfour)} · ${link(PRISM_SOURCES.nsaFiles)} · ${link(PRISM_SOURCES.slides)}</p>`
     + '<a class="prism-go" href="#/saints">LIGHT A CANDLE →</a></div>'
-    + `<div class="prism-panel"><div class="label">SOURCES</div><div class="prism-sources">${sources}</div></div>`
-    + '</div>';
+    + `<div class="prism-panel"><div class="label">SOURCES</div><div class="prism-sources">${sources}</div></div>`;
+  const head = '<a class="back-link" href="#/city">← THE CITY</a>'
+    + '<a class="back-link" href="#/government" style="margin-left: 16px;">◎ WHO GETS YOUR DATA</a>'
+    + `<h1>${esc(PRISM_COPY.title)}</h1><p class="prism-sub">${esc(PRISM_COPY.sub.toUpperCase())}</p>`;
+  let body;
+  if (readLevel(state) === 'simplest') {
+    // Simple: the picture, one line about you, what to do; everything else after.
+    const n = companiesOnList(state);
+    const line = n
+      ? `<p class="prism-yours" data-prism-yours>${n} of your companies ${n === 1 ? 'was' : 'were'} on the slides.</p>`
+      : '<p class="prism-yours" data-prism-yours>None of the companies on your list were on the slides. The cables still carry everything.</p>';
+    body = diagram(state) + line + defend + scout + key + slides + rest + tail;
+  } else {
+    // Advanced: what to do sits right under the list of companies, not at the bottom of the page.
+    body = scout + diagram(state) + key + slides + defend + rest + tail;
+  }
+  return `${renderHud(state)}${STYLE}<div class="screen prism">${head}${body}</div>`;
 }

@@ -75,7 +75,7 @@ export function ladderPanel(rungs, { selected = null, open = false, home = null,
 }
 
 export const LADDER_CSS = `
-.sky-ladder{padding:12px 14px;background:rgba(17,21,31,0.96);border:1px solid rgba(198,255,0,0.25);border-radius:8px;font-size:13px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
+.sky-ladder{padding:12px 14px;background:#11151F;border:1px solid rgba(198,255,0,0.25);border-radius:8px;font-size:13px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
 .sky-ladder .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(198,255,0,0.7);margin:0 0 6px}
 .sky-ladder-bar{display:none}
 .sky-rungs{list-style:none;margin:0;padding:0}
@@ -106,4 +106,6 @@ export const LADDER_CSS = `
 .sky-ladder:not(.is-open) .sky-ladder-body{display:none}
 .sky-ladder:has(.sky-rung-card){max-height:46svh}
 .sky-ladder:not(.is-open){padding-bottom:env(safe-area-inset-bottom)}
+.sky-ladder-bar{background:#11151F}
+.sky-ladder-body .residency .label{display:none}
 }`;
