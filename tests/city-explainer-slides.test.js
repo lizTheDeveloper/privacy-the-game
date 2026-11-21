@@ -136,6 +136,6 @@ describe('Your City: Play stats points to the explainer', () => {
 describe('CITY FORTIFIED: its definition behind "What\'s this?" on a phone (Task 7a)', () => {
   it('a fold, open on desktop, holding the definition word for word', () => {
     const html = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: DATA } });
-    expect(html).toMatch(/CITY FORTIFIED<\/div>\s*<details class="phone-fold fortified-what" data-fold="fortified-what" data-open-desktop><summary>[^<]+<\/summary><div style="[^"]*">[^<]+<\/div><\/details>/);
+    expect(html).toMatch(/(?:CITY FORTIFIED|LEAKED EMAILS FIXED)<\/div>\s*<details class="phone-fold fortified-what" data-fold="fortified-what" data-open-desktop><summary>[^<]+<\/summary><div style="[^"]*">[^<]+<\/div><\/details>/);
   });
 });

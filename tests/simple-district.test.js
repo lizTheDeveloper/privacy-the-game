@@ -196,7 +196,7 @@ describe('Simple: plain mission names', () => {
   });
 
   it('no OSINT Sieve on The Perimeter: each one has a plain name, from its own plain line', () => {
-    const html = renderDistrict(fresh('simplest'), 'perimeter');
+    const html = renderDistrict(fresh('simplest'), 'perimeter', undefined, { openLists: all('perimeter', 'facilities') });
     expect(html).not.toMatch(/OSINT/);
     for (const m of getMissionsForDistrict('perimeter').filter((x) => x.id.startsWith('osint-sieve'))) {
       expect(m.simpleTitle, m.id).toBeTruthy();
@@ -232,7 +232,7 @@ describe('Simple: plain mission names', () => {
 describe('READY is plain grey text, not a badge, in both modes', () => {
   for (const level of ['simplest', 'full']) {
     it(level, () => {
-      const html = renderDistrict(fresh(level), 'perimeter');
+      const html = renderDistrict(fresh(level), 'perimeter', undefined, { openLists: all('perimeter', 'facilities') });
       expect(html).toContain('<div class="status-quiet">READY</div>');
       expect(html).toContain('<div class="status-quiet" data-quiz-badge>READY</div>');
       expect(html).not.toMatch(/class="badge"[^>]*>READY</);

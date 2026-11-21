@@ -9,12 +9,14 @@ import { calcDistrictProgress } from '../src/utils/calc.js';
 import { isMissionInPlay } from '../src/utils/mission-status.js';
 import { CURATED_MESSAGES } from '../src/data/phishing.js';
 
+// Simple (the default) folds the list to three; "Show all" opens every facility (screens/district.js).
+const ALL = { openLists: new Set(['perimeter:facilities']) };
 const briefingIds = (html) => [...html.matchAll(/href="#\/mission\/([^/"]+)\/briefing"/g)].map((m) => m[1]);
 const badges = (html) => [...html.matchAll(/<div class="badge"[^>]*>([^<]*)<\/div>/g)].map((m) => m[1].trim());
 
 describe('Perimeter lists every mission it counts', () => {
   it('both Scam Defense missions have a START on the page', () => {
-    const html = renderDistrict(createInitialState(), 'perimeter');
+    const html = renderDistrict(createInitialState(), 'perimeter', undefined, ALL);
     expect(briefingIds(html)).toEqual(expect.arrayContaining(['scam_defense-recon-phishing-eye', 'scam_defense-fortify-tools']));
     // The quiz is still there too.
     expect(html).toContain('href="#/quiz/phishing"');
@@ -22,7 +24,7 @@ describe('Perimeter lists every mission it counts', () => {
 
   it('filing every listed mission reaches 100%', () => {
     let s = createInitialState();
-    const listed = briefingIds(renderDistrict(s, 'perimeter'));
+    const listed = briefingIds(renderDistrict(s, 'perimeter', undefined, ALL));
     for (const id of listed) s.missions[id] = { status: 'completed', action: 'action-done', completedAt: '2026-11-01T00:00:00Z' };
     expect(calcDistrictProgress(s, 'perimeter').percent).toBe(100);
     // And every mission in play in the district was listed.
@@ -33,7 +35,7 @@ describe('Perimeter lists every mission it counts', () => {
 
 describe('facility badges', () => {
   it('an untouched facility with START links says READY, never LOCKED', () => {
-    const html = renderDistrict(createInitialState(), 'perimeter');
+    const html = renderDistrict(createInitialState(), 'perimeter', undefined, ALL);
     expect(badges(html)).not.toContain('LOCKED');
     expect(facilityBadge(0, 3)).toBe('READY');
     expect(facilityBadge(1, 3)).toBe('1/3');
@@ -49,7 +51,7 @@ describe('facility badges', () => {
     // All answered, only 5 right: not SECURED, not TRAINED.
     const s = createInitialState();
     s.phishingQuiz = { ...answers(5), streak: 0, bestStreak: 0, quizAnswers: {} };
-    const html = renderDistrict(s, 'perimeter');
+    const html = renderDistrict(s, 'perimeter', undefined, ALL);
     expect(html).toContain(`5/${total} RIGHT`);
     expect(html).not.toMatch(/data-quiz-badge[^>]*>(SECURED|TRAINED)/);
   });

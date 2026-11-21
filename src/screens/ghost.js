@@ -6,6 +6,10 @@ import { renderWhoamiPanel, renderDeletionBlock, renderNotice, esc } from './sta
 import { displayPodId, findPod, fmt } from '../utils/collective.js';
 import { isCityComplete, hasGoneGhost, getGhostInfo, isGhostPending } from '../utils/ghost.js';
 import { isAnalyticsOff } from '../utils/analytics-pref.js';
+import { getChosenPod } from '../utils/pod-pref.js';
+import { readLevel } from '../utils/reading.js';
+import { fillBar } from '../components/fill-bar.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const MUTED = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 const STEP = 'font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--cyan); margin-bottom: 12px;';
@@ -28,9 +32,53 @@ function locked(state) {
   </div>`);
 }
 
+// Simple's one sentence for each ghost screen.
+export const GHOST_LEADS = {
+  ghost: 'Last job: see what this game can see about you, then switch it off.',
+  early: 'Going ghost switches off what this phone sends us. Read what it does first.',
+};
+
+// Simple: is step 1 done? THAT'S RIGHT was tapped, a place was picked, or there was nothing to
+// confirm (sharing already off, or our analytics couldn't be reached): then step 2 shows.
+export function ghostStepOneDone(view = {}) {
+  const st = view.whoami?.status;
+  return Boolean(view.whoamiConfirmed) || Boolean(getChosenPod()) || st === 'error' || st === 'local' || isAnalyticsOff();
+}
+
+// Simple's #/ghost (Liz 2026-11-21): Scout in short lines, "Step 1 of 2" as a bar that fills, and
+// step 2 once step 1 is done. Until then step 2 waits behind See everything, never gone.
+function simpleGhost(state, view) {
+  const one = ghostStepOneDone(view);
+  const step = one ? 2 : 1;
+  const lines = GHOST_DIALOGUE.briefingSimple.map((l) => `<p style="margin: 0 0 8px;">${l}</p>`).join('');
+  const stepTwo = (lit) => `
+    <div class="panel" data-ghost-step="2" style="padding: 20px 24px; margin-top: ${lit ? 16 : 0}px;">
+      ${lit ? '' : `<div style="${STEP}">Step 2: Turn us off</div>`}
+            <p style="font-size: 15px; color: var(--offwhite); line-height: 1.6; margin: 0 0 18px;">${isAnalyticsOff() ? GHOST_DIALOGUE.alreadyOff : GHOST_DIALOGUE.whatHappens}</p>
+      <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+        <button class="${lit ? 'btn-primary' : 'btn-secondary'}" data-action="go-ghost" style="min-height: 44px;">GO GHOST</button>
+        <a class="btn-secondary" href="#/city" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none;">NOT YET</a>
+      </div>
+    </div>`;
+  return shell(state, `
+  <div style="max-width: 640px; margin: 0 auto; padding: 18px 24px 0;">
+    <div style="font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: 3px; color: var(--cyan); text-shadow: 0 0 24px rgba(0,229,255,0.5);">GO GHOST</div>
+    ${simpleLead(GHOST_LEADS.ghost)}
+    <div data-ghost-steps style="margin: 0 0 4px;">
+      <div style="font-size: 15px; font-weight: 600; color: var(--offwhite); margin-bottom: 6px;">Step ${step} of 2${one ? ': Turn us off' : ': See what we can see'}</div>
+      ${fillBar({ key: 'ghost:steps', done: step, total: 2, size: 'mid', label: `Step ${step} of 2` })}
+    </div>
+    ${renderWhoamiPanel(view, { primary: !one })}
+    ${one ? stepTwo(true) : ''}
+    <div data-ghost-lines style="display: flex; gap: 10px; align-items: flex-start; margin-top: 20px; font-size: 15px; line-height: 1.5; color: var(--offwhite);">${smallScout('thinkingB', 40)}<div>${lines}</div></div>
+    ${one ? '' : seeEverything('ghost', stepTwo(false))}
+  </div>`);
+}
+
 export function renderGhost(state, view = {}) {
   if (hasGoneGhost()) return renderGhostDone(state, view);
   if (!isCityComplete(state)) return locked(state);
+  if (readLevel(state) === 'simplest') return simpleGhost(state, view);
   return shell(state, `
   <div style="text-align: center; padding: 44px 24px 0;">
     <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px;">ONE LAST JOB</div>
@@ -71,6 +119,7 @@ export function renderGhostEarly(state, view = {}) {
     <div style="font-family: var(--font-display); font-size: 48px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
+    ${readLevel(state) === 'simplest' ? simpleLead(GHOST_LEADS.early) : ''}
     <div class="panel" style="padding: 20px 24px; margin-top: 24px;">
       <div style="display: flex; gap: 10px; align-items: flex-start; margin: 0 0 18px;">
         ${smallScout('worried')}
@@ -125,7 +174,7 @@ export function renderGhostDone(state, view = {}) {
   return shell(state, `
   <div style="text-align: center; padding: 56px 24px 0;">
     <div style="font-family: var(--font-display); font-size: 44px; font-weight: 900; letter-spacing: 4px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5);">YOU HAVE GONE GHOST</div>
-    <div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>
+    ${readLevel(state) === 'simplest' ? `<p class="simple-lead" data-simple-lead style="margin-top: 16px;">${countsLine(view, info)}</p>` : `<div style="${MUTED} margin-top: 16px;">${countsLine(view, info)}</div>`}
   </div>
   <div style="max-width: 640px; margin: 32px auto 0; padding: 0 24px;">
     ${renderScout(info?.early ? GHOST_DIALOGUE.doneEarly : GHOST_DIALOGUE.done, { feeling: feelingForGhostDone(info) })}

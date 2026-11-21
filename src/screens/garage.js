@@ -4,6 +4,10 @@ import { renderHud } from '../components/hud.js';
 import { renderBuilding } from '../components/building.js';
 import { getBuildingState } from '../utils/calc.js';
 import { fillBar } from '../components/fill-bar.js';
+import { readLevel } from '../utils/reading.js';
+import { MISSIONS } from '../data/missions.js';
+import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 function esc(value) {
   return String(value)
@@ -201,11 +205,69 @@ export function renderAddForm() {
   </div>`;
 }
 
+// Simple's one sentence (the GM case: data/leaks/location.js, gm-smart-driver).
+export const GARAGE_LEAD = 'Car makers like GM sold how people drive to data brokers, and insurers used it to set prices.';
+
+// The next opt-out for the player's cars: each car's maker's opt-outs, then the two driving-data
+// brokers; the first one in play and not done. null when there's none left (or no car).
+export function nextCarOptOut(state) {
+  const accounts = [];
+  for (const v of state.vehicles || []) {
+    const mfr = findManufacturer(v.make);
+    if (mfr && !accounts.includes(mfr.id)) accounts.push(mfr.id);
+  }
+  if (!accounts.length && !(state.vehicles || []).length) return null;
+  for (const id of [...accounts, ...BROKERS]) {
+    const m = MISSIONS.find((x) => x.accountId === id && x.phase === 'fortify' && !x.optional && !x.legacy && isMissionInPlay(state, x) && !isMissionDoneIn(state, x));
+    if (m) return m;
+  }
+  return null;
+}
+
+// Simple's bright button: ADD YOUR CAR with no car (it opens the form here, and goes while the form
+// is open, like the ADD VEHICLE card), else the next opt-out, else add another car.
+function simpleGo(state) {
+  const m = nextCarOptOut(state);
+  if (m) {
+    return `<a class="btn-primary" data-garage-next href="#/mission/${esc(m.id)}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 1px;">Next opt-out: ${esc(m.title)} ›</a>
+      <p style="font-size: 14px; color: var(--offwhite); margin: 8px 0 0;">Opens the “${esc(m.title)}” mission.</p>`;
+  }
+  const any = (state.vehicles || []).length > 0;
+  return `<button type="button" class="btn-primary" data-action="show-add-vehicle" data-add-vehicle-card style="min-height: 44px;">${any ? 'ADD ANOTHER CAR' : 'ADD YOUR CAR'}</button>
+    <p style="font-size: 14px; color: var(--offwhite); margin: 8px 0 0;">${any ? 'Every opt-out for your cars is done.' : 'Opens a short form here: make, model and year.'}</p>`;
+}
+
 // confirmRemove: the index of the car whose REMOVE was tapped (app.js, in memory).
 export function renderGarage(state, { confirmRemove = null } = {}) {
   const vehicles = state.vehicles || [];
+  const simple = readLevel(state) === 'simplest';
 
   const cards = vehicles.map((v, i) => renderVehicleCard(state, v, i, { confirmRemove: confirmRemove === i })).join('');
+  // Simple: the bright button is the way to add a car while it shows, so the dashed card is in the
+  // grid only when the bright button is an opt-out.
+  const addCard = !simple || nextCarOptOut(state) ? renderAddCard() : '';
+  const grid = vehicles.length || addCard ? `
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: 3px; color: rgba(0,229,255,0.4); margin-bottom: 16px;">YOUR VEHICLES ${vehicles.length > 0 ? `(${vehicles.length})` : ''}</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+        ${cards}
+        ${addCard}
+      </div>` : '';
+  if (simple) {
+    return `
+  <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
+    ${renderHud(state)}
+    <div style="padding: 20px 24px 0;">
+      <a href="#/district/freeway" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4); margin-top: 14px;">YOUR GARAGE</div>
+      ${simpleLead(GARAGE_LEAD)}
+      ${simpleGo(state)}
+    </div>
+    <div style="padding: 0 24px 24px;">
+      <div id="add-form-container"></div>
+      ${seeEverything('garage', grid)}
+    </div>
+  </div>`;
+  }
 
   return `
   <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
@@ -219,12 +281,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
         </div>
       </div>
     </div>
-    <div style="padding: 24px;">
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: 3px; color: rgba(0,229,255,0.4); margin-bottom: 16px;">YOUR VEHICLES ${vehicles.length > 0 ? `(${vehicles.length})` : ''}</div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
-        ${cards}
-        ${renderAddCard()}
-      </div>
+    <div style="padding: 24px;">${grid}
       <div id="add-form-container"></div>
     </div>
   </div>`;

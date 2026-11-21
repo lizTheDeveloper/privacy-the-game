@@ -7,6 +7,12 @@ import { ACCOUNTS } from '../data/accounts.js';
 import { hasInterior } from '../data/interiors/index.js';
 import { deck } from '../components/deck.js';
 import { saveNote } from '../components/browser-warning.js';
+import { readLevel } from '../utils/reading.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
+
+// Simple's one sentence. The gallery has no bright button: nothing here is a next step, and a
+// candle is the player's own (lighting one is never tracked).
+export const SAINTS_LEAD = 'These people told the world what was being watched, and many paid for it. Swipe to meet each one.';
 
 export const SAINT_ORDER = ['swartz', 'snowden', 'klein', 'zimmermann', 'ellsberg', 'manning', 'drake', 'binney', 'poitras'];
 
@@ -65,15 +71,18 @@ export function saintsOrigin(route, lastRoute, current = null) {
 
 export function renderSaints(state, { from = null } = {}) {
   const saints = SAINT_ORDER.map((id) => SAINTS[id]).filter(Boolean);
+  const simple = readLevel(state) === 'simplest';
+  const candles = `<details class="phone-fold" data-fold="saints-candles" data-open-desktop><summary>About candles</summary><div class="dim interior-note">${saveNote('candles')} Nothing here is sent anywhere.</div></details>`;
   return `
   <div class="scanlines">
     ${renderHud(state)}
     <div class="interior saints" data-saints>
       ${backLink(state, from)}
       <div class="interior-title">SAINTS</div>
-      <div class="interior-sub">People whose work made this map knowable</div>
-      <details class="phone-fold" data-fold="saints-candles" data-open-desktop><summary>About candles</summary><div class="dim interior-note">${saveNote('candles')} Nothing here is sent anywhere.</div></details>
+      ${simple ? simpleLead(SAINTS_LEAD) : `<div class="interior-sub">People whose work made this map knowable</div>
+      ${candles}`}
       ${deck(saints.map((s) => ({ html: card(state, s) })), { label: 'Saints', className: 'saints-deck', names: saints.map((s) => s.name) })}
+      ${simple ? seeEverything('saints', `<div class="interior-sub">People whose work made this map knowable</div><div class="dim interior-note" style="margin-top: 8px;">About candles: ${saveNote('candles')} Nothing here is sent anywhere.</div>`) : ''}
     </div>
   </div>`;
 }

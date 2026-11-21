@@ -2,6 +2,17 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.43.0 (2026-11-21): Simple mode on the side screens, part 1
+
+The last pick from Liz's layout review. In Simple, each side screen now has one plain sentence that says what it is and why it matters to you, one bright button for the next thing to do, and everything else behind a "See everything" button. Nothing was removed: tap "See everything" and the rest of the screen is right there. Advanced is unchanged.
+
+- **Your City.** One sentence, then Next, the three dials and the district bars. The findings, what our analytics can see and the sharing switch are under "See everything". The page is about 1,400px tall instead of 2,000.
+- **The Whole City.** One sentence, the ring (now called "Leaked emails fixed" in Simple), your part with its breach check, two of the city's numbers and one SHARE for the page. The other numbers, the places, the breach map, What you can do, GO GHOST and the notes are under "See everything". The page went from about 5,500px to 1,200.
+- **Go ghost.** Scout's long paragraph is now four short lines. "Step 1 of 2" is a bar that fills. Step 1's button (THAT'S RIGHT) is the bright one, and step 2 (GO GHOST) appears after you tap it. Until then step 2 is under "See everything". If there's nothing to confirm (sharing is off, or our analytics can't be reached), step 2 shows right away. The early ghost page and the "you've gone ghost" page each start with one plain sentence.
+- **The garage.** One sentence about why cars matter (GM sold how people drive to data brokers, and insurers used it to set prices). The bright button is ADD YOUR CAR, which opens the form right there. Once you have a car, it is your next opt-out. Your cars and the ADD VEHICLE card are under "See everything".
+- **The saints.** One sentence, then the saints. "About candles" is under "See everything". There's no bright button here, since nothing on this page is a next step.
+- **The Perimeter, The Reclamation, The Clinic, The Trail and The Field** now get the same short list as the other districts in Simple: the mission to do next and the two after it, then "Show all", with the missions you've done folded under "Done". The Perimeter's Simple page went from 2,654px to about 1,150.
+
 ## 7.42.0 (2026-11-21): The briefing and the report, reshaped
 
 Four layout changes Liz picked from the mission-screen audit.

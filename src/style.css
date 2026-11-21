@@ -1315,6 +1315,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .list-more:hover { border-color: rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.06); }
 .list-more::after { content: ' ▾'; color: var(--cyan); margin-left: 6px; }
 .list-more[aria-expanded="true"]::after { content: ' ▴'; }
+/* Simple's side screens (components/see-everything.js): one plain sentence up top, full size and
+   off-white; the rest of the screen behind "See everything" (the .list-more button, cyan outline). */
+.simple-lead { margin: 10px 0 14px; font-size: 17px; font-weight: 500; line-height: 1.5; color: var(--text-strong); }
+.see-all { margin: 20px 0 8px; }
+.see-all-body { margin-top: 12px; }
 .done-fold { margin-top: 12px; }
 .done-fold > summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-size: 16px; color: var(--lime); border: 1px solid rgba(198, 255, 0, 0.3); }
 .done-fold > summary::-webkit-details-marker { display: none; }

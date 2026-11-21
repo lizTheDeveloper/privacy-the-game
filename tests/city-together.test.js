@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderCityTogether, cityStats } from '../src/screens/city-together.js';
 import { createInitialState } from '../src/state.js';
+import { setReadLevel } from '../src/utils/reading.js';
 import { shouldAutoLoad } from '../src/utils/collective.js';
 import { setChosenPod } from '../src/utils/pod-pref.js';
 import { setAnalyticsOff } from '../src/utils/analytics-pref.js';
@@ -27,7 +28,8 @@ describe('The Whole City', () => {
 
   it('shows the city score, board, breach map and footer', () => {
     const html = renderCityTogether(createInitialState(), { collective: ready });
-    expect(html).toContain('CITY FORTIFIED');
+    // Simple names the ring in plain words (tests/simple-side-screens.test.js).
+    expect(html).toMatch(/CITY FORTIFIED|LEAKED EMAILS FIXED/);
     expect(html).toMatch(/18%/);
     expect(html).toMatch(/Gmail/);
     expect(html).toMatch(/85%/);
@@ -148,8 +150,8 @@ describe('The Whole City: the city in numbers', () => {
     expect(panel(html, 'optedOut')).toMatch(/12/);
   });
 
-  it('each panel offers SHARE', () => {
-    const html = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: FULL } });
+  it('each panel offers SHARE (Advanced; Simple has one SHARE for the page)', () => {
+    const html = renderCityTogether(setReadLevel(createInitialState(), 'full'), { collective: { status: 'ready', data: FULL } });
     for (const s of cityStats(FULL.city)) expect(panel(html, s.key)).toContain(`data-action="share-stat" data-stat="${s.key}"`);
   });
 
@@ -168,7 +170,7 @@ describe('The Whole City: the city in numbers', () => {
   it('the existing panels are still there, unchanged', () => {
     const before = renderCityTogether(createInitialState(), { collective: ready });
     const after = renderCityTogether(createInitialState(), { collective: { status: 'ready', data: FULL } });
-    for (const marker of ['CITY FORTIFIED', 'PLACES', 'ADDRESSES FOUND IN A KNOWN BREACH', 'YOUR PART', 'GO GHOST', 'anonymous browser sessions']) {
+    for (const marker of ['LEAKED EMAILS FIXED', 'PLACES', 'ADDRESSES FOUND IN A KNOWN BREACH', 'YOUR PART', 'GO GHOST', 'anonymous browser sessions']) {
       expect(after).toContain(marker);
       expect(before).toContain(marker);
     }
