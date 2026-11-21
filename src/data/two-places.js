@@ -28,3 +28,18 @@ export function twoPlaceNames(places = []) {
   if (!PHONE_PLACE[a] || !COMPUTER_PLACE[b] || a === b) return null;
   return [PHONE_PLACE[a], COMPUTER_PLACE[b]];
 }
+
+// Each step of a two-places mission says where it happens, as a chip on its card (Liz 2026-11-20:
+// the step that only said "your passwords are in two places" had nothing to do on it). `now` is
+// the chip on the first step after the place changes, and `line` the plain words under it.
+const PHONE_CHIP = { apple: 'your iPhone', google: 'your Android phone' };
+const COMPUTER_CHIP = { google: ['In', 'Chrome'], apple: ['On', 'your Mac'], edge: ['In', 'Edge'], firefox: ['In', 'Firefox'] };
+
+export function phonePlace(a) {
+  return { kind: 'phone', label: `On ${PHONE_CHIP[a]}`, now: `Now on ${PHONE_CHIP[a]}` };
+}
+
+export function computerPlace(b, line) {
+  const [on, name] = COMPUTER_CHIP[b];
+  return { kind: 'computer', label: `${on} ${name}`, now: `Now ${on.toLowerCase()} ${name}`, line };
+}

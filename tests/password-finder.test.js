@@ -157,8 +157,12 @@ describe('passwords in two places: remembered, and both get checked', () => {
   });
 
   it('a reset: do it on the iPhone, check it saved, then update Chrome too (not a move)', () => {
-    const steps = missionSteps(gmail, two).map((st) => st.text);
-    expect(steps[0]).toBe('Your passwords are in two places: your iPhone and Chrome on your computer. That’s fine. Do this on your iPhone first. Then you’ll update Chrome on your computer too.');
+    const list = missionSteps(gmail, two);
+    const steps = list.map((st) => st.text);
+    // No step only says where (2026-11-20): each step's chip does, the iPhone first, then Chrome.
+    expect(steps.some((t) => /two places/.test(t))).toBe(false);
+    expect(list.slice(0, -1).every((st) => st.place?.label === 'On your iPhone')).toBe(true);
+    expect(list.at(-1).place).toMatchObject({ kind: 'computer', now: 'Now in Chrome' });
     expect(steps).toContain('When it asks for a new password, tap “Use Strong Password”. It makes a strong one and saves it for you.');
     expect(steps).toContain('Check it saved: open the Passwords app and search for Gmail.');
     expect(steps.at(-1)).toBe('Now update Chrome on your computer too. It still has the old password. Find Gmail there, and change the saved password to the new one.');
@@ -182,8 +186,11 @@ describe('passwords in two places: remembered, and both get checked', () => {
 
   it('the password check reads the report in both places', () => {
     const pm = MISSIONS.find((x) => x.id === 'password_manager-recon-report');
-    const steps = missionSteps(pm, two).map((st) => st.text);
-    expect(steps[0]).toMatch(/^Your passwords are in two places: your iPhone and Chrome on your computer\. That’s fine\. Each one has its own check\./);
+    const list = missionSteps(pm, two);
+    const steps = list.map((st) => st.text);
+    expect(steps.some((t) => /two places/.test(t))).toBe(false);
+    expect(list[0].place.label).toBe('On your iPhone');
+    expect(list.find((st) => st.place?.kind === 'computer').place.line).toBe('Now do the same on your computer.');
     expect(steps.some((t) => /^iPhone or iPad: open the Passwords app/.test(t))).toBe(true);
     expect(steps.some((t) => /Google Password Checkup/.test(t))).toBe(true);
     expect(steps.at(-1)).toMatch(/each one says/);
@@ -249,7 +256,9 @@ describe('Simple mode asks about the devices first, before any step', () => {
     expect(h).not.toContain('data-setup-card');
     expect(h).not.toContain('data-pm-ask');
     expect(h.indexOf('data-step-card')).toBeLessThan(h.indexOf('data-pm-two'));
-    expect(h).toContain('Your passwords are in two places');
+    // The card's chip says where; the way to change it is under the first card.
+    expect(h).toContain('On your iPhone');
+    expect(h).toContain('Change where my passwords are');
   });
 
   it('skipping shows every step, as before', () => {

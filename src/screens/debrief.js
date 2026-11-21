@@ -20,6 +20,7 @@ import { feelingForDebrief, twoFactorHugDue } from '../utils/scout-feelings.js';
 import { alreadyOption, saidAlready, visibleSteps, progressFor, stepAnswers } from '../utils/reading.js';
 import { missionTrail } from '../components/walkthrough.js';
 import { fillBar } from '../components/fill-bar.js';
+import { shortQuestionLabel } from './briefing.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -89,7 +90,9 @@ function questionLabel(label) {
 
 // `given` is a stored answer to show again (re-check); it wins over a pre-fill.
 // recheck: leave out the answers that would un-file it (skip / later).
-function questionGroup(q, state, mission, shown = false, given = undefined, recheck = false) {
+// card: Simple's report, one question per card ({ now, told }): `now` is the card showing, `told`
+// a question a step card already answered (it waits in "You told us:" instead).
+function questionGroup(q, state, mission, shown = false, given = undefined, recheck = false, card = null) {
   // "I already have this" on the briefing picks the report's "already" answer.
   const already = mission && saidAlready(state, mission.id) ? alreadyOption(mission) : null;
   const alreadyPre = already?.question === q.id ? already.value : undefined;
@@ -108,8 +111,8 @@ function questionGroup(q, state, mission, shown = false, given = undefined, rech
     ? 'Filled in from your breach check. Change it if that’s wrong.'
     : 'Filled in from your password manager report. Change it if the report says something else.';
   return `
-  <div data-question="${q.id}"${showIfAttrs(q, shown)} style="margin-bottom: 28px;">
-    ${questionLabel(q.label)}
+  <div data-question="${q.id}"${card?.now ? ' class="is-card-now"' : ''}${card?.told ? ' data-told' : ''}${showIfAttrs(q, shown)} style="margin-bottom: 28px;">
+    ${questionLabel(card ? shortQuestionLabel(mission, q) || q.label : q.label)}
     ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
     ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
     ${pre && !has ? `<div data-prefilled="${q.id}" style="font-size: 12px; color: var(--cyan); line-height: 1.5; margin: -6px 0 12px;">${preNote}</div>` : ''}
@@ -323,18 +326,122 @@ export function debriefReaction(state, mission) {
 // The open form. Follow-ups a pre-filled answer already shows start shown.
 // Re-check: the stored answers come back as the starting point.
 // The open form, and how many of the questions it shows have no answer yet (SKIP counts as one).
-function debriefForm(state, mission, given = null, recheck = false) {
+// cards (Simple, Liz 2026-11-20): the same form, one question showing at a time, the ones the step
+// cards answered left out of the walk and listed at the end. It is the same fields either way, so
+// SUBMIT REPORT reads and files the same answers (app.js submitDebrief).
+function debriefForm(state, mission, given = null, recheck = false, cards = false) {
   const pre = {};
   const already = saidAlready(state, mission.id) ? alreadyOption(mission) : null;
+  const onSteps = stepAnswers(state, mission.id);
   for (const q of mission.debriefQs) {
-    const v = given?.[q.id] ?? stepAnswers(state, mission.id)[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
+    const v = given?.[q.id] ?? onSteps[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
     if (v !== undefined) pre[q.id] = v;
   }
   const visible = visibleQuestions(mission, pre);
   const shown = new Set(visible.map((q) => q.id));
   const checklist = renderBrokerChecklist(mission, state, recheck ? 'recheck' : 'file');
-  const left = visible.filter((q) => pre[q.id] === undefined || (Array.isArray(pre[q.id]) && !pre[q.id].length)).length;
-  return { left, html: `<div data-debrief="${mission.id}" class="debrief-form">${mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id), given?.[q.id], recheck)).join('')}${checklist}</div>` };
+  const unanswered = (q) => pre[q.id] === undefined || (Array.isArray(pre[q.id]) && !pre[q.id].length);
+  const left = visible.filter(unanswered).length;
+  if (!cards) {
+    return { left, html: `<div data-debrief="${mission.id}" class="debrief-form">${mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id), given?.[q.id], recheck)).join('')}${checklist}</div>` };
+  }
+  const told = new Set(visible.filter((q) => onSteps[q.id] !== undefined && questionOptions(q, state).some((o) => o.value === onSteps[q.id])).map((q) => q.id));
+  const walk = visible.filter((q) => !told.has(q.id));
+  // The first card still to answer; all answered, the last (SUBMIT REPORT is on it).
+  const now = walk.find(unanswered) || walk.at(-1) || null;
+  const at = now ? walk.indexOf(now) : -1;
+  const last = at === walk.length - 1;
+  const groups = mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id), given?.[q.id], recheck, { now: q === now, told: told.has(q.id) })).join('');
+  return {
+    left,
+    cards: { total: walk.length, done: walk.filter((q) => !unanswered(q)).length, first: at <= 0, last, nowAnswered: Boolean(now && !unanswered(now)) },
+    html: `<div data-debrief-bar>${cardsBar(mission.id, walk.filter((q) => !unanswered(q)).length, walk.length)}</div>
+    <div data-debrief="${mission.id}" data-cards class="debrief-form${last ? ' is-last' : ''}">${groups}${checklist}</div>
+    ${toldSummary(state, mission, visible.filter((q) => told.has(q.id)), pre, last)}`,
+  };
+}
+
+// How many of the report's cards are answered, as Simple's other bars (components/fill-bar.js).
+export function cardsBar(missionId, done, total) {
+  if (total < 2) return '';
+  const left = total - done;
+  return `<div class="debrief-cards-bar">${fillBar({ key: `report:${missionId}`, done, total, size: 'big', label: left ? questionsLeftText(left) : 'Every question answered' })}</div>`;
+}
+
+// "You told us:" what the step cards already answered, each with Change, on the last card.
+function toldSummary(state, mission, qs, pre, show) {
+  if (!qs.length) return '';
+  const rows = qs.map((q) => {
+    const opt = questionOptions(q, state).find((o) => o.value === pre[q.id]);
+    return `<li data-told-row="${q.id}"><span>${shortQuestionLabel(mission, q) || q.label}</span> <b>${opt ? opt.text.split(' — ')[0] : ''}</b> <button class="walk-link" data-action="debrief-change" data-question="${q.id}">Change</button></li>`;
+  }).join('');
+  return `<div class="debrief-told" data-debrief-told${show ? '' : ' hidden'}><p class="debrief-told-head">You told us:</p><ul>${rows}</ul></div>`;
+}
+
+// ---- Simple's report cards, in the browser (app.js calls these) --------------------------------
+// The card showing is the [data-question] with .is-card-now; a question the step cards answered
+// has data-told until Change brings it back. Nothing here reads or sends an answer anywhere: it
+// only shows and hides the form's own fields.
+
+const answeredGroup = (g) => Boolean(g.querySelector('input:checked') || g.querySelector('input[type="number"]')?.value);
+const cardList = (form) => [...form.querySelectorAll('[data-question]')].filter((g) => !g.hidden && !g.hasAttribute('data-told'));
+
+export function syncDebriefCards(root) {
+  const form = root.querySelector('[data-debrief][data-cards]');
+  if (!form) return;
+  const cards = cardList(form);
+  let now = cards.find((g) => g.classList.contains('is-card-now'));
+  if (!now) now = cards.find((g) => !answeredGroup(g)) || cards.at(-1) || null;
+  for (const g of form.querySelectorAll('[data-question].is-card-now')) if (g !== now) g.classList.remove('is-card-now');
+  now?.classList.add('is-card-now');
+  const at = now ? cards.indexOf(now) : -1;
+  const last = at === cards.length - 1;
+  form.classList.toggle('is-last', last);
+  const done = cards.filter(answeredGroup).length;
+  const bar = root.querySelector('[data-debrief-bar]');
+  if (bar) bar.innerHTML = cardsBar(form.dataset.debrief, done, cards.length);
+  const nav = root.querySelector('[data-debrief-nav]');
+  if (nav) {
+    nav.querySelector('[data-action="debrief-back"]').hidden = at <= 0;
+    const next = nav.querySelector('[data-action="debrief-next"]');
+    next.hidden = last;
+    const lit = Boolean(now && answeredGroup(now));
+    next.classList.toggle('btn-primary', lit);
+    next.classList.toggle('btn-secondary', !lit);
+    nav.querySelector('[data-debrief-submit]').hidden = !last;
+  }
+  const told = root.querySelector('[data-debrief-told]');
+  if (told) told.hidden = !last || !told.querySelector('li');
+}
+
+export function showDebriefCard(root, group) {
+  const form = root.querySelector('[data-debrief][data-cards]');
+  if (!form || !group) return;
+  for (const g of form.querySelectorAll('[data-question].is-card-now')) g.classList.remove('is-card-now');
+  group.classList.add('is-card-now');
+  syncDebriefCards(root);
+  group.scrollIntoView?.({ block: 'start' });
+  group.querySelector('input')?.focus({ preventScroll: true });
+}
+
+// NEXT (+1) and Back (-1).
+export function moveDebriefCard(root, by) {
+  const form = root.querySelector('[data-debrief][data-cards]');
+  if (!form) return;
+  const cards = cardList(form);
+  const at = cards.findIndex((g) => g.classList.contains('is-card-now'));
+  const to = cards[Math.max(0, Math.min(cards.length - 1, at + by))];
+  if (to) showDebriefCard(root, to);
+}
+
+// Change, beside an answer from the step cards: that question becomes a card again.
+export function changeToldAnswer(root, questionId) {
+  const form = root.querySelector('[data-debrief][data-cards]');
+  const group = form?.querySelector(`[data-question="${questionId}"]`);
+  if (!group) return;
+  group.removeAttribute('data-told');
+  root.querySelector(`[data-told-row="${questionId}"]`)?.remove();
+  showDebriefCard(root, group);
 }
 
 // "2 questions left" beside SUBMIT REPORT, kept up to date by app.js as answers are picked.
@@ -348,6 +455,17 @@ export function questionsLeftText(n) {
 export function submitReportButton(missionId, left) {
   return `<button class="${left ? 'btn-secondary' : 'btn-primary'}" data-action="submit-debrief" data-mission="${missionId}">SUBMIT REPORT</button>
     <span class="debrief-left" data-debrief-left${left ? '' : ' hidden'}>${questionsLeftText(left)}</span>`;
+}
+
+// Simple's report cards: Back, NEXT, and on the last card SUBMIT REPORT (the only bright button
+// there). NEXT lights once its card is answered, like a step's DONE; it moves on either way.
+function cardsNav(missionId, form) {
+  const { first, last, nowAnswered } = form.cards;
+  return `<div class="debrief-nav" data-debrief-nav>
+      <button class="walk-link" data-action="debrief-back"${first ? ' hidden' : ''}>&#8249; Back</button>
+      <button class="${nowAnswered && !last ? 'btn-primary' : 'btn-secondary'}" data-action="debrief-next" data-mission="${missionId}"${last ? ' hidden' : ''}>NEXT &#9654;</button>
+      <span data-debrief-submit${last ? '' : ' hidden'}>${submitReportButton(missionId, form.left)}</span>
+    </div>`;
 }
 
 // A re-check of a mission that was never filed as done: no form, the way in.
@@ -392,7 +510,9 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
 
   const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
   const simple = readLevel(state) === 'simplest';
-  const form = completed ? null : debriefForm(state, mission, recheck ? stored : null, recheck);
+  // Simple files its report one question per card; a re-check stays the full form.
+  const cards = simple && !recheck;
+  const form = completed ? null : debriefForm(state, mission, recheck ? stored : null, recheck, cards);
   const questions = completed
     ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(state, mission, stored)}${progressPanel}`
     : form.html;
@@ -400,7 +520,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const greeting = completed ? DEBRIEF_GREETINGS.filed : recheck ? DEBRIEF_GREETINGS.recheck : saidAlready(state, mission.id) ? DEBRIEF_GREETINGS.already : DEBRIEF_GREETINGS.welcome;
   // Read it to me (in Scout's voice): his lines, then each question and its answers.
-  const sayLines = [greeting, scoutLine, ...(completed ? [] : visibleQuestions(mission, recheck ? stored : {}).flatMap((q) => [q.label, ...(q.options || []).map((o) => o.text)]))];
+  const sayLines = [greeting, scoutLine, ...(completed ? [] : visibleQuestions(mission, recheck ? stored : {}).flatMap((q) => [(cards && shortQuestionLabel(mission, q)) || q.label, ...(q.options || []).map((o) => o.text)]))];
   const footer = completed
     ? `
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
@@ -415,7 +535,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
       ? `<div data-recheck-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">A re-check keeps this filed as it was. Pick an answer, or go back.</div>
     <button class="btn-primary" data-action="submit-recheck" data-mission="${mission.id}">SAVE RE-CHECK</button>`
       : `<div data-debrief-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">Answer every question to file the report.</div>
-    ${submitReportButton(mission.id, form.left)}`;
+    ${form.cards ? cardsNav(mission.id, form) : submitReportButton(mission.id, form.left)}`;
 
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">

@@ -5,7 +5,8 @@ import { renderDistrict } from '../src/screens/district.js';
 import { MISSIONS } from '../src/data/missions.js';
 import { ACCOUNTS } from '../src/data/accounts.js';
 import { PASSWORD_MANAGERS } from '../src/data/missions-passwords.js';
-import { createInitialState, saveState, loadState } from '../src/state.js';
+import { createInitialState, saveState, loadState, markMissionStarted } from '../src/state.js';
+import { visibleSteps, stepKey, markStep } from '../src/utils/reading.js';
 import { parseRoute } from '../src/router.js';
 import { isPrivateBreadcrumb } from '../src/utils/errorNoise.js';
 import { restoreEvents } from '../src/utils/restore.js';
@@ -15,7 +16,7 @@ import { umamiPayload } from '../src/utils/restore-send.js';
 import { pageviewUrl, errorContext } from '../src/utils/pageview-url.js';
 import {
   BANK_NOTE_ACCOUNTS, addBankNote, updateBankNote, removeBankNote, bankNotes, safeUrl, managerPointer,
-  primaryLinkKind, ANY_BANK_STEPS,
+  primaryLinkKind, ANY_BANK_STEPS, bankStepIndex,
 } from '../src/utils/bank-notes.js';
 import { renderBankNotesScreen, renderBankNotesPanel, PRIVACY_NOTE, NO_PASSWORDS_NOTE } from '../src/components/bank-notes.js';
 
@@ -47,6 +48,16 @@ function deadHashLinks(html) {
   return bad;
 }
 
+// The bank notes live on the step that needs the bank's address (2026-11-20), not the briefing:
+// the mission started, the "Before you start" card skipped, the steps before it ticked.
+function atBank(state, id) {
+  let s = markMissionStarted({ ...state, stepProgress: { ...state.stepProgress, [id]: { setup: 'skipped' } } }, id);
+  const m = mission(id);
+  const steps = visibleSteps(m, s);
+  for (const st of steps.slice(0, bankStepIndex(steps))) s = markStep(s, id, stepKey(st), 'done');
+  return renderBriefing(s, id);
+}
+
 const goUrl = (html) => html.match(/data-action="go-do-it"[^>]*data-url="([^"]*)"/)?.[1] ?? null;
 const outLinks = (html) => [...html.matchAll(/<a [^>]*href="(https?:[^"]*)"/g)].map((m) => m[1]);
 
@@ -63,7 +74,9 @@ describe('the Vault has no dead ends (Liz 2026-11-01: "the vault doesn\'t take y
         const h = renderBriefing(s, m.id);
         // A site of the mission's own: GO DO IT, a step link, or a saved bank (not the HUD's links).
         const hasSite = goUrl(h)?.startsWith('https://') || /data-action="(?:mission-step|bank-note-open)"/.test(h);
-        const hasNotes = h.includes('href="#/vault/banks?from=');
+        // START opens the steps; the bank's own step has the notes.
+        const hasNotes = h.includes('href="#/vault/banks?from=')
+          || (BANK_NOTE_ACCOUNTS.has(m.accountId) && /data-action="(?:start-mission|show-steps)"|data-step-card/.test(h) && atBank(s, m.id).includes('href="#/vault/banks?from='));
         if (!hasSite && !hasNotes) bad.push(m.id);
         const dead = deadHashLinks(h);
         if (dead.length) bad.push(`${m.id}: ${dead.join(' ')}`);
@@ -72,10 +85,21 @@ describe('the Vault has no dead ends (Liz 2026-11-01: "the vault doesn\'t take y
     expect(bad).toEqual([]);
   });
 
-  it('every Vault mission for an unknown bank, card, exchange or brokerage shows the bank notes', () => {
+  it('every Vault mission for an unknown bank, card, exchange or brokerage shows the bank notes on the step that needs them', () => {
     const ids = VAULT_MISSIONS.filter((m) => BANK_NOTE_ACCOUNTS.has(m.accountId)).map((m) => m.id);
     expect(ids.length).toBeGreaterThanOrEqual(10);
-    for (const id of ids) expect(renderBriefing(createInitialState(), id)).toContain('data-bank-panel');
+    for (const level of ['simplest', 'full']) {
+      for (const id of ids) {
+        const s = { ...createInitialState(), reading: { level } };
+        expect(atBank(s, id), `${level} ${id}`).toContain('data-bank-step');
+        // Not a panel on the briefing (Liz 2026-11-20: START sat under ~1,100px of it). Simple's
+        // briefing has none; Advanced lists every step, and the banks sit in the bank step's row.
+        const brief = renderBriefing(s, id);
+        expect(brief, id).not.toContain('data-bank-panel');
+        if (level === 'simplest') expect(brief, id).not.toContain('data-bank-step');
+        else expect(brief.match(/data-bank-step/g)?.length, id).toBe(1);
+      }
+    }
   });
 
   it('the Vault district screen links to the bank notes on every tab, and no link on it is dead', () => {
@@ -105,15 +129,17 @@ describe('the Vault has no dead ends (Liz 2026-11-01: "the vault doesn\'t take y
 });
 
 describe('unknown bank: ask, never a dead end', () => {
-  it('with no notes the panel asks which bank, links to the list, and gives steps that work at any bank', () => {
-    const h = renderBriefing(createInitialState(), 'primary_bank-fortify-password');
-    expect(h).toContain('Which bank?');
-    expect(h).toContain('href="#/vault/banks?from=primary_bank-fortify-password"');
-    expect(h).toContain('WORKS AT ANY BANK');
+  it('with no notes the bank step has a compact Add your bank, back to the mission, and steps that work at any bank', () => {
+    const h = atBank(createInitialState(), 'primary_bank-fortify-password');
+    expect(h).toMatch(/<a class="btn-secondary bank-note-add" href="#\/vault\/banks\?from=primary_bank-fortify-password">Add your bank<\/a>/);
+    expect(h).toContain('Steps that work at any bank');
     for (const step of ANY_BANK_STEPS) expect(h).toContain(escHtml(step).replace(/&#39;/g, "'"));
+    // The other steps: nothing (no banks to list).
+    expect(h).not.toContain('data-bank-line');
     // Nothing to open yet: START keeps the steps on screen, never a "#".
-    expect(h).toContain('data-action="start-mission"');
-    expect(goUrl(h)).toBeNull();
+    const brief = renderBriefing(createInitialState(), 'primary_bank-fortify-password');
+    expect(brief).toContain('data-action="start-mission"');
+    expect(goUrl(brief)).toBeNull();
   });
 
   it('the generic steps name the actor, never a vague "they"', () => {
@@ -124,9 +150,9 @@ describe('unknown bank: ask, never a dead end', () => {
   });
 
   it('a note with no address yet sends the player back to add one', () => {
-    const h = renderBriefing(withNotes({ name: 'Mystery Bank' }), 'primary_bank-fortify-2fa');
+    const h = atBank(withNotes({ name: 'Mystery Bank' }), 'primary_bank-fortify-2fa');
     expect(h).toContain('Mystery Bank');
-    expect(h).toContain('No address saved yet: add one');
+    expect(h).toContain('No web address yet: add one');
   });
 });
 
@@ -149,22 +175,26 @@ describe('more than one bank', () => {
       { name: 'Bank A', loginUrl: 'https://a.example.com/login', resetUrl: 'https://a.example.com/reset' },
       { name: 'Bank B', loginUrl: 'https://b.example.com/' },
     );
-    const reset = renderBriefing(s, 'primary_bank-fortify-password');
-    expect(outLinks(reset)).toEqual(expect.arrayContaining(['https://a.example.com/reset', 'https://a.example.com/login', 'https://b.example.com/']));
-    expect(reset.indexOf('https://a.example.com/reset')).toBeLessThan(reset.indexOf('https://a.example.com/login'));
-    const login = renderBriefing(s, 'primary_bank-fortify-alerts');
-    expect(login.indexOf('https://a.example.com/login')).toBeLessThan(login.indexOf('https://a.example.com/reset'));
-    // Two places to go: the player picks one in the panel; the main button is START.
-    expect(goUrl(reset)).toBeNull();
-    expect(reset).toContain('data-action="start-mission"');
+    // A chip per bank, opening the mission's kind of page and saying which.
+    const reset = atBank(s, 'primary_bank-fortify-password');
+    expect(outLinks(reset)).toEqual(expect.arrayContaining(['https://a.example.com/reset', 'https://b.example.com/']));
+    expect(reset).toContain('Opens its reset-password page');
+    expect(reset).toContain('Opens its log-in page');
+    const login = atBank(s, 'primary_bank-fortify-alerts');
+    expect(outLinks(login)).toContain('https://a.example.com/login');
+    expect(outLinks(login)).not.toContain('https://a.example.com/reset');
+    // Two places to go: the player picks one on the step; the briefing's button is START.
+    const brief = renderBriefing(s, 'primary_bank-fortify-password');
+    expect(goUrl(brief)).toBeNull();
+    expect(brief).toContain('data-action="start-mission"');
     // Each bank link records the start (I DID IT on return) without a track().
-    expect(reset).toMatch(/class="bank-note-link"[^>]*data-action="bank-note-open" data-mission="primary_bank-fortify-password"/);
+    expect(reset).toMatch(/class="bank-note-link bank-note-chip"[^>]*data-action="bank-note-open" data-mission="primary_bank-fortify-password"/);
   });
 
   it('with one bank saved, its link is the way out and GO DO IT carries no bank address', () => {
     const s = withNotes({ name: 'Only Bank', loginUrl: 'https://only.example.com/' });
+    expect(outLinks(atBank(s, 'primary_bank-fortify-2fa'))).toContain('https://only.example.com/');
     const h = renderBriefing(s, 'primary_bank-fortify-2fa');
-    expect(outLinks(h)).toContain('https://only.example.com/');
     expect(goUrl(h)).toBeNull();
     expect(h).toContain('data-action="start-mission"');
   });
@@ -220,7 +250,7 @@ describe('saved addresses are user data: checked and escaped', () => {
   it('names and addresses are escaped, and links open with noopener noreferrer', () => {
     const name = '"><img src=x onerror=alert(1)>';
     const s = withNotes({ name, loginUrl: 'https://bank.example/?a="b"&c=<d>' });
-    for (const h of [renderBriefing(s, 'primary_bank-fortify-2fa'), renderBankNotesScreen(s), renderBankNotesScreen(s, { editId: bankNotes(s)[0].id })]) {
+    for (const h of [atBank(s, 'primary_bank-fortify-2fa'), renderBankNotesScreen(s), renderBankNotesScreen(s, { editId: bankNotes(s)[0].id })]) {
       expect(h).not.toContain('<img src=x');
       expect(h).toContain('&lt;img src=x onerror=alert(1)&gt;');
       for (const [tag] of h.matchAll(/<a [^>]*class="bank-note-link"[^>]*>/g)) {
@@ -256,7 +286,7 @@ describe('never a password, and the player is told where it\'s kept', () => {
     expect(PRIVACY_NOTE).toMatch(/analytics/);
     // The privacy line is beside the form and on every mission panel.
     expect(h.slice(h.indexOf('data-bank-note-form'))).toContain(PRIVACY_NOTE);
-    expect(renderBriefing(createInitialState(), 'credit_card-fortify-alerts')).toContain(PRIVACY_NOTE);
+    expect(atBank(createInitialState(), 'credit_card-fortify-alerts')).toContain(PRIVACY_NOTE);
   });
 });
 
@@ -355,7 +385,7 @@ describe('bank notes never leave the browser', () => {
 
   it('names and addresses appear only as text, href and value: never in an id, name, title, aria-label or data- attribute', () => {
     const st = s();
-    for (const h of [renderBriefing(st, 'primary_bank-fortify-2fa'), renderBankNotesScreen(st), renderBankNotesScreen(st, { editId: bankNotes(st)[0].id })]) {
+    for (const h of [atBank(st, 'primary_bank-fortify-2fa'), renderBankNotesScreen(st), renderBankNotesScreen(st, { editId: bankNotes(st)[0].id })]) {
       for (const [, attr, value] of h.matchAll(/\s([a-zA-Z-:]+)="([^"]*)"/g)) {
         if (/Zyx|zyx-secret/.test(value)) expect(['href', 'value'], `${attr}="${value}"`).toContain(attr);
       }

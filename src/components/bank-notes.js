@@ -75,14 +75,65 @@ export function renderManagerPointer(state, { tail = '' } = {}) {
   return `<div class="bank-note-pm" data-pm-pointer style="font-size: 13px; color: var(--offwhite); line-height: 1.6; margin-top: 12px; border-left: 2px solid var(--lime); padding-left: 10px;">${esc(p.text)}${link}${typed}${tail ? `<div style="${SMALL} margin-top: 6px;">${esc(tail)}</div>` : ''}</div>`;
 }
 
-function anyBankSteps(open) {
+function anyBankSteps(open, label = 'WORKS AT ANY BANK') {
   const items = ANY_BANK_STEPS.map((s) => `<li style="margin-bottom: 6px;">${esc(s)}</li>`).join('');
   // With no saved address these are the way through: open on a desktop, one tap away on a phone
   // (data-open-desktop), where the panel sits under the step slides.
   return `<details class="bank-note-any" data-any-bank${open ? ' data-open-desktop' : ''} style="margin-top: 14px;">
-    <summary style="cursor: pointer; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 2px; color: rgba(0,229,255,0.7); min-height: 32px;">WORKS AT ANY BANK</summary>
+    <summary style="cursor: pointer; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 2px; color: rgba(0,229,255,0.7); min-height: 32px;">${label}</summary>
     <ol style="margin: 10px 0 0; padding-left: 20px; font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.55;">${items}</ol>
   </details>`;
+}
+
+// ---- On the step that needs the bank (screens/briefing.js) -------------------------------------
+// The briefing no longer carries the panel. The step that needs the bank's address gets the saved
+// banks as chips, each saying what it opens, with the password-manager pointers one tap away
+// ("Where's my password?"). Every other step gets one line. Nothing saved: a compact "Add your
+// bank" that comes back to the mission.
+
+const OPENS = { login: 'Opens its log-in page', reset: 'Opens its reset-password page' };
+
+// A saved bank's chip: its name, and what it opens. No address yet: add one.
+function bankChip(note, missionId, kind) {
+  const order = kind === 'reset' ? ['reset', 'login'] : ['login', 'reset'];
+  const which = order.find((k) => noteLink(note, k));
+  if (!which) {
+    return `<a class="bank-note-chip bank-note-chip--add" href="${banksHref(missionId)}"><span class="bank-note-chip-name">${esc(note.name)}</span><span class="bank-note-chip-what">No web address yet: add one</span></a>`;
+  }
+  return `<a class="bank-note-link bank-note-chip" href="${esc(noteLink(note, which))}" target="_blank" rel="noopener noreferrer" data-action="bank-note-open" data-mission="${esc(missionId)}"><span class="bank-note-chip-name">${esc(note.name)} &#8599;</span><span class="bank-note-chip-what">${OPENS[which]}</span></a>`;
+}
+
+// The bank step: the chips, then "Where's my password?" and the steps that work at any bank.
+export function renderBankStep(state, mission) {
+  const notes = bankNotes(state);
+  const kind = primaryLinkKind(mission);
+  const top = notes.length
+    ? `<div class="bank-note-chips">${notes.map((n) => bankChip(n, mission.id, kind)).join('')}</div>
+        <a class="bank-note-edit-link" href="${banksHref(mission.id)}">+ Add or edit your banks</a>`
+    : `<a class="btn-secondary bank-note-add" href="${banksHref(mission.id)}">Add your bank</a>
+        <p class="bank-note-add-why">Save where it logs in, and this step opens it for you. Then you come back here.</p>`;
+  const pointer = renderManagerPointer(state, { tail: notes.length ? '' : 'The saved entry has the bank’s real web address in it: copy that into your bank notes.' });
+  return `
+        <div class="bank-note-step" data-bank-step>
+          ${top}
+          <details class="bank-note-where" data-bank-where><summary>Where’s my password?</summary>${pointer || `<p class="bank-note-where-none">Look in the place your passwords are saved, and search for your bank.</p>`}${privacyLine()}</details>
+          ${anyBankSteps(false, 'Steps that work at any bank')}
+        </div>`;
+}
+
+// Every other step: one line. Nothing saved: nothing (the bank step has the way to add one).
+export function renderBankLine(state, mission) {
+  const notes = bankNotes(state);
+  if (!notes.length) return '';
+  const kind = primaryLinkKind(mission);
+  const order = kind === 'reset' ? ['reset', 'login'] : ['login', 'reset'];
+  const links = notes.map((n) => {
+    const url = order.map((k) => noteLink(n, k)).find(Boolean);
+    return url
+      ? `<a class="bank-note-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" data-action="bank-note-open" data-mission="${esc(mission.id)}">${esc(n.name)} &#8599;</a>`
+      : `<a class="bank-note-name-link" href="${banksHref(mission.id)}">${esc(n.name)}</a>`;
+  });
+  return `<p class="bank-note-line" data-bank-line>Your banks: ${links.join(' <span aria-hidden="true">&middot;</span> ')} <span aria-hidden="true">&middot;</span> <a class="bank-note-edit-link" href="${banksHref(mission.id)}">edit</a></p>`;
 }
 
 const privacyLine = (extra = '') => `<div class="bank-note-privacy" style="${SMALL} margin-top: 12px;">&#128274; ${esc(PRIVACY_NOTE)}${extra}</div>`;

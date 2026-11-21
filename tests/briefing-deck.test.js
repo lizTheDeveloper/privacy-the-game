@@ -10,11 +10,12 @@ import { ACCOUNTS } from '../src/data/accounts.js';
 import { DISTRICT_DIALOGUE } from '../src/data/dialogue.js';
 import { missionDistrict } from '../src/data/missions.js';
 import { PM_BURST_ID, pmBurstBriefingLine } from '../src/utils/bursts.js';
-import { setReadLevel } from '../src/utils/reading.js';
+import { setReadLevel, setReadAloud } from '../src/utils/reading.js';
 
-// The phone slide deck is the Full intel level's layout (Short and Simplest are one short
-// screen, then one step at a time: screens/briefing.js).
-const state = setReadLevel(createInitialState(), 'full');
+// The phone slide deck is the Advanced level's layout with Read it to me on, which steps through
+// it slide by slide (Simple is one short screen, then one step at a time; Advanced without Read
+// it to me is one scroll since 2026-11-20: screens/briefing.js, tests/brief-reshape.test.js).
+const state = setReadAloud(setReadLevel(createInitialState(), 'full'), true);
 // The page as read in order, without the "More intel" summary.
 const read = (html) => norm(html.replace(/<summary>[^<]*<\/summary>/g, ' '));
 const norm = (s) => String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();

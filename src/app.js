@@ -54,7 +54,7 @@ import { mountBugReporter } from './components/bug-reporter.js';
 import { initBrowserWarning, syncBrowserWarning } from './components/browser-warning.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
-import { renderDebrief, debriefReaction, questionsLeftText } from './screens/debrief.js';
+import { renderDebrief, debriefReaction, questionsLeftText, syncDebriefCards, showDebriefCard, moveDebriefCard, changeToldAnswer } from './screens/debrief.js';
 import { setPasswordPlaces } from './utils/password-places.js';
 import { readLevel, setReadLevel, readAloudOn, setReadAloud, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
@@ -1204,6 +1204,11 @@ function submitDebrief(missionId) {
     if (msg) msg.hidden = false;
     const open = [...app.querySelectorAll('[data-question]')].find((g) => !g.hidden
       && !g.querySelector('input:checked') && !g.querySelector('input[type="number"]')?.value);
+    // Simple's report cards: go to that question's card.
+    if (open && app.querySelector('[data-debrief][data-cards]')) {
+      open.removeAttribute('data-told');
+      return showDebriefCard(app, open);
+    }
     open?.scrollIntoView({ block: 'center' });
     open?.querySelector('input')?.focus({ preventScroll: true });
     return;
@@ -1686,6 +1691,11 @@ app.addEventListener('click', async (e) => {
       track('mission-started', { mission: el.dataset.mission, phase: mission?.phase });
     }
     setTimeout(() => renderCurrentRoute(), 0);
+  } else if (action === 'debrief-next' || action === 'debrief-back') {
+    // Simple's report cards: only which question shows changes (screens/debrief.js).
+    moveDebriefCard(app, action === 'debrief-next' ? 1 : -1);
+  } else if (action === 'debrief-change') {
+    changeToldAnswer(app, el.dataset.question);
   } else if (action === 'submit-debrief') {
     submitDebrief(el.dataset.mission);
   } else if (action === 'retry-broker-data') {
@@ -2099,6 +2109,7 @@ function refreshDebriefForm(e) {
     leftEl.textContent = questionsLeftText(left);
   }
   if (!left) app.querySelector('[data-debrief-msg]')?.setAttribute('hidden', '');
+  syncDebriefCards(app);
 }
 document.addEventListener('click', (e) => {
   if (!swallowClickUntil) return;

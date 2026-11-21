@@ -31,7 +31,9 @@ describe('breach debrief: the password question', () => {
     expect(g).toContain('data-show-if-q="finding"');
     expect(g).toContain('data-show-if-values="1-2-breaches,3plus-breaches"');
     expect(group(html, 'finding')).not.toContain('hidden');
-    expect(html).toContain('Did any of those breaches include the password you used on that site?');
+    // Simple asks it in the step card's words (one question per card); Advanced in the report's.
+    expect(html).toContain('Did a leak have your password in it?');
+    expect(renderDebrief({ ...s0, reading: { ...s0.reading, level: 'full' } }, 'gmail-recon-breach')).toContain('Did any of those breaches include the password you used on that site?');
     expect(html).toContain('Compromised data');
   });
 

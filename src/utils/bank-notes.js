@@ -34,6 +34,19 @@ export function missionUsesBankNotes(mission) {
   return Boolean(mission && BANK_NOTE_ACCOUNTS.has(mission.accountId));
 }
 
+// The step that needs the bank's address (Liz 2026-11-20: the panel sat under every step, about
+// 1,100px of reference in the middle of a task). "Log into your bank's website", "Go to your bank's
+// site", "In the card issuer's app or site"; else the first step that happens at the bank (not on
+// a site of its own, not in the password report). Its card has the saved banks; the rest a line.
+const AT_THE_BANK = /\b(?:log ?in(?:to)?|sign ?in(?:to)?|go to|open)\b[^.]*\b(?:bank|card|brokerage|exchange)\b|\b(?:issuer|bank|brokerage|exchange)[’']s (?:own )?(?:app|site|website|security)/i;
+const NOT_AT_THE_BANK = /security report|passwords are saved|^note whether/i;
+export function bankStepIndex(steps = []) {
+  const ok = (st) => st && !st.url && !NOT_AT_THE_BANK.test(st.text || '');
+  const named = steps.findIndex((st) => ok(st) && AT_THE_BANK.test(st.text || ''));
+  if (named !== -1) return named;
+  return steps.findIndex(ok);
+}
+
 // A password mission goes to the reset page first; everything else starts at the login page.
 export function primaryLinkKind(mission) {
   return /-(?:recon|fortify)-(?:password|lockdown)$/.test(mission?.id || '') ? 'reset' : 'login';

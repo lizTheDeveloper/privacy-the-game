@@ -7,7 +7,7 @@
 // the manager question keep exactly their old totals.
 import { ACCOUNTS } from './accounts.js';
 import { PWNED_PASSWORDS_URL, PASSWORD_SAFE_NOTE } from './pwned-passwords-step.js';
-import { PHONE_PLACE, COMPUTER_PLACE, TWO_PLACE_PAIRS, pairKey } from './two-places.js';
+import { TWO_PLACE_PAIRS, pairKey, phonePlace, computerPlace } from './two-places.js';
 
 const BREACHED = ['1-2-breaches', '3plus-breaches'];
 
@@ -153,11 +153,14 @@ const PM_ON_COMPUTER = {
   firefox: PM_STEPS.firefox.slice(0, 2),
 };
 const NOTE_BOTH_STEP = { text: 'Write down how many passwords each one says are compromised, leaked or reused. Add them up. Note which of your accounts they name' };
+// No step of its own says "two places" (it had nothing to do on it, Liz 2026-11-20): each step's
+// chip says where it happens, and the first one on the computer says to do the same there.
 for (const [a, b] of TWO_PLACE_PAIRS) {
+  const phone = phonePlace(a);
+  const computer = computerPlace(b, 'Now do the same on your computer.');
   PM_STEPS[pairKey(a, b)] = [
-    { text: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Each one has its own check. Let’s look at both.`, places: 'two' },
-    ...PM_ON_PHONE[a],
-    ...PM_ON_COMPUTER[b],
+    ...PM_ON_PHONE[a].map((st) => ({ ...st, place: phone })),
+    ...PM_ON_COMPUTER[b].map((st) => ({ ...st, place: computer })),
     NOTE_BOTH_STEP,
   ];
 }

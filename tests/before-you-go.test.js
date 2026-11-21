@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderBriefing } from '../src/screens/briefing.js';
 import { createInitialState, markMissionStarted } from '../src/state.js';
-import { setReadLevel, visibleSteps, stepKey, markStep, progressFor } from '../src/utils/reading.js';
+import { setReadLevel, setReadAloud, visibleSteps, stepKey, markStep, progressFor } from '../src/utils/reading.js';
 import { MISSIONS } from '../src/data/missions.js';
 import { findMission } from '../src/data/custom-missions.js';
 import { markOpened, clearOpened } from '../src/utils/opened-steps.js';
@@ -116,7 +116,9 @@ describe('every step with a link says what to do there before its OPEN button', 
   });
 
   it('Advanced: the briefing says what to do on the site GO DO IT opens, before GO DO IT', () => {
-    const s = setReadLevel(createInitialState(), 'full');
+    // The slides are Read it to me's since 2026-11-20 (without it Advanced is one scroll, every
+    // step listed above the pinned GO DO IT: no preview, tests/brief-reshape.test.js).
+    const s = setReadAloud(setReadLevel(createInitialState(), 'full'), true);
     let seen = 0;
     let single = 0;
     for (const m of LIVE) {

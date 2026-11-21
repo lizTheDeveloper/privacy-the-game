@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { MISSIONS } from '../src/data/missions.js';
 import * as DIALOGUE from '../src/data/dialogue.js';
 import { DEBRIEF_GREETINGS } from '../src/screens/debrief.js';
+import { shortQuestionLabel } from '../src/screens/briefing.js';
 import { voiceId, voiceText } from '../src/utils/voice-line.js';
 import { WHEN_OPENS, COME_BACK, COME_BACK_MORE, previewText } from '../src/components/site-preview.js';
 
@@ -37,9 +38,12 @@ export function collectVoiceLines() {
     for (const st of steps) {
       texts.push(st.text);
       for (const n of st.note || []) texts.push(n.label, n.text);
+      // Where a two-places step happens (its chip), and the line when the place changes.
+      if (st.place) texts.push(st.place.label, st.place.now, st.place.line);
     }
     for (const q of m.debriefQs || []) {
-      texts.push(q.label, q.hint, q.scout);
+      // Simple's report cards ask in the step cards' words where they stand alone.
+      texts.push(q.label, shortQuestionLabel(m, q), q.hint, q.scout);
       for (const o of q.options || []) texts.push(o.text);
     }
   }
