@@ -146,7 +146,12 @@ export function renderBriefing(state, missionId, opts = {}) {
 
   // GO DO IT opens the first step's site: what to do there comes first, above the button (on a
   // phone the step slides are behind the player by then, and the site covers the game).
-  const goAt = !started && !noReset && goUrl ? missionStepList.findIndex((st) => st.url === goUrl) : -1;
+  // Not where YOUR MOVE lists every step on the same screen (one page, or the slides stacked on a
+  // computer): it would only say them twice.
+  // A briefing that fits one phone screen stays as it is; a longer one is slides on a phone.
+  const stepWords = missionStepList.reduce((n, st) => n + countWords(st.text) + (st.note || []).reduce((k, x) => k + countWords(`${x.label} ${x.text}`), 0), 0);
+  const isDeck = countWords(intel) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS;
+  const goAt = isDeck && !started && !noReset && goUrl ? missionStepList.findIndex((st) => st.url === goUrl) : -1;
   const goPreview = goAt === -1 ? null : sitePreview(missionStepList, goAt);
   const goPreviewHtml = sitePreviewHtml(goPreview);
   // How much to read (Scout asks the first time), and Read it to me.
@@ -169,16 +174,14 @@ export function renderBriefing(state, missionId, opts = {}) {
           ${noResetFiled ? '' : `<a class="focus-notnow" href="#/district/${districtId}${targetTab}" style="font-size: 13px;">NOT NOW</a>`}
         </div>`;
 
-  // A briefing that fits one phone screen stays as it is; a longer one is slides on a phone.
-  const stepWords = missionStepList.reduce((n, st) => n + countWords(st.text) + (st.note || []).reduce((k, x) => k + countWords(`${x.label} ${x.text}`), 0), 0);
-  const slides = countWords(intel) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS
+  const slides = isDeck
     ? briefingSlides({ header, briefing: intel, why, intelTools, gearHtml, progressHtml, stepRows, stepRow, missionStepList, noResetPanel: noReset ? renderNoResetPanel(state, mission) : '', scoutLine, scoutFeeling, preview, loreData })
     : null;
 
   const bankPanel = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   const main = slides ? `${deck(slides, { label: 'Mission briefing', className: 'brief-deck' })}
         ${bankPanel ? `<div style="margin-top: 20px;">${bankPanel}</div>` : ''}
-        ${goPreviewHtml ? `<div style="margin-top: 20px;">${goPreviewHtml}</div>` : ''}
+        ${goPreviewHtml ? `<div class="phone-only" style="margin-top: 20px;">${goPreviewHtml}</div>` : ''}
         <div style="margin-top: 20px;">${actions}</div>` : `${header}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
@@ -196,7 +199,6 @@ export function renderBriefing(state, missionId, opts = {}) {
           </div>
         </div>`}
 ${bankPanel}
-${goPreviewHtml ? `<div style="margin-bottom: 20px;">${goPreviewHtml}</div>` : ''}
 ${actions}`;
 
   return `
@@ -482,6 +484,11 @@ function compactBriefingPage(p) {
         ? `<button class="btn-primary focus-go" data-action="go-do-it" data-mission="${mission.id}" data-url="${goUrl}">GO DO IT &#9654;</button>`
         : `<button class="btn-primary focus-go" data-action="start-mission" data-mission="${mission.id}">START &#9654;</button>`;
   const simple = level === 'simplest';
+  // Simple, several steps: "Where are your passwords saved?" is asked once, on the "Before you
+  // start" card after START (setupCard), and the step screens say what was picked. Here it would
+  // be the same question twice, right above START. Kept when that card was skipped.
+  const setupSkipped = state?.stepProgress?.[mission.id]?.setup === 'skipped';
+  const placeAsk = simple && many && !setupSkipped ? '' : passwordPlaceAsk(state, mission);
   const body = `
       ${simple ? focusTitle('', titleBottom) : focusTitle(titleTop, titleBottom)}
       <p class="focus-lead" data-intel>${intel}</p>
@@ -491,18 +498,26 @@ function compactBriefingPage(p) {
       ${many ? `${simple ? `${fillBar({ key: `steps:${mission.id}`, done: progress.handled, total: n, label: `${n} steps` })}<div class="focus-meta">About ${mission.estimatedMinutes} min</div>` : `<div class="focus-meta">${n} steps &middot; about ${mission.estimatedMinutes} min</div>`}
       <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
-      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
+      ${placeAsk + gearAsk(state, gearQuestions(allSteps))}
       ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
         ${simple ? notMineButton(state, mission, '#/next') : ''}
-        ${canSayAlready(mission) ? `<button class="btn-secondary" data-action="already-have" data-mission="${mission.id}">I ALREADY HAVE THIS</button>` : ''}
+        ${canSayAlready(mission) ? alreadyButton(mission, simple) : ''}
         <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
       </div>
       ${renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
   return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine], missionStepList.slice(0, 2).flatMap(stepSay)));
 }
+
+// "I already have this". On a Simple password reset it read as "I changed it already": there it
+// says the report's own answer ("It was already unique and strong") in plain words.
+function alreadyButton(mission, simple) {
+  const plain = simple && isPasswordMission(mission);
+  return `<button class="btn-secondary${plain ? ' already-plain' : ''}" data-action="already-have" data-mission="${mission.id}">${plain ? ALREADY_STRONG : 'I ALREADY HAVE THIS'}</button>`;
+}
+export const ALREADY_STRONG = 'My password is already strong, and I don’t use it anywhere else';
 
 // Simple: "I don't have Gmail", in big words on a quiet button (Liz 2026-11-18: big words, but
 // the secondary button so it isn't as big and blue as START).
@@ -551,12 +566,30 @@ const SHORT_FOLLOW = { password_exposed: 'Did a leak have your password in it?' 
 // "Yes — passwords were in the leaked data" → "Yes".
 const shortText = (t) => t.split(' — ')[0].replace(/^Couldn’t check right now$/, 'Couldn’t check');
 
-function stepAsk(state, mission, step, sends = false) {
-  if (!step?.ask) return '';
+// The step's question (one the card can ask), its follow-ups showing now, and whether all are
+// answered. null when the step asks nothing the card can show.
+function askOf(state, mission, step) {
+  if (!step?.ask) return null;
   const qs = mission.debriefQs || [];
   const q = qs.find((x) => x.id === step.ask);
-  if (!q || q.multi || q.type === 'number') return '';
+  if (!q || q.multi || q.type === 'number') return null;
   const answers = stepAnswers(state, mission.id);
+  const follow = qs.filter((f) => f.showIf?.question === q.id && !f.multi && f.type !== 'number' && showIfMatches(f.showIf, answers[q.id]));
+  const done = answers[q.id] !== undefined && follow.every((f) => answers[f.id] !== undefined);
+  return { q, answers, follow, done };
+}
+
+// The step's question is on its card and not answered yet: DONE waits as an outline until it is
+// (it still works if tapped; the report asks again). Then it is the screen's one bright button.
+export function stepAskPending(state, mission, step) {
+  const a = askOf(state, mission, step);
+  return Boolean(a && !a.done);
+}
+
+function stepAsk(state, mission, step, sends = false) {
+  const a = askOf(state, mission, step);
+  if (!a) return '';
+  const { q, answers, follow, done } = a;
   // keep: the answers a Yes leaves in place (the ones that come after it), for app.js.
   const btn = (qid, value, text, on, keep = '') => `<button class="focus-ask-opt${on ? ' is-picked' : ''}" data-action="step-answer" data-mission="${mission.id}" data-question="${qid}" data-value="${attrEsc(value)}"${keep ? ` data-keep="${attrEsc(keep)}"` : ''} aria-pressed="${on}">${on ? '&#10003; ' : ''}${text}</button>`;
   const group = (id, label, buttons, hint = '') => `
@@ -582,12 +615,10 @@ function stepAsk(state, mission, step, sends = false) {
   } else {
     parts.push(group(q.id, q.label, questionOptions(q, state).map((o) => btn(q.id, o.value, shortText(o.text), answers[q.id] === o.value))));
   }
-  const follow = qs.filter((f) => f.showIf?.question === q.id && !f.multi && f.type !== 'number' && showIfMatches(f.showIf, answers[q.id]));
   for (const f of follow) {
     parts.push(group(f.id, SHORT_FOLLOW[f.id] || f.label, questionOptions(f, state).map((o) => btn(f.id, o.value, shortText(o.text), answers[f.id] === o.value)),
       f.id === 'password_exposed' ? 'Look for “Passwords” in the list.' : ''));
   }
-  const done = answers[q.id] !== undefined && follow.every((f) => answers[f.id] !== undefined);
   return `
       <div class="focus-ask" data-step-ask="${q.id}">${parts.join('')}
         ${done ? `<p class="focus-ask-note">${sends ? 'Saved. Tap DONE to send it to Scout.' : 'Saved. Now tap DONE.'}</p>` : ''}
@@ -596,8 +627,10 @@ function stepAsk(state, mission, step, sends = false) {
 
 // simple: { opened, where } for the Simplest card. Until the step's site has been opened, OPEN
 // is the big button (and DONE waits, see stepModePage); after, it is a quiet "open it again".
-// `where` is the site a step without a link happens on, shown above the words so "the box"
-// is never read as a box on this page (Liz 2026-11-17).
+// `where` is the site a step without a link happens on, named under the words as a small "Open
+// haveibeenpwned.com again" link (Liz 2026-11-17: so "the box" is never read as a box on this
+// page). Under, not above: the card's first words are what to do, not "leave" (layout audit
+// 2026-11-20).
 // preview: what to do once the site opens (components/site-preview.js), before its button.
 function stepCardText(mission, step, simple = null, preview = null) {
   const key = stepKeyOf(step);
@@ -609,10 +642,10 @@ function stepCardText(mission, step, simple = null, preview = null) {
     : big ? open('btn-primary focus-go focus-open simple-open', `OPEN THE WEBSITE &#8599;<span class="simple-host">${hostOf(step.url)}</span>`) + BACK_HINT
     : open('simple-pill simple-again', '<span aria-hidden="true">&#8599;</span> Open the website again');
   const where = simple?.where && !step.url
-    ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#127760;</span> On <b>${hostOf(simple.where)}</b> <span aria-hidden="true">&#8599;</span></a>${BACK_HINT}`
+    ? `<a class="simple-where" href="${simple.where}" target="_blank" rel="noopener" data-action="mission-step" data-mission="${mission.id}" data-step="${key}"><span aria-hidden="true">&#8599;</span> Open <b>${hostOf(simple.where)}</b> again</a>${BACK_HINT}`
     : '';
   const notes = (step.note || []).map((n) => `<details class="focus-note"${n.open ? ' open' : ''}><summary>${n.label}</summary><p>${n.text}</p></details>`).join('');
-  return `${where}<div class="focus-step-text">${pathText(step.text)}</div>${step.url ? sitePreviewHtml(preview, { simple: Boolean(simple) }) : ''}${link}${notes}`;
+  return `<div class="focus-step-text">${pathText(step.text)}</div>${where}${step.url ? sitePreviewHtml(preview, { simple: Boolean(simple) }) : ''}${link}${notes}`;
 }
 
 // The site opens in a new tab, which on a phone looks like leaving the game; say how to get
@@ -666,6 +699,7 @@ function stepModePage(p) {
   const opened = Boolean(step && (!step.url || wasOpened(mission.id, key) || marks[key] === 'done'));
   const simpleCard = simple && step ? { opened, where: simpleWhere(missionStepList, current) } : null;
   const showDone = !simple || opened;
+  const askWaiting = Boolean(step) && stepAskPending(state, mission, step);
   // A step that opens a site says first what to do there (the site covers the game on a phone).
   const preview = step ? sitePreview(missionStepList, current, { max: PREVIEW_MAX[level] || PREVIEW_MAX.full }) : null;
   // Read it to me: the step, any note shown open on its card (the password check's "Is this
@@ -692,7 +726,7 @@ function stepModePage(p) {
         ${stepCardText(mission, step, simpleCard, preview)}
         ${accountSite(mission, missionStepList, p.goUrl)}
         ${showDone ? stepAsk(state, mission, step, sends) : ''}
-        ${showDone ? `<button class="btn-primary focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}
+        ${showDone ? `<button class="${askWaiting ? 'btn-secondary' : 'btn-primary'} focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}
         <div class="simple-pills">
           <button class="simple-pill" data-action="step-stuck" data-mission="${mission.id}" data-step="${key}" aria-expanded="false" aria-controls="stuck-${key}"><span aria-hidden="true">?</span> Help</button>
         </div>${helpPanel({ mission, step, key, site: stepSite(missionStepList, current, p.account) })}
@@ -720,7 +754,7 @@ function stepModePage(p) {
       ${walkProgress(progress, { bare: true, key: `steps:${mission.id}`, size: 'big' })}
       ${allDone ? confetti() : ''}
       ${card}
-      ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
+      ${passwordPlaceAsk(state, mission, { saidOnStep: step?.places === 'two' }) + gearAsk(state, gearQuestions(allSteps))}
       ${p.extras}
       ${bankPanelHtml}
       ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}

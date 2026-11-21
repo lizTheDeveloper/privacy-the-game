@@ -778,6 +778,8 @@ img { image-rendering: pixelated; }
 .focus-meta { font-family: var(--font-mono); font-size: 13px; color: var(--cyan); margin: 8px 0 4px; }
 .focus-steps-peek { margin: 4px 0 16px; }
 .focus-steps-peek > summary { cursor: pointer; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); min-height: 44px; display: flex; align-items: center; }
+/* The site links in the list: a 44px-tall tap area (padding on an inline link doesn't move the lines). */
+.focus-steps-peek ol a { display: inline; padding: 12px 0; margin: -12px 0; }
 .focus-steps-peek ol { margin: 4px 0 0; padding-left: 22px; font-size: 15px; line-height: 1.55; color: rgba(237,239,243,0.85); display: flex; flex-direction: column; gap: 8px; }
 .focus-one-step { margin: 12px 0 16px; }
 .focus-actions { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin: 20px 0 8px; }
@@ -808,7 +810,9 @@ img { image-rendering: pixelated; }
 .focus-ask-hint { margin: -4px 0 10px; font-size: 13px; line-height: 1.5; color: rgba(237,239,243,0.65); }
 .focus-ask-opts { display: flex; flex-direction: column; gap: 8px; }
 .focus-ask-opt { text-align: left; min-height: 48px; padding: 12px 14px; font-size: 15px; line-height: 1.4; color: var(--offwhite); background: rgba(9,11,16,0.6); border: 1px solid rgba(237,239,243,0.2); cursor: pointer; font-family: inherit; }
-.focus-ask-opt.is-picked { border-color: var(--lime); background: rgba(198,255,0,0.1); color: var(--lime); font-weight: 700; }
+/* Picked: a cyan edge and a plain tick. Not lime: lime means done or good, and "Yes, I saw orders
+   I don't know" is neither (layout audit 2026-11-20). */
+.focus-ask-opt.is-picked { border-color: var(--cyan); box-shadow: inset 0 0 0 1px var(--cyan); background: rgba(0,229,255,0.08); color: var(--offwhite); font-weight: 700; }
 .focus-ask-lead { margin: 0; font-size: 15px; line-height: 1.5; color: var(--offwhite); }
 .focus-ask-note { margin: 0; font-size: 13px; color: var(--lime); }
 .walk-help .walk-again, .walk-help .walk-skip { display: block; width: 100%; text-align: center; text-decoration: none; margin: 4px 0 8px; padding: 12px; box-sizing: border-box; }
@@ -896,12 +900,13 @@ img { image-rendering: pixelated; }
 /* On a computer the name stays on one line however full the bar gets. */
 @media (min-width: 900px) { .hud-brand { white-space: nowrap; } }
 .hud-dollar { display: inline-flex; align-items: center; justify-content: center; width: 11px; height: 11px; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-body); font-size: 8px; font-weight: 700; line-height: 1; letter-spacing: 0; }
-/* "I don't have Gmail": big words on the quiet button (Liz 2026-11-18). */
-.focus-actions .btn-secondary.not-mine { font-family: var(--font-body); font-size: 22px; font-weight: 600; letter-spacing: 0; line-height: 1.3; padding: 16px 20px; text-transform: none; overflow-wrap: anywhere; }
+/* "I don't have Gmail" and Simple's "My password is already strong": plain words on the quiet
+   button (Liz 2026-11-18), at a quiet button's size, so they don't weigh as much as START. */
+.focus-actions .btn-secondary.not-mine, .focus-actions .btn-secondary.already-plain { font-family: var(--font-body); font-size: 16px; font-weight: 600; letter-spacing: 0; line-height: 1.3; padding: 14px 20px; text-transform: none; overflow-wrap: anywhere; }
 .not-mine-done { padding: 16px 24px 0; }
 .not-mine-done .btn-secondary { font-size: 18px; letter-spacing: 0; padding: 12px 18px; margin-top: 10px; }
 .brief-simple .focus-card { gap: 18px; }
-.simple-where { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px; font-size: 15px; color: var(--cyan); background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4); border-radius: 20px; text-decoration: none; overflow-wrap: anywhere; }
+.simple-where { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px; font-size: 15px; color: var(--cyan); background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4); border-radius: 20px; text-decoration: none; overflow-wrap: anywhere; }
 .simple-where b { color: var(--offwhite); font-weight: 600; }
 .simple-pills { display: flex; flex-wrap: wrap; gap: 10px; }
 .simple-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; font-family: inherit; font-size: 17px; color: var(--offwhite); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; cursor: pointer; }
@@ -936,7 +941,16 @@ img { image-rendering: pixelated; }
 .pin-bottom { position: relative; }
 @media (max-width: 768px) {
   .pin-bottom { position: sticky; bottom: 0; z-index: 20; padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(13,16,24,0) 0%, rgba(13,16,24,0.96) 22%); }
+  /* Room the height of the pinned bar under the report's last answer, so it scrolls clear of it. */
+  .debrief-form { padding-bottom: 88px; }
+  html:has(.debrief-form) { scroll-padding-bottom: 100px; }
 }
+
+/* The report (layout audit 2026-11-20). Each question in the step cards' style: big, bold,
+   off-white. The way back is a full-size tap target. SUBMIT REPORT says how many are left. */
+.debrief-q { margin: 0 0 14px; font-family: var(--font-body); font-size: 18px; font-weight: 700; line-height: 1.4; letter-spacing: 0; color: var(--offwhite); }
+.debrief-back { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--font-mono); font-size: 11px; color: var(--text-quiet); text-decoration: none; }
+.debrief-left { display: inline-block; margin: 8px 0 0 14px; font-size: 15px; color: var(--text-quiet); vertical-align: middle; }
 
 /* Stats shows Integrity, Exposure and Streak as its big dials, so the top bar doesn't repeat them. */
 .stats-page .hud-stat { display: none !important; }

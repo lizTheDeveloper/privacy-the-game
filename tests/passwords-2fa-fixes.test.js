@@ -15,7 +15,8 @@ const s0 = createInitialState();
 
 describe('fix 1: the password-manager debrief knows its district', () => {
   it('BACK TO DISTRICT goes to Master Keys recon', () => {
-    let s = { ...s0, passwordManager: 'bitwarden', pmFlagged: [] };
+    // Advanced: Simple's filed report goes to What's next instead.
+    let s = { ...s0, reading: { level: 'full' }, passwordManager: 'bitwarden', pmFlagged: [] };
     s = set(s, 'password_manager-recon-report', { status: 'completed', action: 'none-flagged', flagged: ['none'] });
     const html = renderDebrief(s, 'password_manager-recon-report');
     expect(html).toContain('href="#/district/master-keys?tab=recon"');

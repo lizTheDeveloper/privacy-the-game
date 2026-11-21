@@ -56,6 +56,7 @@ const SEE_NEW = {
 function forTwo(a, b) {
   const t = SITE_LABEL[a];
   return {
+    twoPlaces: true,
     where: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Do this on ${PHONE_PLACE[a]} first. Then you’ll update ${COMPUTER_PLACE[b]} too.`,
     make: t.make,
     check: t.check,
@@ -83,7 +84,8 @@ export function resetStepsByManager(steps, accountName) {
   const at = newPasswordStep(steps);
   if (at === -1) return null;
   const build = (t) => [
-    { text: t.where },
+    // places: 'two': the step says where the passwords are, so the screen doesn't say it again.
+    { text: t.where, ...(t.twoPlaces ? { places: 'two' } : {}) },
     ...steps.slice(0, at + 1),
     { text: t.make },
     ...steps.slice(at + 1),

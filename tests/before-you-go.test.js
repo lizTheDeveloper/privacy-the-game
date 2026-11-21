@@ -118,25 +118,33 @@ describe('every step with a link says what to do there before its OPEN button', 
   it('Advanced: the briefing says what to do on the site GO DO IT opens, before GO DO IT', () => {
     const s = setReadLevel(createInitialState(), 'full');
     let seen = 0;
+    let single = 0;
     for (const m of LIVE) {
       const html = renderBriefing(s, m.id);
       const go = /data-action="go-do-it"[^>]*data-url="([^"]*)"/.exec(html);
       if (!go) continue;
       const steps = visibleSteps(m, s);
       const at = steps.findIndex((st) => st.url === decode(go[1]));
-      if (at === -1 || !onSiteSteps(steps, at).length) {
+      // A briefing on one page lists every step under YOUR MOVE, right above GO DO IT: "When it
+      // opens:" would say them twice (layout audit 2026-11-20).
+      const deck = html.includes('brief--deck');
+      if (!deck) single++;
+      if (at === -1 || !onSiteSteps(steps, at).length || !deck) {
         expect(html, m.id).not.toContain('data-site-preview');
         continue;
       }
       const p = html.indexOf('data-site-preview');
       expect(p, m.id).toBeGreaterThan(-1);
       expect(p, m.id).toBeLessThan(go.index);
+      // On a computer the slides stack and the steps show: the preview is for a phone only.
+      expect(html.lastIndexOf('class="phone-only"', p), m.id).toBeGreaterThan(-1);
       // The list keeps every step, each with its own row.
       expect((html.match(/data-brief-step /g) || []).length, m.id).toBe(steps.length);
       expect(readLines(html), m.id).toContain(WHEN_OPENS);
       seen++;
     }
     expect(seen).toBeGreaterThan(50);
+    expect(single).toBeGreaterThan(0);
   });
 });
 

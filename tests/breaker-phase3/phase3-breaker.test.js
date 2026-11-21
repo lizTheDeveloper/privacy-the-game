@@ -346,7 +346,7 @@ describe('P4 car privacy report', () => {
   it('the report is reachable: briefing and debrief render with no account', () => {
     const s = only(['car_gm']);
     expect(renderBriefing(s, m.id)).toContain('Vehicle Privacy Report');
-    expect(renderDebrief(s, m.id)).toContain('WHAT DOES THE LABEL SAY');
+    expect(renderDebrief(s, m.id)).toContain('What does the label say');
   });
 });
 

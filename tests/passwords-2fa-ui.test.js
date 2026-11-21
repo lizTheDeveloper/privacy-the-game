@@ -28,19 +28,19 @@ describe('breach debrief: the password question', () => {
     expect(g).toContain('data-show-if-q="finding"');
     expect(g).toContain('data-show-if-values="1-2-breaches,3plus-breaches"');
     expect(group(html, 'finding')).not.toContain('hidden');
-    expect(html).toContain('DID ANY OF THOSE BREACHES INCLUDE THE PASSWORD YOU USED ON THAT SITE?');
+    expect(html).toContain('Did any of those breaches include the password you used on that site?');
     expect(html).toContain('Compromised data');
   });
 
   it('a filed clean check shows no password question', () => {
     const html = renderDebrief(clean(s0), 'gmail-recon-breach');
-    expect(html).not.toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
+    expect(html).not.toContain('include the password you used on that site');
   });
 
   it('a filed breach shows the answer and Scout says the password is fine', () => {
     const s = set(s0, 'gmail-recon-breach', { status: 'completed', finding: '1-2-breaches', password_exposed: 'no' });
     const html = renderDebrief(s, 'gmail-recon-breach');
-    expect(html).toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
+    expect(html).toContain('include the password you used on that site');
     expect(html).toContain('No — only things like email or username');
     expect(html).toContain(PASSWORD_DIALOGUE.breachNoPassword);
   });
@@ -49,14 +49,14 @@ describe('breach debrief: the password question', () => {
     const s = set(s0, 'gmail-recon-breach', { status: 'completed', finding: '1-2-breaches' });
     const html = renderDebrief(s, 'gmail-recon-breach');
     expect(html).toContain('SECURED');
-    expect(html).not.toContain('INCLUDE THE PASSWORD YOU USED ON THAT SITE');
+    expect(html).not.toContain('include the password you used on that site');
   });
 });
 
 describe('2FA debrief', () => {
   it('asks what protects the account; the setup question waits for "nothing yet"', () => {
     const html = renderDebrief(s0, 'gmail-fortify-2fa');
-    expect(html).toContain('WHAT PROTECTS THIS ACCOUNT NOW?');
+    expect(html).toContain('What protects this account now?');
     expect(group(html, 'method')).not.toContain('hidden');
     const g = group(html, 'method_setup');
     expect(g).toContain('hidden');
@@ -85,14 +85,14 @@ describe('2FA debrief', () => {
     const s = set(s0, 'gmail-fortify-2fa', { status: 'completed', action: 'enabled-2fa', method: 'none', method_setup: 'email' });
     const html = renderDebrief(s, 'gmail-fortify-2fa');
     expect(html).toContain('Nothing yet — I’ll set it up now');
-    expect(html).toContain('WHICH DID YOU SET UP?');
+    expect(html).toContain('Which did you set up?');
     expect(html).toContain(TWO_FA_DIALOGUE.email);
   });
 
   it('an old save shows its old answer, not "Not recorded"', () => {
     const s = set(s0, 'gmail-fortify-2fa', { status: 'completed', action: 'enabled-2fa' });
     const html = renderDebrief(s, 'gmail-fortify-2fa');
-    expect(html).toContain('DID YOU SET UP TWO-FACTOR AUTHENTICATION?');
+    expect(html).toContain('Did you set up two-factor authentication?');
     expect(html).toContain('Yes, 2FA is now enabled');
     expect(html).not.toContain('Not recorded');
   });

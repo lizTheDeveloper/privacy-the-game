@@ -20,8 +20,10 @@ const html = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').repla
 // The steps that happen on the site step i opens: the ones after it, up to the next step with a
 // link of its own or one that happens somewhere else (`elsewhere`: an app, the phone's Settings,
 // another site), ending with the first that asks a question (it is answered back here).
+// None when step i asks a question itself: its answer comes first, on its own card. Listing the
+// next steps there read as "do these before you answer" (the orders card listed steps 4 to 6).
 export function onSiteSteps(steps, i) {
-  if (!steps?.[i]?.url) return [];
+  if (!steps?.[i]?.url || steps[i].ask) return [];
   const out = [];
   for (const st of steps.slice(i + 1)) {
     if (st.url || st.elsewhere) break;

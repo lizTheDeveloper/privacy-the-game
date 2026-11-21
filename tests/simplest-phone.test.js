@@ -35,7 +35,9 @@ describe('Simplest step screens', () => {
     let s = started('simplest');
     s = markStep(s, ID, stepKey(steps(s)[0]), 'done');
     const html = renderBriefing(s, ID);
-    expect(html).toMatch(/class="simple-where"[^>]*>.*On <b>haveibeenpwned\.com<\/b>/s);
+    expect(html).toMatch(/class="simple-where"[^>]*>.*Open <b>haveibeenpwned\.com<\/b> again/s);
+    // What to do comes first; the way back to the site is under it (layout audit 2026-11-20).
+    expect(html.indexOf('class="focus-step-text"')).toBeLessThan(html.indexOf('class="simple-where"'));
     expect(html).toContain('“Email address” box');
     expect(html).not.toContain('box at the top');
     expect(html).toMatch(doneButton); // nothing to open on this step
