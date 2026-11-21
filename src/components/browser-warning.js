@@ -35,6 +35,13 @@ function slimLine(status) {
   return title(status);
 }
 
+// On a mission's steps the bar is one short line (Liz's layout audit, 2026-11-20); it still says the
+// progress isn't saving (7.31.0), and its full words are the bar's label for a screen reader.
+function compactLine(status) {
+  if (status.kind === 'private') return 'Private: won’t save.';
+  return 'Progress won’t save.';
+}
+
 // How to get out of this app's browser. "Look for", since app menus change.
 export function appSteps(app, platform) {
   const browser = browserName(platform);
@@ -78,12 +85,13 @@ function advancedBody(status) {
 }
 
 // The warning's HTML ('' when nothing is wrong or it was hidden). Pure, for the tests.
-export function browserWarningHtml(status, { start = false, simple = true, open = false, dismissed = false, url = '' } = {}) {
+export function browserWarningHtml(status, { start = false, simple = true, open = false, dismissed = false, url = '', compact = false } = {}) {
   if (!status?.kind || dismissed) return '';
   const icon = '<span class="bw-icon" aria-hidden="true">!</span>';
   if (!start && !open) {
-    return `<div class="bw bw--slim" data-bw-kind="${status.kind}" role="region" aria-label="Saving your progress">
-      ${icon}<p class="bw-title">${slimLine(status)}</p>
+    const line = compact ? compactLine(status) : slimLine(status);
+    return `<div class="bw bw--slim${compact ? ' bw--compact' : ''}" data-bw-kind="${status.kind}" role="region" aria-label="Saving your progress">
+      ${icon}<p class="bw-title"${compact ? ` title="${esc(slimLine(status))}"` : ''}>${line}</p>
       <button type="button" class="bw-more" data-bw="open" aria-expanded="false">${simple ? 'How to fix' : 'Fix'}</button>
       <button type="button" class="bw-x" data-bw="hide" aria-label="Hide this warning">&times;</button>
     </div>`;
@@ -128,13 +136,14 @@ export function saveNote(key, status = current) {
 // --- The live warning (memory only) ---
 
 let current = { kind: null, app: null, platform: 'other' };
-let view = { start: false, simple: true };
+let view = { start: false, simple: true, compact: false };
 let open = false;
 let dismissed = false;
 let reported = false;
 let host = null;
 let drawn = null;
 let changed = null;
+let listening = false;
 
 export function browserStatus() { return current; }
 
@@ -146,6 +155,7 @@ export function setBrowserStatus(status) {
   reported = false;
   drawn = null;
   host = null;
+  listening = false;
 }
 
 function pageLink() {
@@ -195,7 +205,21 @@ function ensureHost() {
   host.id = 'browser-warning';
   app.parentNode.insertBefore(host, app);
   host.addEventListener('click', onClick);
+  if (!listening && typeof doc.addEventListener === 'function') {
+    listening = true;
+    doc.addEventListener('click', onPageClick, true);
+  }
   return host;
+}
+
+// Opened, the panel is tall (it pushed a screen's next button off the first screen): a tap anywhere
+// else on the page folds it back into the slim bar (layout audit, 2026-11-20). The start page always
+// shows it whole.
+export function onPageClick(e) {
+  if (!open || view.start) return;
+  if (host && e?.target && host.contains?.(e.target)) return;
+  open = false;
+  draw();
 }
 
 // Never throws: a warning that can't draw must not take the screen down with it.

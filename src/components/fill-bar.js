@@ -21,5 +21,6 @@ export function fillBar({ key, done, total, size = 'mid', label = '' }) {
   // Steps show as segments, up to a dozen; more is one smooth bar.
   const segs = total > 1 && total <= 12 ? ` --segs: ${total};` : '';
   const grew = to > from;
-  return `<div class="fill-bar fill-bar--${size}${full ? ' is-full' : ''}${grew ? ' is-growing' : ''}${done > 0 && !full ? ' has-some' : ''}${segs ? ' has-segs' : ''}" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}" data-fill-bar="${key}" style="--from: ${pct(from)}; --to: ${pct(to)};${segs}"><span class="fill-bar-fill"></span></div>`;
+  // Nothing done: an empty bar, with the first segment outlined (not filled) as "you are here".
+  return `<div class="fill-bar fill-bar--${size}${full ? ' is-full' : ''}${grew ? ' is-growing' : ''}${done > 0 && !full ? ' has-some' : ''}${done <= 0 ? ' is-empty' : ''}${segs ? ' has-segs' : ''}" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}" data-fill-bar="${key}" style="--from: ${pct(from)}; --to: ${pct(to)};${segs}"><span class="fill-bar-fill"></span></div>`;
 }

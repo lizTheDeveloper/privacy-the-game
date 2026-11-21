@@ -2,6 +2,21 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.36.0 (2026-11-20): The next thing first, on the main screens
+
+Liz asked for a screen-by-screen look at the layout, from a Simple player's side and an Advanced player's side. These are the fixes on the main screens: the districts, What's next, the milestone, the bank notes and the warning bar.
+
+- **A district puts the next mission first.** Partway through the game, the password-manager question, the password resets, Scout's welcome and the bank notes all sat above the tabs. Next up's START ended up below the first screen on a phone, and on a computer too. Now a district goes: its name and bar, Next up, the tabs and the missions, and then those four. Nothing was taken away. A mission that needs to know where your passwords are still asks you itself before its first step.
+- **Scout's welcome is open the first time you visit a district.** After that it's one line, "Scout's welcome", that opens it again. DISMISS still hides it for good.
+- **A finished tab points somewhere.** With every mission on a tab done, Next up shows the next tab's mission and says which tab it's on. If the whole district is done, it shows the "you took it back" screen if you haven't seen it yet. After that it shows What's next in Simple mode, or the district your next mission is in.
+- **DONE WITH SURVEY waits for the passwords question.** It used to stick to the bottom of a phone and cover the "Where are your passwords saved?" answers. Now it stays in place, under the question, until you've answered it. That question now reads like a question: big, bold, white letters.
+- **What's next: the bar matches the card.** The bar now counts the part of the district that the card's mission is in. Before, it could say "Part 1 · Check your accounts" above "Give your bank a new password".
+- **An empty bar looks empty.** The "you are here" piece of a bar is an outline now, not a glowing fill. A bar with nothing done no longer looks partly done.
+- **The milestone:** the share card is drawn as soon as the screen opens, not left as an empty black box. In Simple mode, "6% CITY INTEGRITY" next to LIBERATED is now a bar of the city's districts, with the ones you've taken back filled in. The top bar has normal room at the sides again. On a phone, SHARE CARD and the next button come right after your numbers, so they no longer cover them.
+- **Your bank notes:** with nothing saved, the form comes first and the empty "SAVED · 0" list is gone. The field names are plain white words ("Bank, card or app"), not cyan capitals, because cyan means you can tap it. After you save one, the button back to your mission becomes the bright one.
+- **The "won't save your progress" bar:** "How to fix" is an amber outline now, so the screen still has just one filled button. Once it's opened, tapping anywhere else on the page closes it back to the slim bar. On a mission's steps it's one short line: "Progress won't save."
+- **Bigger buttons to tap** (at least 44 pixels tall, without looking much bigger): a district's tabs, ← CITY, the START buttons in a mission list and in Next up, the city's place buttons, and the password answers.
+- Which districts you've visited and which milestones you've seen are remembered on this device only. Nothing new is tracked or sent.
 ## 7.35.0 (2026-11-20): The mission screens, questioned one by one
 
 Liz asked for every screen to be looked at again, from Simple's side and from Advanced's. These are the clear problems found on the mission briefing, the step cards and the report.

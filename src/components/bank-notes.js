@@ -120,7 +120,8 @@ export function renderBankNotesPanel(state, mission) {
 }
 
 const INPUT = 'display: block; width: 100%; box-sizing: border-box; margin-top: 6px; min-height: 44px; padding: 10px 12px; background: #090B10; color: var(--offwhite); border: 1px solid rgba(0,229,255,0.3); font: inherit; font-size: 16px;';
-const LABEL = 'display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; color: rgba(0,229,255,0.7); margin-top: 14px;';
+// Off-white sentence case: cyan is for what you can tap (the colour language, style.css).
+const LABEL = 'display: block; font-size: 15px; font-weight: 600; color: var(--offwhite); margin-top: 14px;';
 // Password managers fill login forms; this isn't one. type="text" only: never a password input.
 const NO_AUTOFILL = 'autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"';
 
@@ -130,8 +131,10 @@ function nameOptions(state) {
   return names.map((n) => `<option value="${esc(n)}"></option>`).join('');
 }
 
-// The screen: the list, the form (add, or edit one), and the privacy line beside it.
-export function renderBankNotesScreen(state, { from = null, editId = null, error = null, draft = null } = {}) {
+// The screen: the list, the form (add, or edit one), and the privacy line beside it. With nothing
+// saved, the form comes first and there is no empty list. saved: a note was just saved; coming from
+// a mission, the way back to it is then the one bright button (Liz's layout audit, 2026-11-20).
+export function renderBankNotesScreen(state, { from = null, editId = null, error = null, draft = null, saved = false } = {}) {
   const notes = bankNotes(state);
   const fromMission = from ? MISSIONS.find((m) => m.id === from) : null;
   const back = fromMission
@@ -139,6 +142,7 @@ export function renderBankNotesScreen(state, { from = null, editId = null, error
     : '<a class="btn-secondary" style="text-decoration: none; padding: 8px 14px;" href="#/district/vault">← THE VAULT</a>';
   const editing = editId ? notes.find((n) => n.id === editId) : null;
   const values = draft || editing || { name: '', loginUrl: '', resetUrl: '' };
+  const backLit = Boolean(fromMission && saved && notes.length && !editing);
 
   const list = notes.length ? notes.map((n) => {
     const login = noteLink(n, 'login');
@@ -164,21 +168,22 @@ export function renderBankNotesScreen(state, { from = null, editId = null, error
   const form = `
       <form class="bank-note-form" data-bank-note-form${editing ? ` data-edit="${esc(editing.id)}"` : ''} novalidate>
         <div class="section-label" style="color: var(--cyan); margin-bottom: 4px;">${editing ? 'EDIT THIS BANK' : 'ADD A BANK'}</div>
+        ${notes.length ? '' : '<div class="bank-note-empty" style="font-size: 14px; color: var(--offwhite); line-height: 1.6; margin-top: 6px;">Nothing saved yet. Add each bank, card, brokerage or exchange you log in to.</div>'}
         <div style="font-size: 13px; color: var(--offwhite); line-height: 1.6; margin-top: 6px;">&#9888;&#65039; ${esc(NO_PASSWORDS_NOTE)}</div>
-        <label style="${LABEL}">BANK, CARD OR APP
+        <label style="${LABEL}">Bank, card or app
           <input class="bank-note-input" type="text" data-field="name" list="bank-note-names" maxlength="${NAME_MAX}" required value="${esc(values.name || '')}" placeholder="Type any name" ${NO_AUTOFILL} style="${INPUT}">
         </label>
         <datalist id="bank-note-names">${nameOptions(state)}</datalist>
-        <label style="${LABEL}">LOGIN PAGE <span style="color: rgba(237,239,243,0.4);">(optional)</span>
+        <label style="${LABEL}">Login page <span style="font-weight: 400; color: var(--text-quiet);">(optional)</span>
           <input class="bank-note-input" type="text" inputmode="url" data-field="loginUrl" maxlength="${URL_MAX}" value="${esc(values.loginUrl || '')}" placeholder="Where you sign in" ${NO_AUTOFILL} style="${INPUT}">
         </label>
-        <label style="${LABEL}">PASSWORD-RESET PAGE <span style="color: rgba(237,239,243,0.4);">(optional)</span>
+        <label style="${LABEL}">Password-reset page <span style="font-weight: 400; color: var(--text-quiet);">(optional)</span>
           <input class="bank-note-input" type="text" inputmode="url" data-field="resetUrl" maxlength="${URL_MAX}" value="${esc(values.resetUrl || '')}" placeholder="Where you reset it" ${NO_AUTOFILL} style="${INPUT}">
         </label>
         <div style="${SMALL} margin-top: 8px;">Find the reset page by signing in and opening Settings or Security, or from the “Forgot password?” link on the real login page.</div>
         ${err}
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px;">
-          <button type="submit" class="btn-primary bank-note-save" data-action="bank-note-save">${editing ? 'SAVE CHANGES' : '+ SAVE BANK'}</button>
+          <button type="submit" class="${backLit ? 'btn-secondary' : 'btn-primary'} bank-note-save" data-action="bank-note-save">${editing ? 'SAVE CHANGES' : '+ SAVE BANK'}</button>
           ${editing ? '<button type="button" class="btn-secondary bank-note-cancel" data-action="bank-note-cancel">CANCEL</button>' : ''}
         </div>
         ${privacyLine()}
@@ -192,12 +197,12 @@ export function renderBankNotesScreen(state, { from = null, editId = null, error
       <div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--cyan); letter-spacing: 3px;">YOUR BANK NOTES</div>
       <div style="font-size: 14px; color: rgba(237,239,243,0.75); line-height: 1.6; margin-top: 8px;">Reclaim City can’t know which banks you use. Write down where each one logs in and resets its password, and the Vault’s missions link straight there. You don’t have to: every mission also has steps that work at any bank.</div>
       ${renderManagerPointer(state, { tail: MANAGER_POINTER_TAIL })}
-      <div class="panel" style="padding: 16px 20px; margin-top: 20px;">
+      ${notes.length ? `<div class="panel" data-bank-saved style="padding: 16px 20px; margin-top: 20px;">
         <div class="section-label" style="color: var(--lime); margin-bottom: 6px;">SAVED · ${notes.length}</div>
         ${list}
-      </div>
+      </div>` : ''}
       <div class="panel panel--active" style="padding: 16px 20px; margin-top: 20px;">${form}</div>
-      ${fromMission ? `<div style="margin-top: 20px;"><a class="btn-secondary" style="text-decoration: none;" href="#/mission/${esc(fromMission.id)}/briefing">← BACK TO ${esc(fromMission.title.toUpperCase())}</a></div>` : ''}
+      ${fromMission ? `<div style="margin-top: 20px;"><a class="${backLit ? 'btn-primary' : 'btn-secondary'}" data-bank-back style="text-decoration: none;" href="#/mission/${esc(fromMission.id)}/briefing">← BACK TO ${esc(fromMission.title.toUpperCase())}</a></div>` : ''}
     </div>
   </div>`;
 }

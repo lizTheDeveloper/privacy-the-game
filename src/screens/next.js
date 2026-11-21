@@ -35,6 +35,15 @@ function districtBar(state, districtId, filedId) {
     </div>`;
 }
 
+// The bar counts the part the card's mission is in, so the two say the same thing (Liz's layout
+// audit, 2026-11-20: the bar said "Part 1 · Check your accounts" over "Give your bank a new
+// password"). Right after a report, it is the report's part, when the card is in the same district.
+export function barMission(state, filed, up) {
+  const filedMission = filed?.id ? findMission(state, filed.id) : null;
+  if (filedMission) return filedMission.id;
+  return up?.mission?.id || null;
+}
+
 // Simple mode's "What's next" (Liz 2026-11-18: "it just dumps you in the master keys and you're
 // suddenly in recon again … make it really clear for the simple mode what we're doing next …
 // card by card, and just assume we're going to lose people and that we're coming back").
@@ -115,7 +124,7 @@ export function renderNext(state, { filed = null, notMine = null } = {}) {
     ${renderHud(state, { nextLink: false })}
     <div class="focus-col">
       ${sent}${dropped}
-      ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '', filed?.id)}
+      ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '', barMission(state, filed, up))}
       ${nextCard(state, up, !anyDone && !sent)}
       <p class="next-saved">${saveNote('next')} This page will show you what's next.</p>
       <a class="focus-notnow next-city" href="#/city">See the whole city</a>

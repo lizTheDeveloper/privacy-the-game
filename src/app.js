@@ -21,7 +21,7 @@ import { DISTRICTS } from './data/districts.js';
 import { hasInterior } from './data/interiors/index.js';
 import { generateMilestoneCard, shareMilestoneCard, shareStatCard, shareStatusText } from './utils/milestone-card.js';
 import { renderCityMap } from './screens/city-map.js';
-import { renderDistrict, settleNextUp } from './screens/district.js';
+import { renderDistrict, settleNextUp, districtVisited } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
 import { renderSaints, saintsOrigin } from './screens/saints.js';
 import { renderPrism } from './screens/prism.js';
@@ -157,6 +157,9 @@ let leavingBriefing = false;
 // Scout's reaction to the report just filed, shown on the district the player
 // lands on: { districtId, reaction, landed }. Kept for that one visit.
 let landingReaction = null;
+// The district being visited, and whether this is the player's first visit to it: Scout's welcome is
+// open on the first visit and folded after. Switching tabs is the same visit. In memory only.
+let districtVisit = null;
 
 function loadBrokerMapData() {
   loadBrokerData().then(() => renderCurrentRoute(), () => renderCurrentRoute());
@@ -207,6 +210,7 @@ const screens = {
   district: ({ id, tab }) => renderDistrict(state, id, tab, {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
     notMine: notMine.hash === location.hash ? notMine.id : null,
+    firstVisit: districtVisit?.id === id ? districtVisit.first : undefined,
   }),
   passwords: ({ from }) => renderPasswordFinder(state, { from: from && findMission(state, from) ? from : null }),
   next: () => renderNext(state, { filed: justFiled, notMine: notMine.hash === location.hash ? notMine.id : null }),
@@ -283,10 +287,11 @@ function saveBankForm() {
     if (bad) app.querySelector(`form[data-bank-note-form] [data-field="${bad}"]`)?.focus();
     return;
   }
-  bankForm = {};
+  // Saved: the way back to the mission becomes the bright button (renderBankNotesScreen).
+  bankForm = { saved: true };
   setState(result.state);
   renderCurrentRoute();
-  app.querySelector('form[data-bank-note-form] [data-field="name"]')?.focus({ preventScroll: true });
+  (app.querySelector('[data-bank-back].btn-primary') || app.querySelector('form[data-bank-note-form] [data-field="name"]'))?.focus({ preventScroll: true });
 }
 
 // Simple mode or Advanced mode: the same as the switch in the top bar, so it can change any time.
@@ -340,7 +345,7 @@ function autoRead() {
 
 function render(route, cause = RENDER_CAUSE.REFRESH) {
   // A browser that won't keep the save says so: in full on the start page, a slim bar elsewhere.
-  syncBrowserWarning({ start: !started, simple: readLevel(state) === 'simplest' });
+  syncBrowserWarning({ start: !started, simple: readLevel(state) === 'simplest', compact: route.screen === 'briefing' });
   if (!started) {
     app.innerHTML = renderWelcome();
     return;
@@ -361,6 +366,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     if (route.screen !== 'bank-notes') bankForm = {};
     lastRoute = route;
     const renderFn = screens[route.screen] || screens.city;
+    if (tracksPageview(cause)) noteVisit(route);
     // The seal animation and Scout's line are in this render; remember they were seen
     // so a later re-render (a device add) does not replay them.
     const watched = hasInteriorScreen(route) ? newlySealed(state, route.params.id) : null;
@@ -380,6 +386,8 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     applyOpenDesktop(app, isDesktopWide(), handFolds);
     // A district's Next up stays only when the list's own bright button is off the first screen.
     if (route.screen === 'district') settleNextUp(app, window.innerHeight);
+    // The share card is drawn as the milestone opens, not left an empty frame until SHARE CARD.
+    if (route.screen === 'milestone') drawMilestonePreview(route.params.districtId);
     initDecks(app, decksBefore);
     syncNowPlaying(route);
     // The Big Check's line is drawn once the data is in; then it's seen.
@@ -407,6 +415,22 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
       <h2 style="color: var(--magenta);">Something broke</h2>
       <p>The error has been reported. <a href="#/city">Return to city</a></p>
     </div>`;
+  }
+}
+
+// Arriving on a district (a new one, not a tab of the same one): remember the visit, and whether it was
+// the first. Arriving on a milestone: it has been seen (a finished tab's Next up stops pointing there).
+function noteVisit(route) {
+  const id = route.params?.id;
+  if (route.screen === 'district' && id && districtVisit?.id !== id) {
+    districtVisit = { id, first: !districtVisited(state, id) };
+    if (!state.districtVisits?.[id]) setState({ ...state, districtVisits: { ...state.districtVisits, [id]: true } });
+  } else if (route.screen !== 'district') {
+    districtVisit = null;
+  }
+  const done = route.params?.districtId;
+  if (route.screen === 'milestone' && done && DISTRICTS.some((d) => d.id === done) && !state.seenMilestones?.[done]) {
+    setState({ ...state, seenMilestones: { ...state.seenMilestones, [done]: true } });
   }
 }
 
@@ -1224,23 +1248,29 @@ async function restoreData() {
   }
 }
 
+// The milestone's share card, drawn into its frame (generateMilestoneCard is synchronous). Drawn
+// again once the web fonts are in, so the card's words aren't in a fallback font.
+function drawMilestonePreview(districtId) {
+  const district = DISTRICTS.find((d) => d.id === districtId);
+  const preview = document.getElementById('milestone-card-preview');
+  if (!district || !preview) return;
+  try {
+    const canvas = generateMilestoneCard(district.name, districtCardStats(districtId));
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.objectFit = 'contain';
+    preview.replaceChildren(canvas);
+    preview.dataset.drawn = '';
+  } catch {
+    preview.replaceChildren();
+  }
+}
+
 async function handleShareCard(districtId) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return;
   const cardStats = districtCardStats(districtId);
-  const preview = document.getElementById('milestone-card-preview');
-  try {
-    const canvas = generateMilestoneCard(district.name, cardStats);
-    if (preview) {
-      preview.innerHTML = '';
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.objectFit = 'contain';
-      preview.appendChild(canvas);
-    }
-  } catch {
-    if (preview) preview.innerHTML = '';
-  }
+  drawMilestonePreview(districtId);
   showShareStatus(app.querySelector('[data-share-status]'), await shareMilestoneCard(district.name, cardStats));
 }
 
@@ -1968,6 +1998,8 @@ window.addEventListener('resize', resettleNextUp);
 // Web fonts landing can move the header; the phone's map is sized from where it starts, so measure again.
 document.fonts?.addEventListener?.('loadingdone', () => {
   if (parseRoute(location.hash).screen === 'broker-map') renderCurrentRoute();
+  const route = parseRoute(location.hash);
+  if (route.screen === 'milestone') drawMilestonePreview(route.params.districtId);
   resettleNextUp();
 });
 
