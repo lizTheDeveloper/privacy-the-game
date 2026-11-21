@@ -103,7 +103,8 @@ describe('app.js wiring: data arriving never logs a pageview', async () => {
   };
 
   it('render tracks only when the cause is a navigation', () => {
-    expect(body('render')).toMatch(/if \(tracksPageview\(cause\)\) trackPageview\(/);
+    // `&& !quiet`: an arrival a password SAVE caused sends none (tests/app/pm-categories-click.test.js).
+    expect(body('render')).toMatch(/if \(tracksPageview\(cause\)(?: && !quiet)?\) trackPageview\(/);
     expect((src.match(/trackPageview\(/g) || []).length).toBe(1);
     expect(body('render')).toContain('cause = RENDER_CAUSE.REFRESH');
     expect(body('renderCurrentRoute')).toContain('cause = RENDER_CAUSE.REFRESH');

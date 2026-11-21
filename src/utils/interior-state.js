@@ -56,6 +56,17 @@ export function allControllableSealed(state, accountId) {
   return sealed > 0 && sealed === controllable;
 }
 
+// The first door still to close (Liz 2026-11-20: "the open door first and lit"): the first
+// open entry, else the first one not checked yet. null when every door in reach is sealed.
+// targetOf(entry) (optional): an open door with somewhere to go wins over one without.
+export function firstUnsealedEntry(state, accountId, targetOf = () => true) {
+  const entries = (getInterior(accountId)?.entries ?? []).map((e) => ({ e, st: entryState(state, accountId, e).state }));
+  const pick = entries.find((x) => x.st === 'open' && targetOf(x.e))
+    ?? entries.find((x) => x.st === 'open')
+    ?? entries.find((x) => x.st === 'not-checked');
+  return pick?.e ?? null;
+}
+
 const sealedIds = (state, accountId) => (getInterior(accountId)?.entries ?? [])
   .filter((e) => entryState(state, accountId, e).state === 'sealed')
   .map((e) => e.id);

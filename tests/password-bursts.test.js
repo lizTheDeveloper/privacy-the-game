@@ -232,8 +232,9 @@ describe('11b and 12c: Change the next 3', () => {
     expect(text).toMatch(/compromised or leaked passwords before reused ones, and reused before weak/);
   });
 
-  it('a bonus since 14b: never adds to the Master Keys core total while pending', () => {
-    expect(calcDistrictProgress(counted(5), 'master-keys').total).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').total);
+  it('a bonus since 14b: the mission never adds to the core total; the passwords left add one thing to do (Q1)', () => {
+    expect(calcDistrictProgress(counted(5), 'master-keys').total).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').total + 1);
+    expect(calcDistrictProgress(counted(5, 0, 5), 'master-keys').total).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').total);
     expect(calcDistrictProgress(counted(5), 'master-keys').bonusTotal).toBe(calcDistrictProgress({ ...counted(5), pmFlaggedCount: undefined }, 'master-keys').bonusTotal + 1);
   });
 });
