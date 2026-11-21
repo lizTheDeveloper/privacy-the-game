@@ -98,8 +98,36 @@ export function helpPanel({ mission, step, key, site }) {
         </div>`;
 }
 
+// Where a two-places step happens (data/two-places.js): "📱 On your iPhone", and on the first
+// step after the place changes "💻 Now in Chrome" with one plain line under it. steps: the list
+// the step is in, so "now" compares with the step before it.
+export function placeMove(steps, i) {
+  const p = steps?.[i]?.place;
+  if (!p) return null;
+  const prev = steps.slice(0, i).reverse().find((st) => st.place)?.place;
+  const moved = Boolean(prev && prev.kind !== p.kind);
+  return { place: p, moved, label: moved ? p.now : p.label, line: moved ? p.line || '' : '' };
+}
+
+// changesOnly: a list of every step (Advanced's YOUR MOVE) says the place on its first step and
+// where it changes, not on every row.
+export function placeChip(steps, i, { changesOnly = false } = {}) {
+  const m = placeMove(steps, i);
+  if (!m) return '';
+  if (changesOnly && !m.moved && steps.slice(0, i).some((st) => st.place)) return '';
+  const icon = m.place.kind === 'phone' ? '&#128241;' : '&#128187;';
+  return `<div class="place-chip-row"><span class="place-chip" data-place="${m.place.kind}"><span aria-hidden="true">${icon}</span> ${m.label}</span></div>${m.line ? `<p class="place-line" data-place-line>${m.line}</p>` : ''}`;
+}
+
+// What Read it to me says for the chip: the line when the place changes, else the chip.
+export function placeSay(steps, i) {
+  const m = placeMove(steps, i);
+  return m ? [m.line || m.label] : [];
+}
+
 // One step. `current` lights it with its buttons; `mark` is 'done', 'skipped' or undefined.
-export function walkStepRow({ mission, step, index, mark, current, notes = step.note, stepNote, site, ask = '' }) {
+// lead: above the words (the place chip); extra: under them, always shown (the bank step's banks).
+export function walkStepRow({ mission, step, index, mark, current, notes = step.note, stepNote, site, ask = '', lead = '', extra = '' }) {
   const key = stepKey(step);
   const num = String(index + 1).padStart(2, '0');
   const path = pathChips(step.text);
@@ -123,7 +151,7 @@ export function walkStepRow({ mission, step, index, mark, current, notes = step.
   return `
     <div data-brief-step data-step-key="${key}" class="walk-step ${state}" style="display: flex; gap: 14px; align-items: flex-start;">
       <button data-step-num class="walk-check" data-action="step-toggle" data-mission="${mission.id}" data-step="${key}" aria-pressed="${mark === 'done'}" aria-label="${checkLabel}">${mark === 'done' ? '&#10003;' : mark === 'skipped' ? '&#8631;' : num}</button>
-      <div class="walk-body" style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${body}${mark === 'skipped' ? ' <span class="walk-tag">skipped</span>' : ''}${note}${current ? ask : ''}${help}</div>
+      <div class="walk-body" style="font-size: 15px; color: var(--offwhite); line-height: 1.5; min-width: 0; overflow-wrap: anywhere;">${lead}${body}${mark === 'skipped' ? ' <span class="walk-tag">skipped</span>' : ''}${note}${extra}${current ? ask : ''}${help}</div>
     </div>`;
 }
 
@@ -199,7 +227,7 @@ export { stepMarks };
 // The password check asks where the player's passwords are saved, right on the mission, so its
 // steps are for their phone or browser. Same answer as the question in The Master Keys
 // (state.passwordManager); it never leaves this browser.
-// opts.saidOnStep: the step on screen already says where they are (the two-places step), so only
+// opts.saidOnStep: the step on screen already says where they are (its place chip), so only
 // the way to change it shows, not the same sentence again in grey.
 export function passwordPlaceAsk(state, mission, { saidOnStep = false } = {}) {
   if (!mission?.stepsByManager) return '';

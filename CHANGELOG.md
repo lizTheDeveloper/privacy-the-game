@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.42.0 (2026-11-21): The briefing and the report, reshaped
+
+Four layout changes Liz picked from the mission-screen audit.
+
+- **Your banks are on the step that needs them.** The bank password briefing is now the title, one line, Scout, the bar and START. The YOUR BANKS panel used to sit above START and again under every step (about 1,100px of it in the middle of a task). Now the "Log into your bank" step shows your saved banks as buttons, each saying what it opens, with "Where's my password?" one tap away. The other steps have one line: "Your banks: Chase ↗ · edit". With no banks saved, that step has a small "Add your bank" that brings you back to the mission. This works the same in Simple and Advanced.
+- **In Simple, the district story is behind "Story"** at the bottom of a briefing.
+- **Two places, said on each step.** If your passwords are in two places (an iPhone and Chrome, say), there is no longer a step that only says so. Each step has a chip: "📱 On your iPhone", then "💻 Now in Chrome" when you move over, with one plain line: "Now do the same on your computer." "Change where my passwords are" is on the first step. Both places are still remembered and both still get checked.
+- **Advanced briefings are one page on a phone.** No more deck of up to 13 slides: the intel is three lines with More, every step is listed and numbered, and GO DO IT (or START) stays pinned at the bottom of the screen. On a computer it is pinned too, so it is always on the first screen. With Read it to me on, the slides are still there to step through while Scout reads.
+- **The Simple report asks one question at a time.** Each question has its own card, in the step cards' shorter words where there are some, with a bar that fills as you answer, NEXT and Back. Questions you already answered on the steps are skipped and listed at the end under "You told us:", each with Change. SUBMIT REPORT is on the last card. It is the same report underneath, so it files exactly what the full form would. Advanced keeps the full form.
+
 ## 7.41.1 (2026-11-20): The milestone's buttons don't depend on your passwords
 
 In 7.39.1, when passwords your manager flagged were still left, the "you took it back" screen added a bright CHANGE THEM button and dimmed CONTINUE. So where you were likely to tap next, and the links on the page, still depended on your password answer.

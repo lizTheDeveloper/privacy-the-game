@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { MISSIONS, missionDistrict } from '../src/data/missions.js';
 import { calcDistrictProgress } from '../src/utils/calc.js';
 import { createInitialState, markMissionStarted, updateMission } from '../src/state.js';
-import { setReadLevel, visibleSteps, stepKey, markStep, setStepAnswer } from '../src/utils/reading.js';
+import { setReadLevel, setReadAloud, visibleSteps, stepKey, markStep, setStepAnswer } from '../src/utils/reading.js';
 import { markOpened, clearOpened } from '../src/utils/opened-steps.js';
 import { renderBriefing, ALREADY_STRONG } from '../src/screens/briefing.js';
 import { renderDebrief, questionsLeftText } from '../src/screens/debrief.js';
@@ -120,8 +120,8 @@ describe('3. “When it opens:” never lists the next steps above a question', 
     expect(checked).toBeGreaterThan(0);
   });
 
-  it('Advanced, as slides: the preview is for a phone only (on a computer the steps are stacked above it)', () => {
-    const html = renderBriefing(allOn('full'), BREACH.id);
+  it('Advanced, as slides (Read it to me on): the preview is for a phone only (on a computer the steps are stacked above it)', () => {
+    const html = renderBriefing(setReadAloud(allOn('full'), true), BREACH.id);
     expect(html).toContain('brief--deck');
     expect(html).toMatch(/<div class="phone-only"[^>]*>\s*<div class="site-preview/);
   });
@@ -129,8 +129,10 @@ describe('3. “When it opens:” never lists the next steps above a question', 
 
 describe('4. a report question reads as a question', () => {
   it('big, bold, in its own words; not grey capitals', () => {
+    // Simple asks it in the step card's words (one question per card, 2026-11-20); Advanced in the report's.
     const html = renderDebrief(markMissionStarted(allOn(), BREACH.id), BREACH.id);
-    expect(html).toContain('<h2 class="debrief-q">What did you find?</h2>');
+    expect(html).toContain('<h2 class="debrief-q">Were you in any leaks?</h2>');
+    expect(renderDebrief(markMissionStarted(allOn('full'), BREACH.id), BREACH.id)).toContain('<h2 class="debrief-q">What did you find?</h2>');
     expect(html).not.toContain('WHAT DID YOU FIND?');
     const css = readFileSync('src/style.css', 'utf8');
     const rule = css.match(/\.debrief-q \{([^}]*)\}/)?.[1] ?? '';
@@ -255,15 +257,19 @@ describe('9, 11, 12: asked once, said plainly, not repeated', () => {
     expect(renderBriefing(allOn('full'), PW.id)).toContain('I ALREADY HAVE THIS');
   });
 
-  it('Simple: the two-places step isn’t repeated in grey under its card; Change stays', () => {
+  it('Simple: two places are a chip on each step, never a grey line under it; Change stays on the first', () => {
+    // 2026-11-20 (pick 5): the step that only said "two places" is gone; each card's chip says where.
     const BANK = byId('primary_bank-fortify-password');
     let s = markMissionStarted({ ...allOn('simplest'), gear: { phone: 'iphone', computer: 'windows' }, passwordManager: 'apple', passwordPlaces: ['apple', 'google'] }, BANK.id);
     const html = renderBriefing(s, BANK.id);
-    expect(html).toMatch(/class="focus-step-text">Your passwords are in two places/);
+    expect(html).not.toMatch(/class="focus-step-text">Your passwords are in two places/);
+    expect(html).toContain('data-place="phone"');
     expect(html).not.toMatch(/data-pm-two>Your passwords are in two places/);
     expect(html).toMatch(/data-pm-two><button class="walk-link" data-action="set-password-manager"/);
-    // On the next step the line comes back (that step doesn't say it).
+    // The next step: its chip, and no line under it.
     s = markStep(s, BANK.id, stepKey(visibleSteps(BANK, s)[0]), 'done');
-    expect(renderBriefing(s, BANK.id)).toMatch(/data-pm-two>Your passwords are in two places/);
+    const next = renderBriefing(s, BANK.id);
+    expect(next).toContain('data-place="phone"');
+    expect(next).not.toContain('data-pm-two');
   });
 });

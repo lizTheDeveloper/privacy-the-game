@@ -12,12 +12,12 @@ import { PM_BURST_ID, pmBurstBriefingLine } from '../utils/bursts.js';
 import { renderPasswordProgress } from '../components/password-progress.js';
 import { scoutSprite } from '../components/scout.js';
 import { deck, splitWords, countWords } from '../components/deck.js';
-import { renderBankNotesPanel } from '../components/bank-notes.js';
-import { missionUsesBankNotes } from '../utils/bank-notes.js';
+import { renderBankStep, renderBankLine } from '../components/bank-notes.js';
+import { missionUsesBankNotes, bankStepIndex } from '../utils/bank-notes.js';
 import { briefingLore } from '../utils/lore.js';
-import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
+import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, progressFor, stepMarks, stepKey as stepKeyOf, canSayAlready, stepAnswers, readAloudOn, READ_LEVELS, READ_LEVEL_LABELS } from '../utils/reading.js';
 import { topTools } from '../components/top-tools.js';
-import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel, devicesAsk, devicesAnswered, missionNeedsDevices } from '../components/walkthrough.js';
+import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel, devicesAsk, devicesAnswered, missionNeedsDevices, placeChip, placeSay } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
@@ -66,10 +66,12 @@ export function renderBriefing(state, missionId, opts = {}) {
   // open: the button is START, which keeps the steps on screen (Liz 2026-10-31: a "#" opened a second
   // copy of the game).
   // "Your bank", "your card", "your brokerage": the game can't know which, so the player's own bank
-  // notes are the way out, a panel under the steps with a link to each saved bank (Liz 2026-11-01:
-  // "it doesn't link you anywhere"). Their addresses stay in that panel (class bank-note-panel,
-  // private to error reports), never in GO DO IT's data-url.
-  const bankNotesHere = missionUsesBankNotes(mission);
+  // notes are the way out, a link to each saved bank (Liz 2026-11-01: "it doesn't link you
+  // anywhere"). They sit on the step that needs the bank's address, not on the briefing and not
+  // under every step (Liz 2026-11-20); the other steps get one line. Their addresses stay in
+  // bank-note… elements (private to error reports), never in GO DO IT's data-url.
+  const bankNotesHere = missionUsesBankNotes(mission) && !noResetFor(state, mission, opts);
+  const bankAt = bankNotesHere ? bankStepIndex(missionStepList) : -1;
   // Once a step is ticked, GO DO IT AGAIN opens the next step's link when it has one.
   const goUrl = missionStepList[progress.current]?.url || missionStepList.find((s) => s.url)?.url || account?.securityUrl || '';
   const noReset = isPasswordMission(mission) && !opts.resetAnyway
@@ -91,6 +93,8 @@ export function renderBriefing(state, missionId, opts = {}) {
     current: !noReset && i === progress.current && missionStepList.length > 1,
     site: stepSite(missionStepList, i, account),
     ask: stepAsk(state, mission, step),
+    lead: placeChip(missionStepList, i, { changesOnly: true }),
+    extra: i === bankAt ? renderBankStep(state, mission) : '',
   }).replace('class="btn-primary walk-done"', 'class="btn-secondary walk-done"');
   const stepRows = missionStepList.map((step, i) => stepRow(step, i));
   const steps = stepRows.join('');
@@ -117,11 +121,10 @@ export function renderBriefing(state, missionId, opts = {}) {
   // Short and Simplest: one screen with the plain line and one START. Once started, a mission
   // with several steps is shown one step at a time (Liz 2026-11-13: "still hard to use").
   // Full intel keeps the long briefing below; a password reset that isn't needed keeps its panel.
-  const bankPanelHtml = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   // What the long briefing's header carries besides the title: the bonus tag, the password
   // manager's flag, recon's notes for this reset, the password progress panel.
   const extras = `${sharesNote(state, mission)}${fieldCourseNote(mission)}${mission.optional ? '<div class="focus-bonus">BONUS &mdash; NEVER BLOCKS PROGRESS</div>' : ''}${isPasswordMission(mission) && isPmFlagged(state, mission.accountId) ? FLAGGED_NOTE.replace('margin: -12px 0 20px', 'margin: 8px 0') : ''}${isPasswordMission(mission) ? passwordReconNotes(state, mission.accountId).map((n) => `<div data-recon-note class="focus-recon-note">${n}</div>`).join('') : ''}${mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : ''}`;
-  const page = { extras, state, mission, districtId, district, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, marks, allSteps, bankPanelHtml, loreData, account, goUrl };
+  const page = { extras, state, mission, districtId, district, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, marks, allSteps, bankNotesHere, bankAt, loreData, account, goUrl };
   if (!noReset && missionStepList.length > 1 && started && !opts.peek) return stepModePage(page);
   if (!noReset && (level !== 'full' || opts.peek)) return compactBriefingPage({ ...page, started });
 
@@ -150,7 +153,11 @@ export function renderBriefing(state, missionId, opts = {}) {
   // computer): it would only say them twice.
   // A briefing that fits one phone screen stays as it is; a longer one is slides on a phone.
   const stepWords = missionStepList.reduce((n, st) => n + countWords(st.text) + (st.note || []).reduce((k, x) => k + countWords(`${x.label} ${x.text}`), 0), 0);
-  const isDeck = countWords(intel) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS;
+  // Advanced is one scroll on a phone too (Liz 2026-11-20: a deck of up to 13 slides): the intel
+  // trimmed to three lines, every step numbered, the button pinned to the bottom. The deck stays
+  // for Read it to me, which steps through it slide by slide.
+  const deckWanted = level !== 'full' || readAloudOn(state);
+  const isDeck = deckWanted && countWords(intel) + (noReset ? 60 : stepWords) + countWords(scoutLine) > SHORT_WORDS;
   const goAt = isDeck && !started && !noReset && goUrl ? missionStepList.findIndex((st) => st.url === goUrl) : -1;
   const goPreview = goAt === -1 ? null : sitePreview(missionStepList, goAt);
   const goPreviewHtml = sitePreviewHtml(goPreview);
@@ -178,14 +185,12 @@ export function renderBriefing(state, missionId, opts = {}) {
     ? briefingSlides({ header, briefing: intel, why, intelTools, gearHtml, progressHtml, stepRows, stepRow, missionStepList, noResetPanel: noReset ? renderNoResetPanel(state, mission) : '', scoutLine, scoutFeeling, preview, loreData })
     : null;
 
-  const bankPanel = bankNotesHere && !noReset ? renderBankNotesPanel(state, mission) : '';
   const main = slides ? `${deck(slides, { label: 'Mission briefing', className: 'brief-deck' })}
-        ${bankPanel ? `<div style="margin-top: 20px;">${bankPanel}</div>` : ''}
         ${goPreviewHtml ? `<div class="phone-only" style="margin-top: 20px;">${goPreviewHtml}</div>` : ''}
         <div style="margin-top: 20px;">${actions}</div>` : `${header}
         <div class="panel" style="padding: 20px; margin-bottom: 24px;">
           <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 10px;">THREAT INTEL</div>
-          <div data-intel style="font-size: ${why ? 15 : 14}px; color: rgba(237,239,243,${why ? 0.9 : 0.75}); line-height: 1.7;">${intel}</div>
+          ${intelHtml(intel, why)}
           ${whyHtml(why)}
           ${intelTools}
         </div>
@@ -198,11 +203,10 @@ export function renderBriefing(state, missionId, opts = {}) {
             ${steps}
           </div>
         </div>`}
-${bankPanel}
-${actions}`;
+<div class="pin-bottom brief-go">${actions}</div>`;
 
   return `
-  <div class="brief${slides ? ' brief--deck' : ''} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
+  <div class="brief${slides ? ' brief--deck' : ' brief--onepage'} scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
     ${renderHud(state, { tools: topTools(state, level, sayIntel, missionStepList.slice(0, 2).flatMap(stepSay)) })}
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; min-width: 0; padding: 24px;">
@@ -229,6 +233,21 @@ ${main}
 
 // The whole briefing (intel, steps, Scout) within this many words fits a phone's first screen.
 const SHORT_WORDS = 60;
+// Longer intel than this is trimmed to three lines on the one-page briefing, with More to open it.
+const INTEL_TRIM_WORDS = 24;
+
+// The one-page briefing's intel: three lines and More (style.css .brief-intel-more), the whole
+// text in the summary so More shows the rest in place.
+function intelHtml(intel, why) {
+  const style = `font-size: ${why ? 15 : 14}px; color: rgba(237,239,243,${why ? 0.9 : 0.75}); line-height: 1.7;`;
+  if (countWords(intel) <= INTEL_TRIM_WORDS) return `<div data-intel style="${style}">${intel}</div>`;
+  return `<details class="brief-intel-more"><summary><span class="brief-intel-text" data-intel style="${style}">${intel}</span><span class="brief-intel-toggle" aria-hidden="true"></span></summary></details>`;
+}
+
+// A password reset recon showed isn't needed (renderBriefing's noReset), for what it hides.
+function noResetFor(state, mission, opts) {
+  return isPasswordMission(mission) && !opts.resetAnyway && passwordResetNeed(state, mission.accountId) === 'not-needed';
+}
 const MOVE_LABEL = '<div class="section-label" style="color: var(--cyan); margin-bottom: 14px; text-shadow: 0 0 8px rgba(0,229,255,0.3);">YOUR MOVE</div>';
 const SLIDE_WORDS = 35;
 // Scout and the closing slides: on a desktop the sidebar has them, so the whole section hides.
@@ -282,6 +301,12 @@ function briefingSlides({ header, briefing, why = '', intelTools = '', gearHtml 
             groups.push({ note: stepNote(n, { num, chunk, first: k === 0 }), alone: true });
           });
         }
+        words = SLIDE_WORDS + 1;
+        return;
+      }
+      // The bank step carries the saved banks: a slide of its own.
+      if (row.includes('data-bank-step')) {
+        groups.push({ rows: [row], alone: true });
         words = SLIDE_WORDS + 1;
         return;
       }
@@ -417,6 +442,16 @@ function renderLoreSection(lore) {
     </div>`;
 }
 
+// Simple: the lore is a story for later, one tap away under the briefing (Liz 2026-11-20).
+function storySection(lore) {
+  if (!lore) return '';
+  return `
+    <details class="brief-story" data-story><summary>Story</summary>
+      ${loreTitle(lore)}
+      ${loreText(lore.text)}
+    </details>`;
+}
+
 // The lore on phone slides, split at sentence ends like the intel.
 function loreSlides(lore) {
   if (!lore) return [];
@@ -470,7 +505,7 @@ function simpleTop(back, right = '') {
 }
 
 function compactBriefingPage(p) {
-  const { state, mission, districtId, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, allSteps, bankPanelHtml, loreData, started, goUrl } = p;
+  const { state, mission, districtId, targetTab, titleTop, titleBottom, level, intel, why, scoutLine, missionStepList, progress, allSteps, loreData, started, goUrl } = p;
   const n = missionStepList.length;
   const many = n > 1;
   // The steps, each with its own site, so the briefing always has somewhere to go.
@@ -499,14 +534,13 @@ function compactBriefingPage(p) {
       <details class="focus-steps-peek"><summary>See the steps</summary><ol style="overflow-wrap: anywhere;">${stepList}</ol></details>
       ${accountSite(mission, missionStepList, goUrl)}` : `<div class="focus-one-step">${missionStepList[0] ? stepCardText(mission, missionStepList[0]) : ''}</div>`}
       ${placeAsk + gearAsk(state, gearQuestions(allSteps))}
-      ${bankPanelHtml}
       <div class="focus-actions">
         ${primary}
         ${simple ? notMineButton(state, mission, '#/next') : ''}
         ${canSayAlready(mission) ? alreadyButton(mission, simple) : ''}
         <a class="focus-notnow" href="#/district/${districtId}${targetTab}">NOT NOW</a>
       </div>
-      ${renderLoreSection(loreData)}`;
+      ${simple ? storySection(loreData) : renderLoreSection(loreData)}`;
   // Back at the top left replaces the breadcrumb at every level (Liz 2026-11-17).
   return pageShell(state, p, body, simple ? 'brief-simple' : '', simpleTop({ href: `#/district/${districtId}${targetTab}` }), topTools(state, level, [intel, scoutLine], missionStepList.slice(0, 2).flatMap(stepSay)));
 }
@@ -563,6 +597,13 @@ const SHORT_ASKS = {
   orders: { none: 'orders-clean', lead: 'Ask the other people in your home who use this account.', more: 'Did one of them order it?', some: [['orders-household', 'Yes, it was them'], ['orders-unknown', 'No, nobody did']] },
 };
 const SHORT_FOLLOW = { password_exposed: 'Did a leak have your password in it?' };
+// The step card's words for a report question, where they stand alone (Simple's report asks one
+// question per card in them, screens/debrief.js). "Any you don’t know?" needs its step, so not that.
+export function shortQuestionLabel(mission, q) {
+  if (SHORT_FOLLOW[q.id]) return SHORT_FOLLOW[q.id];
+  if (q.id === 'finding' && /-recon-breach$/.test(mission.id)) return SHORT_ASKS.breach.label;
+  return null;
+}
 // "Yes — passwords were in the leaked data" → "Yes".
 const shortText = (t) => t.split(' — ')[0].replace(/^Couldn’t check right now$/, 'Couldn’t check');
 
@@ -687,8 +728,17 @@ function setupCard(state, mission, allSteps) {
   return `${place}${gearAsk(state, unanswered)}${skip}`;
 }
 
+// Simple: where the passwords are. Two places: the steps' chips say it, and the first card keeps
+// the way to change it. One place (or none yet): the line as before.
+function simplePlaceAsk(state, mission, steps, current) {
+  const step = steps[current];
+  if (!step?.place) return passwordPlaceAsk(state, mission);
+  const first = !steps.slice(0, current).some((st) => st.place);
+  return first ? passwordPlaceAsk(state, mission, { saidOnStep: true }) : '';
+}
+
 function stepModePage(p) {
-  const { state, mission, titleTop, titleBottom, level, missionStepList, progress, marks, allSteps, bankPanelHtml } = p;
+  const { state, mission, titleTop, titleBottom, level, missionStepList, progress, marks, allSteps, bankNotesHere, bankAt } = p;
   const { total, current } = progress;
   const allDone = current === -1;
   const step = allDone ? null : missionStepList[current];
@@ -704,9 +754,14 @@ function stepModePage(p) {
   const preview = step ? sitePreview(missionStepList, current, { max: PREVIEW_MAX[level] || PREVIEW_MAX.full }) : null;
   // Read it to me: the step, any note shown open on its card (the password check's "Is this
   // safe?"), and what to do once the site opens, read before the player leaves.
-  const say = step ? [...stepSay(step), ...sitePreviewSay(preview)] : [];
+  // A two-places step says where it happens first ("Now do the same on your computer.").
+  const sayAt = (i) => [...placeSay(missionStepList, i), ...stepSay(missionStepList[i])];
+  const say = step ? [...sayAt(current), ...sitePreviewSay(preview)] : [];
   // The next two steps, fetched ahead while Read it to me is on.
-  const upcoming = allDone ? [] : missionStepList.slice(current + 1, current + 3).flatMap(stepSay);
+  const upcoming = allDone ? [] : [current + 1, current + 2].filter((i) => i < missionStepList.length).flatMap(sayAt);
+  // The bank: its saved banks on the step that needs the address, one line on the rest.
+  const bankHere = bankNotesHere && step && current === bankAt ? renderBankStep(state, mission) : '';
+  const bankLine = bankNotesHere && step && current !== bankAt ? renderBankLine(state, mission) : '';
   // The step cards already asked everything the report asks: the last DONE sends it to Scout.
   const report = stepReportAnswers(state, mission);
   const sends = Boolean(report && (allDone || progress.handled === total - 1));
@@ -723,7 +778,8 @@ function stepModePage(p) {
       </div>`
     : `
       <div class="focus-card" data-step-card data-step-key="${key}">
-        ${stepCardText(mission, step, simpleCard, preview)}
+        ${placeChip(missionStepList, current)}${stepCardText(mission, step, simpleCard, preview)}
+        ${bankHere}
         ${accountSite(mission, missionStepList, p.goUrl)}
         ${showDone ? stepAsk(state, mission, step, sends) : ''}
         ${showDone ? `<button class="${askWaiting ? 'btn-secondary' : 'btn-primary'} focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}
@@ -754,9 +810,9 @@ function stepModePage(p) {
       ${walkProgress(progress, { bare: true, key: `steps:${mission.id}`, size: 'big' })}
       ${allDone ? confetti() : ''}
       ${card}
-      ${passwordPlaceAsk(state, mission, { saidOnStep: step?.places === 'two' }) + gearAsk(state, gearQuestions(allSteps))}
+      ${simplePlaceAsk(state, mission, missionStepList, current) + gearAsk(state, gearQuestions(allSteps))}
       ${p.extras}
-      ${bankPanelHtml}
+      ${bankLine}
       ${allDone ? '' : `<div class="focus-actions focus-actions--quiet"><a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a></div>`}
 `;
     return pageShell(state, p, simpleBody, 'brief-steps-mode brief-simple', top, topTools(state, level, say, upcoming));
@@ -766,8 +822,8 @@ function stepModePage(p) {
       ${passwordPlaceAsk(state, mission) + gearAsk(state, gearQuestions(allSteps))}
       ${walkProgress(progress, { bare: true, key: `steps:${mission.id}` })}
       ${card}
+      ${bankLine}
       ${p.extras}
-      ${bankPanelHtml}
       <details class="focus-steps-peek"><summary>All steps</summary><ol class="focus-all">${list}</ol></details>
       <div class="focus-actions focus-actions--quiet">
         ${allDone ? '' : `<a class="walk-link" href="#/mission/${mission.id}/debrief" data-action="i-did-it" data-mission="${mission.id}">Finished already? Report back</a>`}

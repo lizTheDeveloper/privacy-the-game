@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setReadLevel } from '../src/utils/reading.js';
+import { setReadLevel, setReadAloud } from '../src/utils/reading.js';
 import { readFileSync } from 'node:fs';
 import { applyOpenDesktop, recordHandToggle, desktopFoldKey } from '../src/components/deck.js';
 import { renderBrokerMap } from '../src/screens/broker-map.js';
@@ -92,8 +92,8 @@ describe('open on desktop, by script', () => {
     // Simple shows four rows of the key; the rest of it opens on desktop too.
     expect(renderBrokerMap(createInitialState(), { status: 'ready', data: { map, layout } })).toMatch(/<details class="map-key-more" data-open-desktop>/);
     expect(renderDebrief(createInitialState(), 'gmail-recon-login')).toMatch(/<details class="scout-remind" data-open-desktop>/);
-    // "More intel" is the Full intel level's fold (Short and Simplest put the intel under "Why it matters").
-    const withMore = MISSIONS.map((m) => renderBriefing(setReadLevel(createInitialState(), 'full'), m.id)).find((h) => h.includes('brief-more'));
+    // "More intel" is the Advanced deck's fold (Read it to me on; Simple puts the intel under "Why it matters").
+    const withMore = MISSIONS.map((m) => renderBriefing(setReadAloud(setReadLevel(createInitialState(), 'full'), true), m.id)).find((h) => h.includes('brief-more'));
     expect(withMore).toMatch(/<details class="brief-more" data-open-desktop>/);
     for (const f of ['src/screens/saints.js', 'src/screens/building.js']) {
       const src = readFileSync(f, 'utf8');

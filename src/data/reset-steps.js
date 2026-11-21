@@ -3,7 +3,7 @@
 // own steps stay; around them: do it where the passwords are saved, let that place make the new
 // one, then check it saved. Picked by state.passwordManager, like the password check's steps.
 // Passwords in two places (data/two-places.js): do it in the first, then update the second too.
-import { PHONE_PLACE, COMPUTER_PLACE, TWO_PLACE_PAIRS, pairKey } from './two-places.js';
+import { COMPUTER_PLACE, TWO_PLACE_PAIRS, pairKey, phonePlace, computerPlace } from './two-places.js';
 
 const SITE_LABEL = {
   apple: {
@@ -53,11 +53,11 @@ const SEE_NEW = {
 };
 
 // Two places: not a move. Do it in the first place, check it saved, then update the second.
+// No step of its own says where (it had nothing to do on it): each step's chip says, phone first.
 function forTwo(a, b) {
   const t = SITE_LABEL[a];
   return {
-    twoPlaces: true,
-    where: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Do this on ${PHONE_PLACE[a]} first. Then you’ll update ${COMPUTER_PLACE[b]} too.`,
+    places: { first: phonePlace(a), second: computerPlace(b, 'Now switch to your computer.') },
     make: t.make,
     check: t.check,
     checkUrl: t.checkUrl,
@@ -83,16 +83,19 @@ export function newPasswordStep(steps) {
 export function resetStepsByManager(steps, accountName) {
   const at = newPasswordStep(steps);
   if (at === -1) return null;
-  const build = (t) => [
-    // places: 'two': the step says where the passwords are, so the screen doesn't say it again.
-    { text: t.where, ...(t.twoPlaces ? { places: 'two' } : {}) },
-    ...steps.slice(0, at + 1),
-    { text: t.make },
-    ...steps.slice(at + 1),
-    // Without a link of its own, the check happens where the passwords are saved, not on the site.
-    { text: t.check(accountName), ...(t.checkUrl ? { url: t.checkUrl } : { elsewhere: true }) },
-    ...(t.also ? [t.also(accountName)] : []),
-  ];
+  const build = (t) => {
+    const list = [
+      ...(t.places ? [] : [{ text: t.where }]),
+      ...steps.slice(0, at + 1),
+      { text: t.make },
+      ...steps.slice(at + 1),
+      // Without a link of its own, the check happens where the passwords are saved, not on the site.
+      { text: t.check(accountName), ...(t.checkUrl ? { url: t.checkUrl } : { elsewhere: true }) },
+    ];
+    if (!t.places) return list;
+    // Copies: the mission's own step objects are shared with its other lists.
+    return [...list.map((st) => ({ ...st, place: t.places.first })), { ...t.also(accountName), place: t.places.second }];
+  };
   return {
     ...Object.fromEntries(Object.entries(SITE_LABEL).map(([k, t]) => [k, build(t)])),
     ...Object.fromEntries(Object.entries(APPS).map(([k, app]) => [k, build(forApp(app))])),

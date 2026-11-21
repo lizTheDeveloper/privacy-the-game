@@ -994,6 +994,7 @@ img { image-rendering: pixelated; }
   html:has(.pin-bottom) { scroll-padding-bottom: 96px; }
   /* Room the height of the pinned bar under the report's last answer, so it scrolls clear of it. */
   .debrief-form { padding-bottom: 88px; }
+  .debrief-form[data-cards] { padding-bottom: 8px; }
   html:has(.debrief-form) { scroll-padding-bottom: 100px; }
 }
 
@@ -1062,6 +1063,65 @@ img { image-rendering: pixelated; }
 .bw-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .bw-less, .bw-hide { font-size: 15px; color: rgba(237,239,243,0.8); background: none; border: 1px solid rgba(237,239,243,0.25); padding: 0 14px; }
 .bw--advanced .bw-line { font-size: 15px; }
+
+/* ---------- Briefing and report, reshaped (layout audit picks 4-7, 2026-11-20) ----------
+   The bank's saved logins sit on the step that needs them; a two-places step says where it happens
+   as a chip; Advanced reads a briefing as one scroll with its button pinned; Simple answers the
+   report one question per card (screens/briefing.js, components/bank-notes.js, screens/debrief.js). */
+.place-chip-row { display: flex; }
+.place-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 14px; font-size: 15px; font-weight: 600; color: var(--offwhite); background: rgba(255,255,255,0.07); border: 1px solid rgba(237,239,243,0.3); border-radius: 20px; }
+.place-line { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.45; color: var(--offwhite); }
+.walk-body .place-chip-row { margin-bottom: 6px; }
+.walk-body .place-chip { min-height: 28px; font-size: 13px; padding: 2px 10px; }
+.walk-body .place-line { font-size: 15px; margin-bottom: 6px; }
+
+.bank-note-step { display: flex; flex-direction: column; gap: 10px; }
+.walk-body .bank-note-step { margin-top: 12px; }
+.bank-note-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.bank-note-chip { display: inline-flex; flex-direction: column; justify-content: center; min-height: 52px; padding: 6px 16px; text-decoration: none; color: var(--cyan); background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.45); border-radius: 12px; max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+.bank-note-chip-name { font-size: 17px; font-weight: 700; color: var(--offwhite); }
+.bank-note-chip-what { font-size: 13px; color: var(--cyan); margin-top: 2px; }
+.bank-note-edit-link, .bank-note-name-link { color: var(--cyan); font-size: 15px; }
+.bank-note-step > .bank-note-edit-link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; }
+.bank-note-add { align-self: flex-start; text-decoration: none; }
+.bank-note-add-why { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(237,239,243,0.85); }
+.bank-note-where > summary { cursor: pointer; font-size: 16px; font-weight: 600; color: var(--cyan); min-height: 44px; display: flex; align-items: center; }
+.bank-note-where-none { margin: 4px 0 0; font-size: 14px; color: rgba(237,239,243,0.8); line-height: 1.55; }
+.bank-note-step .bank-note-any { margin-top: 0 !important; }
+.bank-note-step .bank-note-any > summary { display: flex; align-items: center; min-height: 44px !important; font-family: inherit !important; font-size: 16px !important; font-weight: 600 !important; letter-spacing: 0 !important; color: var(--cyan) !important; }
+.bank-note-line { margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: rgba(237,239,243,0.85); overflow-wrap: anywhere; }
+.bank-note-line a { display: inline-block; padding: 10px 0; margin: -10px 0; }
+
+.brief-story { width: 100%; margin-top: 16px; border-top: 1px solid rgba(0,229,255,0.1); padding-top: 4px; }
+.brief-story > summary { cursor: pointer; font-size: 16px; font-weight: 600; color: var(--cyan); min-height: 44px; display: flex; align-items: center; }
+
+/* Advanced, one scroll: the intel's first three lines, More opens the rest in place. */
+.brief-intel-more > summary { list-style: none; cursor: pointer; }
+.brief-intel-more > summary::-webkit-details-marker { display: none; }
+.brief-intel-more:not([open]) .brief-intel-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.brief-intel-toggle { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); }
+.brief-intel-toggle::after { content: 'More \25BE'; }
+.brief-intel-more[open] .brief-intel-toggle::after { content: 'Less \25B4'; }
+/* The button stays on screen at every width (on a computer it sat at y=1029). */
+.brief--onepage .pin-bottom { position: sticky; bottom: 0; z-index: 20; padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(13,16,24,0) 0%, rgba(13,16,24,0.96) 22%); }
+html:has(.brief--onepage) { scroll-padding-bottom: 110px; }
+
+/* Simple's report, one question per card. The questions are the same form fields as Advanced's
+   (the card not shown is display: none, its answers still filed). */
+.debrief-form[data-cards] [data-question]:not(.is-card-now) { display: none; }
+.debrief-form[data-cards] [data-question].is-card-now { background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.3); border-left: 3px solid var(--cyan); padding: 18px 16px; margin-bottom: 16px !important; }
+.debrief-form[data-cards] .debrief-opt { min-height: 52px; box-sizing: border-box; }
+.debrief-form[data-cards] .debrief-opt span { font-size: 16px !important; }
+.debrief-cards-bar { margin-bottom: 16px; }
+.debrief-told { margin: 0 0 16px; padding: 14px 16px; border: 1px solid rgba(198,255,0,0.3); background: rgba(198,255,0,0.04); }
+.debrief-told-head { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--offwhite); }
+.debrief-told ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.debrief-told li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 15px; line-height: 1.45; color: rgba(237,239,243,0.9); }
+.debrief-told li b { color: var(--offwhite); }
+.debrief-told .walk-link { min-height: 44px; font-size: 15px; }
+.debrief-nav { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.debrief-nav [hidden] { display: none !important; }
+.debrief-nav .walk-link { min-height: 44px; font-size: 15px; }
 
 /* ===== colour language: start =====
    A player (2026-11-18): "I need your help to ONLY highlight and emphasize the part that is
