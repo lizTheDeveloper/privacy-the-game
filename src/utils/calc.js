@@ -92,6 +92,10 @@ function unplacedReportResets(state) {
   return Math.max(0, n.left - inCategories - rows);
 }
 
+// Mission progress: what every tracked or navigational decision reads (district-completed, the
+// milestone on filing, restoreEvents, isCityComplete and so go-ghost vs go-ghost-early, the
+// seenProgress check-ins). Password-manager answers never change it (security review,
+// 2026-11-20): when or whether those fire would tell them.
 export function calcDistrictProgress(state, districtId) {
   const inDistrict = getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m));
   const isDone = (m) => isMissionDoneIn(state, m);
@@ -100,21 +104,35 @@ export function calcDistrictProgress(state, districtId) {
   const bonus = inDistrict.filter((m) => m.phase !== 'survey' && m.optional && !countsAsCore(m));
   const completed = relevant.filter(isDone).length;
   const bonusCompleted = bonus.filter(isDone).length;
-  // Flagged passwords weigh one mission ("change them"), filling as each is changed; the
-  // district can't read 100% until the last one is changed.
-  const resets = relevant.length ? flaggedResets(state, districtId) : { flagged: 0, changed: 0, left: 0 };
+  return {
+    total: relevant.length,
+    completed,
+    percent: relevant.length ? Math.round((completed / relevant.length) * 100) : 0,
+    bonusTotal: bonus.length,
+    bonusCompleted,
+  };
+}
+
+// What the player SEES as Secured (Q1, Liz 2026-11-20: "100% should mean nothing left to do"):
+// mission progress plus passwords their manager flagged here and not yet changed, which weigh one
+// mission ("change them"), filling as each is changed and capped at 99% until the last one.
+// Display only: the Secured %, LIBERATED / 100% wording, city cards, stats, the milestone's copy.
+// Never feed it to anything tracked, sent or navigated; calcDistrictProgress is for those.
+export function calcDistrictSecured(state, districtId) {
+  const p = calcDistrictProgress(state, districtId);
+  const resets = p.total ? flaggedResets(state, districtId) : { flagged: 0, changed: 0, left: 0 };
   const extra = resets.flagged > 0 ? 1 : 0;
-  const total = relevant.length + extra;
-  const filled = completed + (extra ? resets.changed / resets.flagged : 0);
+  const total = p.total + extra;
+  const filled = p.completed + (extra ? resets.changed / resets.flagged : 0);
   let percent = total ? Math.round((filled / total) * 100) : 0;
   if (resets.left > 0) percent = Math.min(percent, 99);
   return {
+    ...p,
     total,
-    completed: completed + (extra && resets.left === 0 ? 1 : 0),
+    completed: p.completed + (extra && resets.left === 0 ? 1 : 0),
     percent,
-    bonusTotal: bonus.length,
-    bonusCompleted,
     resets,
+    missionsDone: p.total > 0 && p.completed === p.total,
   };
 }
 

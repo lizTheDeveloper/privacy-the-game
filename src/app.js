@@ -8,7 +8,7 @@ import { setChosenPod } from './utils/pod-pref.js';
 import { initRouter, navigate, parseRoute, tracksPageview, RENDER_CAUSE } from './router.js';
 import { setDistrictOn } from './utils/opt-in.js';
 import { localDay, hasSavedState, loadState, saveState, updateMission, updateStreak, streakAfterFiling, toggleAccount, markMissionStarted } from './state.js';
-import { calcDistrictProgress, calcIntegrity, districtBreachedAddresses } from './utils/calc.js';
+import { calcDistrictProgress, calcDistrictSecured, calcIntegrity, districtBreachedAddresses } from './utils/calc.js';
 import { missionDistrict } from './data/missions.js';
 import { findMission, isCustomMission, cleanCustomName } from './data/custom-missions.js';
 import { fileDebrief, applyRecheck, recheckWithChecklist, recordNotNeeded, missionEventData, visibleQuestions } from './utils/debrief.js';
@@ -34,7 +34,7 @@ import { initDecks, deckPositions, openFolds, restoreFolds, applyOpenDesktop, re
 import { nameMatches } from './utils/big-check.js';
 import { loadBrokerData, brokerDataStatus, brokerData } from './utils/broker-data.js';
 import { addDevice, removeDevice, newlySealed, markSealedSeen, setFloorOpen, lightCandle, putOutCandle, isCandleLit } from './utils/interior-state.js';
-import { pageviewUrl, errorContext, markQuietHash } from './utils/pageview-url.js';
+import { pageviewUrl, errorContext } from './utils/pageview-url.js';
 import { renderBriefing } from './screens/briefing.js';
 import { markLoreShown } from './utils/lore.js';
 import { renderBankNotesScreen } from './components/bank-notes.js';
@@ -351,15 +351,7 @@ function autoRead() {
   if (Array.isArray(upcoming) && upcoming.length) setTimeout(() => prefetch(upcoming), 0);
 }
 
-// The hash of a navigation that must send no pageview (the milestone a pm-cat SAVE finishes).
-// Set just before navigate(); the next arrival clears it, whichever screen it is.
-let quietArrival = null;
-
 function render(route, cause = RENDER_CAUSE.REFRESH) {
-  // An arrival the player's own password answer caused (quietArrival) is drawn like any other,
-  // but sends no pageview: it would tell that answer. Any arrival clears it.
-  const quiet = tracksPageview(cause) && quietArrival !== null && quietArrival === location.hash;
-  if (tracksPageview(cause)) quietArrival = null;
   // A browser that won't keep the save says so: in full on the start page, a slim bar elsewhere.
   syncBrowserWarning({ start: !started, simple: readLevel(state) === 'simplest', compact: route.screen === 'briefing' });
   if (!started) {
@@ -425,7 +417,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
       const seen = markSealedSeen(state, route.params.id, watched ?? []);
       if (seen !== state) setState(seen);
     }
-    if (tracksPageview(cause) && !quiet) trackPageview(pageviewUrl(route, location.href), route.screen);
+    if (tracksPageview(cause)) trackPageview(pageviewUrl(route, location.href), route.screen);
     // Landing after SUBMIT REPORT: start at Scout's reaction, not the debrief's scroll position.
     if (tracksPageview(cause) && route.screen === 'district' && landingReaction?.landed) app.querySelector('[data-scout-reaction]')?.scrollIntoView({ block: 'start' });
     if (route.screen === 'city') {
@@ -434,7 +426,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     }
     autoRead();
   } catch (error) {
-    captureError(error, quiet ? { screen: 'quiet' } : errorContext(route));
+    captureError(error, errorContext(route));
     app.innerHTML = `<div style="padding: 40px; text-align: center;">
       <h2 style="color: var(--magenta);">Something broke</h2>
       <p>The error has been reported. <a href="#/city">Return to city</a></p>
@@ -1274,6 +1266,19 @@ async function restoreData() {
   }
 }
 
+// Every flagged password from a district changed: a moment on its panel, in this browser only
+// (no event, no navigation). Gone on the next draw.
+function celebrateAllChanged(districtId) {
+  const panel = app.querySelector(`[data-pm-category="${CSS.escape(districtId)}"]`);
+  if (!panel) return;
+  const note = document.createElement('div');
+  note.className = 'pm-all-changed';
+  note.setAttribute('role', 'status');
+  note.textContent = 'All changed ✓';
+  panel.classList.add('pm-celebrate');
+  panel.prepend?.(note);
+}
+
 // The milestone's share card, drawn into its frame (generateMilestoneCard is synchronous). Drawn
 // again once the web fonts are in, so the card's words aren't in a fallback font.
 function drawMilestonePreview(districtId) {
@@ -1550,19 +1555,14 @@ app.addEventListener('click', async (e) => {
     const raw = app.querySelector(`#pm-cat-num-${districtId}`)?.value;
     const next = applyCategoryAction(state, districtId, kind, raw);
     if (next !== state) {
-      const wasComplete = Boolean(state.seenProgress?.[districtId]?.includes(100));
+      // Display only (security review, 2026-11-20): these numbers change what the player sees,
+      // never what is tracked or where the game goes. No milestone, no navigation, no event: the
+      // milestone already showed when the missions were done. The last one changed gets a local
+      // celebration on the panel, nothing more.
+      const leftBefore = calcDistrictSecured(state, districtId).resets.left;
       setState(next);
-      // Changing the last flagged password can finish the district (they count toward Secured).
-      // Its milestone shows, but no district-completed is sent: it would tell the password answer.
-      const progress = calcDistrictProgress(state, districtId);
-      if (kind === 'changed' && progress.total > 0 && progress.percent === 100 && !wasComplete) {
-        const seen = state.seenProgress?.[districtId] ?? [];
-        setState({ ...state, seenProgress: { ...state.seenProgress, [districtId]: [...new Set([...seen, 25, 50, 75, 100])] } });
-        // No pageview either: arriving here right after SAVE says the same thing.
-        quietArrival = `#/milestone/${districtId}`;
-        markQuietHash(quietArrival);
-        navigate(quietArrival);
-      } else renderCurrentRoute();
+      renderCurrentRoute();
+      if (kind === 'changed' && leftBefore > 0 && calcDistrictSecured(state, districtId).resets.left === 0) celebrateAllChanged(districtId);
     } else if (kind === 'flag' || kind === 'changed') {
       // No number (or not a whole number from 1 up): say so and put the cursor in the box.
       const msg = app.querySelector(`[data-pm-cat-msg="${CSS.escape(districtId)}"]`);

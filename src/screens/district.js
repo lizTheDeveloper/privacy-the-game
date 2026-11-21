@@ -4,7 +4,7 @@ import { visibleSteps, progressFor, progressLabel, readLevel, simpleTitle, simpl
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
-import { calcDistrictProgress, getAccountPhaseGate, getBuildingState, PART_NAMES } from '../utils/calc.js';
+import { calcDistrictProgress, calcDistrictSecured, getAccountPhaseGate, getBuildingState, PART_NAMES } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { renderBuilding } from '../components/building.js';
@@ -278,6 +278,13 @@ export function renderNextUp(state, { name, label, href, where = '', kind = 'mis
       : `<span class="next-up-label">NEXT UP${where ? ` · ${esc(where.toUpperCase())}` : ''}</span><span class="next-up-name">${esc(name)}</span>`}</div>
     <a class="btn-primary btn-sm next-up-go" href="${href}" aria-label="${esc(`${plain} ${name}`)}">${esc(label)}</a>
   </div>`;
+}
+
+// Secured shown with flagged passwords left (display only): "96% · 2 passwords to change".
+function resetsLeftNote(progress) {
+  const n = progress.resets?.left ?? 0;
+  if (n <= 0) return '';
+  return `<div class="resets-left-note" data-resets-left>${progress.percent}% · ${n} password${n === 1 ? '' : 's'} to change</div>`;
 }
 
 const nextUpAfterTab = (state, after) => (after ? renderNextUp(state, after) : '');
@@ -854,7 +861,7 @@ function facilityNextUp(state, district, facilityOrder, leadId) {
 
 function renderFacilityDistrict(state, district, reaction, notMine, firstVisit) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
-  const progress = calcDistrictProgress(state, district.id);
+  const progress = calcDistrictSecured(state, district.id);
 
   const buildings = districtAccounts
     .map(([id]) => skylineBuilding(state, district.id, id))
@@ -882,7 +889,7 @@ function renderFacilityDistrict(state, district, reaction, notMine, firstVisit) 
           <div class="badge badge--quiet" style="letter-spacing: 1px;">CHAPTER ${district.chapter}</div>
         </div>
         <div class="district-desc">${esc(district.description)}</div>
-        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
+        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}${resetsLeftNote(progress)}
         ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--progress" style="flex-shrink: 0;">
@@ -962,7 +969,7 @@ export function afterTab(state, district, activeTab, progress = calcDistrictProg
     return { name: `You took back ${district.name}`, label: 'SEE IT', href: `#/milestone/${district.id}`, kind: 'milestone' };
   }
   // Every mission done but flagged passwords left (Q1): their SAVE, in place, is the next thing.
-  if (progress.resets?.left > 0) return null;
+  if (calcDistrictSecured(state, district.id).resets.left > 0) return null;
   if (isSimple(state)) return { name: 'What’s next', label: 'GO', href: '#/next', kind: 'next' };
   const nextId = nextDistrictId(state);
   const next = nextId && nextId !== district.id ? DISTRICTS.find((d) => d.id === nextId) : null;
@@ -984,7 +991,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
   const knownAccounts = districtAccounts.filter(([id]) => state.accounts[id]);
   const allDisabled = knownAccounts.length > 0 && knownAccounts.every(([id]) => !state.accounts[id].enabled);
-  const progress = calcDistrictProgress(state, districtId);
+  const progress = calcDistrictSecured(state, districtId);
 
   if (!activeTab) {
     // A filed legacy record counts too: an old save opens on Recon, not Survey.
@@ -1004,7 +1011,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const leadBegun = lead && progressFor(state, lead.id, visibleSteps(lead, state)).handled > 0;
   const nextUp = lead
     ? renderNextUp(state, { name: missionName(state, lead), label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` })
-    : listTab ? nextUpAfterTab(state, afterTab(state, district, activeTab, progress)) : '';
+    : listTab ? nextUpAfterTab(state, afterTab(state, district, activeTab)) : '';
   const hoisted = Boolean(lead);
 
   let content;
@@ -1055,7 +1062,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
           <div class="badge badge--quiet" style="letter-spacing: 1px;">CHAPTER ${district.chapter}</div>
         </div>
         <div class="district-desc">${esc(district.description)}</div>
-        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}
+        ${fillBar({ key: `district:${district.id}`, done: progress.completed, total: progress.total, size: 'mid', label: `${progress.percent}% secured` })}${resetsLeftNote(progress)}
         ${renderCategoryQuiet(state, district.id)}
       </div>
       <div class="hud-stat hud-stat--progress" style="flex-shrink: 0;">

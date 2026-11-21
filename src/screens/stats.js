@@ -11,6 +11,7 @@ import {
   calcIntegrity,
   calcExposure,
   calcDistrictProgress,
+  calcDistrictSecured,
   calcFindings,
 } from '../utils/calc.js';
 import { displayStreak } from '../state.js';
@@ -45,7 +46,7 @@ function statCard({ label, labelColor, border, content }) {
 }
 
 function districtRow(state, district) {
-  const progress = calcDistrictProgress(state, district.id);
+  const progress = calcDistrictSecured(state, district.id);
   const locked = progress.total === 0;
   const accent = progress.percent === 100 ? '#C6FF00' : progress.percent > 0 ? '#00E5FF' : 'rgba(237,239,243,0.5)';
   const nameColor = locked ? 'var(--text-quiet)' : accent;

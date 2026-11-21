@@ -10,7 +10,7 @@ import { INTERIORS } from '../src/data/interiors/index.js';
 import { firstUnsealedEntry } from '../src/utils/interior-state.js';
 import { renderDistrict } from '../src/screens/district.js';
 import { applyCategoryAction } from '../src/utils/pm-categories.js';
-import { calcDistrictProgress } from '../src/utils/calc.js';
+import { calcDistrictProgress, calcDistrictSecured } from '../src/utils/calc.js';
 import { getMissionsForDistrict } from '../src/data/missions.js';
 import { isMissionInPlay } from '../src/utils/mission-status.js';
 
@@ -181,21 +181,24 @@ describe('Advanced: the badges stay, under the count, tall enough to tap', () =>
 });
 
 describe('the Vault with flagged passwords left: SAVE is the next thing', () => {
-  it('missions all done, 2 flagged: SAVE is the one bright button', () => {
+  it('missions all done and the milestone seen, 2 flagged: SAVE is the one bright button', () => {
     let s = createInitialState();
     // Twice: filing 2FA unlocks its backup mission.
     for (let i = 0; i < 2; i += 1) {
       for (const m of getMissionsForDistrict('vault').filter((x) => x.phase !== 'survey' && isMissionInPlay(s, x))) s = updateMission(s, m.id, { status: 'completed', method: 'authenticator' });
     }
-    s = applyCategoryAction({ ...s, passwordManager: 'bitwarden' }, 'vault', 'flag', '2');
+    s = applyCategoryAction({ ...s, passwordManager: 'bitwarden', seenMilestones: { vault: true } }, 'vault', 'flag', '2');
     for (const level of ['simplest', 'full']) {
       const html = renderDistrict(setReadLevel(s, level), 'vault', 'fortify').replace(/<style>[\s\S]*?<\/style>/g, '');
       expect(primaries(html), level).toBe(1);
       expect(html).toMatch(/class="btn-primary"[^>]*data-action="pm-cat-changed"/);
       expect(html).not.toMatch(/>100%</);
-      const pct = calcDistrictProgress(s, 'vault').percent;
+      // Shown (display only): under 100%, with the passwords left. Mission progress is 100%.
+      const pct = calcDistrictSecured(s, 'vault').percent;
       expect(pct).toBeLessThan(100);
       expect(html).toContain(`>${pct}%<`);
+      expect(html).toContain(`${pct}% · 2 passwords to change`);
+      expect(calcDistrictProgress(s, 'vault').percent).toBe(100);
     }
   });
 });
@@ -210,11 +213,15 @@ describe('every district with only flagged passwords left has one bright button'
       }
       s = applyCategoryAction(s, d.id, 'flag', '2');
       if (!calcDistrictProgress(s, d.id).total) continue;
+      // Before the milestone is seen and after: one bright button either way.
+      for (const seen of [false, true]) {
+      if (seen) s = { ...s, seenMilestones: { ...s.seenMilestones, [d.id]: true } };
       for (const level of ['simplest', 'full']) {
         for (const tab of ['recon', 'fortify', 'reclaim']) {
           const html = renderDistrict(setReadLevel(s, level), d.id, tab).replace(/<style>[\s\S]*?<\/style>/g, '');
-          expect(primaries(html), `${d.id} ${level} ${tab}`).toBeLessThanOrEqual(1);
+          expect(primaries(html), `${d.id} ${level} ${tab} seen=${seen}`).toBeLessThanOrEqual(1);
         }
+      }
       }
     }
   });

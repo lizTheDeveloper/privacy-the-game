@@ -1,9 +1,11 @@
 // Q1 (Liz 2026-11-20: "Yes"): a district can't read 100% SECURED while passwords its password
-// manager flagged are still unchanged. 100% means nothing left to do.
+// manager flagged are still unchanged. 100% means nothing left to do. Display only (security
+// review, 2026-11-20): calcDistrictSecured is what's shown; calcDistrictProgress, which every
+// event, pageview and navigation reads, never sees these numbers.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createInitialState, updateMission, toggleAccount } from '../src/state.js';
-import { calcDistrictProgress, flaggedResets } from '../src/utils/calc.js';
+import { calcDistrictProgress as missionProgress, calcDistrictSecured as calcDistrictProgress, flaggedResets } from '../src/utils/calc.js';
 import { getMissionsForDistrict } from '../src/data/missions.js';
 import { isMissionInPlay } from '../src/utils/mission-status.js';
 import { applyCategoryAction } from '../src/utils/pm-categories.js';
@@ -90,12 +92,22 @@ describe('flagged passwords keep a district under 100%', () => {
     expect(flaggedResets({ ...s, pmChanged: 3 }, 'master-keys')).toEqual({ flagged: 0, changed: 0, left: 0 });
   });
 
-  it('the milestone waits: a pm-cat SAVE that finishes the district shows it, and sends nothing', () => {
+  it('mission progress never sees them: same total, completed and percent with or without flags', () => {
+    for (const [flag, changed] of [['2', null], ['2', '1'], ['2', '2'], ['200', '199']]) {
+      let s = applyCategoryAction(vaultDone(), 'vault', 'flag', flag);
+      if (changed) s = applyCategoryAction(s, 'vault', 'changed', changed);
+      expect(missionProgress(s, 'vault')).toEqual(missionProgress(vaultDone(), 'vault'));
+    }
+    const m = { ...createInitialState(), passwordManager: 'bitwarden', pmFlaggedCount: 9, pmThrowaway: 0 };
+    // (The report's count does put "Change the next 3" in play, a bonus, as it has since 14b.)
+    const core = ({ total, completed, percent }) => ({ total, completed, percent });
+    expect(core(missionProgress(m, 'master-keys'))).toEqual(core(missionProgress({ ...m, pmFlaggedCount: undefined }, 'master-keys')));
+  });
+
+  it('a pm-cat SAVE never navigates, tracks or opens the milestone', () => {
     const app = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
     const block = app.slice(app.indexOf("action.startsWith('pm-cat-')"), app.indexOf("action === 'district-opt-in'"));
-    expect(block).toContain('calcDistrictProgress(state, districtId)');
-    expect(block).toContain('#/milestone/');
-    expect(block).not.toMatch(/\btrack\(/);
-    expect(block).not.toMatch(/capture\w*\(/);
+    expect(block).not.toMatch(/navigate\(|#\/milestone|seenProgress|\btrack\w*\(|capture\w*\(/);
+    expect(block).toContain('celebrateAllChanged(districtId)');
   });
 });

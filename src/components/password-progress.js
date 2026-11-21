@@ -2,7 +2,7 @@
 // the Master Keys header, the password-manager report and "Change the next 3".
 import { passwordProgressLines, burstScout } from '../utils/bursts.js';
 import { categoryAsk } from '../utils/pm-categories.js';
-import { calcDistrictProgress } from '../utils/calc.js';
+import { calcDistrictSecured } from '../utils/calc.js';
 import { getMissionsForDistrict } from '../data/missions.js';
 import { DISTRICTS } from '../data/districts.js';
 import { isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
@@ -55,7 +55,9 @@ function askControls(districtId, { label, numAction, numButton, clearButton, cle
 // keeps that one lit.
 function onlyResetsLeft(state, districtId) {
   if (DISTRICTS.find((d) => d.id === districtId)?.facilityOrder?.includes('scam_defense')) return false;
-  const p = calcDistrictProgress(state, districtId);
+  // The milestone (opened when the missions were done) comes first; after it, SAVE is the next thing.
+  if (!(state.seenMilestones?.[districtId] || state.seenProgress?.[districtId]?.includes(100))) return false;
+  const p = calcDistrictSecured(state, districtId);
   if (!(p.resets.left > 0 && p.completed === p.total - 1)) return false;
   return getMissionsForDistrict(districtId).every((m) => m.phase === 'survey' || !isMissionInPlay(state, m) || isMissionDoneIn(state, m));
 }

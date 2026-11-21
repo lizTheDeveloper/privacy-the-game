@@ -1264,3 +1264,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .list-all-done { font-size: 16px; color: var(--lime); padding: 4px 0; }
 /* READY (nothing started): plain grey words, not a box that looks like a button (both modes). */
 .status-quiet { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: var(--text-quiet); white-space: nowrap; flex-shrink: 0; }
+
+/* Flagged passwords left (display only): "96% · 2 passwords to change" under the district bar. */
+.resets-left-note { font-size: 13px; color: var(--amber); margin-top: 6px; line-height: 1.4; }
+/* The last flagged password changed: a moment on the panel, in this browser only. */
+.pm-all-changed { font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--lime); text-shadow: 0 0 12px rgba(198,255,0,0.45); margin-bottom: 10px; animation: pm-all-changed-pop 0.6s ease-out; }
+.pm-celebrate { box-shadow: 0 0 0 1px rgba(198,255,0,0.5), 0 0 24px rgba(198,255,0,0.25); }
+@keyframes pm-all-changed-pop { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .pm-all-changed { animation: none; } }
