@@ -307,6 +307,8 @@ img { image-rendering: pixelated; }
 .interior--simple .leak-chip { margin: 0; }
 .interior--simple .interior-doors { display: flex; align-items: center; gap: 12px; margin: 8px 0 10px; }
 .interior--simple .interior-doors-words { flex: 0 0 auto; }
+/* Simple: an open door's SEAL IT comes before how they get in; give the words below it room. */
+.interior--simple .interior-btn + .entry-how { margin-top: 12px; }
 .interior--simple .interior-doors .fill-bar--mid { flex: 1 1 auto; min-width: 80px; margin: 0; }
 .interior-scout.interior-scout--simple { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 10px; padding: 8px 10px; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); }
 .interior-scout--simple > img { flex-shrink: 0; width: 32px; height: 32px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3)); }

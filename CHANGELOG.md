@@ -2,6 +2,13 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.45.2 (2026-11-21): SEAL IT on the first screen when the open door is further down
+
+7.45.1 put a building's bright button on a phone's first screen in almost every case. Twelve were left: you set up two-step sign-in before checking for breaches, so the open door is the 2nd or 3rd in the list, and its SEAL IT ended 861 to 899px down a 390x844 phone.
+
+- **Simple mode: an open door's fix and its SEAL IT now come before how they get in.** The card reads: who gets in, what to do, the button, then how they get in. The same words, in a new order. Those twelve now end 745 to 783px down (the two that just fit, at 843px, now end at 727px); every other building screen is the same or higher (no Simple building button ends below 805px).
+- **Advanced is unchanged.** Its building screen's HTML is byte-for-byte the same.
+
 ## 7.45.1 (2026-11-21): The next button on the first screen, in a building and the broker sky
 
 Liz's layout rule: on a phone in Simple mode, the one bright button (the next thing to tap) should be on the first screen. Two screens still put it below.

@@ -106,6 +106,72 @@ describe('Simple building: the rest above the door, tighter', () => {
   });
 });
 
+// 7.45.2: with two-step sign-in set up before the breach check, the open door is the 2nd or 3rd
+// in the list and its SEAL IT fell below a phone's first screen (843 to 899px on 390x844). In
+// Simple the open door's fix and its SEAL IT now come before how they get in. Same words.
+describe('Simple building: an open door shows its fix and SEAL IT before how they get in', () => {
+  const smsOnly = (b) => file(createInitialState(), `${b}-fortify-2fa`, { method: 'sms', action: 'enabled-2fa' });
+  const authOnly = (b) => file(createInitialState(), `${b}-fortify-2fa`, { method: 'authenticator', action: 'enabled-2fa' });
+  const entries = (html) => html.match(/<div class="entry entry--[\s\S]*?<!-- \/entry -->/g) || [];
+  const litDoor = (html) => entries(html).find((e) => e.includes('btn-primary')) ?? '';
+  const at = (html, re) => html.search(re);
+  const words = (html) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').sort();
+
+  it('the lit open door: fix, then SEAL IT, then how they get in, in every building', () => {
+    let checked = 0;
+    for (const b of Object.keys(INTERIORS)) {
+      for (const s of [smsOnly(b), authOnly(b), mid(b)]) {
+        const door = litDoor(render(simple(s), b));
+        if (!door.includes('data-state="open"')) continue;
+        checked++;
+        const seal = at(door, /class="interior-btn btn-primary"[^>]*>SEAL IT/);
+        expect(seal, b).toBeGreaterThan(-1);
+        expect(seal, b).toBeLessThan(at(door, /class="entry-how"/));
+        if (door.includes('entry-fix')) expect(at(door, /class="entry-fix"/), b).toBeLessThan(seal);
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
+  });
+
+  it('every open door in Simple is in that order, lit or outlined; others keep theirs', () => {
+    for (const b of Object.keys(INTERIORS)) {
+      for (const e of entries(render(simple(authOnly(b)), b))) {
+        const how = at(e, /class="entry-how"/);
+        const btn = at(e, /class="interior-btn /);
+        if (btn < 0) continue;
+        if (e.includes('data-state="open"')) expect(btn, b).toBeLessThan(how);
+        else expect(btn, b).toBeGreaterThan(how);
+      }
+    }
+  });
+
+  it('nothing is dropped: each door has the same words in Simple and Advanced, one bright button', () => {
+    for (const b of Object.keys(INTERIORS)) {
+      for (const s of [smsOnly(b), authOnly(b)]) {
+        const sim = entries(render(simple(s), b));
+        const ad = entries(render(adv(s), b));
+        expect(sim.length, b).toBe(ad.length);
+        sim.forEach((e, i) => expect(words(e), `${b} #${i}`).toEqual(words(ad[i])));
+        expect(primaries(render(simple(s), b)), b).toBe(1);
+      }
+    }
+  });
+
+  it('Advanced keeps how they get in before the fix and SEAL IT', () => {
+    const door = litDoor(render(adv(authOnly('outlook')), 'outlook'));
+    expect(door).toContain('data-state="open"');
+    const how = at(door, /class="entry-how"/);
+    expect(how).toBeGreaterThan(-1);
+    expect(how).toBeLessThan(at(door, /class="entry-fix"/));
+    expect(at(door, /class="entry-fix"/)).toBeLessThan(at(door, /class="interior-btn btn-primary"/));
+  });
+
+  it('the room under the moved button is a Simple-only style', () => {
+    const css = readFileSync('src/style.css', 'utf8');
+    expect(css).toContain('.interior--simple .interior-btn + .entry-how { margin-top: 12px; }');
+  });
+});
+
 describe('Advanced building: unchanged', () => {
   it('the roof starts open with its rows, devices and antennas, the big Scout bubble, no summary', () => {
     for (const s of [createInitialState(), mid()]) {
