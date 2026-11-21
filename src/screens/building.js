@@ -7,6 +7,7 @@
 import { prismTag, prismTagCount } from '../components/prism-tag.js';
 import { fillBar } from '../components/fill-bar.js';
 import { readLevel } from '../utils/reading.js';
+import { simpleLead } from '../components/see-everything.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
@@ -138,7 +139,8 @@ function doorBar(state, accountId) {
 function leakBadges(accountId, account, simple) {
   const n = prismTagCount(accountId);
   if (!n) return '';
-  const badges = `<div class="interior-tags">${prismTag(accountId, { tall: true })}</div>`;
+  // Simple: the plain names (NSA CABLE TAP, TAPPED GOOGLE & YAHOO), not the code names.
+  const badges = `<div class="interior-tags">${prismTag(accountId, { tall: true, simple })}</div>`;
   if (!simple) return badges;
   const name = account.name.replace(/\s+(Login|Account)$/i, '');
   return `<details class="leak-chip" data-fold="leaks-${esc(accountId)}"><summary>${n} ${n === 1 ? 'leak names' : 'leaks name'} ${esc(name)} <span aria-hidden="true">›</span></summary>${badges}</details>`;
@@ -192,8 +194,8 @@ function deviceList(state, accountId) {
       </div>`;
 }
 
-function antennaNote(accountId) {
-  return `<details class="phone-fold" data-fold="antenna-${esc(accountId)}" data-open-desktop><summary>Why antennas fade</summary><div class="dim interior-note">The antennas fade as your last check gets older. A fresh sweep lights them back up.</div></details>`;
+function antennaNote(accountId, simple = false) {
+  return `<details class="phone-fold" data-fold="antenna-${esc(accountId)}" data-open-desktop><summary>Why antennas fade</summary><div class="dim interior-note">The antennas fade as your last check gets older. A fresh ${simple ? 'check' : 'sweep'} lights them back up.</div></details>`;
 }
 
 // "Health check", not "Signal check": Signal is also an app in the city.
@@ -388,6 +390,12 @@ function brightPlan(state, accountId, interior, rows) {
   return { firstDoor, doorLit, litRow, fixes };
 }
 
+// Simple's one sentence: what the building is, and who the open doors let in.
+export function buildingLead(account) {
+  const name = String(account?.name ?? '').replace(/\s+(Login|Account)$/i, '');
+  return `This building is your ${name} account. Each open door lets a hacker or scammer in, so lock them one by one.`;
+}
+
 export function renderBuildingInterior(state, accountId, { now = new Date() } = {}) {
   const interior = getInterior(accountId);
   const account = ACCOUNTS[accountId];
@@ -412,6 +420,7 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
       <a class="btn-secondary interior-back" href="#/district/${esc(account.district)}">← ${esc((district?.name ?? 'DISTRICT').toUpperCase())}</a>
       <div class="interior-title">${esc(account.name.toUpperCase())}</div>
       ${simple ? `<div class="interior-sub">${esc(district?.name ?? '')}</div>
+      ${simpleLead(buildingLead(account))}
       ${leakBadges(accountId, account, true)}
       ${doorBar(state, accountId)}` : `<div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
       ${meter(state, accountId, rows, now)}
@@ -422,7 +431,7 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
       ${simple ? `<details class="building-more" data-fold="more-${esc(accountId)}"><summary>More about this building</summary>
       <div class="dim interior-note">Tap a floor to fold it.</div>
       ${deviceList(state, accountId)}
-      ${antennaNote(accountId)}
+      ${antennaNote(accountId, true)}
       ${floorsBelow}
       </details>` : floorsBelow}
     </div>

@@ -186,7 +186,7 @@ describe('the Big Check', () => {
       if (Number(mm[1]) > 360) expect(html.slice(Math.max(0, mm.index - 4), mm.index)).toMatch(/max-/);
     }
     expect(html).not.toMatch(/white-space:\s*nowrap/);
-    expect(html).toContain('<div class="big-check">');
+    expect(html).toMatch(/<div class="big-check(?: big-check--simple)?">/);
     expect(html).toContain('THE BIG CHECK');
     expect(html).toContain("Optional. It never counts toward your districts, your city lights or the city's totals.");
     expect(html).toMatch(/\.big-check-tick\{[^}]*min-height:44px/);

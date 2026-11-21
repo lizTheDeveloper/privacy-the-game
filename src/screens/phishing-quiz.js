@@ -1,6 +1,8 @@
 import { CURATED_MESSAGES, MESSAGE_BANK, TYPE_LABELS, DIFFICULTY_COLORS } from '../data/phishing.js';
 import { renderHud } from '../components/hud.js';
 import { fillBar } from '../components/fill-bar.js';
+import { readLevel } from '../utils/reading.js';
+import { simpleLead } from '../components/see-everything.js';
 
 function esc(value) {
   return String(value)
@@ -259,14 +261,14 @@ function getNextCuratedMessage(quiz) {
 const btnStyle = (color, rgb) => `flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: ${color}; border-color: rgba(${rgb},0.3); background: rgba(${rgb},0.05);`;
 
 // The verdict buttons and THE TELL box for a message not yet answered.
-function verdictForm(msg, mode) {
+function verdictForm(msg, mode, simple = false) {
   const action = mode === 'bank' ? 'quiz-bank-verdict' : 'quiz-verdict';
   const tellAttr = mode === 'bank' ? 'data-quiz-bank-tell' : 'data-quiz-tell';
   const placeholder = mode === 'bank' ? 'What tipped you off?' : 'What made you decide?';
   return `
         <div style="margin-top: 20px;">
           <div style="margin-bottom: 12px;">
-            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">THE TELL</div>
+            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">${simple ? 'WHAT GAVE IT AWAY?' : 'THE TELL'}</div>
             <input type="text" ${tellAttr}="${msg.id}" placeholder="${placeholder}" style="width: 100%; padding: 10px 14px; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); color: var(--offwhite); font-family: var(--font-body); font-size: 13px; outline: none;">
           </div>
           <div style="display: flex; gap: 12px; margin-bottom: 16px;">
@@ -291,11 +293,15 @@ function bankHeader(quiz) {
 }
 
 // random: for tests (quiz mode's batch order).
+// Simple's one sentence: what the training is, and who it protects you from.
+export const PHISHING_LEAD = 'Scammers send fake texts and emails that look real. Practice here: is each one real or fake?';
+
 export function renderPhishingQuiz(state, { random = Math.random } = {}) {
   const quiz = getQuizState(state);
   if (!quiz.quizAnswers) quiz.quizAnswers = {};
   const progress = getCuratedProgress(quiz);
   const curatedDone = progress.answered >= progress.total;
+  const simple = readLevel(state) === 'simplest';
 
   const scoutIntro = "Real or fake? Name the specific detail that told you. The hard ones are the real messages — genuine services send alerts from domains that look fake.";
 
@@ -320,7 +326,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
     content = `
       <div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${progress.answered + 1} OF ${progress.total}</div>
       ${renderMessageCard(msg)}
-      ${verdictForm(msg, 'curated')}`;
+      ${verdictForm(msg, 'curated', simple)}`;
   } else if (showsCuratedResult(quiz)) {
     content = curatedResult(quiz);
   } else {
@@ -336,7 +342,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
       content = `
       ${bankHeader(quiz)}
       ${renderMessageCard(current)}
-      ${verdictForm(current, 'bank')}`;
+      ${verdictForm(current, 'bank', simple)}`;
     }
   }
 
@@ -361,11 +367,14 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
     </div>
 
     <div style="padding: 0 24px 12px;">
+      ${simple ? simpleLead(PHISHING_LEAD) : ''}
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <img src="assets/characters/scout_0.png" style="width: 40px; height: 40px;">
         <div data-quiz-scout style="flex: 1; font-size: 14px; color: var(--offwhite); line-height: 1.5;">"${curatedDone ? "You cleared the curated set. Quiz mode pulls from a bigger bank — no tells this time. Trust your instincts." : esc(scoutIntro)}"</div>
       </div>
-      ${!curatedDone ? `<div style="margin-bottom: 8px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
+      ${!curatedDone && simple ? `<div data-quiz-progress style="margin-bottom: 4px;">${fillBar({ key: 'quiz:curated', done: progress.answered, total: progress.total, size: 'mid', label: `${progress.answered} of ${progress.total} answered` })}</div>
+      <div style="font-size: 14px; color: var(--offwhite);">${progress.answered} of ${progress.total} answered · ${progress.correct} right</div>` : ''}
+      ${!curatedDone && !simple ? `<div style="margin-bottom: 8px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
         <div style="width: ${Math.round((progress.answered / progress.total) * 100)}%; height: 100%; background: var(--cyan); transition: width 300ms;"></div>
       </div>
       <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35);">${progress.correct}/${progress.answered} correct${progress.answered > 0 ? ` (${Math.round((progress.correct / progress.answered) * 100)}%)` : ''}</div>` : ''}

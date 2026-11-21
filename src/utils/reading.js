@@ -74,6 +74,17 @@ export function simpleTitle(mission) {
   return colon > -1 ? mission.title.slice(colon + 1).trim() : mission.title;
 }
 
+// Simple's plain words for the jargon in a mission's name, wherever a side screen shows it in full
+// (What you can do, the Big Check): 2FA is "Two-step sign-in", a sweep is a check. Advanced keeps
+// the names as they are.
+export function plainWords(text) {
+  return String(text ?? '')
+    .replace(/\b2FA\b/g, 'Two-step sign-in')
+    .replace(/\bSWEEP\b/g, 'CHECK')
+    .replace(/\bSweep\b/g, 'Check')
+    .replace(/\bsweep\b/g, 'check');
+}
+
 // The one plain line under a mission's name in Simple mode (data/mission-simple.js, else
 // data/mission-leads.js); '' for a mission with neither (an account the player added).
 export function simpleLead(mission) {

@@ -2,6 +2,21 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.44.0 (2026-11-21): Simple mode on the side screens, part 2
+
+The rest of Liz's layout review. In Simple, these screens now open with one plain sentence saying what the screen is and why it matters to you. Each has one bright button for the next thing to do, and everything else is behind "See everything". Nothing was removed. Advanced is unchanged.
+
+- **PRISM.** The picture, then one sentence: "The NSA could get emails, chats and photos straight from nine big companies. 3 of your companies were on the slides." Then PRISM BREAK. The slides, the history, Saint Snowden and the sources are under "See everything". The page went from about 4,900px to 1,260.
+- **A badge's own page.** The heading is what the program did, in plain words ("TAPPED GOOGLE & YAHOO"), with the code name small under it ("MUSCULAR · 2013"). Then one sentence about it, then What you can do. Who gets it, the law, your accounts and the sources are under "See everything". On a phone the page now fits on one screen.
+- **Spy code names, in plain words.** In Simple, every badge in the city says what the program did instead of its code name: DISHFIRE is "NSA TAKES TEXTS", WEEPING ANGEL is "TV LISTENS WHEN OFF", STINGRAY is "FAKE CELL TOWERS", and so on: 53 badges in all. Badges that were already plain words, like GM SOLD DRIVING, stay as they are. The PRISM label says "NSA HAS ACCESS · 2009", "NEXT FOR THE NSA" or "NSA CABLE TAP" in place of PRISM · 2009, PRISM · NEXT and UPSTREAM. Each plain name says only what the badge's own sources say. Advanced keeps the code names.
+- **Who gets your data.** One sentence, then What you can do (now above the map), then the map. The key, the scale, the myths and the full list are under "See everything". Agencies have their full names in Simple: the National Counterterrorism Center rather than NCTC, and "part of the Office of the Director of National Intelligence" rather than "part of ODNI". The bright button moved from 1,106px down the page to 431.
+- **The broker sky.** One sentence with no "field" or "stars": "Data brokers sell facts about you. Your opt-outs reach about 3% of their trade." Scout's lines say "dots" and "brokers", the ladder counts brokers, and hubs aren't mentioned. The list, the key, DROP (still explained in one line), what's left and the Big Check link are under "See everything".
+- **The Big Check.** One sentence, then "Start here" with its first opt-out as the one bright button, at the top of the list. The other opt-outs are outlined. The note, the filter and the other groups are under "See everything". Mission names say "Check" instead of "Sweep".
+- **A building.** One sentence: "This building is your Gmail account. Each open door lets a hacker or scammer in, so lock them one by one." Its badges use the plain names, and "a fresh sweep" is now "a fresh check".
+- **The social timeline.** One sentence, the bar, the next platform's SET UP and the "Which of these do you use?" question. The other platforms and the intro are under "See everything".
+- **Scam defense training.** One sentence naming who sends these ("Scammers send fake texts and emails that look real"), a bar that fills as you answer, and "What gave it away?" in place of THE TELL.
+- **Plain words.** In Simple, mission names on these screens say "Two-step sign-in" for 2FA and "Check" for Sweep, and The Whole City's TWO-FACTOR ON is TWO-STEP SIGN-IN ON.
+
 ## 7.43.0 (2026-11-21): Simple mode on the side screens, part 1
 
 The last pick from Liz's layout review. In Simple, each side screen now has one plain sentence that says what it is and why it matters to you, one bright button for the next thing to do, and everything else behind a "See everything" button. Nothing was removed: tap "See everything" and the rest of the screen is right there. Advanced is unchanged.

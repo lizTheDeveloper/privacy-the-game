@@ -79,6 +79,16 @@ export function prismLabel(accountId, accounts = null) {
   return { kind: 'upstream', text: 'UPSTREAM', company: null, since: null };
 }
 
+// Simple mode's words for the same label (components/prism-tag.js): what it means, not the code
+// name. PRISM gave the NSA access to the company's servers from that year; Dropbox was next on the
+// slides; everything else crosses the cables the NSA taps.
+export function simplePrismText(label) {
+  if (!label) return '';
+  if (label.kind === 'named') return `NSA HAS ACCESS · ${label.since}`;
+  if (label.kind === 'next') return 'NEXT FOR THE NSA';
+  return 'NSA CABLE TAP';
+}
+
 export const PRISM_COPY = Object.freeze({
   title: 'PRISM',
   sub: "It's in everything",
@@ -90,5 +100,7 @@ export const PRISM_COPY = Object.freeze({
   defend: "A pipe can only take what it can read. End-to-end encryption, where only you and the person you're writing to hold the keys, leaves nothing readable but who you talked to and when. PRISM Break lists free tools built that way.",
   next: 'The slides named Dropbox as the next company coming on.',
   cables: 'Every other account in the city runs over the same tapped cables. That\'s why each one carries an UPSTREAM label.',
+  // Simple's label for the cables is NSA CABLE TAP (simplePrismText).
+  cablesSimple: 'Every other account in the city runs over the same tapped cables. That\'s why each one carries an NSA CABLE TAP label.',
   snowdenTribute: "We know any of this because Edward Snowden handed the slides to journalists, and paid for it with his home. Light him a candle in the saints' gallery.",
 });

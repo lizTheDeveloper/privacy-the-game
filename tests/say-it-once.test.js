@@ -21,7 +21,8 @@ describe('Social Timeline', () => {
   it('the set-up sentence appears once, above the list', () => {
     const s = createInitialState();
     for (const id of ['instagram', 'facebook', 'twitter', 'tiktok', 'linkedin']) s.accounts[id] = { ...(s.accounts[id] || {}), enabled: true };
-    const html = renderTimeline(s);
+    // Advanced; Simple says it once in its own words (TIMELINE_LEAD), the note behind See everything.
+    const html = renderTimeline({ ...s, reading: { level: 'full' } });
     const line = 'Tell us about your history here to plan your review.';
     expect(count(html, 'data-action="edit-social-profile"')).toBe(5);
     expect(count(html, line)).toBe(1);

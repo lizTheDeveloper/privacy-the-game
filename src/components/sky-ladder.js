@@ -7,8 +7,10 @@ import { MISSIONS } from '../data/missions.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export function rungCount(r) {
+// simple: Simple mode says brokers, not stars.
+export function rungCount(r, simple = false) {
   if (r.kind === 'gpc') return LADDER_COPY.gpc.count;
+  if (simple) return r.count ? LADDER_COPY.brokers(r.count) : LADDER_COPY.zeroSimple;
   return r.count ? LADDER_COPY.stars(r.count) : LADDER_COPY.zero;
 }
 
@@ -19,11 +21,11 @@ const STATUS = {
   todo: () => '',
 };
 
-function rungRow(r, index, isNext) {
+function rungRow(r, index, isNext, simple = false) {
   const status = STATUS[r.status]?.(r) ?? '';
   return `<li><button type="button" class="sky-rung sky-rung--${r.status}${isNext ? ' sky-rung--next' : ''}" data-action="select-rung" data-rung="${index}">`
     + `<span class="sky-rung-name">${isNext ? '<span class="sky-rung-next">NEXT</span> ' : ''}${esc(r.label)}</span>`
-    + `<span class="sky-rung-meta">${esc(rungCount(r))}${status ? ` · <span class="sky-rung-status">${status}</span>` : ''}</span>`
+    + `<span class="sky-rung-meta">${esc(rungCount(r, simple))}${status ? ` · <span class="sky-rung-status">${status}</span>` : ''}</span>`
     + '</button></li>';
 }
 
@@ -31,8 +33,8 @@ function goLink(href, label) {
   return `<p class="star-card-go"><a href="${esc(href)}">${esc(label)}</a></p>`;
 }
 
-export function rungCard(r, { home = null } = {}) {
-  const parts = [`<h2 id="sky-rung-title">${esc(r.label)}</h2>`, `<p class="sky-rung-meta">${esc(rungCount(r))}</p>`];
+export function rungCard(r, { home = null, simple = false } = {}) {
+  const parts = [`<h2 id="sky-rung-title">${esc(r.label)}</h2>`, `<p class="sky-rung-meta">${esc(rungCount(r, simple))}</p>`];
   if (r.status === 'done') parts.push(`<p class="star-card-state">${STATUS.done(r)}</p>`);
   if (r.status === 'amber') parts.push('<p class="star-card-state" style="color: var(--amber);">Re-check due</p>');
   if (r.kind === 'drop') {
@@ -71,8 +73,8 @@ export function ladderPanel(rungs, { selected = null, open = false, home = null,
   const bar = `<button type="button" class="sky-ladder-bar" data-action="ladder-toggle" aria-expanded="${open || sel ? 'true' : 'false'}">`
     + `<span class="sky-ladder-grab" aria-hidden="true"></span><span>${esc(barText)}</span></button>`;
   const body = sel
-    ? `<div class="sky-rung-card" role="region" aria-labelledby="sky-rung-title" tabindex="-1">${rungCard(sel, { home })}</div>`
-    : `${top}<div class="label">BIGGEST FIRST</div><ol class="sky-rungs">${rungs.map((r, i) => rungRow(r, i, i === nextIndex)).join('')}</ol>`;
+    ? `<div class="sky-rung-card" role="region" aria-labelledby="sky-rung-title" tabindex="-1">${rungCard(sel, { home, simple: inline })}</div>`
+    : `${top}<div class="label">BIGGEST FIRST</div><ol class="sky-rungs">${rungs.map((r, i) => rungRow(r, i, i === nextIndex, inline)).join('')}</ol>`;
   return `<section class="sky-ladder${inline ? ' sky-ladder--inline' : ''}${open || sel ? ' is-open' : ''}" aria-label="Opt-outs, biggest first">${bar}<div class="sky-ladder-body">${body}</div></section>`;
 }
 
@@ -90,7 +92,7 @@ export function nextRungCard(rungs, { quiz = '' } = {}) {
     return '<section class="sky-next sky-next--done" data-sky-next><div class="label">THE LADDER</div><p class="sky-next-done">Every opt-out on the ladder is done ✓</p></section>';
   }
   const index = rungs.indexOf(next);
-  const parts = ['<div class="label">NEXT: THE BIGGEST OPT-OUT LEFT</div>', `<h2>${esc(next.label)}</h2>`, `<p class="sky-rung-meta">${esc(rungCount(next))}</p>`];
+  const parts = ['<div class="label">NEXT: THE BIGGEST OPT-OUT LEFT</div>', `<h2>${esc(next.label)}</h2>`, `<p class="sky-rung-meta">${esc(rungCount(next, true))}</p>`];
   if (next.kind === 'gpc') parts.push(`<p>${esc(LADDER_COPY.gpc.body)}</p>`);
   else if (next.text) parts.push(`<p>${esc(next.text)}</p>`);
   const go = (href, label, opens) => `<a class="btn-primary sky-next-go" href="${esc(href)}">${esc(label)} ›</a><p class="sky-next-opens">${esc(opens)}</p>`;
