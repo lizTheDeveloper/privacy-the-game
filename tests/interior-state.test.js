@@ -6,6 +6,7 @@ import { renderBuildingInterior } from '../src/screens/building.js';
 import { renderDistrict } from '../src/screens/district.js';
 import { sealedCount } from '../src/utils/interior.js';
 import { controllableProgress } from '../src/utils/interior-state.js';
+import { setReadLevel } from '../src/utils/reading.js';
 
 const NOW = new Date('2026-10-20T00:00:00Z');
 const render = (s, id = 'gmail') => renderBuildingInterior(s, id, { now: NOW });
@@ -112,7 +113,8 @@ describe('sealing moments', () => {
 
 describe('floors remember open/closed', () => {
   it('first visit: the roof and the doors open, desk and alcove open on desktop only; a closed floor renders closed; reopening restores', () => {
-    const s0 = createInitialState();
+    // Advanced. (Simple folds the roof on a phone too: tests/simple-fold.test.js.)
+    const s0 = setReadLevel(createInitialState(), 'full');
     const first = render(s0);
     expect(first.match(/<details class="floor[^"]*"[^>]* open/g)).toHaveLength(2);
     expect(first).toMatch(/<details class="floor floor--roof" open data-floor="roof">/);
@@ -123,6 +125,10 @@ describe('floors remember open/closed', () => {
     const html = render(s1);
     expect(html).toMatch(/<details class="floor floor--desk" data-floor="desk">/);
     expect(render(setFloorOpen(s1, 'gmail', 'desk', true))).toMatch(/<details class="floor floor--desk" open data-floor="desk">/);
+    // Simple: the roof opens on desktop only, like the desk and the alcove; the doors stay open.
+    const simple = render(setReadLevel(createInitialState(), 'simplest'));
+    expect(simple).toMatch(/<details class="floor floor--roof" data-open-desktop data-floor="roof">/);
+    expect(simple).toMatch(/<details class="floor floor--ground" open data-floor="ground">/);
   });
   it('setFloorOpen is a no-op (same state) when the value is unchanged', () => {
     const s = createInitialState();
