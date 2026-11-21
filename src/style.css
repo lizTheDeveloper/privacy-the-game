@@ -298,6 +298,24 @@ img { image-rendering: pixelated; }
 .building-more[open] > summary { margin-bottom: 10px; }
 .building-more > .interior-note, .building-more > .devices { margin-bottom: 10px; }
 .building-more > .phone-fold { display: block; margin-bottom: 10px; }
+/* Simple on a phone: the first open door's SEAL IT on the first screen (Liz's layout rule, 7.45.1).
+   The name and district share a line, Scout's line is a small bubble, and the roof is one line. */
+.interior-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin-top: 10px; }
+.interior-head .interior-title { margin-top: 0; }
+.interior-head .interior-sub { margin-top: 0; }
+.interior--simple .simple-lead { margin: 6px 0 8px; }
+.interior--simple .leak-chip { margin: 0; }
+.interior--simple .interior-doors { display: flex; align-items: center; gap: 12px; margin: 8px 0 10px; }
+.interior--simple .interior-doors-words { flex: 0 0 auto; }
+.interior--simple .interior-doors .fill-bar--mid { flex: 1 1 auto; min-width: 80px; margin: 0; }
+.interior-scout.interior-scout--simple { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 10px; padding: 8px 10px; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); }
+.interior-scout--simple > img { flex-shrink: 0; width: 32px; height: 32px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3)); }
+.interior-scout--simple > p { flex: 1; min-width: 0; margin: 0; font-family: var(--font-body); font-size: 14px; line-height: 1.45; color: var(--offwhite); }
+.roof-sum { margin-left: auto; font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none; text-align: right; }
+.roof-sum--ok { color: var(--lime); }
+.roof-sum--warn { color: var(--amber); }
+.roof-sum--crit { color: var(--magenta); }
+.roof-sum--not-checked { color: var(--text-quiet); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .leak-chip > summary span { transition: none; } }
 
 .slip { border: 1px dashed rgba(159,182,255,0.4); background: rgba(13,20,32,0.8); padding: 8px 10px; margin-top: 8px; }

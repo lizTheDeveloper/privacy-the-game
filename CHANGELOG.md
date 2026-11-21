@@ -2,6 +2,19 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.45.1 (2026-11-21): The next button on the first screen, in a building and the broker sky
+
+Liz's layout rule: on a phone in Simple mode, the one bright button (the next thing to tap) should be on the first screen. Two screens still put it below.
+
+- **A building.** The first open door's SEAL IT (or START) was about 1,260px down the page on a phone. It's now about 750 to 810px down, so it's on the first screen. The order is the same: Roof, Ground floor, Alcove, Records desk.
+  - **The roof is one line on a phone.** It says "▲ Roof · Health check" and how it's doing: "3 need fixing", "4 not checked" or "All good". Tap it to see every check, each with its Fix it or Check again, as before. On a computer it starts open. When a check's Fix it is the screen's bright button (no door is open yet), the roof starts open, so you can see it.
+  - **Scout's line is a small bubble** with a small Scout beside it. Scout says the same thing.
+  - **The building's name and its district share a line**, and "1 of 4 doors locked" sits beside its bar.
+  - The leaks chip, the devices list, the alcove and the records desk are where they were.
+- **The broker sky, first visit.** The next opt-out's button is about 30px higher. The empty line under the map no longer takes up room, and the dot's name still shows there when you tap one.
+- **Advanced mode is unchanged** on both screens.
+- Nothing new is tracked or sent.
+
 ## 7.45.0 (2026-11-21): One short top bar, and one way forward on the city
 
 Liz's layout review, two picks she approved ("Do it"). The top of every screen was a tall 2×2 block (up to about 193px on a report), with tiny links for Patreon and the studio. And the city had three different "next" pointers fighting over the first screen.

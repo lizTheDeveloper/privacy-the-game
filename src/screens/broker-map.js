@@ -101,6 +101,7 @@ const STYLE = `<style>
 .map-key-more>summary{display:inline-flex;align-items:center;min-height:44px;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--cyan)}
 @media (max-width:899.98px){.broker-map--simple .map-stage{height:220px;min-height:0}}
 .broker-map--simple .constellation-scout{position:static;margin:8px 0 0}
+.broker-map--simple .constellation-pick:empty{min-height:0;margin:0}
 .map-big-check{display:inline-flex;align-items:center;min-height:44px;margin-top:14px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--cyan);text-decoration:none}
 .map-big-check:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 ${TICK_CSS}

@@ -68,15 +68,16 @@ function sourceLinks(sources = []) {
 // Floors remember whether the player folded them (state.interior[id].floors). The desk and
 // alcove, never touched, start folded on a phone and open from 900px (data-open-desktop, set by
 // script); the roof and the ground floor (where the doors are) start open.
+// Simple's roof folds on a phone too (opts.phoneFolded), its head saying how it is ("2 need fixing").
 const PHONE_FOLDED = new Set(['desk', 'alcove']);
-function floor(ctx, kind, title, body) {
-  const unset = PHONE_FOLDED.has(kind) && floorChoice(ctx.state, ctx.accountId, kind) === undefined;
+function floor(ctx, kind, title, body, { phoneFolded = PHONE_FOLDED.has(kind), headNote = '' } = {}) {
+  const unset = phoneFolded && floorChoice(ctx.state, ctx.accountId, kind) === undefined;
   // An entry sealing right now is seen: its floor opens at every width (not saved).
   const sealingHere = kind === 'ground' && ctx.sealing?.size > 0;
   const open = unset && !sealingHere ? ' data-open-desktop' : unset || isFloorOpen(ctx.state, ctx.accountId, kind) ? ' open' : '';
   return `
     <details class="floor floor--${kind}"${open} data-floor="${kind}">
-      <summary class="floor-head"><span>${title}</span><span class="floor-chev" aria-hidden="true">▾</span></summary>
+      <summary class="floor-head"><span>${title}</span>${headNote}<span class="floor-chev" aria-hidden="true">▾</span></summary>
       <div class="floor-body">${body}</div>
     </details>`;
 }
@@ -124,13 +125,13 @@ function meter(state, accountId, rows, now) {
   return `<div class="interior-meter">${count}${age}</div>`;
 }
 
-// Simple mode: the doors as a bar that fills, and the count in words.
+// Simple mode: the count in words, and beside it the doors as a bar that fills.
 function doorBar(state, accountId) {
   const { sealed, controllable } = controllableProgress(state, accountId);
   const words = `${sealed} of ${controllable} ${controllable === 1 ? 'door' : 'doors'} locked`;
   return `<div class="interior-doors">
-      ${fillBar({ key: `building:${accountId}`, done: sealed, total: controllable, size: 'mid', label: words })}
       <div class="interior-doors-words">${esc(words)}</div>
+      ${fillBar({ key: `building:${accountId}`, done: sealed, total: controllable, size: 'mid', label: words })}
     </div>`;
 }
 
@@ -198,14 +199,30 @@ function antennaNote(accountId, simple = false) {
   return `<details class="phone-fold" data-fold="antenna-${esc(accountId)}" data-open-desktop><summary>Why antennas fade</summary><div class="dim interior-note">The antennas fade as your last check gets older. A fresh ${simple ? 'check' : 'sweep'} lights them back up.</div></details>`;
 }
 
+// Simple's roof in one line: the worst news first. Rows at warn or crit each have a Fix it.
+export function roofSummary(rows) {
+  const bad = rows.filter((r) => r.status === 'crit' || r.status === 'warn').length;
+  if (bad) return { text: `${bad} ${bad === 1 ? 'needs' : 'need'} fixing`, tone: rows.some((r) => r.status === 'crit') ? 'crit' : 'warn' };
+  const unchecked = rows.filter((r) => r.status === 'not-checked').length;
+  if (unchecked) return { text: `${unchecked} not checked`, tone: 'not-checked' };
+  return { text: 'All good', tone: 'ok' };
+}
+
 // "Health check", not "Signal check": Signal is also an app in the city.
+// Simple: on a phone the roof is one line ("▲ Roof · Health check   2 need fixing ▾") and its rows
+// are one tap away, so the first open door's SEAL IT sits on the first screen. When a roof row's
+// Fix it is the screen's one bright button, the roof starts open instead.
 function roof(ctx, rows, plan) {
   const { state, accountId, simple } = ctx;
   const body = rows.map((r) => roofRow(state, r, { fix: plan.fixes.get(r.id), lit: plan.litRow === r.id, simple })).join('');
+  const sum = simple ? roofSummary(rows) : null;
   return floor(ctx, 'roof', '▲ Roof · Health check', `
       <div class="ant${simple ? ' ant--simple' : ''}">${body}</div>
       ${simple ? '' : `${deviceList(state, accountId)}
-      ${antennaNote(accountId)}`}`);
+      ${antennaNote(accountId)}`}`, simple ? {
+    phoneFolded: !plan.litRow,
+    headNote: `<span class="roof-sum roof-sum--${sum.tone}" data-roof-sum>${esc(sum.text)}</span>`,
+  } : {});
 }
 
 // The desk table's last column: whether a judge signs off. Each part is a whole
@@ -410,19 +427,21 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
   const floorsBelow = `${saints.map((sa) => alcove(ctx, sa)).join('')}
       ${desk(ctx, interior)}`;
   const kind = interiorLineKind(state, accountId);
-  const scout = kind
-    ? `<div class="interior-scout" data-scout="interior">${renderScout(esc(pick(INTERIOR_LINES[kind]).replace(/\{name\}/g, account.name)))}</div>`
-    : '';
+  const line = kind ? esc(pick(INTERIOR_LINES[kind]).replace(/\{name\}/g, account.name)) : '';
+  // Simple: the same line in a small bubble (a 32px Scout beside it), not the full-width one.
+  const scout = !kind ? ''
+    : simple ? `<div class="interior-scout interior-scout--simple" data-scout="interior" role="note"><img src="assets/characters/scout_0.png" alt="Scout" width="32" height="32"><p>${line}</p></div>`
+    : `<div class="interior-scout" data-scout="interior">${renderScout(line)}</div>`;
   return `
   <div class="scanlines">
     ${renderHud(state)}
-    <div class="interior" data-building="${esc(accountId)}">
+    <div class="interior${simple ? ' interior--simple' : ''}" data-building="${esc(accountId)}">
       <a class="btn-secondary interior-back" href="#/district/${esc(account.district)}">← ${esc((district?.name ?? 'DISTRICT').toUpperCase())}</a>
-      <div class="interior-title">${esc(account.name.toUpperCase())}</div>
-      ${simple ? `<div class="interior-sub">${esc(district?.name ?? '')}</div>
+      ${simple ? `<div class="interior-head"><div class="interior-title">${esc(account.name.toUpperCase())}</div><div class="interior-sub">${esc(district?.name ?? '')}</div></div>
       ${simpleLead(buildingLead(account))}
       ${leakBadges(accountId, account, true)}
-      ${doorBar(state, accountId)}` : `<div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
+      ${doorBar(state, accountId)}` : `<div class="interior-title">${esc(account.name.toUpperCase())}</div>
+      <div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
       ${meter(state, accountId, rows, now)}
       ${leakBadges(accountId, account, false)}`}
       ${scout}
