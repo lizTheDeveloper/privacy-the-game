@@ -16,9 +16,9 @@ const app = readFileSync('src/app.js', 'utf8');
 describe('Simple mode and Advanced mode', () => {
   it('are the names of the two levels ("Full intel" is now Advanced mode)', () => {
     expect(READ_LEVEL_LABELS).toEqual({ simplest: 'Simple mode', full: 'Advanced mode' });
-    const tools = topTools(setReadLevel(createInitialState(), 'full'), 'full', 'x');
-    expect(tools).toContain('<span class="tt-long">Advanced mode</span><span class="tt-short" aria-hidden="true">Advanced</span>');
-    expect(tools).not.toContain('Full intel');
+    const hud = renderHud(setReadLevel(createInitialState(), 'full'));
+    expect(hud).toContain('data-level="full" aria-pressed="true">Advanced mode</button>');
+    expect(hud).not.toContain('Full intel');
   });
 
   it('PLAY asks which mode, and picking one starts the game in it', () => {
@@ -34,21 +34,20 @@ describe('Simple mode and Advanced mode', () => {
 });
 
 describe('the top bar', () => {
-  it('says Support us with a tiny dollar sign', () => {
+  it('says Support us with a tiny dollar sign (in More)', () => {
     const h = renderHud(createInitialState());
-    expect(h).toContain('<span class="hud-dollar" aria-hidden="true">$</span>SUPPORT US</a>');
+    expect(h).toContain('<span class="hud-dollar" aria-hidden="true">$</span>Support us</a>');
   });
 
-  it('offers the other mode next to Support us', () => {
+  it('has both modes in More, the one in use pressed, on every screen (mission screens too)', () => {
     const advanced = renderHud(setReadLevel(createInitialState(), 'full'));
-    expect(advanced).toContain('data-action="read-level" data-level="simplest" aria-label="Switch to Simple mode">Simple mode</button>');
-    expect(advanced.indexOf('hud-mode')).toBeLessThan(advanced.indexOf('hud-support'));
+    expect(advanced).toContain('data-action="read-level" data-level="simplest" aria-pressed="false">Simple mode</button>');
+    expect(advanced.indexOf('data-level="simplest"')).toBeLessThan(advanced.indexOf('hud-support-link'));
     const simple = renderHud(setReadLevel(createInitialState(), 'simplest'));
-    expect(simple).toContain('data-level="full" aria-label="Switch to Advanced mode">Advanced mode</button>');
-  });
-
-  it('leaves the switch to the tools row on mission screens', () => {
-    expect(renderHud(createInitialState(), { tools: '<div>tools</div>' })).not.toContain('hud-mode');
+    expect(simple).toContain('data-level="simplest" aria-pressed="true">Simple mode</button>');
+    expect(simple).toContain('data-level="full" aria-pressed="false">Advanced mode</button>');
+    const mission = renderHud(createInitialState(), { tools: topTools(createInitialState(), 'simplest', 'x') });
+    expect(mission).toContain('data-action="read-level" data-level="full"');
   });
 
   it('the switch uses the same action as the mission screens’ switch', () => {

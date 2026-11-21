@@ -49,7 +49,7 @@ import { SATELLITE_IDS, satelliteBand } from './utils/satellites.js';
 import { isTap, isWidest, keepStarInView, panView, pinchView, wheelView, wheelZooms, TAP_MAX_PX } from './utils/map-gestures.js';
 import { HIT_PX } from './components/constellation.js';
 import { checklistTicksFor } from './components/broker-checklist.js';
-import { STUDIO_URL } from './components/hud.js';
+import { STUDIO_URL, initHudMenu } from './components/hud.js';
 import { mountBugReporter } from './components/bug-reporter.js';
 import { initBrowserWarning, syncBrowserWarning } from './components/browser-warning.js';
 import { checklistFor } from './data/broker-checklists.js';
@@ -2221,6 +2221,8 @@ initBrowserWarning({ onChange: () => renderCurrentRoute() });
 if (started && readLevel(state) === 'simplest' && /^(#?|#\/city|#\/district\/.*)$/.test(location.hash)) history.replaceState(null, '', '#/next');
 initRouter(render);
 mountBugReporter();
+// The top bar's More panel: opens and closes in place (components/hud.js).
+initHudMenu(document, window);
 // Web cabinet: tell campus the game has booted (no-op outside cabinet mode).
 announceReady();
 

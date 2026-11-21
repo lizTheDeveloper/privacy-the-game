@@ -118,8 +118,10 @@ describe('the quiz screen reads plainly', () => {
   it('the quiz\'s run is IN A ROW (the game has its own STREAK), and Scout\'s line is off-white', () => {
     const html = renderPhishingQuiz(createInitialState());
     expect(html).toContain('>IN A ROW<');
-    // STREAK is the top bar's (the game's days in a row); the quiz's own count isn't called that.
-    expect((html.match(/>STREAK</g) || []).length).toBe(1);
+    // STREAK is the top bar's (the game's days in a row, in Advanced mode's score strip); the quiz's own count isn't called that.
+    expect((html.match(/>STREAK</g) || []).length).toBe(0);
+    const advanced = renderPhishingQuiz({ ...createInitialState(), reading: { level: 'full' } });
+    expect((advanced.match(/>STREAK</g) || []).length).toBe(1);
     expect(html).toMatch(/data-quiz-scout style="[^"]*color: var\(--offwhite\)/);
     expect(html).not.toMatch(/data-quiz-scout style="[^"]*font-style: italic/);
   });

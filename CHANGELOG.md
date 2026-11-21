@@ -2,6 +2,20 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.45.0 (2026-11-21): One short top bar, and one way forward on the city
+
+Liz's layout review, two picks she approved ("Do it"). The top of every screen was a tall 2×2 block (up to about 193px on a report), with tiny links for Patreon and the studio. And the city had three different "next" pointers fighting over the first screen.
+
+- **One short top bar, the same on every screen.** One row, 56px on a phone: the name on one line, the way on, and a **More** button. The way on is **What's next** in Simple mode, and in Advanced mode a small chip showing how much of the city you've taken back. On the mission screens, Read it to me stays right in the bar, so it's always one tap away.
+- **More holds everything else, nothing removed.** Simple mode / Advanced mode, Focus music (now on every screen), Report a bug, Support us, Patreon, and the link to Multiverse Games. Every item is at least 44px tall. More opens a panel; tap outside it or press Escape to close it.
+- **Scores only in Advanced.** Simple mode no longer shows INTEGRITY, EXPOSURE and STREAK in the bar (they're still on Your City). Advanced shows them on one thin line under the bar that scrolls away with the page. The LIBERATED screen leaves them out, so a win doesn't read like a 6% score.
+- **Support us, quietly, when something goes right.** The LIBERATED screen and a filed report say "Like what you're doing here?" with two plain links. Never a second bright button.
+- **The city: one way forward.** On a phone, it now goes: Scout's line, then one bright button that names the mission (like "START: GMAIL"), then the district cards, then the map, then **More places** (Quick Quest, Stats, Look up, PRISM, Who gets it, Whole city), each a full 44px tall. The button opens the same mission What's next would. On a computer, the map-led layout stays, and its one button says "NEXT MISSION: GMAIL".
+- **Scout's first line is one sentence.** The rest is behind "Tell me more".
+- **Simple mode's district cards show bars, not numbers.** No more "0/28 MISSIONS + 22 BONUS" on a brand-new game, and no D-01 codes. Advanced keeps the numbers. Its readout now counts the 8 districts on the map, plus how many more are off the map.
+- **Kept:** the "won't save here" warning bar, the press flash, the arrival pulse and the focus rings.
+- Nothing new is tracked or sent.
+
 ## 7.44.0 (2026-11-21): Simple mode on the side screens, part 2
 
 The rest of Liz's layout review. In Simple, these screens now open with one plain sentence saying what the screen is and why it matters to you. Each has one bright button for the next thing to do, and everything else is behind "See everything". Nothing was removed. Advanced is unchanged.

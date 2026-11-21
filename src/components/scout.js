@@ -77,6 +77,12 @@ export function scoutSprite(feeling, { size = 64, style = '', attrs = '' } = {})
   return `<span class="scout-sprite" role="img" aria-label="Scout" data-feeling="${list.join(' ')}"${attrs ? ` ${attrs}` : ''} style="width: ${size}px; height: ${size}px;${style ? ` ${style}` : ''}"><span class="scout-sprite__stage" style="transform: scale(${scale});">${sheets}</span></span>`;
 }
 
+// options.more: the rest of what Scout has to say, behind the bubble's ▾ (one sentence up front,
+// the rest one tap away). A fold app.js keeps open across a re-draw.
+function moreFold(more) {
+  return `<details class="scout-more" data-fold="scout-more"><summary class="scout-more-toggle">Tell me more <span class="scout-more-caret" aria-hidden="true">&#9662;</span></summary><div class="scout-more-text">${more}</div></details>`;
+}
+
 export function renderScout(message, options = {}) {
   const action = options.actionText && options.actionHref
     ? `<a class="${options.actionClass || 'btn-primary'} scout-action" href="${options.actionHref}">${options.actionText}</a>`
@@ -93,7 +99,7 @@ export function renderScout(message, options = {}) {
       </div>
       <div style="flex: 1; background: rgba(26,31,43,0.9); border: 1px solid rgba(0,229,255,0.25); padding: 12px 16px; position: relative; box-shadow: 0 0 15px rgba(0,229,255,0.05), inset 0 0 30px rgba(0,229,255,0.02);">
         <div style="font-size: 14px; color: var(--offwhite); line-height: 1.6;">${message}</div>
-        <div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(237,239,243,0.35);"></div>
+        ${options.more ? moreFold(options.more) : '<div style="position: absolute; bottom: 8px; right: 12px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(237,239,243,0.35);"></div>'}
       </div>
       ${action}
     </div>

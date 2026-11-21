@@ -3,7 +3,11 @@
 // all read the streak as it stands today, from lastDate.
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { createInitialState, displayStreak } from '../src/state.js';
-import { renderHud } from '../src/components/hud.js';
+import { renderHud as hudOf } from '../src/components/hud.js';
+import { setReadLevel } from '../src/utils/reading.js';
+
+// The scores are in the top bar in Advanced mode only (Simple mode hides them, 7.35.0).
+const renderHud = (s) => hudOf(setReadLevel(s, 'full'));
 import { renderStats } from '../src/screens/stats.js';
 import { welcomeBackNote } from '../src/utils/notifications.js';
 import { textOf } from './helpers/on-page.mjs';

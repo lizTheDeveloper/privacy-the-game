@@ -61,7 +61,7 @@ describe('real-money asks', () => {
   it('HUD shows SUPPORT US and Patreon outside cabinet mode', () => {
     vi.stubGlobal('window', fakeWindow({ framed: false }));
     const html = renderHud(hudState);
-    expect(html).toContain('>$</span>SUPPORT US<');
+    expect(html).toContain('>$</span>Support us<');
     expect(html).toContain('buy.stripe.com');
     expect(html).toContain('patreon.com');
   });
@@ -71,7 +71,9 @@ describe('real-money asks', () => {
     const html = renderHud(hudState);
     expect(html).not.toMatch(/stripe|patreon|SUPPORT/i);
     expect(html).toContain('RECLAIM CITY');
-    expect(html).toContain('INTEGRITY');
+    expect(html).toContain('data-hud-more');
+    expect(html).toContain('data-bug-report');
+    expect(renderHud({ ...hudState, reading: { level: 'full' } })).toContain('INTEGRITY');
   });
 });
 
