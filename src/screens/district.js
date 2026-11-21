@@ -26,18 +26,27 @@ import { CURATED_MESSAGES } from '../data/phishing.js';
 import { timelineNote, timelineRank, timelineLine } from '../utils/social-timeline.js';
 import { TIMELINE_DOES } from './timeline.js';
 import { isDistrictOn } from '../utils/opt-in.js';
-import { nextAvailableMission } from './city-map.js';
+import { nextAvailableMission, nextDistrictId } from './city-map.js';
 
-function renderDistrictIntro(state, districtId) {
+// Has the player been to this district before this visit? A district they have filed or started a
+// mission in counts, so a save from before visits were remembered isn't treated as new.
+export function districtVisited(state, districtId) {
+  if (state.districtVisits?.[districtId]) return true;
+  return getMissionsForDistrict(districtId).some((m) => state.missions?.[m.id]?.status);
+}
+
+// Scout's welcome: open on the first visit to a district; after that it starts folded into one line
+// (Liz's layout audit, 2026-11-20: three Scouts above the tabs pushed the next mission off the first
+// screen). DISMISS still hides it for good.
+function renderDistrictIntro(state, districtId, { open = true } = {}) {
   const dialogue = DISTRICT_DIALOGUE[districtId];
   if (!dialogue?.intro) return '';
   const seen = state.seenIntros?.[districtId];
   if (seen) return '';
-  return `
-  <div style="padding: 12px 24px 4px;">
+  const block = `
     <div style="display: flex; gap: 14px; align-items: flex-start;">
       <div style="flex-shrink: 0; text-align: center;">
-        <img src="assets/characters/scout_0.png" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
+        <img src="assets/characters/scout_0.png" alt="" style="width: 52px; height: 52px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));">
         <div class="scout-name">SCOUT</div>
       </div>
       <div style="flex: 1; background: rgba(26,31,43,0.8); border: 1px solid rgba(0,229,255,0.2); padding: 14px 16px;">
@@ -45,8 +54,18 @@ function renderDistrictIntro(state, districtId) {
       </div>
     </div>
     <div style="text-align: right; margin-top: 8px;">
-      <span data-action="dismiss-intro" data-district="${districtId}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px;">DISMISS</span>
-    </div>
+      <span data-action="dismiss-intro" data-district="${districtId}" role="button" tabindex="0" class="intro-dismiss">DISMISS</span>
+    </div>`;
+  if (open) return `
+  <div data-district-intro style="padding: 12px 24px 4px;">${block}
+  </div>`;
+  return `
+  <div data-district-intro style="padding: 12px 24px 4px;">
+    <details class="intro-fold" data-intro-fold>
+      <summary class="intro-fold-summary"><img src="assets/characters/scout_0.png" alt="" style="width: 24px; height: 24px;"> Scout’s welcome</summary>
+      <div style="margin-top: 10px;">${block}
+      </div>
+    </details>
   </div>`;
 }
 
@@ -207,7 +226,7 @@ function renderTabs(districtId, activeTab) {
   const tabs = PHASES.map((phase) => {
     const active = phase.id === activeTab;
     return `
-    <a href="#/district/${districtId}?tab=${phase.id}" class="panel${active ? ' panel--active' : ''}" style="flex: 1 1 0; min-width: 0; text-align: center; padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'var(--text-dim)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
+    <a href="#/district/${districtId}?tab=${phase.id}" class="panel district-tab${active ? ' panel--active' : ''}" style="flex: 1 1 0; min-width: 0; text-align: center; padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'var(--text-dim)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
   });
   return `
   <div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 24px 0;">
@@ -232,14 +251,15 @@ function renderDisabledPanel(districtId) {
 // mission's name; the row in the list keeps its lit edge and an outlined START. A bright button
 // that does something in place (TURN ON THE FIELD, a switch, a chip) stays where it is.
 // Simple reads "Next: <mission>"; Advanced keeps the NEXT UP label.
-export function renderNextUp(state, { name, label, href }) {
+export function renderNextUp(state, { name, label, href, where = '', kind = 'mission' }) {
   const simple = readLevel(state) === 'simplest';
   const plain = label.charAt(0) + label.slice(1).toLowerCase();
+  const whereNote = where ? `<span class="next-up-where">${esc(where)}</span>` : '';
   return `
-  <div class="next-up${simple ? ' next-up--simple' : ''}" data-next-up>
+  <div class="next-up${simple ? ' next-up--simple' : ''}" data-next-up="${kind}">
     <div class="next-up-text">${simple
-      ? `<span class="next-up-label">Next:</span> <span class="next-up-name">${esc(name)}</span>`
-      : `<span class="next-up-label">NEXT UP</span><span class="next-up-name">${esc(name)}</span>`}</div>
+      ? `<span class="next-up-label">Next:</span> <span class="next-up-name">${esc(name)}</span>${whereNote}`
+      : `<span class="next-up-label">NEXT UP${where ? ` · ${esc(where.toUpperCase())}` : ''}</span><span class="next-up-name">${esc(name)}</span>`}</div>
     <a class="btn-primary btn-sm next-up-go" href="${href}" aria-label="${esc(`${plain} ${name}`)}">${esc(label)}</a>
   </div>`;
 }
@@ -494,13 +514,19 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
       <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
     </div>
-    <div class="pin-bottom survey-done" style="margin-top: 20px; text-align: right;">
+    <div class="${pinSurveyDone(state, district) ? 'pin-bottom ' : ''}survey-done" style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none; display: inline-block; max-width: 100%;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
     </div>
   </div>`;
 }
 
-// The per-category password-manager ask, at the top of every district.
+// DONE WITH SURVEY sticks to the bottom of a phone, except over the passwords question while it is
+// unanswered: pinned, it covered the chips (Liz's layout audit, 2026-11-20). Until then it sits after it.
+export function pinSurveyDone(state, district) {
+  return !district?.askPasswordManager || passwordPlaces(state).length > 0;
+}
+
+// The per-category password-manager ask, under a district's mission list.
 function categoryAskBlock(state, districtId) {
   const html = renderCategoryAsk(state, districtId);
   return html ? `<div style="padding: 0 24px;">${html}</div>` : '';
@@ -518,12 +544,12 @@ function renderPasswordManagerQuestion(state) {
   const places = passwordPlaces(state);
   const chips = PASSWORD_MANAGERS.map((pm) => {
     const on = places.includes(pm.value);
-    return `<span data-action="set-password-manager" data-pm="${pm.value}" role="button" tabindex="0" aria-pressed="${on}" style="cursor: pointer; font-size: 12px; padding: 7px 12px; border: 1px solid ${on ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${on ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${on ? 'var(--lime)' : 'rgba(237,239,243,0.7)'};">${esc(pm.text)}</span>`;
+    return `<span class="pm-chip" data-action="set-password-manager" data-pm="${pm.value}" role="button" tabindex="0" aria-pressed="${on}" style="cursor: pointer; font-size: 14px; padding: 7px 12px; border: 1px solid ${on ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${on ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${on ? 'var(--lime)' : 'rgba(237,239,243,0.7)'};">${esc(pm.text)}</span>`;
   }).join('');
   const line = chosen === 'none' ? PASSWORD_DIALOGUE.noManager : chosen ? PASSWORD_DIALOGUE.hasManager : '';
   return `
-    <div class="panel" style="padding: 14px; margin: 16px 0 8px;">
-      <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 12px;">WHERE ARE YOUR PASSWORDS SAVED?</div>
+    <div class="panel" data-pm-ask style="padding: 14px; margin: 16px 0 8px;">
+      <div class="district-q" data-pm-question>Where are your passwords saved?</div>
       <div style="display: flex; flex-wrap: wrap; gap: 6px;">${chips}</div>
       ${line ? `<div style="display: flex; gap: 10px; align-items: flex-start; margin-top: 14px;">
         <img src="assets/characters/scout_0.png" alt="" style="width: 32px; height: 32px; flex-shrink: 0;">
@@ -736,7 +762,7 @@ function facilityNextUp(state, district, facilityOrder, leadId) {
   return '';
 }
 
-function renderFacilityDistrict(state, district, reaction, notMine) {
+function renderFacilityDistrict(state, district, reaction, notMine, firstVisit) {
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === district.id);
   const progress = calcDistrictProgress(state, district.id);
 
@@ -759,7 +785,7 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
     ${reactionBlock(reaction)}
     ${notMineBlock(state, notMine)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
-      <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
+      <a class="btn-secondary district-back" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
           <div class="district-name">${esc(district.name)}</div>
@@ -784,7 +810,7 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
       </div>
     </div>
     ${district.id === 'reclamation' ? MAP_WAY_IN : ''}
-    ${renderDistrictIntro(state, district.id)}
+    ${renderDistrictIntro(state, district.id, { open: firstVisit })}
     ${district.facilityIntro && (state.seenIntros?.[district.id]) ? `
     <div style="padding: 16px 24px 8px;">
       <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; max-width: 640px;">${esc(district.facilityIntro)}</div>
@@ -798,12 +824,61 @@ function renderFacilityDistrict(state, district, reaction, notMine) {
   </div>`;
 }
 
-export function renderDistrict(state, districtId, activeTab, { reaction = null, notMine = null } = {}) {
+// What a district says around its missions (the password-manager ask, the password resets, Scout's
+// welcome, the bank notes): after the tabs and the list, so the next mission comes first (Liz's layout
+// audit, 2026-11-20). None of it gates a mission: a mission that needs to know where the passwords
+// are asks for itself ("Before you start", 7.30.0).
+function districtNotes(state, districtId, first) {
+  const notes = [
+    categoryAskBlock(state, districtId),
+    showsPasswordProgress(state, districtId) ? `<div style="padding: 12px 24px 0;">${renderPasswordProgress(state, { withBurst: true })}</div>` : '',
+    renderDistrictIntro(state, districtId, { open: first }),
+    districtId === 'vault' ? renderBankNotesCard(state) : '',
+  ].filter((html) => html.trim());
+  return notes.length ? `<div class="district-notes" data-district-notes>${notes.join('')}</div>` : '';
+}
+
+const TAB_ORDER = PHASES.map((p) => p.id).filter((id) => id !== 'survey');
+
+// The milestone screen for a district: shown once on taking it back (afterMissionRecorded, which
+// also marks 100% seen), and remembered since this release when it is drawn.
+export function milestoneSeen(state, districtId) {
+  return Boolean(state.seenMilestones?.[districtId] || state.seenProgress?.[districtId]?.includes(100));
+}
+
+// A tab with nothing left to do still says what's next (Liz's layout audit, 2026-11-20: "a finished
+// tab is a dead end"): the lead of the next tab that has one (then an earlier one), else the
+// milestone if it hasn't been seen, else What's next (Simple) or the district the next mission is in.
+// A district already taken back doesn't send the player to a bonus mission first.
+export function afterTab(state, district, activeTab, progress = calcDistrictProgress(state, district.id)) {
+  const at = TAB_ORDER.indexOf(activeTab);
+  const order = [...TAB_ORDER.slice(at + 1), ...TAB_ORDER.slice(0, Math.max(at, 0))];
+  const secured = progress.total > 0 && progress.percent >= 100;
+  for (const tab of order) {
+    const m = tabLeadMission(state, district.id, tab);
+    if (!m || (secured && m.optional)) continue;
+    const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
+    const label = PHASES.find((p) => p.id === tab).label;
+    return { name: m.title, label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing`, where: `${label.charAt(0)}${label.slice(1).toLowerCase()} tab`, kind: 'tab' };
+  }
+  if (secured && !milestoneSeen(state, district.id)) {
+    return { name: `You took back ${district.name}`, label: 'SEE IT', href: `#/milestone/${district.id}`, kind: 'milestone' };
+  }
+  if (readLevel(state) === 'simplest') return { name: 'What’s next', label: 'GO', href: '#/next', kind: 'next' };
+  const nextId = nextDistrictId(state);
+  const next = nextId && nextId !== district.id ? DISTRICTS.find((d) => d.id === nextId) : null;
+  if (next) return { name: next.name, label: 'GO', href: `#/district/${next.id}`, kind: 'district' };
+  return { name: 'Your city', label: 'SEE IT', href: '#/stats', kind: 'stats' };
+}
+
+// firstVisit: this is the player's first visit to the district (app.js knows; else the save says).
+export function renderDistrict(state, districtId, activeTab, { reaction = null, notMine = null, firstVisit } = {}) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
+  const first = firstVisit ?? !districtVisited(state, districtId);
 
   if (district.type === 'facility') {
-    return renderFacilityDistrict(state, district, reaction, notMine);
+    return renderFacilityDistrict(state, district, reaction, notMine, first);
   }
 
   const districtAccounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === districtId);
@@ -827,8 +902,10 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const listTab = activeTab !== 'survey' && !(allDisabled && !(districtId === 'square' && activeTab === 'reclaim'));
   const lead = listTab ? tabLeadMission(state, districtId, activeTab) : null;
   const leadBegun = lead && progressFor(state, lead.id, visibleSteps(lead, state)).handled > 0;
-  const nextUp = lead ? renderNextUp(state, { name: lead.title, label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` }) : '';
-  const hoisted = Boolean(nextUp);
+  const nextUp = lead
+    ? renderNextUp(state, { name: lead.title, label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` })
+    : listTab ? renderNextUp(state, afterTab(state, district, activeTab, progress)) : '';
+  const hoisted = Boolean(lead);
 
   let content;
   if (district.hasGarage && activeTab === 'survey') {
@@ -871,7 +948,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     ${reactionBlock(reaction)}
     ${notMineBlock(state, notMine)}
     <div style="display: flex; align-items: center; gap: 16px; padding: 16px 24px;">
-      <a class="btn-secondary" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
+      <a class="btn-secondary district-back" style="flex-shrink: 0; padding: 8px 14px; text-decoration: none;" href="#/city">← CITY</a>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
           <div class="district-name">${esc(district.name)}</div>
@@ -886,7 +963,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
         <span class="stat-label">SECURED</span>
       </div>
     </div>
-    ${categoryAskBlock(state, district.id)}
+    ${nextUp}
     <div class="district-buildings" style="padding: 20px 24px 16px; border-bottom: 1px solid rgba(0,229,255,0.08); background: rgba(26,31,43,0.3);">
       <div class="section-label" style="color: rgba(0,229,255,0.4); margin-bottom: 14px;">DISTRICT BUILDINGS</div>
       ${skylineHint(state, district.id, districtAccounts.map(([id]) => id))}
@@ -894,12 +971,9 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
         ${buildings}
       </div>
     </div>
-    ${showsPasswordProgress(state, districtId) ? `<div style="padding: 12px 24px 0;">${renderPasswordProgress(state, { withBurst: true })}</div>` : ''}
-    ${renderDistrictIntro(state, districtId)}
-    ${districtId === 'vault' ? renderBankNotesCard(state) : ''}
     ${renderTabs(districtId, activeTab)}
-    ${nextUp}
     ${content}
+    ${districtNotes(state, districtId, first)}
     ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}
   </div>`;
 }

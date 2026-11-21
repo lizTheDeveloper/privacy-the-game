@@ -182,10 +182,11 @@ describe('briefing: no reset needed', () => {
 describe('district screens', () => {
   it('the Master Keys survey asks about a password manager', () => {
     const html = renderDistrict(s0, 'master-keys', 'survey');
-    expect(html).toContain('WHERE ARE YOUR PASSWORDS SAVED?');
+    // A question in the step cards' style since the layout audit (2026-11-20), not a grey label.
+    expect(html).toContain('Where are your passwords saved?');
     expect(html.match(/data-action="set-password-manager"/g)).toHaveLength(11);
     expect(html).not.toContain(PASSWORD_DIALOGUE.noManager);
-    expect(renderDistrict(s0, 'vault', 'survey')).not.toContain('PASSWORDS SAVED?');
+    expect(renderDistrict(s0, 'vault', 'survey')).not.toContain('passwords saved?');
   });
 
   it('marks the chosen manager; no manager gets Scout’s one-line nudge', () => {
