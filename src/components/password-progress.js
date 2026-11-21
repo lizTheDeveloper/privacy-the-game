@@ -2,6 +2,10 @@
 // the Master Keys header, the password-manager report and "Change the next 3".
 import { passwordProgressLines, burstScout } from '../utils/bursts.js';
 import { categoryAsk } from '../utils/pm-categories.js';
+import { calcDistrictProgress } from '../utils/calc.js';
+import { getMissionsForDistrict } from '../data/missions.js';
+import { DISTRICTS } from '../data/districts.js';
+import { isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 
 export function renderPasswordProgress(state, { withBurst = false } = {}) {
   const lines = passwordProgressLines(state);
@@ -29,18 +33,31 @@ const scoutLine = (text) => `
     </div>`;
 
 // A number box and the button that files it, plus the button that closes the ask.
-function askControls(districtId, { label, numAction, numButton, clearButton, clearAction = 'pm-cat-clear' }) {
+// bright: the district's missions are all done and these passwords are what's left (they keep it
+// under 100%), so SAVE is the screen's one bright button.
+function askControls(districtId, { label, numAction, numButton, clearButton, clearAction = 'pm-cat-clear', bright = false }) {
   const id = `pm-cat-num-${districtId}`;
   return `
     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px;">
       <label for="${id}" style="font-size: 13px; color: rgba(237,239,243,0.7);">${label}</label>
       <input id="${id}" type="number" min="1" max="9999" step="1" inputmode="numeric" style="width: 84px; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 16px; padding: 8px 10px; font-family: var(--font-mono);">
-      <button class="btn-secondary" style="padding: 8px 14px;" data-action="${numAction}" data-district="${districtId}">${numButton}</button>
+      <button class="${bright ? 'btn-primary' : 'btn-secondary'}" style="padding: ${bright ? '12px 22px' : '8px 14px'};" data-action="${numAction}" data-district="${districtId}">${numButton}</button>
     </div>
     <div data-pm-cat-msg="${districtId}" role="status" hidden style="margin-top: 6px; font-size: 12px; color: var(--amber);">Type a number from 1 up first.</div>
     <div style="margin-top: 10px;">
       <button class="btn-secondary" style="padding: 8px 14px;" data-action="${clearAction}" data-district="${districtId}">${clearButton}</button>
     </div>`;
+}
+
+// Every mission here is done, bonus ones too (so no Next up is lit), and flagged passwords are
+// what keep the district under 100%.
+// A district whose screen always has a next thing of its own (Scam Defense's phishing training)
+// keeps that one lit.
+function onlyResetsLeft(state, districtId) {
+  if (DISTRICTS.find((d) => d.id === districtId)?.facilityOrder?.includes('scam_defense')) return false;
+  const p = calcDistrictProgress(state, districtId);
+  if (!(p.resets.left > 0 && p.completed === p.total - 1)) return false;
+  return getMissionsForDistrict(districtId).every((m) => m.phase === 'survey' || !isMissionInPlay(state, m) || isMissionDoneIn(state, m));
 }
 
 export function renderCategoryAsk(state, districtId) {
@@ -52,7 +69,7 @@ export function renderCategoryAsk(state, districtId) {
   } else if (ask.mode === 'working') {
     body = `${ask.lines.map((l, i) => `<div style="font-size: ${i === 0 ? 14 : 13}px; color: ${i === 0 ? 'var(--offwhite)' : 'var(--lime)'}; line-height: 1.5;">${l}</div>`).join('')}
     <div style="margin-top: 10px;">${scoutLine(ask.scout)}</div>
-    ${askControls(districtId, { label: 'I changed', numAction: 'pm-cat-changed', numButton: 'SAVE', clearButton: 'THAT’S ALL FROM HERE' })}`;
+    ${askControls(districtId, { label: 'I changed', numAction: 'pm-cat-changed', numButton: 'SAVE', clearButton: 'THAT’S ALL FROM HERE', bright: onlyResetsLeft(state, districtId) })}`;
   } else {
     body = scoutLine(ask.scout) + askControls(districtId, { label: 'How many?', numAction: 'pm-cat-flag', numButton: 'ADD', clearButton: 'NO MORE' });
   }

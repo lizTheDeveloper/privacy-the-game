@@ -6,6 +6,7 @@ import { renderBuilding } from '../src/components/building.js';
 import { renderHud } from '../src/components/hud.js';
 import { parseRoute } from '../src/router.js';
 import { getInterior } from '../src/data/interiors/index.js';
+import { setReadLevel } from '../src/utils/reading.js';
 
 const NOW = new Date('2026-10-20T00:00:00Z');
 const daysAgo = (n) => new Date(NOW.getTime() - n * 864e5).toISOString();
@@ -36,7 +37,9 @@ describe('building screen', () => {
     expect(html.match(/<details class="floor/g)).toHaveLength(4);
     // The roof open; the floors below open from 900px by script (folded on a phone until chosen).
     expect(html.match(/<details class="floor[^"]*" (open|data-open-desktop) /g)).toHaveLength(4);
-    expect(html).toContain('Roof · Signal check');
+    // "Health check": Signal is also an app in the city.
+    expect(html).toContain('Roof · Health check');
+    expect(html).not.toContain('Signal check');
     expect(html).toContain('Records desk · Google’s');
     expect(html).toContain('Ground floor · Entries');
     expect(html).toContain('Alcove · Saint Edward Snowden');
@@ -48,8 +51,9 @@ describe('building screen', () => {
   });
 
   it('meter reads NO ENTRIES CHECKED YET on a fresh save and ENTRIES SEALED 1/3 after sms 2FA + unique password (front door sealed; phone line, mail slot open; back room not-checked)', () => {
-    expect(render(createInitialState())).toContain('NO ENTRIES CHECKED YET');
-    let s = file(createInitialState(), 'gmail-fortify-2fa', { method: 'sms' }, daysAgo(23));
+    // Advanced mode's count (Simple's is a bar: tests/building-open-door.test.js).
+    expect(render(setReadLevel(createInitialState(), 'full'))).toContain('NO ENTRIES CHECKED YET');
+    let s = file(setReadLevel(createInitialState(), 'full'), 'gmail-fortify-2fa', { method: 'sms' }, daysAgo(23));
     s = file(s, 'gmail-fortify-password', { action: 'reset-password' }, daysAgo(30));
     const html = render(s);
     expect(html).toContain('ENTRIES SEALED <b>1/3</b>');
@@ -142,12 +146,14 @@ describe('building screen', () => {
     expect(vents).not.toMatch(/nowrap/);
   });
 
-  it('roof rows: SWEEP re-checks a filed mission, START briefs an unfiled one; bars by status', () => {
+  it('roof rows: a weak row gets Fix it (to the door it closes), an unfiled one START; bars by status', () => {
     const s = file(createInitialState(), 'gmail-fortify-2fa', { method: 'sms' });
     const html = render(s);
     const tf = rowHtml(html, 'two-factor');
-    expect(tf).toContain('SWEEP');
-    expect(tf).toContain('href="#/mission/gmail-fortify-2fa/recheck"');
+    expect(tf).toContain('Fix it');
+    expect(tf).not.toContain('SWEEP');
+    // Codes by text: the phone line's fix, the upgrade.
+    expect(tf).toContain('href="#/mission/gmail-fortify-2fa-upgrade/briefing"');
     expect(tf.match(/class="bar on"/g)).toHaveLength(2);
     const dev = rowHtml(html, 'devices');
     expect(dev).toContain('START');
@@ -348,22 +354,22 @@ describe('signal roof (fix round 1)', () => {
 });
 
 describe('final fixes: pw-clean row on a recon mission', () => {
-  it('facebook pw-clean from facebook-recon-password: dated row with SWEEP on that mission', () => {
+  it('facebook pw-clean from facebook-recon-password: dated row with a quiet Check again on that mission', () => {
     let s = toggleAccount(createInitialState(), 'facebook', true);
     s = file(s, 'facebook-recon-password', { pw_status: 'pw-clean', service_breach: 'not-in-service-breach' }, daysAgo(4));
     const row = rowHtml(renderBuildingInterior(s, 'facebook', { now: NOW }), 'password');
     expect(row).toContain('data-status="ok"');
     expect(row).toContain('data-fresh="fresh"');
     expect(row).not.toContain('date unknown');
-    expect(row).toContain('SWEEP');
-    expect(row).toContain('href="#/mission/facebook-recon-password/recheck"');
+    expect(row).toContain('<a class="ant-again" href="#/mission/facebook-recon-password/recheck">Check again</a>');
+    expect(row).not.toContain('SWEEP');
   });
-  it('a skipped 2FA "later" row is crit and STARTs the briefing (no re-check of a skip)', () => {
+  it('a skipped 2FA "later" row is crit and its Fix it opens the briefing (no re-check of a skip)', () => {
     const s = updateMission(createInitialState(), 'gmail-fortify-2fa', { status: 'skipped', method: 'none', method_setup: 'later', action: 'later' });
     const html = render(s);
     const row = rowHtml(html, 'two-factor');
     expect(row).toContain('data-status="crit"');
-    expect(row).toContain('START');
+    expect(row).toContain('Fix it');
     expect(row).toContain('href="#/mission/gmail-fortify-2fa/briefing"');
     expect(entryHtml(html, 'phishing')).toContain('href="#/mission/gmail-fortify-2fa/briefing"');
   });

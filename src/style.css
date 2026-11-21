@@ -261,6 +261,44 @@ img { image-rendering: pixelated; }
 
 .interior-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; margin-top: 6px; padding: 6px 12px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; background: var(--cyan); color: var(--midnight); text-decoration: none; }
 .interior-btn--quiet { margin-top: 0; background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+/* The open door first and lit (Liz 2026-11-20). One bright button on the screen: the first open
+   door's SEAL IT (or the worst roof row's Fix it); every other one outlined. */
+.interior-btn.btn-primary { margin-top: 8px; padding: 10px 18px; font-size: 11px; }
+.ant-row .interior-btn { margin-top: 0; }
+.interior-btn.ant-fix { font-family: var(--font-body); font-size: 15px; letter-spacing: 0; padding: 6px 16px; white-space: nowrap; }
+.ant-again { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-size: 13px; color: var(--cyan); text-decoration: underline; text-decoration-color: rgba(0,229,255,0.4); text-underline-offset: 3px; white-space: normal; }
+.ant-status { display: inline-flex; align-items: center; gap: 8px; }
+/* Simple: the row's name on its own line; under it the status in words, the bars, and the action. */
+.ant--simple { gap: 10px; }
+.ant--simple .ant-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label label" "status action"; row-gap: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--line-quiet); }
+.ant--simple .ant-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.ant--simple .ant-label { grid-area: label; font-size: 15px; }
+.ant--simple .ant-status { grid-area: status; }
+.ant--simple .ant-row > a { grid-area: action; justify-self: end; }
+.ant-word { font-size: 14px; font-weight: 700; }
+.ant-word--ok { color: var(--lime); }
+.ant-word--warn { color: var(--amber); }
+.ant-word--crit { color: var(--magenta); }
+.ant-word--not-checked { color: var(--text-quiet); font-weight: 400; }
+.interior-doors { margin: 12px 0 14px; }
+.interior-doors .fill-bar--mid { margin: 0 0 6px; }
+.interior-doors-words { font-family: var(--font-body); font-size: 16px; font-weight: 700; color: var(--offwhite); }
+.interior-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.leak-chip { margin: 8px 0 4px; }
+.leak-chip > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; cursor: pointer; list-style: none; font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text-strong); border: 1px solid rgba(255,45,155,0.55); background: rgba(255,45,155,0.08); }
+.leak-chip > summary::-webkit-details-marker { display: none; }
+.leak-chip > summary span { color: var(--magenta); transition: transform 150ms ease; }
+.leak-chip[open] > summary span { transform: rotate(90deg); }
+.leak-chip[open] .interior-tags { margin-top: 10px; }
+.building-more { margin-top: 4px; }
+.building-more > summary { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 14px; cursor: pointer; list-style: none; font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text-strong); border: 1px solid rgba(0,229,255,0.4); }
+.building-more > summary::-webkit-details-marker { display: none; }
+.building-more > summary::after { content: '▾'; color: var(--cyan); }
+.building-more[open] > summary::after { content: '▴'; }
+.building-more[open] > summary { margin-bottom: 10px; }
+.building-more > .interior-note, .building-more > .devices { margin-bottom: 10px; }
+.building-more > .phone-fold { display: block; margin-bottom: 10px; }
+@media (prefers-reduced-motion: reduce) { .leak-chip > summary span { transition: none; } }
 
 .slip { border: 1px dashed rgba(159,182,255,0.4); background: rgba(13,20,32,0.8); padding: 8px 10px; margin-top: 8px; }
 .slip-stamp { display: inline-block; max-width: 100%; margin: 0 0 6px; padding: 1px 5px; border: 1px solid #9FB6FF; color: #9FB6FF; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; transform: rotate(-3deg); overflow-wrap: anywhere; }
@@ -642,18 +680,23 @@ img { image-rendering: pixelated; }
   .more-fold:not([open]) + .more-fold-text, .more-fold[open] + .more-fold-text { display: inline; margin-top: 0; }
   .deck.deck--flow, .deck--flow > .slide { display: inline; }
 }
-/* Quick Quest on a phone: four tiles a slide, two columns. */
-.qq-grid { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; }
-.qq-tile { position: relative; display: flex; flex-direction: column; min-width: 0; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); }
-.qq-go { display: block; min-height: 44px; padding: 12px 44px 12px 12px; font-family: var(--font-display); font-size: 12px; font-weight: 700; line-height: 1.35; letter-spacing: 0.5px; color: var(--offwhite); text-decoration: none; overflow-wrap: anywhere; }
+/* Quick Quest on a phone: one list that scrolls, a row per problem (Liz 2026-11-20). The row is the
+   link: the problem, then where it takes you. The ? beside it opens what it looks like. */
+.qq-rows { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; }
+.qq-row { position: relative; min-width: 0; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.3); }
+.qq-go { display: flex; flex-direction: column; gap: 4px; min-height: 56px; padding: 12px 52px 12px 14px; color: var(--offwhite); text-decoration: none; overflow-wrap: anywhere; }
 .qq-go:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
-.qq-signs { padding: 0 12px; }
-.qq-signs > summary { position: absolute; top: 0; right: 0; display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; cursor: pointer; list-style: none; font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--cyan); }
+.qq-name { font-family: var(--font-body); font-size: 17px; font-weight: 700; line-height: 1.35; }
+.qq-to { font-size: 14px; line-height: 1.4; color: var(--text-quiet); }
+.qq-to-name { color: var(--cyan); font-weight: 600; }
+.qq-list .qq-to { margin-top: 8px; font-size: 13px; }
+.qq-signs { padding: 0 14px; }
+.qq-signs > summary { position: absolute; top: 6px; right: 4px; display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; cursor: pointer; list-style: none; font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--cyan); }
 .qq-signs > summary::-webkit-details-marker { display: none; }
 .qq-signs > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
 .qq-signs[open] { padding-bottom: 12px; }
-.qq-badge { display: inline-block; font-size: 8px; letter-spacing: 1px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15); }
-.qq-desc { margin-top: 6px; font-size: 12px; line-height: 1.5; color: rgba(237,239,243,0.6); }
+.qq-badge { display: inline-block; font-size: 8px; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255,255,255,0.03); border-color: var(--line-quiet); }
+.qq-desc { margin-top: 6px; font-size: 14px; line-height: 1.5; color: rgba(237,239,243,0.85); }
 /* Surveys on a phone: one question, a chip per account (district.js). */
 .survey-ask { font-size: 14px; line-height: 1.5; color: var(--offwhite); margin-bottom: 10px; }
 .survey-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }

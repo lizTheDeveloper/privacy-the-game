@@ -128,26 +128,23 @@ describe('the trim CSS', () => {
   });
 });
 
-describe('Quick Quest: two slides of four tiles on a phone', () => {
+describe('Quick Quest: one list on a phone, a row per problem', () => {
   const html = renderQuickQuest(createInitialState());
-  const d = deckOf(html, 'Quick Quest');
-  const slides = slidesOf(d);
+  const rows = [...html.matchAll(/<li class="qq-row" data-quest="[^"]+">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
 
-  it('the desktop list is as it was, marked desktop-only; the deck is phone-only', () => {
+  it('the desktop list is marked desktop-only; the rows are phone-only; no slides', () => {
     expect(html).toMatch(/<div class="desktop-only qq-list"/);
-    expect(html).toMatch(/<div class="phone-only qq-deck">/);
-    for (const q of QUICK_QUESTS) expect(html.split(`href="#/district/${q.targetDistrict}"`).length - 1).toBeGreaterThanOrEqual(2);
+    expect(html).toMatch(/<div class="phone-only"><ul class="qq-rows">/);
+    expect(html).not.toContain('data-deck');
   });
 
-  it('every problem is a tile, in order, four to a slide; each tile is a link to its district', () => {
-    expect(slides).toHaveLength(Math.ceil(QUICK_QUESTS.length / 4));
-    const tiles = slides.flatMap((s) => [...s.matchAll(/<li class="qq-tile">([\s\S]*?)<\/li>/g)].map((m) => m[1]));
-    expect(tiles).toHaveLength(QUICK_QUESTS.length);
+  it('every problem is a row, in order: its name and where it takes you are the link; what it looks like behind the ?', () => {
+    expect(rows).toHaveLength(QUICK_QUESTS.length);
     QUICK_QUESTS.forEach((q, i) => {
-      const t = tiles[i];
-      expect(t).toMatch(new RegExp(`<a class="qq-go" href="#/district/${q.targetDistrict}">`));
-      expect(decode(norm(t.match(/<a class="qq-go"[^>]*>([\s\S]*?)<\/a>/)[1]))).toBe(q.title);
-      // What it looks like, and where it goes, behind a tap.
+      const t = rows[i];
+      const link = t.match(/<a class="qq-go" href="([^"]+)">([\s\S]*?)<\/a>/);
+      expect(link).toBeTruthy();
+      expect(decode(norm(link[2]))).toMatch(new RegExp(`^${q.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} Takes you to: `));
       const fold = t.match(/<details class="qq-signs" data-fold="qq-[a-z0-9-]+"><summary aria-label="What it looks like: [^"]+">\?<\/summary>([\s\S]*)<\/details>/)?.[1] ?? '';
       expect(decode(norm(fold))).toContain(q.description);
       const district = DISTRICTS.find((x) => x.id === q.targetDistrict);
@@ -155,14 +152,14 @@ describe('Quick Quest: two slides of four tiles on a phone', () => {
     });
   });
 
-  it('a slide shows only the titles: at most 35 words with the folds closed', () => {
-    for (const s of slides) expect(countWords(closedDetails(s))).toBeLessThanOrEqual(35);
+  it('a row shows only the problem and where it goes: at most 20 words with the fold closed', () => {
+    for (const r of rows) expect(countWords(closedDetails(r))).toBeLessThanOrEqual(20);
   });
 
-  it('the tile grid is two columns and fits a 320px phone', () => {
-    expect(TRIM_CSS).toMatch(/\.qq-grid \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  it('rows are tall enough to tap, and the ? is too', () => {
+    expect(TRIM_CSS).toMatch(/\.qq-rows \{[^}]*flex-direction: column/);
     expect(TRIM_CSS).toMatch(/\.qq-signs > summary \{[^}]*min-height: 44px/);
-    expect(TRIM_CSS).toMatch(/\.qq-go \{[^}]*min-height: 44px/);
+    expect(TRIM_CSS).toMatch(/\.qq-go \{[^}]*min-height: 56px/);
   });
 });
 
@@ -268,8 +265,9 @@ describe('a building on a phone: the floors below the roof start folded until th
   const s = toggleAccount(createInitialState(), 'gmail', true);
   const r = (st) => renderBuildingInterior(st, 'gmail', { now: new Date('2026-10-20T00:00:00Z') });
 
-  it('untouched: desk, ground and alcove are data-open-desktop (open from 900px by script); a choice wins', () => {
-    for (const k of ['desk', 'ground', 'alcove']) expect(r(s)).toContain(`<details class="floor floor--${k}" data-open-desktop data-floor="${k}">`);
+  it('untouched: desk and alcove are data-open-desktop (open from 900px by script), the doors open; a choice wins', () => {
+    for (const k of ['desk', 'alcove']) expect(r(s)).toContain(`<details class="floor floor--${k}" data-open-desktop data-floor="${k}">`);
+    expect(r(s)).toContain('<details class="floor floor--ground" open data-floor="ground">');
     expect(r(setFloorOpen(s, 'gmail', 'desk', false))).toContain('<details class="floor floor--desk" data-floor="desk">');
   });
 
@@ -348,27 +346,26 @@ describe('building floors: a fold keyed by its floor, not its place in the page 
   it("a floor's key is its floor id, the same before and after another floor is saved", () => {
     const before = foldsOf(r(s0));
     const after = foldsOf(r(setFloorOpen(s0, 'gmail', 'desk', false)));
-    expect(keyOf(before, 'ground')).toBe('floor-ground');
-    expect(keyOf(after, 'ground')).toBe('floor-ground');
+    expect(keyOf(before, 'alcove')).toBe('floor-alcove');
     expect(keyOf(before, 'desk')).toBe('floor-desk');
     expect(keyOf(after, 'desk')).toBeNull(); // saved: no longer the script's to open
     expect(keyOf(after, 'alcove')).toBe('floor-alcove');
   });
 
   for (const [width, wide] of [['desktop', true], ['phone', false]]) {
-    it(`${width}: folding the desk and redrawing leaves ground and alcove as they were`, () => {
+    it(`${width}: folding the desk and redrawing leaves the alcove as it was`, () => {
       const hand = new Map();
       const first = foldsOf(r(s0));
       applyOpenDesktop(rootOf(first), wide, hand);
-      // On a phone the player had opened ground by hand; on desktop it is open by script.
-      if (!wide) hand.set(keyOf(first, 'ground'), true);
+      // On a phone the player had opened the alcove by hand; on desktop it is open by script.
+      if (!wide) hand.set(keyOf(first, 'alcove'), true);
       // The player folds the desk (a hand toggle), and it is saved.
       hand.set(keyOf(first, 'desk'), false);
       const redraw = foldsOf(r(setFloorOpen(s0, 'gmail', 'desk', false)));
       applyOpenDesktop(rootOf(redraw), wide, hand);
       const open = (id) => redraw.find((d) => d.getAttribute('data-floor') === id).open;
-      expect(open('ground')).toBe(true);
-      expect(open('alcove')).toBe(wide);
+      expect(open('alcove')).toBe(true);
+      expect(redraw.find((d) => d.getAttribute('data-floor') === 'desk')).toBeUndefined();
     });
   }
 });

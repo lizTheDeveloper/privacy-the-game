@@ -1,6 +1,8 @@
 import { MISSIONS, getMissionsForAccount, getMissionsForDistrict } from '../data/missions.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from './mission-status.js';
 import { DISTRICTS } from '../data/districts.js';
+import { hasManager, pmNumbers } from './pm-numbers.js';
+import { categoryEntry } from './pm-categories.js';
 
 export { isMissionDone };
 
@@ -60,6 +62,36 @@ function countedMissions(state, inDistrict) {
   return inDistrict.filter((m) => isCoreMission(m) || (m.countsWhenDone && isMissionDoneIn(state, m)));
 }
 
+// Passwords the player's password manager flagged in this district that aren't changed yet (Liz
+// 2026-11-20: "100% should mean nothing left to do"). Two kinds are not mission rows:
+//  - the per-category ask on each district ("Did your password manager flag any passwords from
+//    here?", state.pmByDistrict): flagged and changed are the player's own numbers;
+//  - the manager report's count (state.pmFlaggedCount) on The Master Keys, where its panel and
+//    "Change the next 3" live, less the part already counted elsewhere: what the category asks
+//    hold, and each flagged account the city has (its own Password Reset / Secure Login row
+//    already counts in its district, so it isn't counted twice).
+// A flagged account's reset ("Flagged by your password manager" on a mission row) is a core
+// mission and already counts. Without a manager nothing here counts. Local only: none of these
+// numbers is ever tracked or sent with an error.
+export function flaggedResets(state, districtId) {
+  if (!hasManager(state)) return { flagged: 0, changed: 0, left: 0 };
+  const own = categoryEntry(state, districtId);
+  const flagged = own.flagged + (districtId === 'master-keys' ? unplacedReportResets(state) : 0);
+  return { flagged, changed: own.changed, left: flagged - own.changed };
+}
+
+function unplacedReportResets(state) {
+  const n = pmNumbers(state);
+  if (!n || n.left <= 0) return 0;
+  let inCategories = 0;
+  for (const id of Object.keys(state.pmByDistrict || {})) {
+    const e = categoryEntry(state, id);
+    inCategories += e.flagged - e.changed;
+  }
+  const rows = new Set((state.pmFlagged || []).filter((a) => state.accounts?.[a]?.enabled)).size;
+  return Math.max(0, n.left - inCategories - rows);
+}
+
 export function calcDistrictProgress(state, districtId) {
   const inDistrict = getMissionsForDistrict(districtId).filter((m) => isMissionInPlay(state, m));
   const isDone = (m) => isMissionDoneIn(state, m);
@@ -68,12 +100,21 @@ export function calcDistrictProgress(state, districtId) {
   const bonus = inDistrict.filter((m) => m.phase !== 'survey' && m.optional && !countsAsCore(m));
   const completed = relevant.filter(isDone).length;
   const bonusCompleted = bonus.filter(isDone).length;
+  // Flagged passwords weigh one mission ("change them"), filling as each is changed; the
+  // district can't read 100% until the last one is changed.
+  const resets = relevant.length ? flaggedResets(state, districtId) : { flagged: 0, changed: 0, left: 0 };
+  const extra = resets.flagged > 0 ? 1 : 0;
+  const total = relevant.length + extra;
+  const filled = completed + (extra ? resets.changed / resets.flagged : 0);
+  let percent = total ? Math.round((filled / total) * 100) : 0;
+  if (resets.left > 0) percent = Math.min(percent, 99);
   return {
-    total: relevant.length,
-    completed,
-    percent: relevant.length ? Math.round((completed / relevant.length) * 100) : 0,
+    total,
+    completed: completed + (extra && resets.left === 0 ? 1 : 0),
+    percent,
     bonusTotal: bonus.length,
     bonusCompleted,
+    resets,
   };
 }
 

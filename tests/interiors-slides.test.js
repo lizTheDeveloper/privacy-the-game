@@ -142,7 +142,7 @@ describe('the ground floor: one line per entry, opening on tap', () => {
       const html = building(i.accountId);
       for (const e of i.entries) {
         const block = html.match(new RegExp(`<div class="entry[^"]*" data-entry="${e.id}"[\\s\\S]*?<!-- /entry -->`))?.[0] ?? '';
-        const m = block.match(/<details class="entry-fold" data-fold="entry-[a-z_]+-[a-z-]+" data-open-desktop><summary class="entry-line">([\s\S]*?)<\/summary>([\s\S]*)<\/details>/);
+        const m = block.match(/<details class="entry-fold" data-fold="entry-[a-z_]+-[a-z-]+"(?: open| data-open-desktop)><summary class="entry-line">([\s\S]*?)<\/summary>([\s\S]*)<\/details>/);
         expect(m, `${i.accountId}/${e.id}`).toBeTruthy();
         const [, line, inside] = m;
         expect(countWords(line), `${i.accountId}/${e.id}: ${norm(line)}`).toBeLessThanOrEqual(8);
@@ -151,6 +151,8 @@ describe('the ground floor: one line per entry, opening on tap', () => {
         for (const s of e.sources) expect(inside).toContain(s.url.replace(/&/g, '&amp;'));
         for (const a of e.actor.split(' · ')) expect(norm(inside)).toContain(norm(a));
       }
+      // One door starts unfolded at every width: the first still to close.
+      expect(html.match(/<details class="entry-fold" [^>]* open>/g) ?? [], i.accountId).toHaveLength(1);
     }
   });
 

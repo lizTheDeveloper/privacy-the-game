@@ -147,6 +147,12 @@ export async function bootApp({ state, hash = '#/city', storage = {} } = {}) {
     })),
     // Any other event on #app (submit, change, input) with a target the test builds.
     fire: (type, target) => fire(type, target),
+    // The browser's hashchange after navigate() set location.hash (the fake location fires none).
+    arrive: async () => {
+      for (const fn of winListeners.hashchange || []) await fn({ type: 'hashchange' });
+      await new Promise((r) => setTimeout(r, 0));
+    },
+    location,
     // Every timer the handlers set (Scout's cheer before a navigation) has run.
     settle: (ms = 2000) => new Promise((r) => setTimeout(r, ms)),
     // Everything that could have left the device, as [channel, ...args] rows.

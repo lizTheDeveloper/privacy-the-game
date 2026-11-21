@@ -1,7 +1,12 @@
 // A building's interior: a cutaway of its floors, top to bottom. Roof (the
-// player's own checkup), the company's records desk, the ground-floor entries,
-// and a saint's alcove. Spec: docs/superpowers/specs/2026-10-20-building-interiors-design.md
-import { prismTag } from '../components/prism-tag.js';
+// player's own health check), the ground-floor entries, a saint's alcove, and
+// the company's records desk. Spec: docs/superpowers/specs/2026-10-20-building-interiors-design.md
+// Liz 2026-11-20 ("the open door first and lit"): the first door still open starts unfolded and
+// its SEAL IT is the screen's one bright button; the desk moved to the bottom. In Simple mode the
+// count is a filling bar, and the desk, the alcove and the notes wait under "More about this building".
+import { prismTag, prismTagCount } from '../components/prism-tag.js';
+import { fillBar } from '../components/fill-bar.js';
+import { readLevel } from '../utils/reading.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS } from '../data/missions.js';
@@ -14,12 +19,22 @@ import { canRecheck } from '../utils/debrief.js';
 import { renderScout } from '../components/scout.js';
 import { INTERIOR_LINES, pick } from '../data/dialogue.js';
 import { renderCandle } from './saints.js';
-import { devicesOf, isFloorOpen, floorChoice, newlySealed, interiorLineKind } from '../utils/interior-state.js';
+import { devicesOf, isFloorOpen, floorChoice, newlySealed, interiorLineKind, controllableProgress, firstUnsealedEntry } from '../utils/interior-state.js';
 
 const DAY = 864e5;
 const LIT = { ok: 4, warn: 2, crit: 1, 'not-checked': 0 };
 const DIM = { fresh: 1, aging: 0.6, stale: 0.35, unknown: 0.35 };
 const ICON = { sealed: '🔒', open: '◇', beyond: '◌', 'not-checked': '?' };
+// Simple mode says each roof row's status in words, before the antenna bars.
+const STATUS_WORD = { ok: 'Good', warn: 'Could be better', crit: 'Needs fixing', 'not-checked': 'Not checked' };
+// The door a roof row's fix closes, by the entries' rules (in order of preference).
+const ROW_RULES = {
+  password: ['password-unique'],
+  leak: ['password-unique'],
+  'two-factor': ['sim-swap', 'phishing'],
+  reglock: ['reglock'],
+  devices: ['devices'],
+};
 const STATE_LABEL = { sealed: 'Sealed', open: 'Open', beyond: 'Beyond your control', 'not-checked': 'Not checked yet' };
 const METAPHOR = {
   'front-door': 'Front door',
@@ -49,10 +64,10 @@ function sourceLinks(sources = []) {
     .join('')}</details>`;
 }
 
-// Floors remember whether the player folded them (state.interior[id].floors). One the
-// player never touched, below the roof, starts folded on a phone and open from 900px
-// (data-open-desktop, set by script); the roof always starts open.
-const PHONE_FOLDED = new Set(['desk', 'ground', 'alcove']);
+// Floors remember whether the player folded them (state.interior[id].floors). The desk and
+// alcove, never touched, start folded on a phone and open from 900px (data-open-desktop, set by
+// script); the roof and the ground floor (where the doors are) start open.
+const PHONE_FOLDED = new Set(['desk', 'alcove']);
 function floor(ctx, kind, title, body) {
   const unset = PHONE_FOLDED.has(kind) && floorChoice(ctx.state, ctx.accountId, kind) === undefined;
   // An entry sealing right now is seen: its floor opens at every width (not saved).
@@ -108,21 +123,49 @@ function meter(state, accountId, rows, now) {
   return `<div class="interior-meter">${count}${age}</div>`;
 }
 
-function roofRow(state, row) {
-  const lit = LIT[row.status] ?? 0;
+// Simple mode: the doors as a bar that fills, and the count in words.
+function doorBar(state, accountId) {
+  const { sealed, controllable } = controllableProgress(state, accountId);
+  const words = `${sealed} of ${controllable} ${controllable === 1 ? 'door' : 'doors'} locked`;
+  return `<div class="interior-doors">
+      ${fillBar({ key: `building:${accountId}`, done: sealed, total: controllable, size: 'mid', label: words })}
+      <div class="interior-doors-words">${esc(words)}</div>
+    </div>`;
+}
+
+// The badges for every leak that names this building. Advanced: under the count, each 44px tall.
+// Simple: one chip that opens to them ("9 leaks name Facebook ›").
+function leakBadges(accountId, account, simple) {
+  const n = prismTagCount(accountId);
+  if (!n) return '';
+  const badges = `<div class="interior-tags">${prismTag(accountId, { tall: true })}</div>`;
+  if (!simple) return badges;
+  const name = account.name.replace(/\s+(Login|Account)$/i, '');
+  return `<details class="leak-chip" data-fold="leaks-${esc(accountId)}"><summary>${n} ${n === 1 ? 'leak names' : 'leaks name'} ${esc(name)} <span aria-hidden="true">›</span></summary>${badges}</details>`;
+}
+
+// A roof row's action: a row at warn or crit gets "Fix it" (to the door it closes; only the worst
+// one lit, and only when no SEAL IT is); a healthy row a quiet "Check again"; an unchecked one START.
+function roofRow(state, row, { fix = null, lit = false, simple = false } = {}) {
+  const lit4 = LIT[row.status] ?? 0;
   const checked = row.status !== 'not-checked';
-  const bars = [0, 1, 2, 3].map((i) => `<span class="bar${i < lit ? ' on' : ''}"></span>`).join('');
+  const bars = [0, 1, 2, 3].map((i) => `<span class="bar${i < lit4 ? ' on' : ''}"></span>`).join('');
   const mission = row.missionId ? missionById(row.missionId) : null;
   const sweepId = checked ? recheckableId(state, mission) : null;
+  const bad = row.status === 'warn' || row.status === 'crit';
   let action = '';
-  if (sweepId) action = `<a class="interior-btn interior-btn--quiet" href="${recheckHref(sweepId)}">SWEEP</a>`;
+  if (bad) {
+    const href = fix?.href ?? (sweepId ? recheckHref(sweepId) : mission ? briefingHref(mission.id) : null);
+    if (href) action = `<a class="interior-btn ${lit ? 'btn-primary' : 'interior-btn--quiet btn-secondary'} ant-fix" href="${href}">Fix it</a>`;
+  } else if (sweepId) action = `<a class="ant-again" href="${recheckHref(sweepId)}">Check again</a>`;
   else if (mission) action = `<a class="interior-btn interior-btn--quiet" href="${briefingHref(mission.id)}">START</a>`;
   // A skipped filing ("I'll come back") never had a date to lose.
   const when = checked && row.freshness === 'unknown' && row.missionId && filedRecord(state, row.missionId) ? '<span class="dim"> · date unknown</span>' : '';
+  const word = simple ? `<span class="ant-word ant-word--${esc(row.status)}">${STATUS_WORD[row.status] ?? 'Not checked'}</span>` : '';
   return `
         <div class="ant-row" data-row="${esc(row.id)}" data-status="${esc(row.status)}" data-fresh="${esc(row.freshness)}">
           <span class="ant-label">${esc(row.label)}${when}</span>
-          <span class="ant-bars ant-bars--${esc(row.status)}" style="opacity: ${DIM[row.freshness] ?? 0.35};" aria-label="${lit} of 4 bars">${bars}</span>
+          <span class="ant-status">${word}<span class="ant-bars ant-bars--${esc(row.status)}" style="opacity: ${DIM[row.freshness] ?? 0.35};" aria-label="${lit4} of 4 bars">${bars}</span></span>
           ${action}
         </div><!-- /row -->`;
 }
@@ -149,12 +192,18 @@ function deviceList(state, accountId) {
       </div>`;
 }
 
-function roof(ctx, rows) {
-  const { state, accountId } = ctx;
-  return floor(ctx, 'roof', '▲ Roof · Signal check', `
-      <div class="ant">${rows.map((r) => roofRow(state, r)).join('')}</div>
-      ${deviceList(state, accountId)}
-      <details class="phone-fold" data-fold="antenna-${esc(accountId)}" data-open-desktop><summary>Why antennas fade</summary><div class="dim interior-note">The antennas fade as your last check gets older. A fresh sweep lights them back up.</div></details>`);
+function antennaNote(accountId) {
+  return `<details class="phone-fold" data-fold="antenna-${esc(accountId)}" data-open-desktop><summary>Why antennas fade</summary><div class="dim interior-note">The antennas fade as your last check gets older. A fresh sweep lights them back up.</div></details>`;
+}
+
+// "Health check", not "Signal check": Signal is also an app in the city.
+function roof(ctx, rows, plan) {
+  const { state, accountId, simple } = ctx;
+  const body = rows.map((r) => roofRow(state, r, { fix: plan.fixes.get(r.id), lit: plan.litRow === r.id, simple })).join('');
+  return floor(ctx, 'roof', '▲ Roof · Health check', `
+      <div class="ant${simple ? ' ant--simple' : ''}">${body}</div>
+      ${simple ? '' : `${deviceList(state, accountId)}
+      ${antennaNote(accountId)}`}`);
 }
 
 // The desk table's last column: whether a judge signs off. Each part is a whole
@@ -241,18 +290,21 @@ function actorLines(actor) {
   return String(actor).split(' · ').map((a) => `<span class="entry-actor">${esc(a)}</span>`).join('');
 }
 
-function entry(state, accountId, e, sealing) {
+// first: the first door still to close, unfolded at every width; lit: its button is the screen's
+// one bright button. Every other SEAL IT is outlined.
+function entry(state, accountId, e, sealing, { first: isFirst = false, lit = false } = {}) {
   const s = entryState(state, accountId, e);
   const target = entryTarget(state, accountId, e);
+  const filled = lit ? 'interior-btn btn-primary' : 'interior-btn interior-btn--quiet btn-secondary';
   let status = '';
   if (s.state === 'sealed') {
     status = `<div class="ok">Sealed.</div>${s.note ? `<div class="dim">${esc(s.note)}</div>` : ''}`;
   } else if (s.state === 'open') {
-    status = `${e.fix ? `<div class="entry-fix">${esc(e.fix)}</div>` : ''}${target ? `<a class="interior-btn" href="${target.href}">${target.recheck ? 'SEAL IT ▸ RE-CHECK' : 'SEAL IT ▸'}</a>` : ''}`;
+    status = `${e.fix ? `<div class="entry-fix">${esc(e.fix)}</div>` : ''}${target ? `<a class="${filled}" href="${target.href}">${target.recheck ? 'SEAL IT ▸ RE-CHECK' : 'SEAL IT ▸'}</a>` : ''}`;
   } else if (s.state === 'beyond') {
     status = `<div class="dim">Beyond your control.${e.narrows ? ` ${esc(e.narrows)}` : ''}</div>`;
   } else {
-    status = `<div class="dim">Not checked yet.</div>${e.fix ? `<div class="entry-fix">${esc(e.fix)}</div>` : ''}${target ? `<a class="interior-btn interior-btn--quiet" href="${target.href}">${target.recheck ? 'RE-CHECK' : 'START'}</a>` : ''}`;
+    status = `<div class="dim">Not checked yet.</div>${e.fix ? `<div class="entry-fix">${esc(e.fix)}</div>` : ''}${target ? `<a class="${lit ? 'interior-btn btn-primary' : 'interior-btn interior-btn--quiet'}" href="${target.href}">${target.recheck ? 'RE-CHECK' : 'START'}</a>` : ''}`;
   }
   // On a phone, one line (lock, where, who) that opens to the rest; at 900px and
   // up the line hides and the entry shows in full, as before (style.css).
@@ -262,8 +314,8 @@ function entry(state, accountId, e, sealing) {
   const label = STATE_LABEL[s.state] ?? 'Not checked yet';
   const icon = ICON[s.state] ?? '?';
   return `
-      <div class="entry entry--${s.state}${sealing.has(e.id) ? ' entry--sealing' : ''}" data-entry="${esc(e.id)}" data-state="${s.state}">
-        <details class="entry-fold" data-fold="entry-${esc(accountId)}-${esc(e.id)}" data-open-desktop><summary class="entry-line"><span class="entry-lock entry-lock--line" role="img" aria-label="${label}">${icon}</span><span class="entry-line-where">${esc(METAPHOR[e.metaphor] ?? e.metaphor)}</span><span class="entry-line-who">${esc(who)}</span></summary>
+      <div class="entry entry--${s.state}${sealing.has(e.id) ? ' entry--sealing' : ''}${isFirst ? ' entry--first' : ''}" data-entry="${esc(e.id)}" data-state="${s.state}">
+        <details class="entry-fold" data-fold="entry-${esc(accountId)}-${esc(e.id)}"${isFirst ? ' open' : ' data-open-desktop'}><summary class="entry-line"><span class="entry-lock entry-lock--line" role="img" aria-label="${label}">${icon}</span><span class="entry-line-where">${esc(METAPHOR[e.metaphor] ?? e.metaphor)}</span><span class="entry-line-who">${esc(who)}</span></summary>
         <div class="entry-card">
         <div class="entry-lock" role="img" aria-label="${label}">${icon}</div>
         <div class="entry-text">
@@ -278,9 +330,11 @@ function entry(state, accountId, e, sealing) {
       </div><!-- /entry -->`;
 }
 
-function ground(ctx, interior, sealing) {
+function ground(ctx, interior, sealing, plan) {
   const { state, accountId } = ctx;
-  return floor(ctx, 'ground', '▼ Ground floor · Entries', interior.entries.map((e) => entry(state, accountId, e, sealing)).join(''));
+  return floor(ctx, 'ground', '▼ Ground floor · Entries', interior.entries
+    .map((e) => entry(state, accountId, e, sealing, { first: e.id === plan.firstDoor?.id, lit: plan.doorLit && e.id === plan.firstDoor?.id }))
+    .join(''));
 }
 
 function alcove(ctx, saint) {
@@ -312,6 +366,28 @@ function renderNoPlan(state, accountId) {
   </div>`;
 }
 
+// The screen's one bright button. The first door still open gets it (its SEAL IT); with no
+// open door, the worst roof row's Fix it; with neither, the first unchecked door's START.
+// fixes: roof row id -> { href } for each row at warn or crit whose door has somewhere to go.
+function brightPlan(state, accountId, interior, rows) {
+  const targetOf = (e) => Boolean(entryTarget(state, accountId, e));
+  const firstDoor = firstUnsealedEntry(state, accountId, targetOf);
+  const firstState = firstDoor ? entryState(state, accountId, firstDoor).state : null;
+  const doorTarget = firstDoor ? entryTarget(state, accountId, firstDoor) : null;
+  const fixes = new Map();
+  for (const r of rows) {
+    if (r.status !== 'warn' && r.status !== 'crit') continue;
+    const doors = (ROW_RULES[r.id] ?? []).flatMap((rule) => interior.entries.filter((e) => e.rule === rule));
+    const door = doors.find((e) => entryState(state, accountId, e).state !== 'sealed' && targetOf(e)) ?? doors.find(targetOf);
+    if (door) fixes.set(r.id, entryTarget(state, accountId, door));
+  }
+  const sealLit = firstState === 'open' && Boolean(doorTarget);
+  const worst = rows.find((r) => r.status === 'crit' && fixes.has(r.id)) ?? rows.find((r) => r.status === 'warn' && fixes.has(r.id));
+  const litRow = !sealLit && worst ? worst.id : null;
+  const doorLit = sealLit || (!litRow && Boolean(doorTarget));
+  return { firstDoor, doorLit, litRow, fixes };
+}
+
 export function renderBuildingInterior(state, accountId, { now = new Date() } = {}) {
   const interior = getInterior(accountId);
   const account = ACCOUNTS[accountId];
@@ -320,7 +396,11 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
   const rows = checkupRows(state, accountId, now);
   const saints = (interior.saints ?? []).map((id) => SAINTS[id]).filter(Boolean);
   const sealing = new Set(newlySealed(state, accountId));
-  const ctx = { state, accountId, sealing };
+  const simple = readLevel(state) === 'simplest';
+  const ctx = { state, accountId, sealing, simple };
+  const plan = brightPlan(state, accountId, interior, rows);
+  const floorsBelow = `${saints.map((sa) => alcove(ctx, sa)).join('')}
+      ${desk(ctx, interior)}`;
   const kind = interiorLineKind(state, accountId);
   const scout = kind
     ? `<div class="interior-scout" data-scout="interior">${renderScout(esc(pick(INTERIOR_LINES[kind]).replace(/\{name\}/g, account.name)))}</div>`
@@ -330,14 +410,21 @@ export function renderBuildingInterior(state, accountId, { now = new Date() } = 
     ${renderHud(state)}
     <div class="interior" data-building="${esc(accountId)}">
       <a class="btn-secondary interior-back" href="#/district/${esc(account.district)}">← ${esc((district?.name ?? 'DISTRICT').toUpperCase())}</a>
-      <div class="interior-title">${esc(account.name.toUpperCase())}${prismTag(accountId)}</div>
-      <div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
+      <div class="interior-title">${esc(account.name.toUpperCase())}</div>
+      ${simple ? `<div class="interior-sub">${esc(district?.name ?? '')}</div>
+      ${leakBadges(accountId, account, true)}
+      ${doorBar(state, accountId)}` : `<div class="interior-sub">${esc(district?.name ?? '')} · tap a floor to fold it</div>
       ${meter(state, accountId, rows, now)}
+      ${leakBadges(accountId, account, false)}`}
       ${scout}
-      ${roof(ctx, rows)}
-      ${desk(ctx, interior)}
-      ${ground(ctx, interior, sealing)}
-      ${saints.map((sa) => alcove(ctx, sa)).join('')}
+      ${roof(ctx, rows, plan)}
+      ${ground(ctx, interior, sealing, plan)}
+      ${simple ? `<details class="building-more" data-fold="more-${esc(accountId)}"><summary>More about this building</summary>
+      <div class="dim interior-note">Tap a floor to fold it.</div>
+      ${deviceList(state, accountId)}
+      ${antennaNote(accountId)}
+      ${floorsBelow}
+      </details>` : floorsBelow}
     </div>
   </div>`;
 }

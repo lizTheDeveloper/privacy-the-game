@@ -264,6 +264,8 @@ export function renderNextUp(state, { name, label, href, where = '', kind = 'mis
   </div>`;
 }
 
+const nextUpAfterTab = (state, after) => (after ? renderNextUp(state, after) : '');
+
 // Next up is for a bright button that would be off the first screen. Drawn, the page measures
 // where the list's own button sits without it: on the first screen anyway, Next up is hidden and
 // the list's button is the bright one (as before 7.34.1); below it, Next up shows and the list's
@@ -864,6 +866,8 @@ export function afterTab(state, district, activeTab, progress = calcDistrictProg
   if (secured && !milestoneSeen(state, district.id)) {
     return { name: `You took back ${district.name}`, label: 'SEE IT', href: `#/milestone/${district.id}`, kind: 'milestone' };
   }
+  // Every mission done but flagged passwords left (Q1): their SAVE, in place, is the next thing.
+  if (progress.resets?.left > 0) return null;
   if (readLevel(state) === 'simplest') return { name: 'What’s next', label: 'GO', href: '#/next', kind: 'next' };
   const nextId = nextDistrictId(state);
   const next = nextId && nextId !== district.id ? DISTRICTS.find((d) => d.id === nextId) : null;
@@ -904,7 +908,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const leadBegun = lead && progressFor(state, lead.id, visibleSteps(lead, state)).handled > 0;
   const nextUp = lead
     ? renderNextUp(state, { name: lead.title, label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` })
-    : listTab ? renderNextUp(state, afterTab(state, district, activeTab, progress)) : '';
+    : listTab ? nextUpAfterTab(state, afterTab(state, district, activeTab, progress)) : '';
   const hoisted = Boolean(lead);
 
   let content;

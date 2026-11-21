@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.38.0 (2026-11-20): The open door first, a Quick Quest that goes to the fix, and 100% means done
+
+- **A building shows the open door first, and lit.** The floors now go Roof, Ground floor, Alcove, Records desk. The first door you can still close starts unfolded, and its SEAL IT is the one bright button on the screen; the other SEAL ITs are outlined. The roof is now called "Health check" (Signal is also an app in the city). A row that needs work says "Fix it" and takes you to the door it closes (the worst one is lit when no SEAL IT is); a healthy row has a quiet "Check again" link instead of SWEEP.
+- **In Simple mode, a building is shorter.** The count is a bar that fills: "1 of 4 doors locked". Each roof row says how it is in words (Good, Could be better, Needs fixing, Not checked) before the bars. The leak badges are one chip, like "9 leaks name Facebook ›", that opens to all of them. The records desk, the alcove, your devices and why antennas fade are under one "More about this building".
+- **In Advanced mode** the badges are all still there, on their own row under the count, and big enough to tap.
+- **Quick Quest is one list on a phone**, a row per problem, each saying where it takes you. Picking one opens the mission that fixes it: "My email got hacked" opens your email's breach check, or its password reset once the check is done. If you don't have that account (or the fix is still locked), it goes to the district as before, and the row says so.
+- **100% SECURED means nothing left to do.** Passwords your password manager flagged in a district, and you haven't changed yet, now keep that district under 100% (they count as one more thing to do, and fill in as you change them). The district can't be taken back, and its milestone doesn't show, until they're changed. When that's the last thing left, its SAVE is the bright button. Accounts whose own password reset is already a mission aren't counted twice. These numbers still never leave your browser: the milestone they finish isn't sent as an event or a page visit, and an error report doesn't name it.
+- Nothing was removed.
+
 ## 7.37.0 (2026-11-20): The side screens, questioned one by one
 
 The same screen-by-screen look at the layout, on the screens off to the side: PRISM, going ghost, the phishing quiz, the broker sky, Your City, the government map, a badge's page, the garage, the social timeline, the Big Check, the saints and The Whole City.

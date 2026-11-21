@@ -111,12 +111,14 @@ describe('sealing moments', () => {
 });
 
 describe('floors remember open/closed', () => {
-  it('first visit: the roof open, the floors below open on desktop only; a closed floor renders closed; reopening restores', () => {
+  it('first visit: the roof and the doors open, desk and alcove open on desktop only; a closed floor renders closed; reopening restores', () => {
     const s0 = createInitialState();
     const first = render(s0);
-    expect(first.match(/<details class="floor[^"]*"[^>]* open/g)).toHaveLength(1);
+    expect(first.match(/<details class="floor[^"]*"[^>]* open/g)).toHaveLength(2);
     expect(first).toMatch(/<details class="floor floor--roof" open data-floor="roof">/);
-    expect(first.match(/<details class="floor[^"]*" data-open-desktop data-floor="(desk|ground|alcove)">/g)).toHaveLength(3);
+    expect(first).toMatch(/<details class="floor floor--ground" open data-floor="ground">/);
+    expect(first.match(/<details class="floor[^"]*" data-open-desktop data-floor="(desk|alcove)">/g)).toHaveLength(2);
+    expect(render(setFloorOpen(s0, 'gmail', 'ground', false))).toMatch(/<details class="floor floor--ground" data-floor="ground">/);
     const s1 = setFloorOpen(s0, 'gmail', 'desk', false);
     const html = render(s1);
     expect(html).toMatch(/<details class="floor floor--desk" data-floor="desk">/);

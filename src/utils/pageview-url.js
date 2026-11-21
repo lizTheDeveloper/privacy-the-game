@@ -24,11 +24,21 @@ export function pageviewUrl(route, href) {
   return hash && typeof href === 'string' ? withHash(href, hash) : href;
 }
 
+// Arrivals that sent no pageview (app.js quietArrival: the milestone a password SAVE finished).
+// An error report doesn't say them either, for the rest of this session: its page URL reads
+// '#/quiet' and its navigation breadcrumbs to or from them are dropped.
+const quietHashes = new Set();
+export function markQuietHash(hash) {
+  quietHashes.add(hash);
+}
+const isQuiet = (href) => typeof href === 'string' && href.includes('#') && quietHashes.has(href.slice(href.indexOf('#')));
+
 // The same rule when only the URL is known (error reports, breadcrumbs).
 export function sanitizeHref(href) {
   if (typeof href !== 'string') return href;
   const i = href.indexOf('#');
   if (i === -1) return href;
+  if (isQuiet(href)) return withHash(href, '#/quiet');
   return pageviewUrl(parseRoute(href.slice(i)), href);
 }
 
@@ -42,6 +52,9 @@ export function errorContext(route) {
 export function scrubEventUrls(event) {
   if (!event || typeof event !== 'object') return event;
   if (event.request?.url) event.request.url = sanitizeHref(event.request.url);
+  if (Array.isArray(event.breadcrumbs)) {
+    event.breadcrumbs = event.breadcrumbs.filter((b) => b?.category !== 'navigation' || !(isQuiet(b.data?.from) || isQuiet(b.data?.to)));
+  }
   for (const b of event.breadcrumbs ?? []) {
     if (b?.category !== 'navigation' || !b.data) continue;
     if (b.data.from) b.data.from = sanitizeHref(b.data.from);

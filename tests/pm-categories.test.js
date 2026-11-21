@@ -98,16 +98,30 @@ describe('14b: the per-category ask', () => {
     expect(act(withPm, 'nowhere', 'flag', '2')).toBe(withPm);
   });
 
-  it('never blocks: district %, buildings, phase gates, integrity, city-complete unchanged', () => {
+  // Q1 (Liz 2026-11-20: "100% should mean nothing left to do"): flagged passwords not yet changed
+  // keep their district (and so the city) under 100%. They still never gate a phase or touch Integrity.
+  it('flagged and unchanged: each district under 100% until they are changed; gates and integrity unchanged', () => {
     let s = withPm;
     for (const m of MISSIONS) if (isCoreMission(m) && s.accounts[m.accountId]?.enabled) s = updateMission(s, m.id, { status: 'completed' });
     const before = { city: isCityComplete(s), integ: calcIntegrity(s), p: DISTRICTS.map((d) => calcDistrictProgress(s, d.id)) };
     let t = s;
     for (const d of DISTRICTS) t = act(t, d.id, 'flag', '9');
-    expect(isCityComplete(t)).toBe(before.city);
     expect(calcIntegrity(t)).toBe(before.integ);
-    expect(DISTRICTS.map((d) => calcDistrictProgress(t, d.id))).toEqual(before.p);
     expect(getAccountPhaseGate(t, 'vault', 'primary_bank', 'recon')).toEqual(getAccountPhaseGate(s, 'vault', 'primary_bank', 'recon'));
+    DISTRICTS.forEach((d, i) => {
+      const p = calcDistrictProgress(t, d.id);
+      if (before.p[i].total === 0) expect(p.total, d.id).toBe(0);
+      else expect(p.percent, d.id).toBeLessThan(100);
+    });
+    expect(isCityComplete(t)).toBe(false);
+    // All changed: done work, so never lower than before (and 100% stays 100%).
+    let u = t;
+    for (const d of DISTRICTS) u = act(u, d.id, 'changed', '9');
+    expect(isCityComplete(u)).toBe(before.city);
+    DISTRICTS.forEach((d, i) => {
+      expect(calcDistrictProgress(u, d.id).percent, d.id).toBeGreaterThanOrEqual(before.p[i].percent);
+      if (before.p[i].percent === 100) expect(calcDistrictProgress(u, d.id).percent, d.id).toBe(100);
+    });
   });
 
   it('nothing from here is ever tracked, and restore never resends it', () => {
@@ -164,11 +178,12 @@ describe('14b: "Change the next 3" is a bonus', () => {
     expect(isMissionInPlay(counted(5), BURST)).toBe(true);
   });
 
-  it('pending in an old save: Master Keys % never drops', () => {
+  it('pending: the burst stays a bonus; the passwords it would change count as one thing left in Master Keys (Q1)', () => {
     const s = counted(5);
     const noBurst = { ...s, pmFlaggedCount: undefined };
-    expect(calcDistrictProgress(s, 'master-keys').total).toBe(calcDistrictProgress(noBurst, 'master-keys').total);
-    expect(calcDistrictProgress(s, 'master-keys').percent).toBeGreaterThanOrEqual(calcDistrictProgress(noBurst, 'master-keys').percent);
+    expect(calcDistrictProgress(s, 'master-keys').bonusTotal).toBe(calcDistrictProgress(noBurst, 'master-keys').bonusTotal + 1);
+    expect(calcDistrictProgress(s, 'master-keys').total).toBe(calcDistrictProgress(noBurst, 'master-keys').total + 1);
+    expect(calcDistrictProgress(s, 'master-keys').resets).toMatchObject({ flagged: 5, left: 5 });
   });
 
   it('completed in an old save: still counts toward Master Keys', () => {
@@ -180,12 +195,13 @@ describe('14b: "Change the next 3" is a bonus', () => {
     expect(p.completed).toBe(without.completed + 1);
   });
 
-  it('a whole Master Keys with a pending burst is 100%', () => {
+  it('a whole Master Keys with flagged passwords left is under 100%; changed, it is 100% (Q1)', () => {
     let s = counted(5);
     for (const m of MISSIONS) if (isCoreMission(m) && s.accounts[m.accountId]?.enabled) s = updateMission(s, m.id, { status: 'completed' });
     if (isMissionInPlay(s, MISSIONS.find((m) => m.id === 'password_manager-recon-report'))) s = updateMission(s, 'password_manager-recon-report', { status: 'completed' });
-    expect(calcDistrictProgress(s, 'master-keys').percent).toBe(100);
+    expect(calcDistrictProgress(s, 'master-keys').percent).toBeLessThan(100);
     expect(isMissionDone(s.missions[BURST.id])).toBe(false);
+    expect(calcDistrictProgress({ ...s, pmChanged: 5 }, 'master-keys').percent).toBe(100);
   });
 
   it('sends mission-completed only when the whole job is done; restore agrees', () => {
