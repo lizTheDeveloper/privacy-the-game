@@ -3,7 +3,7 @@ import { activeDistricts } from '../utils/opt-in.js';
 import { missionsInProgress, visibleSteps, progressFor, progressLabel } from '../utils/reading.js';
 import { findMission } from '../data/custom-missions.js';
 import { MISSIONS, missionDistrict } from '../data/missions.js';
-import { calcDistrictProgress, calcIntegrity, isCoreMission } from '../utils/calc.js';
+import { calcDistrictSecured, calcIntegrity, isCoreMission } from '../utils/calc.js';
 import { isMissionDone, isMissionDoneIn, isMissionInPlay } from '../utils/mission-status.js';
 import { currentBurst, isHeldBack, returnPacingLine, PM_BURST_ID } from '../utils/bursts.js';
 import { renderHud } from '../components/hud.js';
@@ -232,7 +232,7 @@ function renderCluster(def, district, progress, index) {
 function renderDistrictBlocks(state) {
   return BLOCK_DEFS.map((def, i) => {
     const district = DISTRICTS.find((d) => d.id === def.district);
-    return renderCluster(def, district, calcDistrictProgress(state, district.id), i);
+    return renderCluster(def, district, calcDistrictSecured(state, district.id), i);
   }).join('');
 }
 
@@ -348,7 +348,7 @@ function renderDistrictLabels(state, startHere) {
   const nextId = nextDistrictId(state);
   return BLOCK_DEFS.map((def) => {
     const district = DISTRICTS.find((d) => d.id === def.district);
-    const { percent, completed, total, bonusTotal, bonusCompleted } = calcDistrictProgress(state, district.id);
+    const { percent, completed, total, bonusTotal, bonusCompleted } = calcDistrictSecured(state, district.id);
     const status = districtStatus(percent);
     const isMaster = district.id === 'master-keys';
     const { side, top } = def.label;
@@ -835,7 +835,7 @@ export function renderCityMap(state, { collective, whoami, arrival, welcomeBack 
   const hasPods = Boolean(placed && placed.length);
   const startHere = !Object.values(state.missions).some((m) => m.status === 'completed');
   const active = activeDistricts(state);
-  const progress = active.map((d) => calcDistrictProgress(state, d.id).percent);
+  const progress = active.map((d) => calcDistrictSecured(state, d.id).percent);
   const securedCount = progress.filter((p) => p >= 100).length;
   const avg = progress.reduce((sum, p) => sum + p, 0) / progress.length / 100;
   const hazeMagenta = (0.22 * (1 - avg)).toFixed(3);

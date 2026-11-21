@@ -1,7 +1,7 @@
 import { DISTRICTS } from '../data/districts.js';
 import { readLevel } from '../utils/reading.js';
 import { ACCOUNTS } from '../data/accounts.js';
-import { calcIntegrity, calcDistrictProgress, getBuildingState, districtBreachedAddresses } from '../utils/calc.js';
+import { calcIntegrity, calcDistrictSecured, getBuildingState, districtBreachedAddresses } from '../utils/calc.js';
 import { activeDistricts } from '../utils/opt-in.js';
 import { fillBar } from '../components/fill-bar.js';
 import { renderHud } from '../components/hud.js';
@@ -11,8 +11,8 @@ import { scoutSprite } from '../components/scout.js';
 // Simple mode's city bar on the milestone: one segment per district, the ones taken back full
 // (Liz's layout audit, 2026-11-20: "6% CITY INTEGRITY" next to LIBERATED undercut the win).
 export function cityBar(state) {
-  const districts = activeDistricts(state).filter((d) => calcDistrictProgress(state, d.id).total > 0);
-  const done = districts.filter((d) => calcDistrictProgress(state, d.id).percent >= 100).length;
+  const districts = activeDistricts(state).filter((d) => calcDistrictSecured(state, d.id).total > 0);
+  const done = districts.filter((d) => calcDistrictSecured(state, d.id).percent >= 100).length;
   const total = districts.length;
   if (!total) return '';
   return `<div class="milestone-city" data-city-bar>
@@ -50,12 +50,18 @@ export function renderMilestone(state, districtId) {
   const integrity = calcIntegrity(state);
   const simple = readLevel(state) === 'simplest';
   const nextDistrict = DISTRICTS.find((d) => d.chapter === district.chapter + 1);
+  // Missions done, flagged passwords still to change (Q1). The milestone opens exactly as it
+  // would without them (same events, same pageview: app.js never reads these numbers), and only
+  // what is drawn here says so. Display only, never sent.
+  const left = calcDistrictSecured(state, districtId).resets.left;
+  const resetsLeft = left > 0 ? `${left} password${left === 1 ? '' : 's'} still to change` : '';
   // Simple mode carries on from What's next (one card), not the next district's tabs.
+  const go = resetsLeft ? 'btn-secondary' : 'btn-primary';
   const continueLink = simple
-    ? '<a class="btn-primary" href="#/next" style="display: inline-block; text-decoration: none;">WHAT’S NEXT &rarr;</a>'
+    ? '<a class="' + go + '" href="#/next" style="display: inline-block; text-decoration: none;">WHAT’S NEXT &rarr;</a>'
     : nextDistrict
-    ? `<a class="btn-primary" href="#/district/${nextDistrict.id}" style="display: inline-block; text-decoration: none;">CONTINUE TO ${nextDistrict.name.toUpperCase()} &rarr;</a>`
-    : `<a class="btn-primary" href="#/stats" style="display: inline-block; text-decoration: none;">VIEW YOUR CITY</a>`;
+    ? `<a class="${go}" href="#/district/${nextDistrict.id}" style="display: inline-block; text-decoration: none;">CONTINUE TO ${nextDistrict.name.toUpperCase()} &rarr;</a>`
+    : `<a class="${go}" href="#/stats" style="display: inline-block; text-decoration: none;">VIEW YOUR CITY</a>`;
 
   return `
   <div class="scanlines milestone-page" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0a1020 30%, #121828 100%); padding: 0 0 60px; overflow: clip;">
@@ -67,8 +73,9 @@ export function renderMilestone(state, districtId) {
       <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">
-      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">LIBERATED</div>
-      <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${district.name.toUpperCase()} IS SECURE</div>
+      <div class="milestone-word" style="font-family: var(--font-display); font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">${resetsLeft ? 'MISSIONS DONE' : 'LIBERATED'}</div>
+      <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 3px; color: rgba(237,239,243,0.75); margin-top: 12px;">${resetsLeft ? '' : `${district.name.toUpperCase()} IS SECURE`}</div>
+      ${resetsLeft ? `<div data-resets-left style="font-size: 17px; font-weight: 600; color: var(--offwhite); margin-top: 4px;">${resetsLeft.charAt(0).toUpperCase()}${resetsLeft.slice(1)}.</div>` : ''}
       <div style="font-size: 13px; color: var(--text-quiet); margin-top: 8px;">${district.description}</div>
     </div>
     <div class="milestone-buildings" style="position: relative; display: flex; gap: 4px; align-items: flex-end; justify-content: center; margin: 44px 0 10px;">
@@ -92,6 +99,7 @@ export function renderMilestone(state, districtId) {
     ${simple ? `<div class="milestone-city-wrap" style="position: relative; max-width: 512px; margin: -20px auto 24px;">${cityBar(state)}</div>` : ''}
     <div class="pin-bottom milestone-actions" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
       <button class="btn-secondary" data-action="share-card" data-district="${districtId}">SHARE CARD</button>
+      ${resetsLeft ? `<a class="btn-primary" href="#/district/${districtId}" style="display: inline-block; text-decoration: none;">CHANGE THEM &rarr;</a>` : ''}
       ${continueLink}
     </div>
     <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin: 12px 0 20px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--offwhite);"></div>

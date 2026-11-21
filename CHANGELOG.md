@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.39.1 (2026-11-20): Your password answers change what you see, never what we count
+
+7.38.0 made passwords your password manager flagged, and you haven't changed yet, keep a district under 100%. That number also decided when the game sent "district completed", what it resent when you restore your data, and whether going ghost counted as early. So someone reading our analytics could have guessed that you had flagged passwords. This fixes that.
+
+- **What we count only ever looks at your missions.** Finishing a district's missions sends the same things, and opens the same "you took it back" screen, whether or not you have flagged passwords. Restoring your data and going ghost work the same way too.
+- **What you see still counts them.** The district says, for example, "96% · 2 passwords to change", and the city map and Your City show it the same way. When the missions are done but passwords are left, the milestone says MISSIONS DONE and "2 passwords still to change." with a CHANGE THEM button, instead of LIBERATED.
+- **Changing the last one** no longer jumps to the milestone (it already showed when the missions were done). The panel says "All changed ✓", right where you are, and nothing is sent.
+- Nothing was removed.
+
 ## 7.39.0 (2026-11-21): A district for Simple players
 
 Simple players were getting the Advanced district: tabs called SURVEY, RECON, FORTIFY and RECLAIM, up to 19 rows that all looked the same, and names like "OSINT Sieve". Liz asked for a real Simple district (Advanced stays as it was).
