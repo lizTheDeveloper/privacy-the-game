@@ -2,6 +2,14 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.41.1 (2026-11-20): The milestone's buttons don't depend on your passwords
+
+In 7.39.1, when passwords your manager flagged were still left, the "you took it back" screen added a bright CHANGE THEM button and dimmed CONTINUE. So where you were likely to tap next, and the links on the page, still depended on your password answer.
+
+- **The milestone has the same buttons for everyone:** SHARE CARD, "← Back to" the district, and CONTINUE (or WHAT'S NEXT) as the bright one.
+- **With passwords left,** only the words change: "2 passwords still to change. They're on the district page."
+- Nothing was removed, and nothing new is sent.
+
 ## 7.41.0 (2026-11-20): Something to do on every side screen
 
 Five changes Liz picked from the side-screen review.
@@ -17,7 +25,7 @@ Five changes Liz picked from the side-screen review.
 7.38.0 made passwords your password manager flagged, and you haven't changed yet, keep a district under 100%. That number also decided when the game sent "district completed", what it resent when you restore your data, and whether going ghost counted as early. So someone reading our analytics could have guessed that you had flagged passwords. This fixes that.
 
 - **What we count only ever looks at your missions.** Finishing a district's missions sends the same things, and opens the same "you took it back" screen, whether or not you have flagged passwords. Restoring your data and going ghost work the same way too.
-- **What you see still counts them.** The district says, for example, "96% · 2 passwords to change", and the city map and Your City show it the same way. When the missions are done but passwords are left, the milestone says MISSIONS DONE and "2 passwords still to change." with a CHANGE THEM button, instead of LIBERATED.
+- **What you see still counts them.** The district says, for example, "96% · 2 passwords to change", and the city map and Your City show it the same way. When the missions are done but passwords are left, the milestone says MISSIONS DONE and "2 passwords still to change." with a CHANGE THEM button, instead of LIBERATED (7.41.1 replaced that button: see above).
 - **Changing the last one** no longer jumps to the milestone (it already showed when the missions were done). The panel says "All changed ✓", right where you are, and nothing is sent.
 - Nothing was removed.
 
