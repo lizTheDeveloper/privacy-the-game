@@ -155,7 +155,7 @@ const PM_ON_COMPUTER = {
 const NOTE_BOTH_STEP = { text: 'Write down how many passwords each one says are compromised, leaked or reused. Add them up. Note which of your accounts they name' };
 for (const [a, b] of TWO_PLACE_PAIRS) {
   PM_STEPS[pairKey(a, b)] = [
-    { text: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Each one has its own check. Let’s look at both.` },
+    { text: `Your passwords are in two places: ${PHONE_PLACE[a]} and ${COMPUTER_PLACE[b]}. That’s fine. Each one has its own check. Let’s look at both.`, places: 'two' },
     ...PM_ON_PHONE[a],
     ...PM_ON_COMPUTER[b],
     NOTE_BOTH_STEP,

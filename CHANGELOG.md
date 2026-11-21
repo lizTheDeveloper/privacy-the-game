@@ -2,6 +2,25 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.35.0 (2026-11-20): The mission screens, questioned one by one
+
+Liz asked for every screen to be looked at again, from Simple's side and from Advanced's. These are the clear problems found on the mission briefing, the step cards and the report.
+
+- **DONE waits for your answer.** On a step that asks something (the Amazon orders card, the breach check), DONE stays an outline until you answer, then it lights up with "Saved. Now tap DONE." It still works if you tap it early.
+- **A picked answer is cyan, not green.** Green means done or good, and "Yes, I saw orders I don't know" is neither. A picked answer now has a cyan edge and a plain tick.
+- **"When it opens:" no longer jumps ahead.** A step that asks a question doesn't list the next steps above it any more (the orders card listed steps 4 to 6 before you'd answered). In Advanced, a briefing that already lists every step under YOUR MOVE doesn't list them again above GO DO IT.
+- **Report questions look like questions.** Each one is big, bold and in its own words, like on the step cards, instead of small grey capitals.
+- **SUBMIT REPORT lights up when you're done.** Until every question has an answer ("Couldn't check" counts), it's an outline that says how many are left. It still works if you tap it early: it shows what's missing. There's room under the last answer so the bar at the bottom of a phone doesn't cover it.
+- **Simple doesn't show SAFE, WARN and CRIT on the report.** They gave away the "right" answer before you'd said what you found. Advanced keeps them.
+- **A filed report in Simple goes on to What's next,** and shows how far the district is as the filling bar, not "PROGRESS: 25%".
+- **No tick beside "Steps 0/3".** The steps get their tick on the report only once they're all done.
+- **Simple asks where your passwords are saved once,** on the "Before you start" card, not also on the briefing right above START.
+- **A step card starts with what to do.** "Open haveibeenpwned.com again" is a small link under the instruction, not the first thing on the card.
+- **Clearer extra buttons in Simple.** On a password reset, "I ALREADY HAVE THIS" now says "My password is already strong, and I don't use it anywhere else". "I don't have Gmail" is a normal-size quiet button, smaller than START.
+- **The two-places step isn't repeated in grey** under its card. "Change where my passwords are" is still there.
+- **Bigger tap targets:** the report's link back to the mission, and the site links in "See the steps", are at least 44 pixels tall.
+- Nothing new is tracked or sent. Your answers stay on your device.
+
 ## 7.34.1 (2026-11-19): A district's next mission is on the first screen
 
 On a phone, a district's bright START (the one thing to tap next, since 7.33.0) often sat under the intro, the tabs and the missions already done, so you had to scroll to find it. Liz: "district yes if its nav".

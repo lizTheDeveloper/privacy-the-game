@@ -39,8 +39,12 @@ describe('one bright button per screen', () => {
         expect(primaries(renderBriefing(started(level, first.id), first.id))).toBe(1);
       });
 
-      it('the report', () => {
-        expect(primaries(renderDebrief(started(level, first.id), first.id))).toBe(1);
+      it('the report: SUBMIT REPORT lights once every question has an answer', () => {
+        // Unanswered, the next thing is an answer, not SUBMIT (layout audit 2026-11-20).
+        expect(primaries(renderDebrief(started(level, first.id), first.id))).toBe(0);
+        const q = first.debriefQs[0];
+        const answered = { ...started(level, first.id), stepProgress: { [first.id]: { answers: { [q.id]: q.options[0].value } } } };
+        expect(primaries(renderDebrief(answered, first.id))).toBe(1);
       });
 
       it('the city map: the Scout’s next mission, and the top bar never adds one', () => {

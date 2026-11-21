@@ -180,11 +180,15 @@ export function missionTrail(stage, p, { already = false } = {}) {
   ];
   const order = ['brief', 'steps', 'report', 'filed'];
   const at = order.indexOf(stage);
+  // Past the steps without doing them all ("Steps 0/3" on the report): no tick beside a count
+  // that says they aren't done. Its number, and not lit.
+  const stepsLeft = !already && p && p.total > 1 && p.handled < p.total;
   return `
     <ol class="mission-trail" aria-label="Mission progress">
       ${items.map(([id, label], i) => {
-        const cls = i < at ? 'is-past' : i === at ? 'is-now' : '';
-        return `<li class="${cls}"${i === at ? ' aria-current="step"' : ''}><span class="mission-trail-n">${i < at ? '&#10003;' : i + 1}</span>${label}</li>`;
+        const past = i < at && !(id === 'steps' && stepsLeft);
+        const cls = past ? 'is-past' : i === at ? 'is-now' : '';
+        return `<li class="${cls}"${i === at ? ' aria-current="step"' : ''}><span class="mission-trail-n">${past ? '&#10003;' : i + 1}</span>${label}</li>`;
       }).join('<li class="mission-trail-sep" aria-hidden="true"></li>')}
     </ol>`;
 }
@@ -195,12 +199,17 @@ export { stepMarks };
 // The password check asks where the player's passwords are saved, right on the mission, so its
 // steps are for their phone or browser. Same answer as the question in The Master Keys
 // (state.passwordManager); it never leaves this browser.
-export function passwordPlaceAsk(state, mission) {
+// opts.saidOnStep: the step on screen already says where they are (the two-places step), so only
+// the way to change it shows, not the same sentence again in grey.
+export function passwordPlaceAsk(state, mission, { saidOnStep = false } = {}) {
   if (!mission?.stepsByManager) return '';
   const chosen = PASSWORD_MANAGERS.find((pm) => pm.value === state?.passwordManager);
   const change = '<button class="walk-link" data-action="set-password-manager" data-pm="">Change</button>';
   // Two places (the finder): steps that cover both. Nothing to move.
   const two = twoPlaceNames(passwordPlaces(state));
+  if (chosen && two && saidOnStep) {
+    return `<div class="walk-gear-set" data-pm-set data-pm-two><button class="walk-link" data-action="set-password-manager" data-pm="">Change where my passwords are</button></div>`;
+  }
   if (chosen && two) {
     return `<div class="walk-gear-set" data-pm-set data-pm-two>Your passwords are in two places: <strong>${two[0]}</strong> and <strong>${two[1]}</strong>. These steps cover both. ${change}</div>`;
   }

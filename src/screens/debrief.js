@@ -19,6 +19,7 @@ import { isChecklistPending } from '../utils/broker-lighting.js';
 import { feelingForDebrief, twoFactorHugDue } from '../utils/scout-feelings.js';
 import { alreadyOption, saidAlready, visibleSteps, progressFor, stepAnswers } from '../utils/reading.js';
 import { missionTrail } from '../components/walkthrough.js';
+import { fillBar } from '../components/fill-bar.js';
 
 const ROW = 'display: flex; align-items: center; gap: 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;';
 
@@ -41,12 +42,15 @@ function badge(severity) {
   return `<span class="badge badge--${severity}" style="flex-shrink: 0;">${severity.toUpperCase()}</span>`;
 }
 
-function optionRow(q, opt, checked = false) {
+// tags: SAFE / WARN / CRIT beside each answer. Advanced sees how each one is scored. Simple
+// doesn't, on the form: there the tags gave away the "right" answer before the player said what
+// they found. (A filed report keeps its tag: by then it is the result.)
+function optionRow(q, opt, checked = false, tags = true) {
   return `
   <label class="debrief-opt" style="${ROW}">
     <input type="${q.multi ? 'checkbox' : 'radio'}" name="q_${q.id}" value="${opt.value}"${checked ? ' checked' : ''} style="width: 16px; height: 16px; flex-shrink: 0;">
     <span style="flex: 1; font-size: 14px; color: var(--offwhite); line-height: 1.5;">${opt.text}</span>
-    ${opt.severity ? badge(opt.severity) : ''}
+    ${opt.severity && tags ? badge(opt.severity) : ''}
   </label>`;
 }
 
@@ -77,6 +81,12 @@ function numberInput(q, value) {
       <input type="number" name="q_${q.id}" min="${q.min ?? 0}"${max} inputmode="numeric" step="1"${value !== undefined ? ` value="${value}"` : ''} aria-label="${q.label}" style="width: 140px; max-width: 100%; background: transparent; border: 1px solid rgba(0,229,255,0.3); color: var(--offwhite); font-size: 18px; padding: 10px 12px; font-family: var(--font-mono);">`;
 }
 
+// A question reads as a question, like the step cards' (style.css .debrief-q): big, bold, off-white,
+// in its own words. Grey capitals are for the names of sections, and read as "optional".
+function questionLabel(label) {
+  return `<h2 class="debrief-q">${label}</h2>`;
+}
+
 // `given` is a stored answer to show again (re-check); it wins over a pre-fill.
 // recheck: leave out the answers that would un-file it (skip / later).
 function questionGroup(q, state, mission, shown = false, given = undefined, recheck = false) {
@@ -99,7 +109,7 @@ function questionGroup(q, state, mission, shown = false, given = undefined, rech
     : 'Filled in from your password manager report. Change it if the report says something else.';
   return `
   <div data-question="${q.id}"${showIfAttrs(q, shown)} style="margin-bottom: 28px;">
-    <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
+    ${questionLabel(q.label)}
     ${q.hint ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.5; margin: -6px 0 12px;">${q.hint}</div>` : ''}
     ${q.multi ? `<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin: -6px 0 12px;">Pick all that apply.</div>` : ''}
     ${pre && !has ? `<div data-prefilled="${q.id}" style="font-size: 12px; color: var(--cyan); line-height: 1.5; margin: -6px 0 12px;">${preNote}</div>` : ''}
@@ -109,7 +119,7 @@ function questionGroup(q, state, mission, shown = false, given = undefined, rech
     </div>` : ''}
     <div style="display: flex; flex-direction: column; gap: 6px;">
       ${q.type === 'number' ? numberInput(q, typed) : ''}
-      ${questionOptions(q, state).filter((opt) => !recheck || !isSkipOption(opt)).map((opt) => optionRow(q.type === 'number' ? { ...q, multi: true } : q, opt, isPicked(opt.value))).join('')}
+      ${questionOptions(q, state).filter((opt) => !recheck || !isSkipOption(opt)).map((opt) => optionRow(q.type === 'number' ? { ...q, multi: true } : q, opt, isPicked(opt.value), readLevel(state) !== 'simplest')).join('')}
     </div>
   </div>`;
 }
@@ -133,7 +143,7 @@ function completedGroup(q, stored, state) {
        </div>`;
   return `
   <div style="margin-bottom: 28px;">
-    <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${q.label.toUpperCase()}</div>
+    ${questionLabel(q.label)}
     ${row}
   </div>`;
 }
@@ -146,7 +156,7 @@ function completedQuestions(mission, stored, state) {
     const total = pmNumbers(state)?.changed ?? (Number.isFinite(state.pmChanged) ? state.pmChanged : 0);
     return `
   <div style="margin-bottom: 28px;">
-    <div class="section-label" style="color: rgba(0,229,255,0.5); margin-bottom: 14px;">${mission.debriefQs[0].label.toUpperCase()}</div>
+    ${questionLabel(mission.debriefQs[0].label)}
     <div style="${ROW}"><span style="flex: 1; font-size: 14px; color: var(--offwhite);">${total} changed in all</span></div>
   </div>`;
   }
@@ -219,14 +229,19 @@ function debriefScout(state, mission, stored) {
   return scoutSprite(feeling, { size: 52, style: DEBRIEF_SCOUT });
 }
 
-function getProgressCheckIn(state, districtId, percent, dialogue) {
+// Simple shows how far as a bar that fills (components/fill-bar.js), not "PROGRESS: 25%".
+function getProgressCheckIn(state, districtId, progress, dialogue) {
   if (!dialogue?.progress) return '';
+  const { percent } = progress;
   const milestones = [25, 50, 75, 100];
   const seen = state.seenProgress?.[districtId] || [];
   for (const m of milestones) {
     if (percent >= m && !seen.includes(m) && dialogue.progress[m]) {
-      return `<div style="margin-top: 16px; padding: 14px 16px; background: rgba(198,255,0,0.04); border: 1px solid rgba(198,255,0,0.15);">
-        <div class="section-label" style="color: rgba(198,255,0,0.6); margin-bottom: 6px;">PROGRESS: ${m}%</div>
+      const head = readLevel(state) === 'simplest'
+        ? `<div style="margin-bottom: 10px;">${fillBar({ key: `district:${districtId}`, done: progress.completed, total: progress.total, size: 'mid', label: `${percent}% secured` })}</div>`
+        : `<div class="section-label" style="color: rgba(198,255,0,0.6); margin-bottom: 6px;">PROGRESS: ${m}%</div>`;
+      return `<div data-progress-check-in style="margin-top: 16px; padding: 14px 16px; background: rgba(198,255,0,0.04); border: 1px solid rgba(198,255,0,0.15);">
+        ${head}
         <div style="font-size: 13px; color: rgba(237,239,243,0.7); line-height: 1.6; font-style: italic;">${pick(dialogue.progress[m])}</div>
       </div>`;
     }
@@ -300,13 +315,14 @@ export function debriefReaction(state, mission) {
   const progress = calcDistrictProgress(state, districtId);
   return {
     line,
-    progressLine: getProgressCheckIn(state, districtId, progress.percent, dialogue),
+    progressLine: getProgressCheckIn(state, districtId, progress, dialogue),
     feeling: twoFactorHugDue(state, mission.id) ? 'hug' : feelingForDebrief(mission, stored),
   };
 }
 
 // The open form. Follow-ups a pre-filled answer already shows start shown.
 // Re-check: the stored answers come back as the starting point.
+// The open form, and how many of the questions it shows have no answer yet (SKIP counts as one).
 function debriefForm(state, mission, given = null, recheck = false) {
   const pre = {};
   const already = saidAlready(state, mission.id) ? alreadyOption(mission) : null;
@@ -314,9 +330,24 @@ function debriefForm(state, mission, given = null, recheck = false) {
     const v = given?.[q.id] ?? stepAnswers(state, mission.id)[q.id] ?? (already?.question === q.id ? already.value : prefillAnswer(q, mission, state));
     if (v !== undefined) pre[q.id] = v;
   }
-  const shown = new Set(visibleQuestions(mission, pre).map((q) => q.id));
+  const visible = visibleQuestions(mission, pre);
+  const shown = new Set(visible.map((q) => q.id));
   const checklist = renderBrokerChecklist(mission, state, recheck ? 'recheck' : 'file');
-  return `<div data-debrief="${mission.id}">${mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id), given?.[q.id], recheck)).join('')}${checklist}</div>`;
+  const left = visible.filter((q) => pre[q.id] === undefined || (Array.isArray(pre[q.id]) && !pre[q.id].length)).length;
+  return { left, html: `<div data-debrief="${mission.id}" class="debrief-form">${mission.debriefQs.map((q) => questionGroup(q, state, mission, shown.has(q.id), given?.[q.id], recheck)).join('')}${checklist}</div>` };
+}
+
+// "2 questions left" beside SUBMIT REPORT, kept up to date by app.js as answers are picked.
+export function questionsLeftText(n) {
+  return n === 1 ? '1 question left' : `${n} questions left`;
+}
+
+// SUBMIT REPORT is the screen's one bright button only once every question has an answer. Before
+// that it is an outline that says how many are left. It still works: tapped early, it says what's
+// missing and goes to it (app.js submitDebrief).
+export function submitReportButton(missionId, left) {
+  return `<button class="${left ? 'btn-secondary' : 'btn-primary'}" data-action="submit-debrief" data-mission="${missionId}">SUBMIT REPORT</button>
+    <span class="debrief-left" data-debrief-left${left ? '' : ' hidden'}>${questionsLeftText(left)}</span>`;
 }
 
 // A re-check of a mission that was never filed as done: no form, the way in.
@@ -360,9 +391,11 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
   }
 
   const progressPanel = mission.id === PM_MISSION_ID || mission.id === PM_BURST_ID ? renderPasswordProgress(state) : '';
+  const simple = readLevel(state) === 'simplest';
+  const form = completed ? null : debriefForm(state, mission, recheck ? stored : null, recheck);
   const questions = completed
     ? `<div class="completed-marker">${completedQuestions(mission, stored, state)}</div>${upgradeOffer(state, mission, stored)}${progressPanel}`
-    : debriefForm(state, mission, recheck ? stored : null, recheck);
+    : form.html;
 
   const targetTab = mission.phase ? `?tab=${mission.phase}` : '';
   const greeting = completed ? DEBRIEF_GREETINGS.filed : recheck ? DEBRIEF_GREETINGS.recheck : saidAlready(state, mission.id) ? DEBRIEF_GREETINGS.already : DEBRIEF_GREETINGS.welcome;
@@ -373,13 +406,16 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <span class="badge badge--safe">SECURED</span>
       ${checklistFor(mission.id) ? `<a href="#/mission/${mission.id}/recheck" class="btn-secondary" style="text-decoration: none;">RE-CHECK</a>` : ''}
-      <a href="#/district/${districtId}${targetTab}" class="btn-primary" style="text-decoration: none;">BACK TO DISTRICT</a>
+      ${simple
+        // Simple's home is What's next, where Scout says what to do now (not the district's tabs).
+        ? '<a href="#/next" class="btn-primary" style="text-decoration: none;">WHAT’S NEXT &#9654;</a>'
+        : `<a href="#/district/${districtId}${targetTab}" class="btn-primary" style="text-decoration: none;">BACK TO DISTRICT</a>`}
     </div>`
     : recheck
       ? `<div data-recheck-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">A re-check keeps this filed as it was. Pick an answer, or go back.</div>
     <button class="btn-primary" data-action="submit-recheck" data-mission="${mission.id}">SAVE RE-CHECK</button>`
       : `<div data-debrief-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;">Answer every question to file the report.</div>
-    <button class="btn-primary" data-action="submit-debrief" data-mission="${mission.id}">SUBMIT REPORT</button>`;
+    ${submitReportButton(mission.id, form.left)}`;
 
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
@@ -392,7 +428,7 @@ export function renderDebrief(state, missionId, { recheck = false } = {}) {
     <div style="display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: rgba(9,11,16,0.97); border-bottom: 1px solid rgba(0,229,255,0.15);">
       <div class="screen-eyebrow">${recheck ? 'RE-CHECK' : 'MISSION DEBRIEF'}</div>
       <div style="flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,229,255,0.2), transparent);"></div>
-      <a href="#/mission/${mission.id}/briefing" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-quiet); text-decoration: none;">&#8592; ${mission.title}</a>
+      <a class="debrief-back" href="#/mission/${mission.id}/briefing">&#8592; ${mission.title}</a>
     </div>
     <div style="flex: 1; padding: 24px;">
       ${recheck ? '' : missionTrail(completed ? 'filed' : 'report', progressFor(state, mission.id, visibleSteps(mission, state)), { already: saidAlready(state, mission.id) && !progressFor(state, mission.id, visibleSteps(mission, state)).handled })}

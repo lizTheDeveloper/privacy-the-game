@@ -54,7 +54,7 @@ import { mountBugReporter } from './components/bug-reporter.js';
 import { initBrowserWarning, syncBrowserWarning } from './components/browser-warning.js';
 import { checklistFor } from './data/broker-checklists.js';
 import { stepReportAnswers } from './utils/step-report.js';
-import { renderDebrief, debriefReaction } from './screens/debrief.js';
+import { renderDebrief, debriefReaction, questionsLeftText } from './screens/debrief.js';
 import { setPasswordPlaces } from './utils/password-places.js';
 import { readLevel, setReadLevel, readAloudOn, setReadAloud, setGear, markStep, stepMarks, markAlready, visibleSteps, progressFor, stepAnswers, setStepAnswer } from './utils/reading.js';
 import { recordSignal, markOffered, OFFER_LINES } from './utils/reading-signals.js';
@@ -1874,6 +1874,21 @@ function refreshDebriefForm(e) {
   }
   const shown = new Set(visibleQuestions(mission, readAnswers(form, mission)).map((q) => q.id));
   for (const group of form.querySelectorAll('[data-question]')) group.hidden = !shown.has(group.dataset.question);
+  // SUBMIT REPORT lights once every question showing has an answer; until then it says how many
+  // are left (screens/debrief.js submitReportButton). Only a count: no answer goes anywhere.
+  const left = [...form.querySelectorAll('[data-question]')].filter((g) => !g.hidden
+    && !g.querySelector('input:checked') && !g.querySelector('input[type="number"]')?.value).length;
+  const submit = app.querySelector('[data-action="submit-debrief"]');
+  if (submit) {
+    submit.classList.toggle('btn-primary', !left);
+    submit.classList.toggle('btn-secondary', Boolean(left));
+  }
+  const leftEl = app.querySelector('[data-debrief-left]');
+  if (leftEl) {
+    leftEl.hidden = !left;
+    leftEl.textContent = questionsLeftText(left);
+  }
+  if (!left) app.querySelector('[data-debrief-msg]')?.setAttribute('hidden', '');
 }
 document.addEventListener('click', (e) => {
   if (!swallowClickUntil) return;

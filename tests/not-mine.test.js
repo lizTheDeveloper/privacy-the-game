@@ -30,11 +30,15 @@ describe('"I don’t have Gmail" on the Simple briefing', () => {
     expect(renderBriefing(off, ID)).not.toContain('data-action="not-mine"');
   });
 
-  it('uses big words, not the small capitals the other secondary buttons use', () => {
+  it('uses plain words, not the small capitals, at a quiet button’s size (not as big as START)', () => {
     const css = readFileSync('src/style.css', 'utf8');
-    const rule = css.match(/\.btn-secondary\.not-mine \{([^}]*)\}/)?.[1] ?? '';
-    expect(rule).toMatch(/font-size: 2\dpx/);
+    const rule = css.match(/\.btn-secondary\.not-mine[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toContain('font-family: var(--font-body)');
     expect(rule).toContain('letter-spacing: 0');
+    expect(rule).toContain('text-transform: none');
+    const size = Number(/font-size: (\d+)px/.exec(rule)?.[1]);
+    expect(size).toBeGreaterThanOrEqual(15);
+    expect(size).toBeLessThan(18); // START is 18px in Simple (.brief-simple .focus-go)
   });
 
   it('says it plainly for every account that has one', () => {
