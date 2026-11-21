@@ -1244,3 +1244,23 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .bw--compact .bw-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bw--compact .bw-icon { width: 22px; height: 22px; font-size: 14px; }
 .bw--compact .bw-more { font-size: 14px; padding: 0 10px; }
+
+/* ---------- A Simple district (Liz 2026-11-20, "Simple only"; screens/district.js) ---------- */
+/* Tabs in plain words: up to two lines, four across a phone, still 44px taps. */
+.district-tab--simple { font-family: var(--font-body); text-transform: none; overflow-wrap: anywhere; hyphens: auto; }
+/* What a mission does, under its name: full-size and bright, so it doesn't read as optional. */
+.mission-about { font-size: 14px; line-height: 1.4; color: var(--text-strong); margin-top: 3px; }
+/* "Show all 18" / "Show fewer": cyan outline (tappable), sentence case. */
+.list-more { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; margin-top: 8px; padding: 8px 12px; box-sizing: border-box; font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text-strong); background: transparent; border: 1px solid rgba(0, 229, 255, 0.4); cursor: pointer; }
+.list-more:hover { border-color: rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.06); }
+.list-more::after { content: ' ▾'; color: var(--cyan); margin-left: 6px; }
+.list-more[aria-expanded="true"]::after { content: ' ▴'; }
+.done-fold { margin-top: 12px; }
+.done-fold > summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-size: 16px; color: var(--lime); border: 1px solid rgba(198, 255, 0, 0.3); }
+.done-fold > summary::-webkit-details-marker { display: none; }
+.done-fold > summary::before { content: '✓'; }
+.done-fold > summary::after { content: '▾'; margin-left: auto; color: var(--cyan); }
+.done-fold[open] > summary::after { content: '▴'; }
+.list-all-done { font-size: 16px; color: var(--lime); padding: 4px 0; }
+/* READY (nothing started): plain grey words, not a box that looks like a button (both modes). */
+.status-quiet { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: var(--text-quiet); white-space: nowrap; flex-shrink: 0; }

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderDistrict, tabLeadMission, settleNextUp, afterTab, districtVisited, pinSurveyDone } from '../src/screens/district.js';
 import { createInitialState, updateMission } from '../src/state.js';
-import { setReadLevel, visibleSteps, markStep, stepKey } from '../src/utils/reading.js';
+import { setReadLevel, visibleSteps, markStep, stepKey, simpleTitle } from '../src/utils/reading.js';
 import { getMissionsForDistrict, MISSIONS, missionDistrict } from '../src/data/missions.js';
 import { DISTRICTS } from '../src/data/districts.js';
 import { isMissionInPlay } from '../src/utils/mission-status.js';
@@ -44,7 +44,9 @@ describe('Next up: the lead mission comes up to the top of the tab', () => {
       expect(nextUp).toBeGreaterThan(html.indexOf('% secured'));
       expect(nextUp).toBeLessThan(html.indexOf('?tab=survey'));
       expect(nextUp).toBeLessThan(at[0]);
-      expect(html.slice(nextUp)).toMatch(new RegExp(`class="btn-primary btn-sm next-up-go" href="#/mission/${lead.id}/briefing" aria-label="Start ${lead.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">START</a>`));
+      // Simple names it as the row does: its Simple name (7.38.0).
+      const name = level === 'simplest' ? simpleTitle(lead) : lead.title;
+      expect(html.slice(nextUp)).toMatch(new RegExp(`class="btn-primary btn-sm next-up-go" href="#/mission/${lead.id}/briefing" aria-label="Start ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">START</a>`));
       // Nothing left the list: the lead row is still lit, with an outlined twin of the button.
       expect((html.match(/mission-row--lead/g) || []).length).toBe(1);
       expect(html).toMatch(new RegExp(`class="btn-secondary btn-sm" data-next-up-twin href="#/mission/${lead.id}/briefing">START</a>`));
@@ -56,7 +58,7 @@ describe('Next up: the lead mission comes up to the top of the tab', () => {
     const lead = tabLeadMission(state, 'master-keys', 'recon');
     const html = renderDistrict(state, 'master-keys', 'recon');
     expect(html).toContain('next-up--simple');
-    expect(html).toMatch(new RegExp(`<span class="next-up-label">Next:</span> <span class="next-up-name">${lead.title}</span>`));
+    expect(html).toMatch(new RegExp(`<span class="next-up-label">Next:</span> <span class="next-up-name">${simpleTitle(lead)}</span>`));
   });
 
   it('Advanced keeps a NEXT UP label', () => {

@@ -25,6 +25,9 @@ import { nextAvailableMission } from '../../src/screens/city-map.js';
 import { milestoneCardLine } from '../../src/utils/milestone-card.js';
 import { yourPart } from '../../src/utils/collective.js';
 import { renderCityTogether } from '../../src/screens/city-together.js';
+import { setReadLevel } from '../../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 beforeEach(() => {
   const store = {};
@@ -117,7 +120,7 @@ describe('promise 4: old saves keep district %, gates, buildings, picker', () =>
     for (const other of MONEY.filter((a) => a !== 'primary_bank')) {
       expect(getAccountPhaseGate(s, 'vault', other, 'recon').unlocked, other).toBe(false);
     }
-    const html = renderDistrict(s, 'vault', 'fortify');
+    const html = renderDistrict(adv(s), 'vault', 'fortify');
     expect(html).toMatch(/Complete RECON for Credit Card Portal first/);
     expect(html).not.toMatch(/Complete RECON for Bank first/);
   });

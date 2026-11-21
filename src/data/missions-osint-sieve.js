@@ -27,6 +27,7 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Photo Intelligence',
+    simpleTitle: 'See what your photos give away', // Simple mode's name (utils/reading.js)
     briefing: "An OSINT investigator starts with your photos. They reverse-image-search your profile picture to find every platform you're on. They zoom into backgrounds looking for house numbers, street signs, license plates, and reflections. They run your landscape photos through AI geolocation tools that can pinpoint a location from a single image. They check if your photos still have EXIF metadata with GPS coordinates baked in. Let's see what they'd find.",
     steps: [
       { text: "Reverse image search your main profile photo — drag it into Google Images and see where else it appears", url: "https://images.google.com/" },
@@ -57,6 +58,7 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Behavioral Patterns',
+    simpleTitle: 'See what your posts show about your days', // Simple mode's name (utils/reading.js)
     briefing: "Your posting habits reveal your life's rhythm. An investigator looks at WHEN you post to determine your timezone and daily routine — morning posts reveal when you wake up, gaps reveal your work hours, late-night posts show when you sleep. They look at WHERE you post from — the same café tagged three times a week, the gym selfie with the gym name visible, the office building in the background of your lunch photo. Repeated locations build a map of your daily life. Let's see what pattern your posts paint.",
     steps: [
       { text: "Open your most active social media account" },
@@ -88,6 +90,7 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Social Graph',
+    simpleTitle: 'See what your friends give away about you', // Simple mode's name (utils/reading.js)
     briefing: "You might lock down your own profile, but your connections leak information about you. An investigator maps your social graph — your followers, your tagged photos, your most frequent commenters — to identify your family members, your partner, your workplace, your friend group. They find your mom's unlocked Facebook, your partner's public Instagram, your colleague who tags the whole team at the office holiday party. Your privacy is only as strong as the weakest link in your social circle.",
     steps: [
       { text: "Check your followers/following list. On a public account, this reveals who you know. Can someone identify your family, partner, or coworkers from the list?" },
@@ -119,6 +122,7 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Cross-Platform',
+    simpleTitle: 'See if a stranger can tie your accounts to you', // Simple mode's name (utils/reading.js)
     briefing: "An investigator's favorite trick: you're careful on Instagram but sloppy on Reddit. You use your real name on LinkedIn but a pseudonym on Twitter — except the same profile photo links them. You use the same username on GitHub and a gaming forum, and the gaming forum has your city in the bio. Cross-platform correlation is how anonymous accounts get de-anonymized. Let's see if your accounts are linkable.",
     steps: [
       { text: "Search your primary username on a username checker — see how many platforms it appears on", url: "https://namechk.com/" },
@@ -150,6 +154,7 @@ export const OSINT_SIEVE_MISSIONS = [
     accountId: 'device_security',
     phase: 'fortify',
     title: 'OSINT Sieve: Digital Breadcrumbs',
+    simpleTitle: 'See the trail you leave without thinking', // Simple mode's name (utils/reading.js)
     briefing: "The trail you leave without thinking about it. An Amazon list you made public, or shared, can show your name and city (Amazon makes new lists private unless you choose otherwise). Your Venmo transactions were public, showing who you pay and when. Your Strava running route goes right past your front door. Screenshots you share show your WiFi network name, which maps to your physical address. Unboxing videos show delivery labels with your full name and address. These aren't social media posts — they're ambient data you scatter just by living a digital life.",
     steps: [
       { text: "Check your Amazon lists: go to Your Lists and look at each list's privacy setting. Any you made public or shared? Does it show your city?", url: "https://www.amazon.com/hz/wishlist/ls" },

@@ -18,6 +18,9 @@ import { yourPart } from '../../src/utils/collective.js';
 import { renderDebrief } from '../../src/screens/debrief.js';
 import { renderBriefing } from '../../src/screens/briefing.js';
 import { renderDistrict } from '../../src/screens/district.js';
+import { setReadLevel } from '../../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 beforeEach(() => {
   const store = {};
@@ -330,7 +333,7 @@ describe('P4 car privacy report', () => {
   });
 
   it('two cars show the report once', () => {
-    const html = renderDistrict(only(['car_gm', 'car_vw']), 'freeway', 'recon');
+    const html = renderDistrict(adv(only(['car_gm', 'car_vw'])), 'freeway', 'recon');
     expect(html.split('Vehicle Privacy Report').length - 1).toBe(1);
   });
 
