@@ -7,6 +7,9 @@ import { QUICK_QUESTS } from '../src/data/quests.js';
 import { DISTRICTS } from '../src/data/districts.js';
 import { countWords, splitWords } from '../src/components/deck.js';
 import { onPage, phoneHtml } from './helpers/on-page.mjs';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 const CSS = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
 const TRIM_CSS = CSS.slice(CSS.indexOf('/* trim pass: start */'), CSS.indexOf('/* trim pass: end */'));
@@ -71,7 +74,7 @@ describe('every string from the data that these screens draw reaches the page, a
 
   it('the Reclamation: its facilities and their missions', () => {
     const d = DISTRICTS.find((x) => x.id === 'reclamation');
-    const html = renderDistrict(createInitialState(), 'reclamation');
+    const html = renderDistrict(adv(createInitialState()), 'reclamation');
     const accounts = Object.entries(ACCOUNTS).filter(([, a]) => a.district === 'reclamation');
     both(html, [d.name, d.description, DISTRICT_DIALOGUE.reclamation?.intro, ...accounts.map(([, a]) => a.name),
       ...getMissionsForDistrict('reclamation').filter((m) => !m.legacy && accounts.some(([id]) => id === m.accountId)).map((m) => m.title)], 'reclamation');
@@ -218,7 +221,7 @@ describe('surveys: one question and a grid of chips on a phone', async () => {
   });
 
   it("a facility's title is not said twice on a phone: its building's own label hides there", () => {
-    const html = renderDistrict(createInitialState(), 'reclamation');
+    const html = renderDistrict(adv(createInitialState()), 'reclamation');
     expect(html).toContain('<span class="facility-icon">');
     expect(TRIM_CSS).toMatch(/@media \(max-width: 899px\) \{ \.facility-icon > div > div:last-child[,\s]/);
   });

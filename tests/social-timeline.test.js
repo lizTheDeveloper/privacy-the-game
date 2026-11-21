@@ -8,6 +8,9 @@ import { renderTimeline, renderSocialForm, renderEraQuestions } from '../src/scr
 import { socialProfileFromForm, timelineNote, timelineRank, getEras, ERA_MISSIONS } from '../src/utils/social-timeline.js';
 import { MISSIONS } from '../src/data/missions.js';
 import { textOf } from './helpers/on-page.mjs';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 const NOW = new Date();
 const YEAR = NOW.getFullYear();
@@ -57,7 +60,7 @@ describe('what the answers do on Reclaim', () => {
   });
 
   it('the busiest era and platform come first on the Square Reclaim tab, with its years shown', () => {
-    const s = player();
+    const s = adv(player());
     const before = renderDistrict(s, 'square', 'reclaim');
     const order = (html) => [...html.matchAll(/href="#\/mission\/([^/"]+)\/briefing"/g)].map((m) => m[1]);
     // Without answers: the data's order (Instagram's general privacy mission before its eras).

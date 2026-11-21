@@ -8,6 +8,9 @@ import { renderCityMap } from '../src/screens/city-map.js';
 import { renderDistrict } from '../src/screens/district.js';
 import { getMissionsForDistrict } from '../src/data/missions.js';
 import { createInitialState, updateMission } from '../src/state.js';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 // Core missions every player has. The password-manager report is core too,
 // but only for players who say they use a manager (mission.unlock).
@@ -61,7 +64,7 @@ describe('MUL-38 Chapter 1 core/bonus split', () => {
   });
 
   it('district recon list badges the bonus login-history mission', () => {
-    const html = renderDistrict(createInitialState(), 'master-keys', 'recon');
+    const html = renderDistrict(adv(createInitialState()), 'master-keys', 'recon');
     expect(html).toContain('#/mission/yahoo-recon-login/briefing');
     expect(html).toContain('BONUS');
   });

@@ -15,16 +15,17 @@ const COLOURS = {
 };
 
 // tall: 44px badges (a building's page). Elsewhere the small inline ones, as they were.
-export function prismTag(accountId, { tall = false } = {}) {
+// simple: Simple mode, where a leak with a plain badge (simpleBadge) shows that instead.
+export function prismTag(accountId, { tall = false, simple = false } = {}) {
   const size = tall ? TALL : '';
   const l = prismLabel(accountId, ACCOUNTS);
-  if (!l) return leakTags(accountId, size);
+  if (!l) return leakTags(accountId, size, simple);
   const name = ACCOUNTS[accountId]?.name ?? accountId;
   const why = l.kind === 'named' ? `${name} is run by ${l.company}, in PRISM since ${l.since}`
     : l.kind === 'next' ? `${l.company} was next on the PRISM slides`
     : `${name} runs over the internet cables the NSA taps`;
   const prism = `<a class="prism-tag prism-tag--${l.kind}" href="#/prism" aria-label="${why}: see the PRISM map" style="${TAG};${COLOURS[l.kind]}${size}"><span aria-hidden="true">◈</span>${l.text}</a>`;
-  return prism + leakTags(accountId, size);
+  return prism + leakTags(accountId, size, simple);
 }
 
 // How many badges prismTag draws for this account: its PRISM label (if any) and each leak.
@@ -34,8 +35,8 @@ export function prismTagCount(accountId) {
 
 // Every leak, program or case that names this entry (an account, or a district topic like Location
 // Data Brokers): a badge each, to its own page of sources.
-function leakTags(accountId, size = '') {
-  return leaksForAccount(accountId).map((e) => `<a class="prism-tag leak-tag" href="#/leak/${e.id}" aria-label="${e.title}: ${e.agency}, ${e.year}. See its sources" style="${TAG};${COLOURS.named}${size}"><span aria-hidden="true">◈</span>${e.badge}</a>`).join('');
+function leakTags(accountId, size = '', simple = false) {
+  return leaksForAccount(accountId).map((e) => `<a class="prism-tag leak-tag" href="#/leak/${e.id}" aria-label="${e.title}: ${e.agency}, ${e.year}. See its sources" style="${TAG};${COLOURS.named}${size}"><span aria-hidden="true">◈</span>${(simple && e.simpleBadge) || e.badge}</a>`).join('');
 }
 
 // The phone survey chips are buttons, so they get a mark, not a link: solid for PRISM, hollow for upstream.

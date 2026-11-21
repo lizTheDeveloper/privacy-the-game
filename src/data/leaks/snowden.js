@@ -502,6 +502,9 @@ export const LEAKS_SNOWDEN = Object.freeze([
   {
     id: 'ant-catalog',
     badge: 'ANT CATALOG',
+    // Simple mode's badge (components/prism-tag.js): the catalog is the NSA's list of tools that
+    // break into phones, computers and routers.
+    simpleBadge: 'NSA SPY TOOLS',
     title: 'The NSA ANT catalog',
     agency: 'NSA (Tailored Access Operations)',
     leak: 'reporting',

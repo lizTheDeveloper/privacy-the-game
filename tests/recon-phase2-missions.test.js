@@ -18,6 +18,9 @@ import { renderDebrief, debriefReaction } from '../src/screens/debrief.js';
 import { renderBriefing } from '../src/screens/briefing.js';
 import { nextAvailableMission } from '../src/screens/city-map.js';
 import { DISTRICTS } from '../src/data/districts.js';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 beforeEach(() => {
   const store = {};
@@ -108,7 +111,7 @@ describe('legacy missions are hidden but keep counting', () => {
   it('the new recon shows in its district’s recon list', () => {
     const s = allOn();
     for (const m of RECON_ACCOUNT_MISSIONS) {
-      expect(renderDistrict(s, missionDistrict(m), 'recon'), m.id).toContain(`#/mission/${m.id}/briefing`);
+      expect(renderDistrict(adv(s), missionDistrict(m), 'recon'), m.id).toContain(`#/mission/${m.id}/briefing`);
     }
   });
 

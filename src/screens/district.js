@@ -1,10 +1,10 @@
 import { prismTag, prismMark } from '../components/prism-tag.js';
 import { fillBar } from '../components/fill-bar.js';
-import { visibleSteps, progressFor, progressLabel, readLevel } from '../utils/reading.js';
+import { visibleSteps, progressFor, progressLabel, readLevel, simpleTitle, simpleLead } from '../utils/reading.js';
 import { DISTRICTS, haveAccount } from '../data/districts.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { getMissionsForDistrict, missionDistrict } from '../data/missions.js';
-import { calcDistrictProgress, getAccountPhaseGate, getBuildingState } from '../utils/calc.js';
+import { calcDistrictProgress, getAccountPhaseGate, getBuildingState, PART_NAMES } from '../utils/calc.js';
 import { renderHud } from '../components/hud.js';
 import { renderScout } from '../components/scout.js';
 import { renderBuilding } from '../components/building.js';
@@ -124,12 +124,23 @@ function renderAlliesSection(districtId) {
   </div>`;
 }
 
+// simple: the tab's name in Simple mode (Liz 2026-11-20, "Simple only"), the same words as What's
+// next's parts (utils/calc.js PART_NAMES). The tab URLs stay ?tab=recon and so on.
 const PHASES = [
-  { id: 'survey', label: 'SURVEY' },
-  { id: 'recon', label: 'RECON' },
-  { id: 'fortify', label: 'FORTIFY' },
-  { id: 'reclaim', label: 'RECLAIM' },
+  { id: 'survey', label: 'SURVEY', simple: 'Your accounts' },
+  { id: 'recon', label: 'RECON', simple: PART_NAMES.recon },
+  { id: 'fortify', label: 'FORTIFY', simple: PART_NAMES.fortify },
+  { id: 'reclaim', label: 'RECLAIM', simple: PART_NAMES.reclaim },
 ];
+
+const isSimple = (state) => readLevel(state) === 'simplest';
+
+// A mission's name on the district: in Simple mode its Simple name (utils/reading.js), with its plain
+// line under it to say what it does ("Gmail" / "Find out if your Gmail address or password has
+// leaked."); a mission with no plain line (an account the player added) keeps its whole title.
+function missionName(state, mission) {
+  return isSimple(state) && simpleLead(mission) ? simpleTitle(mission) : mission.title;
+}
 
 // A building is tappable when it has an interior and the player has it.
 function interiorHref(state, id) {
@@ -222,11 +233,16 @@ function renderNotFound() {
   </div>`;
 }
 
-function renderTabs(districtId, activeTab) {
+// Simple: the plain names, in the body font, on up to two lines, four across a phone.
+function renderTabs(state, districtId, activeTab) {
+  const simple = isSimple(state);
+  const type = simple
+    ? 'padding: 6px 4px; font-size: 13px; font-weight: 600; line-height: 1.2;'
+    : 'padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px;';
   const tabs = PHASES.map((phase) => {
     const active = phase.id === activeTab;
     return `
-    <a href="#/district/${districtId}?tab=${phase.id}" class="panel district-tab${active ? ' panel--active' : ''}" style="flex: 1 1 0; min-width: 0; text-align: center; padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : 'var(--text-dim)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${phase.label}</a>`;
+    <a href="#/district/${districtId}?tab=${phase.id}" class="panel district-tab${simple ? ' district-tab--simple' : ''}${active ? ' panel--active' : ''}"${active ? ' aria-current="page"' : ''} style="flex: 1 1 0; min-width: 0; text-align: center; ${type} text-decoration: none; border-bottom: 2px solid ${active ? 'var(--cyan)' : 'transparent'}; color: ${active ? 'var(--cyan)' : simple ? 'var(--text-quiet)' : 'var(--text-dim)'}; background: ${active ? 'rgba(0,229,255,0.04)' : 'transparent'};">${simple ? esc(phase.simple) : phase.label}</a>`;
   });
   return `
   <div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 24px 0;">
@@ -252,7 +268,7 @@ function renderDisabledPanel(districtId) {
 // that does something in place (TURN ON THE FIELD, a switch, a chip) stays where it is.
 // Simple reads "Next: <mission>"; Advanced keeps the NEXT UP label.
 export function renderNextUp(state, { name, label, href, where = '', kind = 'mission' }) {
-  const simple = readLevel(state) === 'simplest';
+  const simple = isSimple(state);
   const plain = label.charAt(0) + label.slice(1).toLowerCase();
   const whereNote = where ? `<span class="next-up-where">${esc(where)}</span>` : '';
   return `
@@ -294,6 +310,7 @@ function bright(el, on) {
 // its lit edge and an outlined twin, which becomes the bright one again when the row is on the
 // first screen anyway (settleNextUp).
 function renderMissionRow(state, mission, { lead = true, hoisted = false } = {}) {
+  const simple = isSimple(state);
   const record = state.missions[mission.id];
   const notNeeded = record?.status === 'not-needed';
   const completed = isMissionDone(record);
@@ -330,7 +347,8 @@ function renderMissionRow(state, mission, { lead = true, hoisted = false } = {})
   <div class="mission-row${dimmed ? ' mission-row--done' : lead ? ' mission-row--lead' : ' mission-row--rest'}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px;">
     ${missionIcon(state, mission)}
     <div class="mission-text" style="flex: 1; min-width: 0;">
-      <div style="font-size: 14px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(mission.title)}</div>
+      <div style="font-size: ${simple ? 16 : 14}px; font-weight: ${dimmed ? 400 : 600}; color: ${dimmed ? 'rgba(237,239,243,0.6)' : 'var(--offwhite)'};">${esc(missionName(state, mission))}</div>
+      ${simple && !completed && simpleLead(mission) ? `<div class="mission-about">${esc(simpleLead(mission))}</div>` : ''}
       ${summary ? `<div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${esc(summary)}</div>` : ''}
       ${stepsStarted ? missionProgressLine(steps, mission.id) : ''}
       ${timeline ? `<div data-timeline-note class="mission-note" style="font-size: 11px; margin-top: 2px;">${esc(timeline)}</div>` : ''}
@@ -368,9 +386,15 @@ function renderCustomMissions(state, districtId, activeTab) {
   </div>`;
 }
 
-function renderMissionList(state, districtId, activeTab, { hoisted = false } = {}) {
-  return renderGameMissionList(state, districtId, activeTab, Boolean(customMissionsFor(state, districtId).some((m) => m.phase === activeTab)), hoisted)
+function renderMissionList(state, districtId, activeTab, { hoisted = false, openLists = null } = {}) {
+  const hasCustom = customMissionsFor(state, districtId).some((m) => m.phase === activeTab);
+  return renderGameMissionList(state, districtId, activeTab, { hasCustom, hoisted, showAll: Boolean(openLists?.has?.(listKey(districtId, activeTab))) })
     + renderCustomMissions(state, districtId, activeTab);
+}
+
+// The key a tab's "Show all" is remembered by (app.js keeps the open ones in memory, never in the save).
+export function listKey(districtId, tab) {
+  return `${districtId}:${tab}`;
 }
 
 // The game's missions on a tab, in list order: bonus ones last; on Reclaim, the Social Timeline's
@@ -395,7 +419,77 @@ export function tabLeadMission(state, districtId, activeTab) {
   return missions.find((m) => open(m) && begun(m)) || missions.find((m) => open(m) && !m.optional) || missions.find(open) || null;
 }
 
-function renderGameMissionList(state, districtId, activeTab, hasCustom, hoisted = false) {
+// A "Complete RECON first" row: the account's missions on this tab wait on the phase before it.
+// Simple names the tab by its plain name and says it in two short lines.
+function gateRow(state, districtId, activeTab, accountId, gate) {
+  const prereq = PHASE_PREREQ[activeTab];
+  const accountName = esc(ACCOUNTS[accountId]?.name || accountId);
+  const simple = isSimple(state);
+  const plainPrereq = PHASES.find((p) => p.id === prereq).simple;
+  const title = simple ? `First: “${esc(plainPrereq)}” for ${accountName}` : `Complete ${prereq.toUpperCase()} for ${accountName} first`;
+  const note = simple
+    ? `${gate.remaining} more mission${gate.remaining === 1 ? '' : 's'} there, then these open.`
+    : `Finish the remaining ${gate.remaining} ${prereq} mission${gate.remaining === 1 ? '' : 's'} for ${accountName} to unlock ${activeTab.toUpperCase()} for this building. Buildings you have fully cleared in ${prereq.toUpperCase()} stay open.`;
+  return `
+      <div class="mission-row mission-row--gate" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05);">
+        ${renderBuilding(accountId, getBuildingState(state, accountId), 32, simple ? { showName: false } : {})}
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: ${simple ? 15 : 13}px; font-weight: 600; color: ${simple ? 'var(--offwhite)' : 'rgba(237,239,243,0.6)'};">${title}</div>
+          <div style="font-size: ${simple ? 14 : 11}px; color: ${simple ? 'var(--text-quiet)' : 'rgba(237,239,243,0.35)'}; margin-top: 2px;">${note}</div>
+        </div>
+        <a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; white-space: nowrap;" href="#/district/${districtId}?tab=${prereq}">${simple ? 'GO THERE' : `GO TO ${prereq.toUpperCase()}`}</a>
+      </div>`;
+}
+
+// A tab's list, as items in list order: a mission's row, or (on Fortify and Reclaim) one row for an
+// account whose missions wait on the phase before.
+function tabItems(state, districtId, activeTab, missions, row) {
+  const prereq = PHASE_PREREQ[activeTab];
+  if (!prereq) return missions.map((m) => ({ mission: m, html: row(m) }));
+  const byAccount = new Map();
+  for (const m of missions) {
+    if (!byAccount.has(m.accountId)) byAccount.set(m.accountId, []);
+    byAccount.get(m.accountId).push(m);
+  }
+  return [...byAccount.entries()].flatMap(([accountId, accountMissions]) => {
+    const gate = getAccountPhaseGate(state, districtId, accountId, prereq);
+    if (gate.unlocked) return accountMissions.map((m) => ({ mission: m, html: row(m) }));
+    return [{ gate: accountId, html: gateRow(state, districtId, activeTab, accountId, gate) }];
+  });
+}
+
+// How many missions a Simple tab shows before "Show all": the lit one and the next two.
+export const SIMPLE_LIST_SHOWN = 3;
+
+// Simple mode's list (Liz 2026-11-20, "Simple only"): a tab held up to 18 rows that all looked the
+// same. It shows the lit mission and the next two not done yet; "Show all N" opens today's list in
+// place (showAll), and the missions already done wait in a folded "Done (N)" at the end.
+// Nothing is removed: every mission is one tap away.
+function simpleFolded(state, districtId, activeTab, missions, items, leadId) {
+  const isDone = (item) => item.mission && isMissionDone(state.missions[item.mission.id]);
+  const open = items.filter((item) => !isDone(item));
+  const done = items.filter(isDone);
+  const at = open.findIndex((item) => item.mission?.id === leadId);
+  const order = at > -1 ? [...open.slice(at), ...open.slice(0, at)] : open;
+  const shown = order.slice(0, SIMPLE_LIST_SHOWN);
+  const hidden = open.length - shown.length;
+  const bonusShown = shown.some((item) => item.mission?.optional);
+  const list = shown.length
+    ? `<div class="panel" style="padding: 4px;">${shown.map((item) => item.html).join('')}</div>`
+    : `<div class="list-all-done" data-list-all-done>You did every mission here.</div>`;
+  const more = hidden > 0
+    ? `<button type="button" class="list-more" data-action="show-all-missions" data-list="${listKey(districtId, activeTab)}" aria-expanded="false">Show all ${missions.length}</button>`
+    : '';
+  const doneFold = done.length
+    ? `<details class="done-fold" data-fold="done:${listKey(districtId, activeTab)}" data-done-fold>
+        <summary>Done (${done.length})</summary>
+        <div class="panel" style="padding: 4px; margin-top: 8px;">${done.map((item) => item.html).join('')}</div>
+      </details>`
+    : '';
+  return { list, more, doneFold, bonusShown };
+}
+
+function renderGameMissionList(state, districtId, activeTab, { hasCustom = false, hoisted = false, showAll = false } = {}) {
   const missions = tabMissions(state, districtId, activeTab);
   if (missions.length === 0) {
     if (hasCustom) return '';
@@ -410,44 +504,29 @@ function renderGameMissionList(state, districtId, activeTab, hasCustom, hoisted 
   const bonusNote = missions.some((m) => m.optional)
     ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
     : '';
-  const prereq = PHASE_PREREQ[activeTab];
-  if (prereq) {
-    const byAccount = new Map();
-    for (const m of missions) {
-      if (!byAccount.has(m.accountId)) byAccount.set(m.accountId, []);
-      byAccount.get(m.accountId).push(m);
-    }
-    const blocks = [...byAccount.entries()].map(([accountId, accountMissions]) => {
-      const gate = getAccountPhaseGate(state, districtId, accountId, prereq);
-      if (gate.unlocked) {
-        return accountMissions.map(row).join('');
-      }
-      const accountName = ACCOUNTS[accountId]?.name || accountId;
-      return `
-      <div class="mission-row" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(0,229,255,0.05);">
-        ${renderBuilding(accountId, getBuildingState(state, accountId), 32)}
-        <div style="flex: 1; min-width: 0;">
-          <div style="font-size: 13px; font-weight: 600; color: rgba(237,239,243,0.6);">Complete ${prereq.toUpperCase()} for ${esc(accountName)} first</div>
-          <div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">Finish the remaining ${gate.remaining} ${prereq} mission${gate.remaining === 1 ? '' : 's'} for ${esc(accountName)} to unlock ${activeTab.toUpperCase()} for this building. Buildings you have fully cleared in ${prereq.toUpperCase()} stay open.</div>
-        </div>
-        <a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; white-space: nowrap;" href="#/district/${districtId}?tab=${prereq}">GO TO ${prereq.toUpperCase()}</a>
-      </div>`;
-    }).join('');
+  const items = tabItems(state, districtId, activeTab, missions, row);
+  if (isSimple(state) && !showAll) {
+    const { list, more, doneFold, bonusShown } = simpleFolded(state, districtId, activeTab, missions, items, leadId);
     return `
-    <div style="padding: 12px 24px 24px;">
-      ${bonusNote}
-      <div class="panel" style="padding: 4px;">
-        ${blocks}
-      </div>
+    <div class="mission-list mission-list--folded" data-mission-list="folded" style="padding: 12px 24px 24px;">
+      ${bonusShown ? bonusNote : ''}
+      ${list}
+      ${more}
+      ${doneFold}
     </div>`;
   }
+  // Today's list: every mission in order. In Simple, opened with "Show all", it can fold back.
+  const fewer = isSimple(state)
+    ? `<button type="button" class="list-more" data-action="show-fewer-missions" data-list="${listKey(districtId, activeTab)}" aria-expanded="true">Show fewer</button>`
+    : '';
   return `
-  <div style="padding: 12px 24px 24px;">
-    ${bonusNote}
-    <div class="panel" style="padding: 4px;">
-      ${missions.map(row).join('')}
-    </div>
-  </div>`;
+    <div class="mission-list" data-mission-list="all" style="padding: 12px 24px 24px;">
+      ${bonusNote}
+      <div class="panel" style="padding: 4px;">
+        ${items.map((item) => item.html).join('')}
+      </div>
+      ${fewer}
+    </div>`;
 }
 
 // The one question over a phone's chip grid: what each row asks, of all of them at once.
@@ -567,6 +646,13 @@ export function facilityBadge(completed, total) {
   return completed > 0 ? `${completed}/${total}` : 'READY';
 }
 
+// A facility's (or the training's) status. READY is plain grey text: in a bordered box it looked like a
+// button (Liz's layout audit, 2026-11-20, both modes). A count or SECURED keeps its badge.
+function statusTag(text, color, attrs = '') {
+  if (text === 'READY') return `<div class="status-quiet"${attrs}>READY</div>`;
+  return `<div class="badge"${attrs} style="letter-spacing: 1px; color: ${color}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${text}</div>`;
+}
+
 // The phishing quiz's badge counts right answers, not answers: a wrong answer is
 // practice, not progress. "n/12 RIGHT" until the curated set is answered; then
 // TRAINED only with every message right, else the score stands as it is.
@@ -600,7 +686,7 @@ function renderQuizPanel(state, lead = false, hoisted = false) {
       <div data-quiz-panel style="padding: 16px; text-align: center; border-top: 1px solid rgba(0,229,255,0.08);">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
           <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">PHISHING TRAINING</div>
-          <div class="badge" data-quiz-badge style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${badge}</div>
+          ${statusTag(badge, statusColor, ' data-quiz-badge')}
         </div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
           Real or fake? Identify phishing emails, texts, calls, and push notifications.
@@ -634,6 +720,7 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
   const pctWidth = total > 0 ? Math.round((completed / total) * 100) : 0;
   const statusColor = allDone ? 'var(--lime)' : 'var(--text-quiet)';
   const statusText = facilityBadge(completed, total);
+  const simple = isSimple(state);
 
   const missionRows = missions.map((m) => {
     const record = state.missions[m.id];
@@ -662,7 +749,8 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
     <div class="facility-row${m.id === leadId ? ' facility-row--lead' : ''}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
       <div style="${dim} font-family: var(--font-mono); font-size: 10px; color: ${done ? 'var(--lime)' : 'var(--text-dim)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
       <div style="${dim} flex: 1; min-width: 0;">
-        <div style="font-size: 13px; font-weight: ${done ? 400 : 500}; color: ${done ? 'rgba(237,239,243,0.5)' : 'var(--offwhite)'};">${esc(m.title)}</div>
+        <div style="font-size: ${simple ? 16 : 13}px; font-weight: ${done ? 400 : 500}; color: ${done ? 'rgba(237,239,243,0.5)' : 'var(--offwhite)'};">${esc(missionName(state, m))}</div>
+        ${simple && !done && simpleLead(m) ? `<div class="mission-about">${esc(simpleLead(m))}</div>` : ''}
         ${summary ? `<div class="quiet-note" style="font-size: 10px; margin-top: 2px;">${esc(summary)}</div>` : ''}
       </div>
       <div class="mission-min" style="${dim} font-family: var(--font-mono); font-size: 10px;">~${m.estimatedMinutes}m</div>
@@ -677,12 +765,12 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
       <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
         <span class="facility-icon">${renderBuilding(facilityId, buildingState, 40)}</span>
         <div style="flex: 1; min-width: 0;">
-          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId)}</div>
+          <div style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 1px;">${esc(account.name)}${prismTag(facilityId, { simple })}</div>
           <div style="margin-top: 6px; height: 3px; background: rgba(255,255,255,0.06); overflow: hidden;">
             <div style="width: ${pctWidth}%; height: 100%; background: ${allDone ? 'var(--lime)' : 'var(--cyan)'}; transition: width 300ms;"></div>
           </div>
         </div>
-        <div class="badge" style="letter-spacing: 1px; color: ${statusColor}; background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.15);">${statusText}</div>
+        ${statusTag(statusText, statusColor)}
       </div>
       <div>
         ${missionRows}
@@ -756,7 +844,7 @@ function facilityNextUp(state, district, facilityOrder, leadId) {
   if (leadId) {
     const m = getMissionsForDistrict(district.id).find((x) => x.id === leadId);
     const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
-    return renderNextUp(state, { name: m.title, label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing` });
+    return renderNextUp(state, { name: missionName(state, m), label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing` });
   }
   if (facilityOrder.includes('scam_defense') && ACCOUNTS.scam_defense) {
     return renderNextUp(state, { name: 'Phishing training', label: quizButtonLabel(state.phishingQuiz), href: '#/quiz/phishing' });
@@ -852,23 +940,30 @@ export function milestoneSeen(state, districtId) {
 // tab is a dead end"): the lead of the next tab that has one (then an earlier one), else the
 // milestone if it hasn't been seen, else What's next (Simple) or the district the next mission is in.
 // A district already taken back doesn't send the player to a bonus mission first.
+// A tab whose missions wait on the phase before ("Complete RECON first", Liz 2026-11-20: "Yes") points
+// to that phase's lead first, so the one bright button leads to what opens this tab.
 export function afterTab(state, district, activeTab, progress = calcDistrictProgress(state, district.id)) {
   const at = TAB_ORDER.indexOf(activeTab);
-  const order = [...TAB_ORDER.slice(at + 1), ...TAB_ORDER.slice(0, Math.max(at, 0))];
+  let order = [...TAB_ORDER.slice(at + 1), ...TAB_ORDER.slice(0, Math.max(at, 0))];
+  const prereq = PHASE_PREREQ[activeTab];
+  if (prereq && tabMissions(state, district.id, activeTab).some((m) => !getAccountPhaseGate(state, district.id, m.accountId, prereq).unlocked)) {
+    order = [prereq, ...order.filter((tab) => tab !== prereq)];
+  }
   const secured = progress.total > 0 && progress.percent >= 100;
   for (const tab of order) {
     const m = tabLeadMission(state, district.id, tab);
     if (!m || (secured && m.optional)) continue;
     const begun = progressFor(state, m.id, visibleSteps(m, state)).handled > 0;
-    const label = PHASES.find((p) => p.id === tab).label;
-    return { name: m.title, label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing`, where: `${label.charAt(0)}${label.slice(1).toLowerCase()} tab`, kind: 'tab' };
+    const phase = PHASES.find((p) => p.id === tab);
+    const where = isSimple(state) ? `On “${phase.simple}”` : `${phase.label.charAt(0)}${phase.label.slice(1).toLowerCase()} tab`;
+    return { name: missionName(state, m), label: begun ? 'CONTINUE' : 'START', href: `#/mission/${m.id}/briefing`, where, kind: 'tab' };
   }
   if (secured && !milestoneSeen(state, district.id)) {
     return { name: `You took back ${district.name}`, label: 'SEE IT', href: `#/milestone/${district.id}`, kind: 'milestone' };
   }
   // Every mission done but flagged passwords left (Q1): their SAVE, in place, is the next thing.
   if (progress.resets?.left > 0) return null;
-  if (readLevel(state) === 'simplest') return { name: 'What’s next', label: 'GO', href: '#/next', kind: 'next' };
+  if (isSimple(state)) return { name: 'What’s next', label: 'GO', href: '#/next', kind: 'next' };
   const nextId = nextDistrictId(state);
   const next = nextId && nextId !== district.id ? DISTRICTS.find((d) => d.id === nextId) : null;
   if (next) return { name: next.name, label: 'GO', href: `#/district/${next.id}`, kind: 'district' };
@@ -876,7 +971,8 @@ export function afterTab(state, district, activeTab, progress = calcDistrictProg
 }
 
 // firstVisit: this is the player's first visit to the district (app.js knows; else the save says).
-export function renderDistrict(state, districtId, activeTab, { reaction = null, notMine = null, firstVisit } = {}) {
+// openLists: the tabs whose Simple list the player opened with "Show all" (listKey; app.js).
+export function renderDistrict(state, districtId, activeTab, { reaction = null, notMine = null, firstVisit, openLists = null } = {}) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   if (!district) return renderNotFound();
   const first = firstVisit ?? !districtVisited(state, districtId);
@@ -907,7 +1003,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
   const lead = listTab ? tabLeadMission(state, districtId, activeTab) : null;
   const leadBegun = lead && progressFor(state, lead.id, visibleSteps(lead, state)).handled > 0;
   const nextUp = lead
-    ? renderNextUp(state, { name: lead.title, label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` })
+    ? renderNextUp(state, { name: missionName(state, lead), label: leadBegun ? 'CONTINUE' : 'START', href: `#/mission/${lead.id}/briefing` })
     : listTab ? nextUpAfterTab(state, afterTab(state, district, activeTab, progress)) : '';
   const hoisted = Boolean(lead);
 
@@ -937,13 +1033,13 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
         <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
       </div>
     </div>`;
-    content = timelineBanner + renderMissionList(state, districtId, activeTab, { hoisted });
+    content = timelineBanner + renderMissionList(state, districtId, activeTab, { hoisted, openLists });
   } else if (allDisabled && activeTab !== 'survey') {
     content = renderDisabledPanel(districtId) + renderCustomMissions(state, districtId, activeTab);
   } else if (activeTab === 'survey') {
     content = renderSurvey(state, districtId, districtAccounts, allDisabled);
   } else {
-    content = renderMissionList(state, districtId, activeTab, { hoisted });
+    content = renderMissionList(state, districtId, activeTab, { hoisted, openLists });
   }
 
   return `
@@ -975,7 +1071,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
         ${buildings}
       </div>
     </div>
-    ${renderTabs(districtId, activeTab)}
+    ${renderTabs(state, districtId, activeTab)}
     ${content}
     ${districtNotes(state, districtId, first)}
     ${progress.percent >= 100 ? renderAlliesSection(districtId) : ''}

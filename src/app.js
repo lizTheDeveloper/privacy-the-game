@@ -208,12 +208,17 @@ function loadWhoami() {
   });
 }
 
+// The district tabs whose Simple list was opened with "Show all" (screens/district.js listKey). In
+// memory only: a new visit to the game starts with the short list.
+const openLists = new Set();
+
 const screens = {
   city: () => renderCityMap(state, { collective: collectiveView, whoami: whoamiView, arrival: cityArrival, welcomeBack }),
   district: ({ id, tab }) => renderDistrict(state, id, tab, {
     reaction: landingReaction?.landed && landingReaction.districtId === id ? landingReaction.reaction : null,
     notMine: notMine.hash === location.hash ? notMine.id : null,
     firstVisit: districtVisit?.id === id ? districtVisit.first : undefined,
+    openLists,
   }),
   passwords: ({ from }) => renderPasswordFinder(state, { from: from && findMission(state, from) ? from : null }),
   next: () => renderNext(state, { filed: justFiled, notMine: notMine.hash === location.hash ? notMine.id : null }),
@@ -1675,6 +1680,12 @@ app.addEventListener('click', async (e) => {
     if (!have) state.customAccounts[districtId].push(name);
     setState(state);
     renderCurrentRoute();
+  } else if (action === 'show-all-missions' || action === 'show-fewer-missions') {
+    // The rest of the list opens (or folds back) in place: the page re-draws where it is.
+    if (action === 'show-all-missions') openLists.add(el.dataset.list);
+    else openLists.delete(el.dataset.list);
+    renderCurrentRoute();
+    if (action === 'show-fewer-missions') app.querySelector('[data-action="show-all-missions"]')?.focus?.();
   } else if (action === 'dismiss-intro') {
     const districtId = el.dataset.district;
     if (!state.seenIntros) state.seenIntros = {};

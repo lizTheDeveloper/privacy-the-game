@@ -95,6 +95,7 @@ export const GRID_MISSIONS = [
     accountId: "smart_tv",
     phase: "recon",
     title: "Disable ACR on Your TV",
+    simpleTitle: 'Turn off the TV setting that reports what you watch', // Simple mode's name (utils/reading.js)
     briefing: "Your smart TV has a feature called Automatic Content Recognition. It takes a fingerprint of what's on screen several times per second and sends it to a server that identifies what you're watching -- live TV, streaming, Blu-ray, even video calls. Vizio paid $2.2 million to the FTC for doing this without telling anyone. Samsung, LG, Roku, and Fire TV all do it too, they just buried the consent in the terms of service. The good news: you can turn it off. The bad news: every manufacturer hides the setting somewhere different.",
     steps: [
       { text: "Samsung: Settings → All Settings → General & Privacy → Terms & Privacy → untick Viewing Information Services" },
@@ -362,6 +363,7 @@ export const GRID_MISSIONS = [
     accountId: "smart_network",
     phase: "fortify",
     title: "Create an IoT Guest Network",
+    simpleTitle: 'Put your smart gadgets on their own guest wifi', // Simple mode's name (utils/reading.js)
     briefing: "A smart light bulb with a security vulnerability can be used to attack your laptop on the same network. The fix: put your IoT devices on a separate network. Most modern routers support a 'guest network' that's isolated from your main network. Your smart devices can still reach the internet (for firmware updates and cloud features) but they can't see or talk to your computers, phones, or NAS. If one gets compromised, the blast radius stops at the guest network.",
     steps: [
       { text: "Open your router's admin panel" },
@@ -388,6 +390,7 @@ export const GRID_MISSIONS = [
     accountId: "smart_network",
     phase: "reclaim",
     title: "Encrypt Your DNS Lookups",
+    simpleTitle: 'Hide the sites you look up from your internet company', // Simple mode's name (utils/reading.js)
     briefing: "Every time your browser looks up a website, it sends a DNS query -- usually to your ISP, in plain text, so your ISP can see every site name you look up. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling your browsing history. Encrypted DNS (DNS over HTTPS or over TLS) hides those lookups from your ISP. It still sees which servers you connect to. Changing the DNS server numbers in your router is different: that changes who answers, not who can see. Pick who answers on purpose: Quad9 is run by a Swiss not-for-profit foundation that says it never logs your IP address, and it blocks known malware and phishing sites. Cloudflare is a company.",
     steps: [
       { text: 'Encrypted, phone: Android: Settings > Network > Private DNS > set to \'dns.quad9.net\' (Quad9, the not-for-profit) or \'one.one.one.one\' (Cloudflare). iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular' },

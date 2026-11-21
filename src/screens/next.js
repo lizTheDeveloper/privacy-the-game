@@ -4,7 +4,7 @@ import { findMission } from '../data/custom-missions.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { nextAvailableMission } from './city-map.js';
 import { notMineButton } from './briefing.js';
-import { missionsInProgress, visibleSteps, progressFor, intelFor } from '../utils/reading.js';
+import { missionsInProgress, visibleSteps, progressFor, intelFor, simpleTitle } from '../utils/reading.js';
 import { esc } from './stats.js';
 import { fillBar } from '../components/fill-bar.js';
 import { confetti } from '../components/celebrate.js';
@@ -51,11 +51,8 @@ export function barMission(state, filed, up) {
 // thing to do next, and that the game will be here when they come back.
 // filed: { id, reaction } right after a report; notMine: an account id just taken off the list.
 
-// "Breach Recon: Gmail" is "Gmail" in Simple mode, as on its briefing.
-export function simpleTitle(mission) {
-  const colon = mission.title.indexOf(':');
-  return colon > -1 ? mission.title.slice(colon + 1).trim() : mission.title;
-}
+// "Breach Recon: Gmail" is "Gmail" in Simple mode, as on its briefing (utils/reading.js).
+export { simpleTitle };
 
 // The mission to show, and how: half-done first (so nobody loses their place), then the next one.
 export function nextUp(state) {

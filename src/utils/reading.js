@@ -66,6 +66,20 @@ export function intelFor(mission, level) {
   return { intel: lead, why: mission.briefing };
 }
 
+// A mission's name in Simple mode: its plain title when the mission data has one (simpleTitle),
+// else the name after the phase words, as on its briefing ("Breach Recon: Gmail" is "Gmail").
+export function simpleTitle(mission) {
+  if (mission.simpleTitle) return mission.simpleTitle;
+  const colon = mission.title.indexOf(':');
+  return colon > -1 ? mission.title.slice(colon + 1).trim() : mission.title;
+}
+
+// The one plain line under a mission's name in Simple mode (data/mission-simple.js, else
+// data/mission-leads.js); '' for a mission with neither (an account the player added).
+export function simpleLead(mission) {
+  return mission.simple?.lead || mission.lead || '';
+}
+
 export function hasSimplest(mission) {
   return Boolean(mission?.simple?.lead);
 }

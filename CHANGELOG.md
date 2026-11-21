@@ -2,6 +2,17 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.39.0 (2026-11-21): A district for Simple players
+
+Simple players were getting the Advanced district: tabs called SURVEY, RECON, FORTIFY and RECLAIM, up to 19 rows that all looked the same, and names like "OSINT Sieve". Liz asked for a real Simple district (Advanced stays as it was).
+
+- **Tabs in plain words.** In Simple the tabs are "Your accounts", "Check your accounts", "Lock them up" and "Take your data back", the same words as the parts on What's next. They fit four across a phone on two lines. The links haven't changed.
+- **A short list first.** A tab shows the mission to do next (lit), and the next two not done yet. "Show all 19" (with the real number) opens the whole list right there, the same list as before, and "Show fewer" folds it back. Missions you've done wait in a "Done (9)" fold at the end.
+- **Plain names.** A mission is named the way its Simple briefing names it ("Gmail"), with one plain line under it saying what it does. The OSINT Sieve missions and a few others with hard names have plain ones now, like "See what your photos give away" and "Turn off the TV setting that reports what you watch". The ANT CATALOG badge reads NSA SPY TOOLS, and still opens its sources.
+- **A tab that waits on the one before** says so in plain words ("First: “Check your accounts” for PayPal", GO THERE), and its one bright button is the next mission on that earlier tab (in both modes). On The Archives it used to point you at a mission further along.
+- **READY** is plain grey text now, not a box that looked like a button (both modes).
+- Nothing was removed, and nothing new is tracked or sent.
+
 ## 7.38.0 (2026-11-20): The open door first, a Quick Quest that goes to the fix, and 100% means done
 
 - **A building shows the open door first, and lit.** The floors now go Roof, Ground floor, Alcove, Records desk. The first door you can still close starts unfolded, and its SEAL IT is the one bright button on the screen; the other SEAL ITs are outlined. The roof is now called "Health check" (Signal is also an app in the city). A row that needs work says "Fix it" and takes you to the door it closes (the worst one is lit when no SEAL IT is); a healthy row has a quiet "Check again" link instead of SWEEP.

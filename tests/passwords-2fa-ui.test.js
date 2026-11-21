@@ -8,6 +8,9 @@ import { createInitialState, updateMission } from '../src/state.js';
 import { PASSWORD_DIALOGUE, TWO_FA_DIALOGUE, COLLECTIVE_DIALOGUE } from '../src/data/dialogue.js';
 import { fileDebrief, recordNotNeeded } from '../src/utils/debrief.js';
 import { MISSIONS } from '../src/data/missions.js';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 const set = (s, id, rec) => updateMission(s, id, rec);
 const byId = (id) => MISSIONS.find((m) => m.id === id);
@@ -196,11 +199,11 @@ describe('district screens', () => {
   });
 
   it('the password check is in recon for every new save; an old save sees it only with a manager', () => {
-    expect(renderDistrict(s0, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
-    expect(renderDistrict({ ...s0, passwordManager: 'none' }, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+    expect(renderDistrict(adv(s0), 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+    expect(renderDistrict(adv({ ...s0, passwordManager: 'none' }), 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
     const old = { ...s0, createdAt: '2026-09-01T00:00:00.000Z' };
-    expect(renderDistrict(old, 'master-keys', 'recon')).not.toContain('password_manager-recon-report');
-    expect(renderDistrict({ ...old, passwordManager: 'lastpass' }, 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
+    expect(renderDistrict(adv(old), 'master-keys', 'recon')).not.toContain('password_manager-recon-report');
+    expect(renderDistrict(adv({ ...old, passwordManager: 'lastpass' }), 'master-keys', 'recon')).toContain('#/mission/password_manager-recon-report/briefing');
   });
 
   it('the password check asks where passwords are saved, on the mission itself', () => {

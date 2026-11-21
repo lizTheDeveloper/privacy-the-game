@@ -490,7 +490,7 @@ function compactBriefingPage(p) {
   const setupSkipped = state?.stepProgress?.[mission.id]?.setup === 'skipped';
   const placeAsk = simple && many && !setupSkipped ? '' : passwordPlaceAsk(state, mission);
   const body = `
-      ${simple ? focusTitle('', titleBottom) : focusTitle(titleTop, titleBottom)}
+      ${simple ? focusTitle('', mission.simpleTitle || titleBottom) : focusTitle(titleTop, titleBottom)}
       <p class="focus-lead" data-intel>${intel}</p>
       ${why ? `<details class="brief-why" data-why><summary>Why it matters</summary><div class="focus-why">${why}</div></details>` : ''}
       ${p.extras}

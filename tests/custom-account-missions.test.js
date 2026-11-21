@@ -11,6 +11,9 @@ import { isPrivateBreadcrumb } from '../src/utils/errorNoise.js';
 import { parseRoute } from '../src/router.js';
 import { MISSIONS } from '../src/data/missions.js';
 import { currentScreen } from '../src/components/bug-reporter.js';
+import { setReadLevel } from '../src/utils/reading.js';
+// Advanced: today's whole list (Simple shows a short list first, 7.38.0; tests/simple-district.test.js).
+const adv = (s) => setReadLevel(s, 'full');
 
 const withCustom = (district, names) => ({ ...createInitialState(), customAccounts: { [district]: names } });
 
@@ -51,7 +54,7 @@ describe('custom accounts get their own missions (feature map row 16)', () => {
   });
 
   it('shows on the district under each phase, labelled as not counting toward progress', () => {
-    const s = withCustom('square', ['Old forum']);
+    const s = adv(withCustom('square', ['Old forum']));
     const recon = renderDistrict(s, 'square', 'recon');
     expect(recon).toContain('ACCOUNTS YOU ADDED');
     expect(recon).toContain('Sign-in check: Old forum');

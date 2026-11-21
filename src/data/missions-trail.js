@@ -348,6 +348,7 @@ export const TRAIL_MISSIONS = [
     accountId: "browser_fingerprint",
     phase: "reclaim",
     title: "Encrypt Your DNS Lookups",
+    simpleTitle: 'Hide the sites you look up from your internet company', // Simple mode's name (utils/reading.js)
     briefing: "Every time you visit a website, your browser asks a DNS server to translate the domain name (google.com) into an IP address. By default, this request goes to your ISP in plain text -- which means your ISP has a complete log of every website you've visited. In 2017, Congress repealed FCC rules that would have required ISPs to get your permission before selling browsing history. Encrypted DNS (DNS over HTTPS or DNS over TLS) sends these requests through an encrypted channel to a DNS provider you chose. Your ISP still sees which servers you connect to. Typing different DNS server numbers into your settings is not the same thing: it changes who answers, not who can see. Pick who answers on purpose: Quad9 is run by a Swiss not-for-profit foundation that says it never logs your IP address, and it blocks known malware and phishing sites. Cloudflare is a company.",
     steps: [
       { text: 'iPhone: install Cloudflare’s 1.1.1.1 app, which encrypts lookups on Wi-Fi and cellular. Typing Quad9’s 9.9.9.9 and 149.112.112.112 (or Cloudflare’s 1.1.1.1 and 1.0.0.1) into Settings > Wi-Fi > (i) > Configure DNS changes who answers, not who can see: those lookups stay unencrypted', url: 'https://one.one.one.one/' },

@@ -3,6 +3,7 @@ import { getAccountPhaseGate } from '../src/utils/calc.js';
 import { renderDistrict } from '../src/screens/district.js';
 import { getMissionsForDistrict } from '../src/data/missions.js';
 import { createInitialState, updateMission } from '../src/state.js';
+import { setReadLevel } from '../src/utils/reading.js';
 
 function completeMission(state, id) {
   return updateMission(state, id, { status: 'completed' });
@@ -45,9 +46,11 @@ describe('getAccountPhaseGate (per-account progression)', () => {
   });
 });
 
+// Advanced shows the whole list with RECON's name; Simple's short list and plain names are in
+// tests/simple-district.test.js.
 describe('district fortify tab (MUL-37 repro)', () => {
   it('shows fortify missions for a fully-reconed account while other accounts stay locked', () => {
-    let state = createInitialState();
+    let state = setReadLevel(createInitialState(), 'full');
     for (const id of yahooReconIds(state)) state = completeMission(state, id);
     const html = renderDistrict(state, 'master-keys', 'fortify');
     expect(html).toContain('#/mission/yahoo-fortify-password/briefing');
@@ -56,7 +59,7 @@ describe('district fortify tab (MUL-37 repro)', () => {
   });
 
   it('locks each account individually when no recon is done', () => {
-    const state = createInitialState();
+    const state = setReadLevel(createInitialState(), 'full');
     const html = renderDistrict(state, 'master-keys', 'fortify');
     expect(html).not.toContain('#/mission/yahoo-fortify-password/briefing');
     expect(html).toContain('Complete RECON for Gmail first');
