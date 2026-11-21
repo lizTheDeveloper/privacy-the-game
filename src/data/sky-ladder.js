@@ -87,4 +87,7 @@ export const LADDER_COPY = Object.freeze({
   }),
   zero: '0 stars mapped yet',
   stars: (n) => `${n} ${n === 1 ? 'star' : 'stars'}`,
+  // Simple says what a star is: a broker.
+  zeroSimple: '0 brokers mapped yet',
+  brokers: (n) => `${n} ${n === 1 ? 'broker' : 'brokers'}`,
 });

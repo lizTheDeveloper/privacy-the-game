@@ -332,6 +332,12 @@ The Broker Constellation (`#/reclamation/map`) and the Big Check (`#/reclamation
 
 > One request, a whole cluster lit. That's DROP: every broker registered in California has to process it.
 
+**`firstVisitSimple`** and **`openedSimple`** *(Simple mode shows these in place of `firstVisit` and `opened`: brokers, not stars or the field. Simple never shows `firstHub`; it doesn't talk about hubs.)*
+
+> Each dot up there is a data broker: a company that buys and sells facts about people. The lit dots are the brokers your opt-outs reach. Tap one to see its name.
+
+> Every dot is a real data broker from the public record. Bigger dots sell more. The shapes around the edge are the buyers, like government agencies. Dim means not yet. Lime means you filed.
+
 **`firstHub`** *(once, on a map visit where a hub has newly lit, or a later visit if another line showed then)*
 
 > That's a hub. A lot of the documented lines run through it, so it counts for more of the field than a small site does.

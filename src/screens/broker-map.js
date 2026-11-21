@@ -21,6 +21,7 @@ import { opensForm, isBareHomepage } from '../components/star-card.js';
 import { satelliteCard, SATELLITE_CARD_CSS } from '../components/satellite-card.js';
 import { satelliteBand, satelliteLines } from '../utils/satellites.js';
 import { SKY_LADDER_DIALOGUE } from '../data/dialogue.js';
+import { seeEverything } from '../components/see-everything.js';
 
 const BACK = '<a class="back-link" href="#/district/reclamation">← THE RECLAMATION</a>';
 const BIG_CHECK_HASH = '#/reclamation/big-check';
@@ -192,11 +193,20 @@ function leftBlock(rows, { map = null, simple = false } = {}) {
     + `<a class="map-big-check" href="${BIG_CHECK_HASH}">THE BIG CHECK →</a>`;
 }
 
+// Simple's version of a Scout line on the map: brokers, not stars or the field; no hubs.
+export function simpleScoutLine(line) {
+  if (line === BROKER_MAP_DIALOGUE.firstVisit) return BROKER_MAP_DIALOGUE.firstVisitSimple;
+  if (line === BROKER_MAP_DIALOGUE.opened) return BROKER_MAP_DIALOGUE.openedSimple;
+  if (line === BROKER_MAP_DIALOGUE.firstHub) return null;
+  return line;
+}
+
 const STATE_WORD = { lit: 'You filed', amber: 'Re-check due', dim: 'Not yet', 'no-opt-out': 'No opt-out exists' };
 
 // The keyboard and screen-reader route to stars: the SVG is role="img", so its hit circles are
 // invisible to assistive tech. Hubs and every lit star, by reach. data-star is a layout index.
-function starList(map, layout, lighting, selectedId, open) {
+// simple: no hubs (Simple doesn't use the word); only the brokers you've reached.
+function starList(map, layout, lighting, selectedId, open, simple = false) {
   const toggle = `<button type="button" class="constellation-list" data-action="map-list" aria-expanded="${open ? 'true' : 'false'}">${open ? 'HIDE LIST' : 'LIST VIEW'}</button>`;
   if (!open) return toggle;
   const byId = new Map(map.brokers.map((b) => [b.id, b]));
@@ -205,7 +215,7 @@ function starList(map, layout, lighting, selectedId, open) {
     const b = byId.get(s?.[0]);
     if (!b || isBuyer(b)) return;
     const st = lighting.stars[b.id]?.state ?? 'dim';
-    if (b.hub === true || st === 'lit' || st === 'amber') rows.push({ b, index, st });
+    if ((!simple && b.hub === true) || st === 'lit' || st === 'amber') rows.push({ b, index, st });
   });
   const reach = (b) => (Number.isFinite(b.reach) ? b.reach : 0);
   rows.sort((p, q) => reach(q.b) - reach(p.b) || (p.b.id < q.b.id ? -1 : 1));
@@ -269,7 +279,7 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   const height = stage?.h > 0 ? ` style="height:${Math.round(stage.h)}px"` : '';
   // Scout's line (the first visit's, else this visit's one-time line) floats over the top of the
   // sky (dismissable), so the map keeps the phone's height; it leaves the zoom buttons' corner clear.
-  const line = firstVisit ? BROKER_MAP_DIALOGUE.firstVisit : scoutLine;
+  const line = simple ? simpleScoutLine(firstVisit ? BROKER_MAP_DIALOGUE.firstVisit : scoutLine) : firstVisit ? BROKER_MAP_DIALOGUE.firstVisit : scoutLine;
   const scout = line
     ? `<div class="constellation-scout" role="note">${smallScout('thinkingA', 28)}<p>${esc(line)}</p><button type="button" class="constellation-scout-x" data-action="dismiss-scout" aria-label="Dismiss">×</button></div>`
     : '';
@@ -277,8 +287,9 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
   // Simple: what the number means, in words, and a bar that fills. Advanced: the field's numbers.
   const shown = coverage.percent === 0 && coverage.anyLit ? 'under 1' : coverage.percent;
   const head = simple
-    ? `<h1 class="map-head" data-reach-head>Brokers you've reached</h1><div class="map-reach-bar">${fillBar({ key: 'broker-map:reach', done: coverage.percent, total: 100, size: 'mid', label: `About ${shown}% of the field` })}</div>`
-      + `<p class="map-sub" style="color: var(--offwhite); font-size: 14px;">Your opt-outs reach about ${shown}% of the brokers' field so far.</p>`
+    ? `<h1 class="map-head" data-reach-head>Brokers you've reached</h1><div class="map-reach-bar">${fillBar({ key: 'broker-map:reach', done: coverage.percent, total: 100, size: 'mid', label: `About ${shown}% of the data broker trade` })}</div>`
+      // The one sentence: what the map is and why it matters to you (no "field", no "stars").
+      + `<p class="simple-lead" data-simple-lead style="margin: 8px 0 10px;">Data brokers sell facts about you. Your opt-outs reach about ${shown}% of their trade.</p>`
     // Each half keeps to one line, so a phone never breaks "HUBS LIT" from its count.
     : `<h1 class="map-head">${fieldHeader(coverage).split(' · ').map((part) => `<span class="nw">${esc(part)}</span>`).join(' · ')}</h1>`
       + '<p class="map-sub">estimated share of the field your opt-outs reach</p>';
@@ -299,11 +310,19 @@ function loadedView(state, { map, layout }, { today, selectedId, view, newlyLit,
     + (simple ? scout : '')
     + `<p class="constellation-pick" aria-live="polite">${selected ? esc(shortName(selected.name)) : ''}</p>`
     + simpleNext
-    + starList(map, layout, lighting, selectedId, listOpen)
+    + (simple ? '' : starList(map, layout, lighting, selectedId, listOpen))
     + `</div>${card}</div>`
-    + key
-    + nudgeBlock(lighting.pending)
-    + (asking ? '' : quizHtml)
-    + dropBlock(lighting.drop, state.caResident)
-    + leftBlock(whatsLeft(map, lighting), { map, simple });
+    + (simple
+      // Simple: the next rung above is the one thing to do; the rest is one tap away.
+      ? seeEverything('broker-map', starList(map, layout, lighting, selectedId, listOpen, true)
+        + key
+        + nudgeBlock(lighting.pending)
+        + (asking ? '' : quizHtml)
+        + dropBlock(lighting.drop, state.caResident)
+        + leftBlock(whatsLeft(map, lighting), { map, simple }))
+      : key
+        + nudgeBlock(lighting.pending)
+        + (asking ? '' : quizHtml)
+        + dropBlock(lighting.drop, state.caResident)
+        + leftBlock(whatsLeft(map, lighting), { map, simple }));
 }

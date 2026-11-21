@@ -25,13 +25,15 @@ export function toggleSeeEverything(key, on = !open.has(key)) {
 const attr = (s) => String(s).replace(/[^a-z0-9:_-]/gi, '-');
 
 // key: which screen's fold (kept open across re-draws). inner: the rest of the screen.
-export function seeEverything(key, inner, { label = 'See everything' } = {}) {
+// ids: false on a screen that keeps every id attribute out of its markup (the Big Check, a
+// PRIVATE_UI screen); aria-expanded still says whether the body below the button is open.
+export function seeEverything(key, inner, { label = 'See everything', ids = true } = {}) {
   if (!String(inner ?? '').trim()) return '';
   const k = attr(key);
   const on = open.has(k);
   return `<div class="see-all" data-see-everything="${k}">`
-    + `<button type="button" class="list-more see-all-btn" data-action="see-everything" data-fold-key="${k}" aria-expanded="${on}" aria-controls="see-all-${k}">${label}</button>`
-    + `<div class="see-all-body" id="see-all-${k}"${on ? '' : ' hidden'}>${inner}</div></div>`;
+    + `<button type="button" class="list-more see-all-btn" data-action="see-everything" data-fold-key="${k}" aria-expanded="${on}"${ids ? ` aria-controls="see-all-${k}"` : ''}>${label}</button>`
+    + `<div class="see-all-body"${ids ? ` id="see-all-${k}"` : ''}${on ? '' : ' hidden'}>${inner}</div></div>`;
 }
 
 // The one plain sentence at the top of a Simple screen: what this is, and why it matters to you.

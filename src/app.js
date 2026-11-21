@@ -1849,7 +1849,7 @@ app.addEventListener('click', async (e) => {
     // Kept in memory for this visit; never tracked.
     const on = toggleSeeEverything(el.dataset.foldKey);
     el.setAttribute('aria-expanded', String(on));
-    const body = app.querySelector(`#see-all-${CSS.escape(el.dataset.foldKey)}`);
+    const body = el.closest('[data-see-everything]')?.querySelector(':scope > .see-all-body');
     if (body) body.hidden = !on;
   } else if (action === 'show-all-missions' || action === 'show-fewer-missions') {
     // The rest of the list opens (or folds back) in place: the page re-draws where it is.

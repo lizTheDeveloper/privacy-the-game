@@ -254,7 +254,9 @@ describe('where the lines show', () => {
   const stageOf = (h) => h.slice(h.indexOf('<div class="map-stage"'), h.indexOf('<p class="constellation-pick"'));
 
   it('a map line shows in the same dismissable overlay as the first-visit line', () => {
-    const h = draw(createInitialState(), { scoutLine: BROKER_MAP_DIALOGUE.opened });
+    // Advanced: the line floats over the sky. Simple puts it under the sky, in plain words.
+    const adv = { ...createInitialState(), reading: { level: 'full' } };
+    const h = draw(adv, { scoutLine: BROKER_MAP_DIALOGUE.opened });
     const stage = stageOf(h);
     expect(stage).toContain('class="constellation-scout"');
     expect(stage).toContain(BROKER_MAP_DIALOGUE.opened);
@@ -269,9 +271,13 @@ describe('where the lines show', () => {
   });
 
   it("the first visit shows Liz's line, never the opened line", () => {
-    const h = draw(createInitialState(), { firstVisit: true, scoutLine: BROKER_MAP_DIALOGUE.opened });
+    const h = draw({ ...createInitialState(), reading: { level: 'full' } }, { firstVisit: true, scoutLine: BROKER_MAP_DIALOGUE.opened });
     expect(h).toContain("There's a whole constellation");
     expect(h).not.toContain('This is the whole field');
+    // Simple: the same line in plain words.
+    const s = draw(createInitialState(), { firstVisit: true, scoutLine: BROKER_MAP_DIALOGUE.opened });
+    expect(s).toContain(BROKER_MAP_DIALOGUE.firstVisitSimple);
+    expect(s).not.toContain(BROKER_MAP_DIALOGUE.openedSimple);
     expect((h.match(/class="constellation-scout"/g) ?? []).length).toBe(1);
   });
 

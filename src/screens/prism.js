@@ -9,6 +9,7 @@ import { readLevel } from '../utils/reading.js';
 import { leakById } from '../data/leaks/index.js';
 import { leakMissionIds } from '../data/leaks/actions.js';
 import { whatYouCanDo } from '../components/what-you-can-do.js';
+import { seeEverything } from '../components/see-everything.js';
 import { PRISM_PROVIDERS, PRISM_PLANNED, PRISM_SOURCES, PRISM_COPY, NOT_AN_ACCOUNT } from '../data/prism.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -98,13 +99,16 @@ function companies(state) {
 
 // Every other account the player has: all of it over the tapped cables. Plain words, not chips:
 // nothing here is tapped. One name once (Reddit is an account in two districts).
-function cables(state) {
+function cables(state, { simple = false } = {}) {
   const named = new Set([...PRISM_PROVIDERS.flatMap((p) => p.accounts), ...PRISM_PLANNED.accounts]);
   const theirs = Object.keys(ACCOUNTS).filter((id) => !named.has(id) && !NOT_AN_ACCOUNT.has(id) && mine(state, id));
   const names = [...new Set(theirs.map((id) => ACCOUNTS[id].name))];
   const list = names.length ? `<p class="prism-cables">${names.map(esc).join(' · ')}</p>` : '';
-  return `<div class="prism-panel"><div class="label">EVERYTHING ELSE: THE CABLES</div><p>${esc(PRISM_COPY.cables)}</p>${list}</div>`;
+  return `<div class="prism-panel"><div class="label">EVERYTHING ELSE: THE CABLES</div><p>${esc(simple ? PRISM_COPY.cablesSimple : PRISM_COPY.cables)}</p>${list}</div>`;
 }
+
+// Simple's one sentence: what PRISM is, before what it means for you.
+export const PRISM_SIMPLE_LEAD = 'The NSA could get emails, chats and photos straight from nine big companies.';
 
 export const PRISM_WYCD_LEDE = 'In this city: the privacy review for each company on the slides.';
 
@@ -124,9 +128,10 @@ export function renderPrism(state) {
   // privacy reviews in this city follow it, outlined.
   const missions = whatYouCanDo(state, leakMissionIds(leakById('prism')), { primary: false, label: '', className: 'wycd--inline', lede: PRISM_WYCD_LEDE });
   const defend = `<div class="prism-panel prism-defend"><div class="label">WHAT YOU CAN DO</div><p>${esc(PRISM_COPY.defend)}</p><a class="btn-primary" href="${esc(PRISM_SOURCES.prismBreak.url)}" target="_blank" rel="noopener">PRISM BREAK ↗</a><p class="prism-opens">Opens prism-break.org in a new tab.</p>${missions}</div>`;
+  const simple = readLevel(state) === 'simplest';
   const rest = `<div class="prism-panel"><div class="label">WHAT IT WAS</div><p>${esc(PRISM_COPY.what)}</p><p>${link(PRISM_SOURCES.guardian)} · ${link(PRISM_SOURCES.wapo)}</p></div>`
     + `<div class="prism-panel"><div class="label">IT'S IN EVERYTHING</div><p>${esc(PRISM_COPY.everything)}</p><p>${esc(PRISM_COPY.you)}</p><p>${link(PRISM_SOURCES.xkeyscore)} · ${link(PRISM_SOURCES.eff702)} · ${link(PRISM_SOURCES.wikiUpstream)} · ${link(PRISM_SOURCES.collectAll)} · <a href="#/saints">Saint Mark Klein</a></p></div>`
-    + cables(state)
+    + cables(state, { simple })
     + `<div class="prism-panel"><div class="label">STILL RUNNING</div><p>${esc(PRISM_COPY.status)}</p><p>${link(PRISM_SOURCES.wiki702)} · ${link(PRISM_SOURCES.brennan702)} · ${link(PRISM_SOURCES.eff702)}</p></div>`;
   const tail = `<div class="prism-panel prism-saint"><div class="label">SAINT EDWARD SNOWDEN</div><p>${esc(PRISM_COPY.snowdenTribute)}</p>`
     + `<p>${link(PRISM_SOURCES.snowden)} · ${link(PRISM_SOURCES.wikiSnowden)} · ${link(PRISM_SOURCES.wikiCitizenfour)} · ${link(PRISM_SOURCES.nsaFiles)} · ${link(PRISM_SOURCES.slides)}</p>`
@@ -136,13 +141,15 @@ export function renderPrism(state) {
     + '<a class="back-link" href="#/government" style="margin-left: 16px;">◎ WHO GETS YOUR DATA</a>'
     + `<h1>${esc(PRISM_COPY.title)}</h1><p class="prism-sub">${esc(PRISM_COPY.sub.toUpperCase())}</p>`;
   let body;
-  if (readLevel(state) === 'simplest') {
-    // Simple: the picture, one line about you, what to do; everything else after.
+  if (simple) {
+    // Simple: the picture, one sentence (what PRISM is, and you), what to do; everything else
+    // behind See everything.
     const n = companiesOnList(state);
-    const line = n
-      ? `<p class="prism-yours" data-prism-yours>${n} of your companies ${n === 1 ? 'was' : 'were'} on the slides.</p>`
-      : '<p class="prism-yours" data-prism-yours>None of the companies on your list were on the slides. The cables still carry everything.</p>';
-    body = diagram(state) + line + defend + scout + key + slides + rest + tail;
+    const you = n
+      ? `${n} of your companies ${n === 1 ? 'was' : 'were'} on the slides.`
+      : 'None of the companies on your list were on the slides. The cables still carry everything.';
+    const line = `<p class="simple-lead prism-yours" data-simple-lead data-prism-yours>${esc(PRISM_SIMPLE_LEAD)} ${you}</p>`;
+    body = diagram(state) + line + defend + seeEverything('prism', scout + key + slides + rest + tail);
   } else {
     // Advanced: what to do sits right under the list of companies, not at the bottom of the page.
     body = scout + diagram(state) + key + slides + defend + rest + tail;

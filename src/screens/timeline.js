@@ -5,6 +5,7 @@ import { getBuildingState } from '../utils/calc.js';
 import { getEras } from '../utils/social-timeline.js';
 import { fillBar } from '../components/fill-bar.js';
 import { readLevel } from '../utils/reading.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 function esc(v) {
   return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -223,6 +224,9 @@ export { getEras };
 
 // ui (app.js memory): { edit: the platform whose full form is open (Advanced), wiz: Simple's
 // one-at-a-time questions, picked: Simple's chips }.
+// Simple's one sentence: what the timeline is for, and why it matters to you.
+export const TIMELINE_LEAD = 'Tell us when you joined each social app, so your clean-up starts with the years you posted most.';
+
 export function renderTimeline(state, ui = {}) {
   const platforms = SOCIAL_PLATFORMS.filter((p) => state.accounts[p.id]?.enabled);
   const simple = readLevel(state) === 'simplest';
@@ -241,6 +245,19 @@ export function renderTimeline(state, ui = {}) {
   const cards = platforms.map((p) => renderPlatformCard(state, p, p.id === lead, inner(p))).join('');
   const pick = simple && !openId && unconfigured > 1 ? pickCard(platforms.filter((p) => !isSet(p)), picked, chipsLit) : '';
   const done = platforms.length - unconfigured;
+  const intro = unconfigured > 0 ? `
+        <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 14px 16px; margin-bottom: 20px;">
+          <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;">Tell us when you joined each platform and how active you were. <details class="more-fold" data-fold="timeline-how" data-open-desktop><summary>MORE</summary></details><span class="more-fold-text">${esc(TIMELINE_DOES)} <strong style="color: var(--cyan);">No rushing.</strong></span></div>
+        </div>
+      ${`<div data-setup-note style="font-size: 11px; color: rgba(237,239,243,0.4); margin-bottom: 10px;">Tell us about your history here to plan your review.</div>`}` : '';
+  // Simple: the sentence, the bar, the card with the bright button (or the open one) and the
+  // platform question; the other cards and the intro behind See everything.
+  const simpleBody = () => {
+    const shown = (p) => p.id === lead || p.id === openId;
+    const top = platforms.filter(shown).map((p) => renderPlatformCard(state, p, p.id === lead, inner(p))).join('');
+    const rest = platforms.filter((p) => !shown(p)).map((p) => renderPlatformCard(state, p, false, inner(p))).join('');
+    return `<div style="padding: 16px 24px 24px;">${simpleLead(TIMELINE_LEAD)}${progress}${top}${pick}${seeEverything('timeline', intro + rest)}</div>`;
+  };
   // How many are set up, as a bar that fills.
   const progress = platforms.length
     ? `<div data-timeline-progress style="margin-bottom: 16px;"><div style="font-size: 14px; font-weight: 600; color: var(--offwhite); margin-bottom: 6px;">${done} of ${platforms.length} set up</div>${fillBar({ key: 'timeline:setup', done, total: platforms.length, size: 'mid', label: `${done} of ${platforms.length} set up` })}</div>`
@@ -254,20 +271,15 @@ export function renderTimeline(state, ui = {}) {
         <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
           <div style="font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
-          <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>
+          ${simple ? '' : '<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>'}
         </div>
       </div>
     </div>
-    <div style="padding: 24px;">
-      ${unconfigured > 0 ? `
-        <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 14px 16px; margin-bottom: 20px;">
-          <div style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;">Tell us when you joined each platform and how active you were. <details class="more-fold" data-fold="timeline-how" data-open-desktop><summary>MORE</summary></details><span class="more-fold-text">${esc(TIMELINE_DOES)} <strong style="color: var(--cyan);">No rushing.</strong></span></div>
-        </div>
-      ` : ''}
-      ${unconfigured > 0 ? `<div data-setup-note style="font-size: 11px; color: rgba(237,239,243,0.4); margin-bottom: 10px;">Tell us about your history here to plan your review.</div>` : ''}
+    ${simple ? simpleBody() : `<div style="padding: 24px;">
+      ${intro}
       ${progress}
       ${pick}
       ${cards}
-    </div>
+    </div>`}
   </div>`;
 }

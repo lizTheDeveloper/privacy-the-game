@@ -165,13 +165,16 @@ export function cityStats(city) {
   }));
 }
 
+// Simple's plain words for a panel's label (Advanced keeps the originals).
+const SIMPLE_KICKER = Object.freeze({ twoFactor: 'TWO-STEP SIGN-IN ON' });
+
 // share: false in Simple, where the page has one SHARE (pageShare) instead of one per panel.
-function statPanel(st, { share = true } = {}) {
+function statPanel(st, { share = true, simple = false } = {}) {
   const [hex, rgba] = COLORS[st.color];
   const sub = st.sub ? `<div style="${MUTED} margin-top: 4px;">${esc(st.sub)}</div>` : '';
   return `
     <div class="panel" data-stat-panel="${st.key}" style="padding: 20px 24px; text-align: center; border-color: ${rgba}0.15);">
-      <div class="section-label" style="color: ${rgba}0.5); margin-bottom: 10px;">${esc(st.kicker)}</div>
+      <div class="section-label" style="color: ${rgba}0.5); margin-bottom: 10px;">${esc((simple && SIMPLE_KICKER[st.key]) || st.kicker)}</div>
       <div style="font-family: var(--font-display); font-size: 34px; font-weight: 800; line-height: 1.1; color: ${hex}; text-shadow: 0 0 18px ${rgba}0.4);">${esc(st.big)}</div>
       <div style="${MUTED} margin-top: 8px;">${esc(st.what)}</div>
       ${sub}
@@ -181,8 +184,8 @@ function statPanel(st, { share = true } = {}) {
 }
 
 // stats: which of the city's numbers (Simple shows two up top and the rest behind See everything).
-function cityNumbers(city, { stats = cityStats(city), share = true } = {}) {
-  const panels = stats.map((st) => statPanel(st, { share })).join('');
+function cityNumbers(city, { stats = cityStats(city), share = true, simple = false } = {}) {
+  const panels = stats.map((st) => statPanel(st, { share, simple })).join('');
   if (!panels) return '';
   return `
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px;">${panels}
@@ -310,7 +313,7 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
     const rest = `
     ${explainer()}
     ${yourPodCard(data, whoami)}
-    ${cityNumbers(city, { stats: stats.slice(SIMPLE_PANELS), share: false })}
+    ${cityNumbers(city, { stats: stats.slice(SIMPLE_PANELS), share: false, simple: true })}
     ${board(data, yoursId)}
     ${breachMap(city)}
     ${checking ? missions : ''}
@@ -320,7 +323,7 @@ export function renderCityTogether(state, { collective, whoami, notice } = {}) {
     ${cityScore(city, { simple: true })}
     ${yourPartPanel(state, yoursPod?.label)}
     ${checking ? '' : missions}
-    ${cityNumbers(city, { stats: stats.slice(0, SIMPLE_PANELS), share: false })}
+    ${cityNumbers(city, { stats: stats.slice(0, SIMPLE_PANELS), share: false, simple: true })}
     ${pageShare(stats)}
     ${seeEverything('together', rest)}`, state);
   }

@@ -1317,7 +1317,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .list-more[aria-expanded="true"]::after { content: ' ▴'; }
 /* Simple's side screens (components/see-everything.js): one plain sentence up top, full size and
    off-white; the rest of the screen behind "See everything" (the .list-more button, cyan outline). */
-.simple-lead { margin: 10px 0 14px; font-size: 17px; font-weight: 500; line-height: 1.5; color: var(--text-strong); }
+.simple-lead { margin: 10px 0 14px; font-family: var(--font-body); font-size: 17px; font-weight: 500; line-height: 1.5; color: var(--text-strong); }
 .see-all { margin: 20px 0 8px; }
 .see-all-body { margin-top: 12px; }
 .done-fold { margin-top: 12px; }

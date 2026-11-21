@@ -1,9 +1,12 @@
 // The ◈ label on every account in the city (data/prism.js): PRISM · year where the company was on the
 // 2013 NSA slides, PRISM · NEXT for Dropbox, UPSTREAM (the tapped cables) for the rest. Each links to
 // the PRISM map.
-import { prismLabel } from '../data/prism.js';
+import { prismLabel, simplePrismText } from '../data/prism.js';
 import { ACCOUNTS } from '../data/accounts.js';
 import { leaksForAccount } from '../data/leaks/index.js';
+
+// A badge's words in markup: AT&T and GOOGLE & YAHOO keep their ampersands.
+const amp = (s) => String(s).replace(/&(?![a-z]+;|#\d+;)/gi, '&amp;');
 
 const TAG = 'display:inline-flex;align-items:center;gap:4px;min-height:22px;margin-left:8px;padding:1px 7px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px;text-decoration:none;border-radius:3px;vertical-align:middle';
 // On a building's own page (Advanced) the badges sit on their own row and are tall enough to tap.
@@ -24,7 +27,7 @@ export function prismTag(accountId, { tall = false, simple = false } = {}) {
   const why = l.kind === 'named' ? `${name} is run by ${l.company}, in PRISM since ${l.since}`
     : l.kind === 'next' ? `${l.company} was next on the PRISM slides`
     : `${name} runs over the internet cables the NSA taps`;
-  const prism = `<a class="prism-tag prism-tag--${l.kind}" href="#/prism" aria-label="${why}: see the PRISM map" style="${TAG};${COLOURS[l.kind]}${size}"><span aria-hidden="true">◈</span>${l.text}</a>`;
+  const prism = `<a class="prism-tag prism-tag--${l.kind}" href="#/prism" aria-label="${why}: see the PRISM map" style="${TAG};${COLOURS[l.kind]}${size}"><span aria-hidden="true">◈</span>${simple ? simplePrismText(l) : l.text}</a>`;
   return prism + leakTags(accountId, size, simple);
 }
 
@@ -36,7 +39,7 @@ export function prismTagCount(accountId) {
 // Every leak, program or case that names this entry (an account, or a district topic like Location
 // Data Brokers): a badge each, to its own page of sources.
 function leakTags(accountId, size = '', simple = false) {
-  return leaksForAccount(accountId).map((e) => `<a class="prism-tag leak-tag" href="#/leak/${e.id}" aria-label="${e.title}: ${e.agency}, ${e.year}. See its sources" style="${TAG};${COLOURS.named}${size}"><span aria-hidden="true">◈</span>${(simple && e.simpleBadge) || e.badge}</a>`).join('');
+  return leaksForAccount(accountId).map((e) => `<a class="prism-tag leak-tag" href="#/leak/${e.id}" aria-label="${e.title}: ${e.agency}, ${e.year}. See its sources" style="${TAG};${COLOURS.named}${size}"><span aria-hidden="true">◈</span>${amp((simple && e.simpleBadge) || e.badge)}</a>`).join('');
 }
 
 // The phone survey chips are buttons, so they get a mark, not a link: solid for PRISM, hollow for upstream.

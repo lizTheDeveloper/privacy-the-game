@@ -5,6 +5,7 @@
 import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
 import { DISTRICTS } from '../data/districts.js';
+import { readLevel, plainWords } from '../utils/reading.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const BY_ID = new Map(MISSIONS.map((m) => [m.id, m]));
@@ -35,22 +36,24 @@ export function actionRows(state, ids, max = 3) {
 
 // Where it is, too: two districts can each have an "Opt Out: LexisNexis".
 const districtName = (m) => DISTRICTS.find((d) => d.id === missionDistrict(m))?.name ?? '';
-const opensMission = (m, again = false) => `Opens the “${esc(m.title)}” mission${again ? ' again' : ''}${districtName(m) ? `, in ${esc(districtName(m))}` : ''}`;
+// named: the mission's name as the screen says it (Simple: plainWords, so 2FA is Two-step sign-in).
+const asIs = (m) => m.title;
+const opensMission = (m, again = false, named = asIs) => `Opens the “${esc(named(m))}” mission${again ? ' again' : ''}${districtName(m) ? `, in ${esc(districtName(m))}` : ''}`;
 
-function row(r, cls) {
+function row(r, cls, named = asIs) {
   if (r.kind === 'garage') {
-    const names = r.missions.slice(0, 2).map((m) => `“${esc(m.title)}”`).join(' and ');
+    const names = r.missions.slice(0, 2).map((m) => `“${esc(named(m))}”`).join(' and ');
     const more = r.missions.length > 2 ? ` and ${r.missions.length - 2} more` : '';
     return `<li><a class="${cls} wycd-go" data-wycd-garage href="#/garage"><span class="wycd-name">Add your car in the Garage first ›</span>`
       + `<span class="wycd-opens">Opens the Garage. Add a car and The Freeway opens, with ${names}${more}.</span></a></li>`;
   }
   const m = r.mission;
   if (r.done) {
-    return `<li><a class="wycd-done" data-wycd-mission="${esc(m.id)}" href="#/mission/${esc(m.id)}/briefing"><span class="wycd-name">✓ ${esc(m.title)}</span>`
-      + `<span class="wycd-opens">Done. ${opensMission(m, true)}.</span></a></li>`;
+    return `<li><a class="wycd-done" data-wycd-mission="${esc(m.id)}" href="#/mission/${esc(m.id)}/briefing"><span class="wycd-name">✓ ${esc(named(m))}</span>`
+      + `<span class="wycd-opens">Done. ${opensMission(m, true, named)}.</span></a></li>`;
   }
-  return `<li><a class="${cls} wycd-go" data-wycd-mission="${esc(m.id)}" href="#/mission/${esc(m.id)}/briefing"><span class="wycd-name">${esc(m.title)} ›</span>`
-    + `<span class="wycd-opens">${opensMission(m)}.</span></a></li>`;
+  return `<li><a class="${cls} wycd-go" data-wycd-mission="${esc(m.id)}" href="#/mission/${esc(m.id)}/briefing"><span class="wycd-name">${esc(named(m))} ›</span>`
+    + `<span class="wycd-opens">${opensMission(m, false, named)}.</span></a></li>`;
 }
 
 // ids: candidate mission ids, best first. primary: the first undone row is the page's one bright
@@ -59,12 +62,13 @@ function row(r, cls) {
 export function whatYouCanDo(state, ids, { primary = true, lede = '', label = 'WHAT YOU CAN DO', className = '' } = {}) {
   const rows = actionRows(state, ids);
   if (!rows.length) return '';
+  const named = readLevel(state) === 'simplest' ? (m) => plainWords(m.title) : asIs;
   const allDone = rows.every((r) => r.done);
   let lit = !primary;
   const items = rows.map((r) => {
     const cls = !lit && !r.done ? 'btn-primary' : 'btn-secondary';
     if (cls === 'btn-primary') lit = true;
-    return row(r, cls);
+    return row(r, cls, named);
   }).join('');
   const head = label ? `<div class="wycd-label">${esc(label)}</div>` : '';
   const said = allDone ? '<p class="wycd-lede wycd-all-done">You’ve done these ✓</p>' : lede ? `<p class="wycd-lede">${esc(lede)}</p>` : '';

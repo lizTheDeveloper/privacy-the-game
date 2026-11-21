@@ -13,6 +13,8 @@ import { MISSIONS } from '../data/missions.js';
 import { localDay } from '../state.js';
 import { deck, splitWords } from '../components/deck.js';
 import { fillBar } from '../components/fill-bar.js';
+import { readLevel, plainWords } from '../utils/reading.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const BACK = '<a class="back-link" href="#/reclamation/map">← THE MAP</a>';
 const NOTE = "Optional. It never counts toward your districts, your city lights or the city's totals.";
@@ -61,19 +63,23 @@ const STYLE = `<style>
 .big-check-scout{display:flex;gap:8px;align-items:flex-start;box-sizing:border-box;margin:0 0 12px;padding:6px 8px;background:rgba(9,11,16,0.86);border:1px solid rgba(0,229,255,0.3);border-radius:8px}
 .big-check-scout p,.big-check-scout-text{flex:1;min-width:0;margin:0;font-size:12px;line-height:1.4;color:var(--offwhite)}
 .big-check-scout-text .deck-controls{margin-top:6px}
+/* Simple: one bright opt-out (the first in Start here); the others outlined. */
+.big-check--simple .big-check-row .star-card-go a{color:var(--cyan);background:transparent;border:1px solid rgba(0,229,255,0.45)}
+.big-check--simple .big-check-row .star-card-go a.btn-primary{color:#090B10;background:var(--cyan);border-color:var(--cyan)}
 ${TICK_CSS}
 </style>`;
 
 const saysNote = (line) => typeof line === 'string' && line.includes('never counts toward your districts');
 
-const missionTitle = (id) => MISSIONS.find((m) => m.id === id)?.title ?? id;
+const missionTitle = (id, simple = false) => { const t = MISSIONS.find((m) => m.id === id)?.title ?? id; return simple ? plainWords(t) : t; };
 
 // A row a mission covers: one line, "Covered by: <mission> ›".
 function missionLine(id, state) {
   const done = state?.missions?.[id]?.status === 'completed';
+  const simple = readLevel(state) === 'simplest';
   return done
-    ? `<div class="big-check-mission">Covered by: ${esc(missionTitle(id))} ✓ · <a href="#/mission/${esc(id)}/recheck">RE-CHECK ›</a></div>`
-    : `<div class="big-check-mission">Covered by: <a href="#/mission/${esc(id)}/briefing">${esc(missionTitle(id))} ›</a></div>`;
+    ? `<div class="big-check-mission">Covered by: ${esc(missionTitle(id, simple))} ✓ · <a href="#/mission/${esc(id)}/recheck">RE-CHECK ›</a></div>`
+    : `<div class="big-check-mission">Covered by: <a href="#/mission/${esc(id)}/briefing">${esc(missionTitle(id, simple))} ›</a></div>`;
 }
 
 // We couldn't confirm the broker's opt-out page: there's nowhere sure to file, so the row says
@@ -85,7 +91,7 @@ export function unconfirmedPage(b) {
 
 const NO_PAGE = 'No working opt-out page right now.';
 
-function rowHtml(r, b, map, byId, state) {
+function rowHtml(r, b, map, byId, state, primaryId = null) {
   if (!r.mission && unconfirmedPage(b)) {
     const box = r.ticked ? bigCheckTick(r.id, true, r.name, { frozen: r.frozen }) : '';
     return `<li class="big-check-row${r.ticked ? '' : ' big-check-row-nopage'}"><p class="big-check-name">${esc(r.name)}</p><p class="big-check-no-page">${NO_PAGE}</p>${ownedRoutesBlock(map, b, byId)}${box}</li>`;
@@ -96,7 +102,9 @@ function rowHtml(r, b, map, byId, state) {
   const action = r.mission
     ? `${missionLine(r.mission, state)}${r.ticked ? bigCheckTick(r.id, true, r.name, { frozen: r.frozen }) : ''}`
     : bigCheckTick(r.id, r.ticked, r.name, { frozen: r.frozen });
-  return `<li class="big-check-row${r.mission ? ' big-check-row-mission' : ''}"><p class="big-check-name">${esc(r.name)}</p>${optOutBlock(b)}${ownedRoutesBlock(map, b, byId)}${action}</li>`;
+  // Simple's one bright button: this row's opt-out link.
+  const opt = r.id === primaryId ? optOutBlock(b).replace('<p class="star-card-go"><a ', '<p class="star-card-go"><a class="btn-primary" data-big-check-next ') : optOutBlock(b);
+  return `<li class="big-check-row${r.mission ? ' big-check-row-mission' : ''}"><p class="big-check-name">${esc(r.name)}</p>${opt}${ownedRoutesBlock(map, b, byId)}${action}</li>`;
 }
 
 // "<label> · <ticked>/<tickable>": only rows with a box of their own (no mission) count, so a
@@ -109,14 +117,16 @@ const hasBox = (r, byId) => !r.mission && (r.ticked || !unconfirmedPage(byId.get
 export const START_KIND = 'people-search';
 export const START_HEAD = 'Start here: these sell your address';
 
-function groupHtml(g, map, byId, state) {
+function groupHtml(g, map, byId, state, primaryId = null) {
   const own = g.rows.filter((r) => hasBox(r, byId));
   const ticked = own.filter((r) => r.ticked).length;
   // The count is a bar that fills (app.js moves it with each tick), with the numbers beside the name.
   const count = own.length
     ? ` <span class="big-check-of"><span class="big-check-dot">· </span><span data-big-check-count>${ticked}</span> of ${own.length} ticked</span>${fillBar({ key: `big-check:${g.kind}`, done: ticked, total: own.length, size: 'small', label: `${g.label}: ${ticked} of ${own.length} ticked` })}`
     : '';
-  const rows = g.rows.map((r) => rowHtml(r, byId.get(r.id), map, byId, state)).join('');
+  // Simple: the row with the bright button leads its group, so it is the first thing in the list.
+  const ordered = primaryId && g.rows.some((r) => r.id === primaryId) ? [...g.rows.filter((r) => r.id === primaryId), ...g.rows.filter((r) => r.id !== primaryId)] : g.rows;
+  const rows = ordered.map((r) => rowHtml(r, byId.get(r.id), map, byId, state, primaryId)).join('');
   if (g.kind === START_KIND) {
     return `<details class="big-check-start" data-start-here open><summary><span class="big-check-sum">${esc(START_HEAD)}<span class="big-check-kind">${esc(g.label.toUpperCase())}</span></span>${count}</summary>`
       + '<p class="big-check-start-why">Opting out of each one takes your listing down.</p>'
@@ -131,6 +141,21 @@ const scoutBubble = (line) => (line
   ? `<div class="big-check-scout" role="note">${smallScout('thinkingA', 28)}<div class="big-check-scout-text">${deck(splitWords(esc(line), 20).map((html) => ({ html })), { label: 'The long tail', className: 'deck--flow' })}</div></div>`
   : '');
 
+// Simple's next step: the first row, Start here first, with a verified opt-out page to open and
+// no tick yet. Its link is the page's one bright button.
+export function bigCheckNextId(groups, byId) {
+  const ordered = [...groups.filter((g) => g.kind === START_KIND), ...groups.filter((g) => g.kind !== START_KIND)];
+  for (const g of ordered) {
+    for (const r of g.rows) {
+      const o = byId.get(r.id)?.optOut;
+      if (!r.mission && !r.ticked && o && o.status === 'verified' && typeof o.url === 'string' && o.url) return r.id;
+    }
+  }
+  return null;
+}
+
+export const BIG_CHECK_LEAD = 'These are the data brokers your missions don’t reach yet. Opting out of one takes your listing down. It’s optional.';
+
 function loadedView(state, { map }, today, query, scoutLine) {
   const lighting = brokerLighting(map, state, today);
   const groups = filterBigCheck(bigCheckGroups(map, lighting), query);
@@ -138,6 +163,20 @@ function loadedView(state, { map }, today, query, scoutLine) {
   const empty = `<p class="big-check-empty" role="status"${groups.length ? ' hidden' : ''}>No brokers match</p>`;
   // The title is lime (done, good) only once something is ticked.
   const anyTicked = groups.some((g) => g.rows.some((r) => r.ticked));
+  if (readLevel(state) === 'simplest') {
+    // Simple: one sentence, Start here open with its first opt-out lit; the note, the filter and
+    // the other groups behind See everything.
+    const primaryId = bigCheckNextId(groups, byId);
+    const start = groups.filter((g) => g.kind === START_KIND).map((g) => groupHtml(g, map, byId, state, primaryId)).join('');
+    const others = groups.filter((g) => g.kind !== START_KIND).map((g) => groupHtml(g, map, byId, state, primaryId)).join('');
+    return `<h1 class="big-check-head${anyTicked ? '' : ' big-check-head--none'}">THE BIG CHECK</h1>`
+      + simpleLead(BIG_CHECK_LEAD)
+      + scoutBubble(scoutLine)
+      + start
+      + seeEverything('big-check', (saysNote(scoutLine) ? '' : `<p class="big-check-note">${esc(NOTE)}</p>`)
+        + `<input type="search" data-big-check-filter class="big-check-filter" placeholder="Filter by name" aria-label="Filter brokers by name" autocomplete="off" value="${esc(query)}">`
+        + others + empty, { ids: false });
+  }
   return `<h1 class="big-check-head${anyTicked ? '' : ' big-check-head--none'}">THE BIG CHECK</h1>`
     // Scout's first-visit line says the note too: then it is said once, by Scout.
     + (saysNote(scoutLine) ? '' : `<p class="big-check-note">${esc(NOTE)}</p>`)
@@ -151,5 +190,5 @@ function loadedView(state, { map }, today, query, scoutLine) {
 // scoutLine: Scout's one-time line for the first visit (broker-scout.js), or null.
 export function renderBigCheck(state, { status = 'idle', data = null, today = localDay(), query = '', scoutLine = null } = {}) {
   const body = status === 'ready' && data?.map ? loadedView(state, data, today, query, scoutLine) : brokerDataStatusBlock(status);
-  return `${renderHud(state)}${STYLE}<div class="big-check">${BACK}${body}</div>`;
+  return `${renderHud(state)}${STYLE}<div class="big-check${readLevel(state) === 'simplest' ? ' big-check--simple' : ''}">${BACK}${body}</div>`;
 }

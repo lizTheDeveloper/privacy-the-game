@@ -9,6 +9,7 @@ import { readLevel } from '../utils/reading.js';
 import { GOV_MISSIONS, GOV_BROKER_MISSION } from '../data/leaks/actions.js';
 import { whatYouCanDo, missionById } from '../components/what-you-can-do.js';
 import { isMissionInPlay, isMissionDoneIn } from '../utils/mission-status.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const arr = (v) => (Array.isArray(v) ? v : v ? [v] : []);
@@ -292,7 +293,8 @@ function sourcesHtml(list) {
   return items ? `<div class="row src"><b>SOURCES</b>${items}</div>` : '';
 }
 
-const badge = (e) => `<a class="badge-link" href="#/leak/${esc(e.id)}">◈ ${esc(e.badge)}</a>`;
+// simple: the leak's plain badge (data/leaks/simple.js) in place of its code name.
+const badge = (e, simple = false) => `<a class="badge-link" href="#/leak/${esc(e.id)}">◈ ${esc((simple && e.simpleBadge) || e.badge)}</a>`;
 
 // The location-broker opt-out, on the two files about bought data (Your apps, Buying your data).
 export function brokerOptOut(state) {
@@ -303,6 +305,8 @@ export function brokerOptOut(state) {
 }
 
 function fileFor(id, data, graph, state) {
+  const simple = readLevel(state) === 'simplest';
+  const bdg = (e) => badge(e, simple);
   const origin = graph.origins.find((o) => o.id === id);
   const pipe = graph.pipes.find((p) => p.id === id);
   const agency = data.agencies.find((a) => a.id === id);
@@ -316,7 +320,7 @@ function fileFor(id, data, graph, state) {
   }
   if (pipe) {
     const entries = graph.entriesByPipe[id] ?? [];
-    const rows = entries.map((e) => `<div class="row">${badge(e)} <b>${esc(arr(e.flow?.to).join(', ') || e.agency)}</b>`
+    const rows = entries.map((e) => `<div class="row">${bdg(e)} <b>${esc(arr(e.flow?.to).map((a) => (simple ? agencyName(a) : a)).join(', ') || e.agency)}</b>`
       + (e.flow?.authority ? `<br>Under: ${redact(esc(e.flow.authority))}` : '')
       + (e.flow?.checkedBy ? `<br>Checked by: ${redact(esc(e.flow.checkedBy))}` : '')
       + (e.scale ? `<br>Scale: ${esc(fmt(e.scale.value))} ${esc(e.scale.unit)} ${esc(e.scale.what ?? '')}` : '') + '</div>').join('');
@@ -326,14 +330,14 @@ function fileFor(id, data, graph, state) {
     const inbound = graph.edges.filter((e) => e.to === id && e.kind === 'takes');
     const ch = data.channels.filter((c) => c.from === id || c.to === id);
     const entries = data.entries.filter((e) => arr(e.flow?.to).includes(id) || arr(e.flow?.sharedWith).includes(id));
-    return `<span class="stamp">FILE</span><h2>${esc(agency.name)}</h2><p class="kind">${esc((agency.kind ?? '').replace('-', ' ').toUpperCase())}${agency.parent ? ` · PART OF ${esc(agency.parent)}` : ''}</p>`
+    return `<span class="stamp">FILE</span><h2>${esc(agency.name)}</h2><p class="kind">${esc((agency.kind ?? '').replace('-', ' ').toUpperCase())}${agency.parent ? ` · PART OF ${esc(simple ? agencyName(agency.parent) : agency.parent)}` : ''}</p>`
       + (agency.does ? `<p><b>What it does.</b> ${redact(esc(agency.does))}</p>` : '')
       + (agency.reality ? `<p><b>What it actually looks like.</b> ${redact(esc(agency.reality))}</p>` : '')
       + (agency.scale ? `<p><b>Scale.</b> ${esc(fmt(agency.scale.value))} ${esc(agency.scale.unit)} ${esc(agency.scale.what ?? '')}</p>` : '')
       + (inbound.length ? `<div class="row"><b>GETS DATA FROM</b><p>${inbound.map((e) => esc(graph.pipes.find((p) => p.id === e.from)?.label ?? e.from)).join(' · ')}</p></div>` : '')
       + ch.map((c) => `<div class="row"><b>${esc(c.from === 'COMPANIES' ? 'Companies' : c.from === 'DATA_BROKERS' ? 'Data brokers' : agencyName(c.from))} → ${esc(agencyName(c.to))}</b><dl><dt>WHAT</dt><dd>${redact(esc(c.data))}</dd><dt>UNDER</dt><dd>${redact(esc(authorityNames(c.authority) || 'No law named in the record'))}</dd><dt>WHEN</dt><dd>${redact(esc(c.when))}</dd><dt>CHECKED BY</dt><dd>${redact(esc(c.checkedBy))}</dd></dl>`
         + (c.scale ? `<p>Scale: ${esc(fmt(c.scale.value))} ${esc(c.scale.unit)} ${esc(c.scale.what ?? '')}</p>` : '') + sourcesHtml(c.sources) + '</div>').join('')
-      + (entries.length ? `<div class="row"><b>ON FILE</b><p>${entries.map(badge).join('')}</p></div>` : '')
+      + (entries.length ? `<div class="row"><b>ON FILE</b><p>${entries.map(bdg).join('')}</p></div>` : '')
       + sourcesHtml(agency.sources) + close;
   }
   return '';
@@ -366,6 +370,9 @@ function ruler(items) {
 
 // focus: the origin or pipe Simple last opened (app.js memory), so its agencies stay on the map
 // after its file is closed.
+// Simple's one sentence: what the map is, and why it matters to you.
+export const GOV_SIMPLE_LEAD = 'This map shows which government agencies get data about you, how they get it, and which law lets them.';
+
 export function renderGovernment(state, data, { selected = null, focus = null } = {}) {
   const graph = buildGovGraph(data);
   const known = new Set([...graph.origins, ...graph.pipes, ...data.agencies].map((x) => x.id));
@@ -378,13 +385,35 @@ export function renderGovernment(state, data, { selected = null, focus = null } 
     ? '<p class="gov-pick" data-gov-pick>The agencies below are the ones it reaches. Tap one to open its file.</p>'
     : '<p class="gov-pick" data-gov-pick>Start with where your data leaves you, or a pipe. Tap one and the agencies it reaches appear.</p>') : '';
   const scaled = [
-    ...data.entries.map((e) => ({ name: e.badge, scale: e.scale, href: `#/leak/${e.id}` })),
+    ...data.entries.map((e) => ({ name: (simple && e.simpleBadge) || e.badge, scale: e.scale, href: `#/leak/${e.id}` })),
     ...data.channels.map((c) => ({ name: `${c.from === 'COMPANIES' ? 'companies' : c.from === 'DATA_BROKERS' ? 'brokers' : agencyName(c.from)} → ${agencyName(c.to)}`, scale: c.scale })),
-    ...data.agencies.map((a) => ({ name: a.short || a.name, scale: a.scale })),
+    ...data.agencies.map((a) => ({ name: simple ? a.name : a.short || a.name, scale: a.scale })),
     ...data.programs.map((p) => ({ name: p.name, scale: p.scale })),
   ];
   const myths = data.paperwork.map((m) => `<div class="gov-myth"><div class="movie">“${esc(m.myth)}”</div><div class="real">${esc(m.reality)}${arr(m.sources).map((s) => `<br><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join('')}</div></div>`).join('');
-  const everything = [...graph.origins, ...graph.pipes, ...data.agencies].map((x) => `<button type="button" data-action="gov-select" data-node="${esc(x.id)}" aria-pressed="${x.id === sel}">${esc(x.short || x.label || x.name)}</button>`).join('');
+  // Simple names every agency in full (NCTC: National Counterterrorism Center).
+  const everything = [...graph.origins, ...graph.pipes, ...data.agencies].map((x) => `<button type="button" data-action="gov-select" data-node="${esc(x.id)}" aria-pressed="${x.id === sel}">${esc(simple ? x.label || x.name : x.short || x.label || x.name)}</button>`).join('');
+  const back = '<a class="back-link" href="#/city">← THE CITY</a><a class="back-link" href="#/prism">◈ PRISM</a><a class="back-link" href="#/reclamation/map">↑ THE BROKER SKY</a>';
+  const map = `<div class="gov-map"><div class="wide">${mapSvg(graph, sel, 17)}</div><div class="narrow">${tierSvg(graph, sel, { simple, focus: picked })}</div></div>`;
+  const legend = '<ul class="gov-legend"><li><i style="background:#EDEFF3"></i>Rings out from you: where it leaves you, the pipes, the agencies, and below them who checks</li><li><i style="background:#FF2D9B"></i>What an agency takes</li><li><i style="background:#FF9F00"></i>What agencies pass to each other</li><li><i class="dash"></i>Who checks</li></ul>';
+  const file = sel ? '<button type="button" class="gov-sheet-shade" data-action="gov-close" aria-label="Close the file" tabindex="-1"></button>'
+    + `<section class="gov-file" role="dialog" aria-label="${esc(fileName(sel, data, graph))}" tabindex="-1"><div class="gov-file-x"><button type="button" data-action="gov-close" aria-label="Close the file">×</button></div>${fileFor(sel, data, graph, state)}</section>` : '';
+  const wycd = whatYouCanDo(state, GOV_MISSIONS, { lede: 'Agencies buy location data from brokers and ask for doorbell video. These missions cut off some of it.' });
+  const scale = `<div class="gov-section"><h2>The scale</h2><p class="sub">Every number on this page, on one ruler. Each step is ten times the last.</p>${ruler(scaled)}</div>`;
+  const movie = myths ? `<div class="gov-section"><h2>The movie, and the paperwork</h2><p class="sub">The myth does the agencies' work for them. The records are smaller, duller, and fixable.</p><div class="gov-myths">${myths}</div></div>` : '';
+  const all = `<div class="gov-section"><h2>Everything on the map</h2><div class="gov-list">${everything}</div></div>`;
+  if (simple) {
+    // Simple: one sentence, What you can do (the bright button), then the map to explore; the key,
+    // the scale, the myths and the full list behind See everything.
+    return `${renderHud(state)}${GOV_CSS}<div class="screen gov">${back}`
+      + '<h1>Who gets your data</h1>'
+      + simpleLead(GOV_SIMPLE_LEAD)
+      + wycd + pick + map + file
+      + seeEverything('government', '<div class="gov-banner"><s>TOP SECRET//SI//ORCON//NOFORN</s><b>PUBLIC RECORD</b></div>'
+        + '<p class="gov-lede">Not a van, and not a they. Named agencies, named pipes, a law for each, and a paper trail. Tap anything on the map to open its file.</p>'
+        + legend + scale + movie + all)
+      + '</div>';
+  }
   return `${renderHud(state)}${GOV_CSS}<div class="screen gov">`
     + '<a class="back-link" href="#/city">← THE CITY</a><a class="back-link" href="#/prism">◈ PRISM</a><a class="back-link" href="#/reclamation/map">↑ THE BROKER SKY</a>'
     + '<div class="gov-banner"><s>TOP SECRET//SI//ORCON//NOFORN</s><b>PUBLIC RECORD</b></div>'

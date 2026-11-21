@@ -696,6 +696,10 @@ export const BROKER_MAP_DIALOGUE = {
   // second visit on (the first visit has firstVisit); noOptOut is on the first no-opt-out card;
   // bigCheck is on the first Big Check visit.
   opened: 'This is the whole field, as far as the public record goes. Every star is a company on a state data broker registry or an ad industry member list, or one that public documents tie to them. The big ones are big because of what the records show them owning, supplying or selling to, not because we guessed. The shapes on the rim are the buyers the contract records show paying for it. Dim means not yet. Lime means you filed.',
+  // Simple's words for the two lines above (screens/broker-map.js): brokers, not stars or the field.
+  // Simple says nothing about hubs: firstHub is not shown there.
+  firstVisitSimple: "Each dot up there is a data broker: a company that buys and sells facts about people. The lit dots are the brokers your opt-outs reach. Tap one to see its name.",
+  openedSimple: 'Every dot is a real data broker from the public record. Bigger dots sell more. The shapes around the edge are the buyers, like government agencies. Dim means not yet. Lime means you filed.',
   firstHub: "That's a hub. A lot of the documented lines run through it, so it counts for more of the field than a small site does.",
   sweep: "One request, a whole cluster lit. That's DROP: every broker registered in California has to process it.",
   noOptOut: "Some of them don't let you leave. When there's no opt-out, a complaint to a regulator still puts it on the record.",

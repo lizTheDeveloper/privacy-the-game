@@ -4,6 +4,7 @@ import { LEAKS_SNOWDEN } from './snowden.js';
 import { LEAKS_VAULT7 } from './vault7.js';
 import { LEAKS_LOCATION } from './location.js';
 import { LEAKS_COURTS } from './courts.js';
+import { LEAK_SIMPLE } from './simple.js';
 import { AGENCIES, AUTHORITIES, CHANNELS, PROGRAMS, PAPERWORK, OUTSIDE } from './agencies.js';
 import { PRISM_PROVIDERS, PRISM_SOURCES, PRISM_COPY } from '../prism.js';
 
@@ -37,7 +38,14 @@ const uniq = (list) => {
   return list.filter((e) => e && typeof e.id === 'string' && !seen.has(e.id) && seen.add(e.id));
 };
 
-export const LEAKS = Object.freeze(uniq([PRISM_ENTRY, ...LEAKS_SNOWDEN, ...LEAKS_VAULT7, ...LEAKS_LOCATION, ...LEAKS_COURTS]));
+// Simple mode's plain badge and one sentence (simple.js), joined on. An entry's own simpleBadge wins.
+const withSimple = (e) => {
+  const s = LEAK_SIMPLE[e?.id];
+  if (!s) return e;
+  return Object.freeze({ ...e, simpleBadge: e.simpleBadge ?? s.badge, simpleLead: s.lead });
+};
+
+export const LEAKS = Object.freeze(uniq([PRISM_ENTRY, ...LEAKS_SNOWDEN, ...LEAKS_VAULT7, ...LEAKS_LOCATION, ...LEAKS_COURTS]).map(withSimple));
 const BY_ID = new Map(LEAKS.map((e) => [e.id, e]));
 
 export const leakById = (id) => BY_ID.get(id) ?? null;

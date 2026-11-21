@@ -8,6 +8,8 @@ import { agencyName } from '../data/leaks/index.js';
 import { DISTRICTS } from '../data/districts.js';
 import { leakMissionIds } from '../data/leaks/actions.js';
 import { whatYouCanDo } from '../components/what-you-can-do.js';
+import { readLevel } from '../utils/reading.js';
+import { seeEverything, simpleLead } from '../components/see-everything.js';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const mine = (state, id) => Boolean(state?.accounts?.[id]?.enabled);
@@ -34,6 +36,7 @@ export const LEAK_CSS = `<style>
 .leak-sources a{display:block;padding:5px 0;font-size:13px}
 .leak-saint{border-color:rgba(198,255,0,0.25)}
 .leak-saint .label{color:rgba(198,255,0,0.75)}
+.leak .leak-code{display:block;margin:2px 0 0;font-family:var(--font-mono);font-size:11px;font-weight:400;letter-spacing:1px;color:rgba(237,239,243,0.6);text-shadow:none}
 @media (max-width:520px){.leak-flow{grid-template-columns:1fr}.leak-flow dt{padding-top:6px}}
 </style>`;
 
@@ -101,6 +104,25 @@ export function renderLeak(state, entry, { from = null } = {}) {
     ? '<div class="leak-panel leak-saint"><div class="label">SAINT EDWARD SNOWDEN</div><p>We know this because Edward Snowden handed the documents to journalists. <a href="#/saints">Light him a candle →</a></p></div>'
     : '';
   const sources = list(entry.sources).map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join('');
+  if (readLevel(state) === 'simplest' && entry.simpleLead) {
+    // Simple: the plain name (the code name small under it), one sentence, What you can do with the
+    // one bright button; everything else, as Advanced has it, behind See everything.
+    const plain = entry.simpleBadge ? entry.simpleBadge : entry.title;
+    const code = entry.simpleBadge ? `<span class="leak-code" data-leak-code>${esc(entry.badge)} · ${esc(String(entry.year))}</span>` : '';
+    const rest = `<p class="leak-meta">${esc(meta.toUpperCase())}</p>`
+      + `<div class="leak-panel"><div class="label">WHAT IT IS</div><p style="margin: 0;">${esc(entry.summary)}</p></div>`
+      + flowBlock(entry.flow)
+      + accountsBlock(state, entry)
+      + saint
+      + `<div class="leak-panel"><div class="label">SOURCES · ${list(entry.sources).length}</div><div class="leak-sources">${sources}</div></div>`;
+    return `${renderHud(state)}${LEAK_CSS}<div class="screen leak">`
+      + backLinks(state, from)
+      + `<h1>${esc(plain)}${code}</h1>`
+      + simpleLead(entry.simpleLead)
+      + whatYouCanDo(state, leakMissionIds(entry), { lede: LEAK_WYCD_LEDE })
+      + seeEverything(`leak:${entry.id}`, rest)
+      + '</div>';
+  }
   return `${renderHud(state)}${LEAK_CSS}<div class="screen leak">`
     + backLinks(state, from)
     + `<h1>${esc(entry.title)}</h1><p class="leak-meta">${esc(meta.toUpperCase())}</p>`
