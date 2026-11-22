@@ -2,6 +2,10 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.48.1 (2026-11-22): Mission links checked
+
+- **Photo Intelligence (OSINT Sieve):** the AI geolocation step now opens Picarta (picarta.ai), which takes a photo without an account. GeoSpy is now Raven, sold only to government and enterprise buyers; its "Try GeoSpy" button opens a sign-in marked "Authorized use only".
+
 ## 7.48.0 (2026-11-21): no words under 11px
 
 IBM Plex Sans (7.47.0) is narrower than Orbitron, with shorter capitals, so the small labels looked smaller still. The owner: no readable text under **11px**, in any font, on a phone, in Simple and Advanced.

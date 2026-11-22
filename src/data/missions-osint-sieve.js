@@ -35,7 +35,7 @@ export const OSINT_SIEVE_MISSIONS = [
       { text: "Pick 5-10 of your most recent social media photos. Zoom in on the background of each one. Can you see: house numbers? Street signs? Store names? License plates? School names?", elsewhere: true },
       { text: "Check reflections — mirrors, windows, sunglasses, car paint, phone screens. What do they reveal about your location or surroundings?" },
       { text: "If you've shared photos on blogs, forums, or messaging apps (not just social media), check if they still have EXIF data: upload one to an EXIF viewer", url: "https://exif.tools/" },
-      { text: "Try uploading a landscape/outdoor photo you've posted to an AI geolocation tool — can it guess where you were?", url: "https://geospy.ai/" },
+      { text: "Try uploading a landscape/outdoor photo you've posted to an AI geolocation tool — can it guess where you were?", url: "https://picarta.ai/" },
     ],
     debriefQs: OSINT_DEBRIEF,
     scoutDialog: {
