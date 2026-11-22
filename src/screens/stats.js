@@ -42,7 +42,7 @@ function statCard({ label, labelColor, border, content }) {
   return `
   <div class="panel stat-dial" style="border-color: ${border};">
     ${content}
-    <div class="stat-dial-label" style="font-family: var(--font-title); font-size: 8px; font-weight: 600; color: ${labelColor};">${label}</div>
+    <div class="stat-dial-label" style="font-family: var(--font-title); font-size: 11px; font-weight: 600; color: ${labelColor};">${label}</div>
   </div>`;
 }
 
@@ -55,13 +55,13 @@ function districtRow(state, district) {
   const garage = locked && district.hasGarage;
   const lockedText = district.optIn ? 'OPTIONAL · TURN IT ON IN THE DISTRICT' : garage ? 'ADD A CAR IN THE GARAGE TO OPEN IT' : 'LOCKED CONTENT';
   const bar = locked
-    ? `<div style="flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; line-height: 1.4; color: ${garage ? 'var(--text-strong)' : 'var(--text-dim)'};">${lockedText}</div>`
+    ? `<div style="flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; line-height: 1.4; color: ${garage ? 'var(--text-strong)' : 'var(--text-dim)'};">${lockedText}</div>`
     : `<div style="flex: 1; height: 4px; background: rgba(0,229,255,0.06);"><div style="width: ${progress.percent}%; height: 100%; background: linear-gradient(90deg, #00E5FF, #C6FF00); box-shadow: 0 0 6px rgba(0,229,255,0.2);"></div></div>`;
   return `
   <a href="${garage ? '#/garage' : `#/district/${district.id}`}" data-district-row="${district.id}" style="display: flex; align-items: center; gap: 14px; min-height: 44px; text-decoration: none; color: inherit;">
     <div style="width: 140px; flex-shrink: 0;">
-      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: ${nameColor};">${district.name.toUpperCase()}</div>
-      <div style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; color: var(--text-dim); margin-top: 3px;">CH ${district.chapter}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: ${nameColor};">${district.name.toUpperCase()}</div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-top: 3px;">CH ${district.chapter}</div>
     </div>
     ${bar}
     <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 40px; text-align: right; color: ${locked ? 'rgba(237,239,243,0.2)' : accent};">${locked ? '' : `${progress.percent}%`}</div>
@@ -87,7 +87,7 @@ function findingCard({ label, value, color, tint }) {
   return `
   <div class="panel stat-finding" style="border-color: ${tint};">
     <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: ${color}; text-shadow: 0 0 8px ${tint};">${value}</div>
-    <div style="font-family: var(--font-title); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.4); margin-top: 6px;">${label}</div>
+    <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.4); margin-top: 6px;">${label}</div>
   </div>`;
 }
 
@@ -95,7 +95,7 @@ export function esc(v) {
   return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-const NOTE = 'font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4); line-height: 1.6;';
+const NOTE = 'font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.4); line-height: 1.6;';
 const BLOCK_TEXT = 'font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6;';
 
 // An early ghost before tonight's run: it can still be called off.
@@ -304,7 +304,7 @@ export function renderStats(state, view = {}) {
         content: `
         <div class="stat-streak" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
           <div class="stat-streak-value" style="font-family: var(--font-mono); font-weight: 700; color: #FF9F00; line-height: 1; text-shadow: 0 0 15px rgba(255,159,0,0.3);">${displayStreak(state)}d</div>
-          <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); margin-top: 6px; letter-spacing: 1px;">BEST ${state.streak.best}d</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 6px; letter-spacing: 1px;">BEST ${state.streak.best}d</div>
         </div>`,
       })}
     </div>

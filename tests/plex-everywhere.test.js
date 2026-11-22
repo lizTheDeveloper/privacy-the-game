@@ -21,14 +21,15 @@ const count = (s, re) => (s.match(re) || []).length;
 // Every place the logo is allowed to be Orbitron. Nothing else may name it.
 const ORBITRON_ALLOWED = {
   'style.css': [/--font-logo: 'Orbitron', sans-serif;/],
-  'focus-music.html': [/\.brand \{ font: 800 12px\/1 Orbitron, system-ui, sans-serif;/],
-  'utils/milestone-card.js': [/const LOGO_FONT = '700 20px Orbitron, sans-serif';/],
+  'focus-music.html': [/--font-logo: 'Orbitron', sans-serif;/, /family=Orbitron:wght@700;800&/],
+  'utils/milestone-card.js': [/const LOGO_FONT = '700 22px Orbitron, sans-serif';/],
   'index.html': [/family=Orbitron:wght@700;800&/],
 };
 // Every element drawn in the logo token.
 const LOGO_TOKEN_USES = {
   'style.css': [/^\.hud-brand \{[^}]*font-family: var\(--font-logo\);/m],
   'app.js': [/<div class="welcome-logo" style="font-family: var\(--font-logo\);[^"]*">RECLAIM CITY<\/div>/],
+  'focus-music.html': [/\.brand \{ font: 800 12px\/1 var\(--font-logo\);/],
 };
 
 describe('Orbitron only on the RECLAIM CITY logo', () => {
@@ -92,6 +93,16 @@ describe('Orbitron only on the RECLAIM CITY logo', () => {
     expect(link).toContain('family=Orbitron:wght@700;800&');
     expect(link).toContain('family=IBM+Plex+Sans:wght@400;500;600;700');
   });
+
+  it('Focus music loads the game\'s own font link and uses its tokens: Orbitron on the logo, Plex and Inter elsewhere', () => {
+    const link = (f) => FILES[f].match(/<link rel="stylesheet" href="(https:\/\/fonts\.googleapis\.com\/css2\?[^"]+)">/)?.[1];
+    expect(link('focus-music.html')).toBe(link('index.html'));
+    const css = code(FILES['focus-music.html']);
+    expect(css).toMatch(/--font-title: 'IBM Plex Sans', system-ui, sans-serif;/);
+    expect(css).toMatch(/--font-body: 'Inter', system-ui, sans-serif;/);
+    expect(css).toMatch(/body \{[^}]*font: 15px\/1\.4 var\(--font-body\);/);
+    expect(css).toMatch(/button \{[^}]*font-family: var\(--font-title\);/);
+  });
 });
 
 describe('the share cards', () => {
@@ -114,8 +125,8 @@ describe('the share cards', () => {
   it('only the RECLAIM CITY wordmark is Orbitron; DISTRICT LIBERATED and the name are Plex', () => {
     const drawn = capture(() => generateMilestoneCard('The Master Keys', { accountsSecured: 3, addressesBreached: 1, integrityPercent: 40 }));
     const fontOf = (t) => drawn.find(([x]) => x === t)?.[1];
-    expect(fontOf('RECLAIM CITY')).toBe('700 20px Orbitron, sans-serif');
-    expect(fontOf('DISTRICT LIBERATED')).toMatch(/^600 11px "IBM Plex Sans"/);
+    expect(fontOf('RECLAIM CITY')).toBe('700 22px Orbitron, sans-serif');
+    expect(fontOf('DISTRICT LIBERATED')).toMatch(/^600 21px "IBM Plex Sans"/);
     expect(fontOf('THE MASTER KEYS')).toMatch(/"IBM Plex Sans"/);
     expect(drawn.filter(([, f]) => /Orbitron/.test(f)).map(([t]) => t)).toEqual(['RECLAIM CITY']);
   });
@@ -140,7 +151,7 @@ describe('the share cards', () => {
   it('asks for the card fonts (including the wordmark’s Orbitron 700) and never throws', async () => {
     const asked = [];
     await loadCardFonts({ load: (f) => { asked.push(f); return Promise.resolve([]); } });
-    expect(asked).toContain('700 20px Orbitron, sans-serif');
+    expect(asked).toContain('700 22px Orbitron, sans-serif');
     expect(asked.some((f) => f.includes('IBM Plex Sans'))).toBe(true);
     await expect(loadCardFonts({ load: () => Promise.reject(new Error('offline')) })).resolves.toBeUndefined();
     await expect(loadCardFonts(undefined)).resolves.toBeUndefined();

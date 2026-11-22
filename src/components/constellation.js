@@ -32,7 +32,7 @@ const LABEL_SIZE = 22;
 const LABEL_GAP = 6;
 // Sizes in CSS px when it does (`px`), so they hold steady as the viewBox zooms.
 const LABEL_PX = 12;
-const STAR_LABEL_PX = 10;
+const STAR_LABEL_PX = 11;
 const MIN_STAR_PX = 1.6;
 export const HIT_PX = 22; // tap radius: a 44px target round every star, whatever its drawn size
 // Non-hub stars get names once the map is zoomed to at least this many CSS px per map unit.
@@ -148,7 +148,7 @@ export const LABEL_LINE_EM = 1.1;
 // Space kept clear around each placed label, in em. Drawn glyphs and their outline stroke run past
 // labelBox by about 0.2em, so this is what leaves a visible gap between two names.
 // Constellation names, in CSS px at any zoom.
-export const CONST_NAME_PX = 10;
+export const CONST_NAME_PX = 11;
 export const LABEL_CLEAR_EM = 0.6;
 // The least a hub's name may keep, when the full clearance leaves it nowhere to go.
 export const LABEL_TIGHT_EM = 0.1;
@@ -442,7 +442,7 @@ export function constellationSvg({ map, layout, lighting, selectedId = null, new
       + '<rect class="sat-panel" x="-15" y="-3" width="8" height="6"/><rect class="sat-panel" x="7" y="-3" width="8" height="6"/>'
       + '<line class="sat-dish" x1="-7" y1="0" x2="7" y2="0"/><rect class="sat-body" x="-4.5" y="-4.5" width="9" height="9" rx="1.5"/>'
       + '<path class="sat-dish" d="M-3 -4.5 Q0 -10 3 -4.5"/>'
-      + `<text class="sat-name" x="0" y="15" font-size="9" text-anchor="middle">${esc(sat.initials)}</text></g></g>`);
+      + `<text class="sat-name" x="0" y="16" font-size="11" text-anchor="middle">${esc(sat.initials)}</text></g></g>`);
     hits.push(`<circle class="sat-hit" cx="${n(sat.x)}" cy="${n(sat.y + 4 * u)}" r="${n(HIT_PX * u)}" data-sat="${sat.index}" fill="transparent" pointer-events="all"/>`);
   }
 

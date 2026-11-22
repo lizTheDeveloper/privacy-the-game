@@ -41,8 +41,8 @@ function lineRow(line) {
 // keeps the box and the name side by side.
 function recheckRow(line, day) {
   const when = day
-    ? `<span style="display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: var(--lime); margin-bottom: 6px;">Last filed ${esc(day)}</span>`
-    : '<span style="display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: rgba(237,239,243,0.4); margin-bottom: 6px;">Not recorded yet</span>';
+    ? `<span style="display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--lime); margin-bottom: 6px;">Last filed ${esc(day)}</span>`
+    : '<span style="display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: rgba(237,239,243,0.4); margin-bottom: 6px;">Not recorded yet</span>';
   return `
     <label class="debrief-opt" style="${ROW} flex-direction: column; gap: 0;">
       ${when}

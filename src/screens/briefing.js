@@ -44,7 +44,7 @@ function notFound(state) {
 
 const FLAGGED_NOTE = '<div style="font-size: 13px; font-weight: 600; color: var(--magenta); margin: -12px 0 20px;">Flagged by your password manager</div>';
 
-const NO_RESET_BADGE = '<div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--lime); background: rgba(198,255,0,0.08); border: 1px solid rgba(198,255,0,0.3); padding: 4px 12px; letter-spacing: 1px;">NO RESET NEEDED</div>';
+const NO_RESET_BADGE = '<div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--lime); background: rgba(198,255,0,0.08); border: 1px solid rgba(198,255,0,0.3); padding: 4px 12px; letter-spacing: 1px;">NO RESET NEEDED</div>';
 
 // opts.resetAnyway: the player chose to reset a password recon showed is fine.
 export function renderBriefing(state, missionId, opts = {}) {
@@ -110,7 +110,7 @@ export function renderBriefing(state, missionId, opts = {}) {
           <img src="${account.building}" style="width: 48px; height: auto; filter: brightness(1.1) drop-shadow(0 0 6px rgba(0,229,255,0.3));">
         </div>
       </div>
-      <div style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; color: var(--cyan); margin-top: 10px;">${account.name}</div>` : '';
+      <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--cyan); margin-top: 10px;">${account.name}</div>` : '';
   const loreData = loreEntry(state, mission.id);
   const lore = renderLoreSection(loreData);
 
@@ -210,7 +210,7 @@ export function renderBriefing(state, missionId, opts = {}) {
     ${renderHud(state, { tools: topTools(state, level, sayIntel, missionStepList.slice(0, 2).flatMap(stepSay)) })}
     <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch;">
       <div style="flex: 2 1 420px; min-width: 0; padding: 24px;">
-        <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; margin-bottom: 20px;">
           <a href="#/district/${districtId}${targetTab}" style="color: var(--text-quiet); text-decoration: none;">${district?.name || districtId}</a>
           <span style="color: rgba(237,239,243,0.2);">/</span>
           <span style="color: rgba(237,239,243,0.6); text-transform: uppercase;">${mission.phase}</span>
@@ -220,7 +220,7 @@ ${main}
 
       <div class="brief-side" style="flex: 1 1 240px; background: rgba(26,31,43,0.4); border-left: 1px solid rgba(0,229,255,0.1); padding: 24px; flex-direction: column; align-items: center;">
         ${briefingScout(scoutFeeling)}
-        <div class="scout-name" style="font-size: 9px; margin-bottom: 16px; letter-spacing: 1px;">SCOUT</div>
+        <div class="scout-name" style="font-size: 11px; margin-bottom: 16px; letter-spacing: 1px;">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
           <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${scoutLine}</div>
         </div>
@@ -338,7 +338,7 @@ function briefingSlides({ header, briefing, why = '', intelTools = '', gearHtml 
 // One of a step's notes. On a phone slide of its own (num set) its label reads "04 · WHO RUNS
 // IT" (the number from style.css, so the text is said once); a continuation names it the same way.
 function stepNote(n, { num = '', chunk = n.text, first = true } = {}) {
-  const label = `<span style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: rgba(0,229,255,0.6); text-transform: uppercase;"${num ? ` class="brief-note-label" data-step="${num} · "` : ''}>${n.label}</span><br>`;
+  const label = `<span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: rgba(0,229,255,0.6); text-transform: uppercase;"${num ? ` class="brief-note-label" data-step="${num} · "` : ''}>${n.label}</span><br>`;
   const cont = num && !first ? ` class="brief-note-cont" data-label="${num} · ${n.label}"` : '';
   return `
           <div${cont} style="font-size: 13px; color: rgba(237,239,243,0.7); line-height: 1.55;">
@@ -357,7 +357,7 @@ export function fieldCourseNote(mission) {
   const ext = 'target="_blank" rel="noopener noreferrer" style="color: var(--cyan);"';
   const rows = ids.map((id) => `<li><a href="${FIELD_KIT_URL}#p${id}" ${ext}>${esc(FIELD_PLAYBOOK_TITLES[id])} &#8599;</a></li>`).join('');
   return `<div data-field-course style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
-    <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">FULL CHECKLIST &mdash; FIELD OPSEC KIT</div>
+    <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">FULL CHECKLIST &mdash; FIELD OPSEC KIT</div>
     <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6;">${rows}</ul>
     <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 6px;">Free, no account. Want to practice it with people? <a href="${FIELD_CLASS_URL}" ${ext}>Take the class &#8599;</a></div>
   </div>`;
@@ -374,7 +374,7 @@ function sharesNote(state, mission) {
     return `<li><a href="#/mission/${m.id}/briefing" style="color: var(--cyan);">${done ? '&#10003; ' : ''}${esc(m.title)}</a> <span style="color: var(--text-dim);">(${esc(where)})</span></li>`;
   }).join('');
   return `<div data-shares style="margin: 0 0 20px; padding: 12px 14px; border-left: 2px solid var(--cyan); background: rgba(0,229,255,0.04);">
-    <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">ALREADY IN RECLAIM CITY &mdash; PART OF THIS JOB</div>
+    <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--cyan); margin-bottom: 6px;">ALREADY IN RECLAIM CITY &mdash; PART OF THIS JOB</div>
     <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6;">${rows}</ul>
   </div>`;
 }
@@ -429,7 +429,7 @@ function loreEntry(state, missionId) {
 }
 
 const LORE_LABEL = '<div class="section-label" style="color: rgba(255,159,0,0.5); margin-bottom: 8px;">INTEL</div>';
-const loreTitle = (lore) => `<div class="section-label brief-lore-title" style="font-family: var(--font-title); font-size: 9px; font-weight: 700; color: rgba(255,159,0,0.7); letter-spacing: 0.5px; margin-bottom: 6px;">${lore.title}</div>`;
+const loreTitle = (lore) => `<div class="section-label brief-lore-title" style="font-family: var(--font-title); font-size: 11px; font-weight: 700; color: rgba(255,159,0,0.7); letter-spacing: 0.5px; margin-bottom: 6px;">${lore.title}</div>`;
 const loreText = (text, attrs = '') => `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6;"${attrs}>${text}</div>`;
 
 function renderLoreSection(lore) {

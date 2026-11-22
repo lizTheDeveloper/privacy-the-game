@@ -112,7 +112,7 @@ function renderAlliesSection(districtId) {
   if (!dialogue?.allies?.length) return '';
   const links = dialogue.allies.map(a =>
     `<a href="${a.url}" target="_blank" rel="noopener" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(0,229,255,0.1); text-decoration: none; margin-bottom: 4px;">
-      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; white-space: nowrap;">${a.name}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; white-space: nowrap;">${a.name}</div>
       <div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.4;">${a.description}</div>
     </a>`
   ).join('');
@@ -238,7 +238,7 @@ function renderTabs(state, districtId, activeTab) {
   const simple = isSimple(state);
   const type = simple
     ? 'padding: 6px 4px; font-size: 13px; font-weight: 600; line-height: 1.2;'
-    : 'padding: 10px 4px; font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 0.5px;';
+    : 'padding: 10px 4px; font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 0.5px;';
   const tabs = PHASES.map((phase) => {
     const active = phase.id === activeTab;
     return `
@@ -444,7 +444,7 @@ function gateRow(state, districtId, activeTab, accountId, gate) {
           <div style="font-size: ${simple ? 15 : 13}px; font-weight: 600; color: ${simple ? 'var(--offwhite)' : 'rgba(237,239,243,0.6)'};">${title}</div>
           <div style="font-size: ${simple ? 14 : 11}px; color: ${simple ? 'var(--text-quiet)' : 'rgba(237,239,243,0.35)'}; margin-top: 2px;">${note}</div>
         </div>
-        <a class="btn-secondary" style="padding: 8px 16px; font-size: 9px; text-decoration: none; white-space: nowrap;" href="#/district/${districtId}?tab=${prereq}">${simple ? 'GO THERE' : `GO TO ${prereq.toUpperCase()}`}</a>
+        <a class="btn-secondary" style="padding: 8px 16px; font-size: 11px; text-decoration: none; white-space: nowrap;" href="#/district/${districtId}?tab=${prereq}">${simple ? 'GO THERE' : `GO TO ${prereq.toUpperCase()}`}</a>
       </div>`;
 }
 
@@ -509,7 +509,7 @@ function renderGameMissionList(state, districtId, activeTab, { hasCustom = false
   const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId, hoisted });
   // Said once for the list, not on every bonus row.
   const bonusNote = missions.some((m) => m.optional)
-    ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-title); font-size: 9px; letter-spacing: 0.5px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
+    ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-title); font-size: 11px; letter-spacing: 0.5px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
     : '';
   const items = tabItems(state, districtId, activeTab, missions, row);
   if (isSimple(state) && !showAll) {
@@ -577,7 +577,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
       return `
       <div class="panel" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
         <div style="flex: 1; font-size: 14px; color: ${enabled ? 'var(--offwhite)' : 'rgba(237,239,243,0.45)'};">${esc(questionFn(account.name))}${prismTag(id, { simple: isSimple(state) })}</div>
-        <span data-action="toggle-account" data-account="${id}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid ${enabled ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${enabled ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${enabled ? 'var(--lime)' : 'rgba(237,239,243,0.35)'};">${enabled ? 'ON' : 'OFF'}</span>
+        <span data-action="toggle-account" data-account="${id}" style="cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid ${enabled ? 'rgba(198,255,0,0.4)' : 'rgba(237,239,243,0.15)'}; background: ${enabled ? 'rgba(198,255,0,0.08)' : 'rgba(255,255,255,0.02)'}; color: ${enabled ? 'var(--lime)' : 'rgba(237,239,243,0.35)'};">${enabled ? 'ON' : 'OFF'}</span>
       </div>`;
     })
     .join('');
@@ -586,7 +586,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
   const customRows = customAccounts.map((name, i) => `
     <div class="panel custom-account" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;">
       <div style="flex: 1; font-size: 14px; color: var(--offwhite);">${esc(name)}</div>
-      <span data-action="remove-custom-account" data-district="${districtId}" data-index="${i}" style="cursor: pointer; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid rgba(255,45,155,0.3); background: rgba(255,45,155,0.05); color: var(--magenta);">REMOVE</span>
+      <span data-action="remove-custom-account" data-district="${districtId}" data-index="${i}" style="cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 6px 14px; border: 1px solid rgba(255,45,155,0.3); background: rgba(255,45,155,0.05); color: var(--magenta);">REMOVE</span>
     </div>`).join('');
 
   return `
@@ -600,7 +600,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
     ${customAccounts.length ? `<div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.5; margin: 4px 0 8px;">Each account you add gets its own missions under Recon, Fortify and Reclaim: steps that work on almost any account. Its name stays in this browser.</div>` : ''}
     <div class="panel" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; margin-top: 16px;">
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
-      <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px;">+ ADD</span>
+      <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">+ ADD</span>
     </div>
     <div class="${pinSurveyDone(state, district) ? 'pin-bottom ' : ''}survey-done" style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none; display: inline-block; max-width: 100%;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
@@ -692,14 +692,14 @@ function renderQuizPanel(state, lead = false, hoisted = false) {
   return `
       <div data-quiz-panel style="padding: 16px; text-align: center; border-top: 1px solid rgba(0,229,255,0.08);">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">PHISHING TRAINING</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">PHISHING TRAINING</div>
           ${statusTag(badge, statusColor, ' data-quiz-badge')}
         </div>
         <div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; margin-bottom: 14px;">
           Real or fake? Identify phishing emails, texts, calls, and push notifications.
           ${answered > 0 ? `<span style="font-family: var(--font-mono); color: var(--offwhite);">${correct}/${answered} correct so far.</span>` : ''}
         </div>
-        <a class="${lead && !hoisted ? 'btn-primary' : 'btn-secondary'}"${lead && hoisted ? ' data-next-up-twin' : ''} style="display: inline-block; text-decoration: none; font-size: 10px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
+        <a class="${lead && !hoisted ? 'btn-primary' : 'btn-secondary'}"${lead && hoisted ? ' data-next-up-twin' : ''} style="display: inline-block; text-decoration: none; font-size: 11px; padding: 12px 24px;" href="#/quiz/phishing">${btnLabel}</a>
       </div>`;
 }
 
@@ -758,20 +758,20 @@ function renderFacilitySection(state, facilityId, district, leadId = null, hoist
 
     return `
     <div class="facility-row${m.id === leadId ? ' facility-row--lead' : ''}" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
-      <div style="${dim} font-family: var(--font-mono); font-size: 10px; color: ${done ? 'var(--lime)' : 'var(--text-dim)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
+      <div style="${dim} font-family: var(--font-mono); font-size: 11px; color: ${done ? 'var(--lime)' : 'var(--text-dim)'}; width: 16px; text-align: center;">${done ? '✓' : skipped ? '↺' : '▸'}</div>
       <div style="${dim} flex: 1; min-width: 0;">
         <div style="font-size: ${simple ? 16 : 13}px; font-weight: ${done ? 400 : 500}; color: ${done ? 'rgba(237,239,243,0.5)' : 'var(--offwhite)'};">${esc(missionName(state, m))}</div>
         ${simple && !done && simpleLead(m) ? `<div class="mission-about">${esc(simpleLead(m))}</div>` : ''}
-        ${summary ? `<div class="quiet-note" style="font-size: 10px; margin-top: 2px;">${esc(summary)}</div>` : ''}
+        ${summary ? `<div class="quiet-note" style="font-size: 11px; margin-top: 2px;">${esc(summary)}</div>` : ''}
       </div>
-      <div class="mission-min" style="${dim} font-family: var(--font-mono); font-size: 10px;">~${m.estimatedMinutes}m</div>
+      <div class="mission-min" style="${dim} font-family: var(--font-mono); font-size: 11px;">~${m.estimatedMinutes}m</div>
       ${action}
     </div>`;
   }).join('');
 
   return `
   <div style="margin-bottom: 16px;">
-    ${connection ? `<div style="padding: 0 24px 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">↳ ${esc(connection)}</div>` : ''}
+    ${connection ? `<div style="padding: 0 24px 6px; font-family: var(--font-mono); font-size: 11px; color: rgba(255,159,0,0.5); letter-spacing: 1px;">↳ ${esc(connection)}</div>` : ''}
     <div class="panel" style="margin: 0 16px; overflow: hidden;">
       <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(26,31,43,0.6); border-bottom: 1px solid rgba(0,229,255,0.1);">
         <span class="facility-icon">${renderBuilding(facilityId, buildingState, 40)}</span>
@@ -884,7 +884,7 @@ function renderOptInPanel(district) {
 function renderOptOutLink(district) {
   return `
   <div style="padding: 0 24px 24px; text-align: center;">
-    <button class="btn-secondary" style="font-size: 9px;" data-action="district-opt-out" data-district="${esc(district.id)}">TURN OFF ${esc(district.name.toUpperCase())} (KEEPS YOUR PROGRESS)</button>
+    <button class="btn-secondary" style="font-size: 11px;" data-action="district-opt-out" data-district="${esc(district.id)}">TURN OFF ${esc(district.name.toUpperCase())} (KEEPS YOUR PROGRESS)</button>
   </div>`;
 }
 
@@ -1079,10 +1079,10 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
     <div style="padding: 12px 24px 0;">
       <div style="background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 200px;">
-          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
+          <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. ${esc(TIMELINE_DOES)}` : `Map your social media history first. ${esc(TIMELINE_DOES)}`}</div>
         </div>
-        <a href="#/timeline" style="font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
+        <a href="#/timeline" style="font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
       </div>
     </div>`;
     content = timelineBanner + renderMissionList(state, districtId, activeTab, { hoisted, openLists });
