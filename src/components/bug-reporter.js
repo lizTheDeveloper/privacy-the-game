@@ -100,7 +100,7 @@ export const STYLE = `
 .bug-dialog__privacy { font-size: 11px; line-height: 1.5; color: rgba(237,239,243,0.55); margin: 8px 0 0; }
 .bug-dialog__privacy code { color: var(--cyan); }
 .bug-dialog__error { font-size: 12px; color: var(--magenta); margin: 8px 0 0; }
-.bug-dialog__send { margin-top: 12px; min-height: 44px; padding: 10px 22px; cursor: pointer; font-family: var(--font-display); font-weight: 800; letter-spacing: 3px;
+.bug-dialog__send { margin-top: 12px; min-height: 44px; padding: 10px 22px; cursor: pointer; font-family: var(--font-title); line-height: 1.2; font-weight: 800; letter-spacing: 1px;
   color: var(--midnight, #090B10); background: var(--lime); border: 0; }
 .bug-dialog__send:disabled { opacity: 0.4; cursor: default; }
 .bug-dialog__done { text-align: center; padding: 24px 0; }

@@ -113,7 +113,7 @@ export function nextRungCard(rungs, { quiz = '' } = {}) {
 
 export const LADDER_CSS = `
 .sky-next{margin-top:12px;padding:14px 16px;background:#11151F;border:1px solid rgba(0,229,255,0.45);border-left:3px solid var(--cyan);border-radius:8px;font-size:15px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
-.sky-next .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin:0 0 6px}
+.sky-next .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--cyan);margin:0 0 6px}
 .sky-next h2{margin:0;font-family:var(--font-title);line-height:1.2;font-size:18px;font-weight:800;letter-spacing:0.5px;color:var(--offwhite)}
 .sky-next p{margin:6px 0}
 .sky-next .sky-rung-meta{font-size:13px;color:var(--offwhite)}
@@ -121,7 +121,7 @@ export const LADDER_CSS = `
 .sky-next .sky-next-opens{font-size:14px;color:var(--offwhite)}
 .sky-next-see,.sky-next .sky-rung-did{display:inline-flex;align-items:center;min-height:44px;margin:8px 8px 0 0}
 .sky-next .residency .map-panel{margin-top:0;padding:0;background:none;border:0}
-.sky-next .residency .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan)}
+.sky-next .residency .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--cyan)}
 .sky-next--done{border-color:rgba(198,255,0,0.45);border-left-color:var(--lime)}
 .sky-next-done{color:var(--lime);font-weight:700}
 .sky-ladder--inline{margin-top:12px}
@@ -130,7 +130,7 @@ export const LADDER_CSS = `
 .sky-ladder--inline .sky-ladder-grab{display:none}
 .sky-ladder--inline:not(.is-open) .sky-ladder-body{display:none}
 .sky-ladder{padding:12px 14px;background:#11151F;border:1px solid rgba(198,255,0,0.25);border-radius:8px;font-size:13px;line-height:1.5;color:var(--offwhite);overflow-wrap:anywhere}
-.sky-ladder .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(198,255,0,0.7);margin:0 0 6px}
+.sky-ladder .label{font-family:var(--font-title);line-height:1.2;font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(198,255,0,0.7);margin:0 0 6px}
 .sky-ladder-bar{display:none}
 .sky-rungs{list-style:none;margin:0;padding:0}
 .sky-rung{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;padding:8px 10px;text-align:left;font:inherit;color:var(--offwhite);background:rgba(26,31,43,0.5);border:0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer}

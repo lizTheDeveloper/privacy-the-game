@@ -112,7 +112,7 @@ function renderAlliesSection(districtId) {
   if (!dialogue?.allies?.length) return '';
   const links = dialogue.allies.map(a =>
     `<a href="${a.url}" target="_blank" rel="noopener" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(0,229,255,0.1); text-decoration: none; margin-bottom: 4px;">
-      <div style="font-family: var(--font-display); font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 1px; white-space: nowrap;">${a.name}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; white-space: nowrap;">${a.name}</div>
       <div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.4;">${a.description}</div>
     </a>`
   ).join('');
@@ -238,7 +238,7 @@ function renderTabs(state, districtId, activeTab) {
   const simple = isSimple(state);
   const type = simple
     ? 'padding: 6px 4px; font-size: 13px; font-weight: 600; line-height: 1.2;'
-    : 'padding: 10px 4px; font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px;';
+    : 'padding: 10px 4px; font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 0.5px;';
   const tabs = PHASES.map((phase) => {
     const active = phase.id === activeTab;
     return `
@@ -509,7 +509,7 @@ function renderGameMissionList(state, districtId, activeTab, { hasCustom = false
   const row = (m) => renderMissionRow(state, m, { lead: m.id === leadId, hoisted });
   // Said once for the list, not on every bonus row.
   const bonusNote = missions.some((m) => m.optional)
-    ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-display); font-size: 9px; letter-spacing: 1px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
+    ? '<div data-bonus-note class="quiet-note" style="font-size: 12px; margin: 0 0 8px;"><span class="bonus-word" style="font-family: var(--font-title); font-size: 9px; letter-spacing: 0.5px;">BONUS</span> missions are optional. They never block progress or Secured.</div>'
     : '';
   const items = tabItems(state, districtId, activeTab, missions, row);
   if (isSimple(state) && !showAll) {
@@ -600,7 +600,7 @@ function renderSurvey(state, districtId, districtAccounts, allDisabled) {
     ${customAccounts.length ? `<div style="font-size: 12px; color: rgba(237,239,243,0.45); line-height: 1.5; margin: 4px 0 8px;">Each account you add gets its own missions under Recon, Fortify and Reclaim: steps that work on almost any account. Its name stays in this browser.</div>` : ''}
     <div class="panel" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 8px; margin-top: 16px;">
       <input id="custom-account-input" type="text" placeholder="Add another account..." style="flex: 1; background: transparent; border: 1px solid rgba(237,239,243,0.15); color: var(--offwhite); font-size: 14px; padding: 8px 12px; font-family: inherit; outline: none;" />
-      <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px;">+ ADD</span>
+      <span data-action="add-custom-account" data-district="${districtId}" class="btn-secondary" style="cursor: pointer; padding: 8px 16px; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px;">+ ADD</span>
     </div>
     <div class="${pinSurveyDone(state, district) ? 'pin-bottom ' : ''}survey-done" style="margin-top: 20px; text-align: right;">
       <a class="btn-primary" style="text-decoration: none; display: inline-block; max-width: 100%;" href="#/district/${districtId}?tab=recon">DONE WITH SURVEY — START RECON</a>
@@ -859,7 +859,7 @@ const MAP_WAY_IN = `
       <a class="map-way-in" href="#/reclamation/map" style="display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 14px 16px; text-decoration: none; background: linear-gradient(180deg, #090B10 0%, #121826 100%); border: 1px solid rgba(198,255,0,0.3); box-shadow: 0 0 18px rgba(198,255,0,0.08);">
         <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 12 L18 7 L30 14 L24 26" fill="none" stroke="#00E5FF" stroke-opacity=".5" stroke-width="1"/><circle cx="6" cy="12" r="2" fill="#3a4256"/><circle cx="18" cy="7" r="2.5" fill="#C6FF00"/><circle cx="30" cy="14" r="2" fill="#3a4256"/><circle cx="24" cy="26" r="1.8" fill="#C6FF00"/><path d="M0 40 V33 H6 V30 H12 V35 H18 V28 H24 V34 H30 V31 H36 V36 H40 V40 Z" fill="#1A1F2B"/></svg>
         <span style="flex: 1; min-width: 0;">
-          <span style="display: block; font-family: var(--font-display); font-size: 14px; font-weight: 800; color: var(--lime); letter-spacing: 3px;">LOOK UP</span>
+          <span style="display: block; font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 800; color: var(--lime); letter-spacing: 1px;">LOOK UP</span>
           <span style="display: block; font-size: 13px; color: var(--offwhite); margin-top: 4px; line-height: 1.5;">Your data drifted up out of the city. Go find it.</span>
           <span style="display: block; font-size: 11px; color: rgba(237,239,243,0.5); margin-top: 2px; line-height: 1.5;">Every data broker we could find, and which ones your opt-outs reach.</span>
         </span>
@@ -1082,7 +1082,7 @@ export function renderDistrict(state, districtId, activeTab, { reaction = null, 
           <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: var(--cyan); letter-spacing: 0.5px; margin-bottom: 6px;">SOCIAL TIMELINE</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.55); line-height: 1.5;">${timelineConfigured > 0 ? `${timelineConfigured} platform${timelineConfigured === 1 ? '' : 's'} mapped. ${esc(TIMELINE_DOES)}` : `Map your social media history first. ${esc(TIMELINE_DOES)}`}</div>
         </div>
-        <a href="#/timeline" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
+        <a href="#/timeline" style="font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #00E5FF; padding: 10px 18px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">${timelineConfigured > 0 ? 'EDIT TIMELINE' : 'SET UP TIMELINE'}</a>
       </div>
     </div>`;
     content = timelineBanner + renderMissionList(state, districtId, activeTab, { hoisted, openLists });

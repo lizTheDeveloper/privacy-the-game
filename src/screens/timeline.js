@@ -93,10 +93,10 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
         </div>
         <button type="button" class="btn-secondary" data-action="edit-social-profile" data-platform="${platform.id}" style="min-height: 44px; padding: 0 16px;">EDIT</button>
       </div>
-      <div style="font-family: var(--font-display); font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
+      <div style="font-family: var(--font-title); font-size: 7px; font-weight: 600; letter-spacing: 1px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
       ${eraRows}
       <div style="margin-top: 12px; text-align: center;">
-        <a href="#/district/${esc(account.district)}?tab=reclaim" style="font-family: var(--font-display); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
+        <a href="#/district/${esc(account.district)}?tab=reclaim" style="font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 0.5px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
       </div>
     </div>`;
   }
@@ -168,7 +168,7 @@ export function renderEraQuestions(joinYear, answers = []) {
   const eras = getEras(joinYear);
   return eras.map((era, i) => `
     <div data-era="${i}" style="margin-bottom: 16px;">
-      <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--cyan); margin-bottom: 4px;">${esc(era.label).toUpperCase()}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: var(--cyan); margin-bottom: 4px;">${esc(era.label).toUpperCase()}</div>
       <div style="font-family: var(--font-mono); font-size: 13px; color: var(--offwhite); margin-bottom: 10px;">${era.startYear}–${era.endYear}</div>
       ${ACTIVITY_LEVELS.map((a) => activityRow(`era-${i}`, a, answers?.[i] === a.value)).join('')}
     </div>
@@ -268,7 +268,7 @@ export function renderTimeline(state, ui = {}) {
     ${TIMELINE_CSS}${renderHud(state)}
     <div style="padding: 20px 24px 0;">
       <div style="display: flex; align-items: center; gap: 16px;">
-        <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
+        <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 0.5px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
           <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
           ${simple ? '' : '<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>'}

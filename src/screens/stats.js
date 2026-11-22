@@ -42,7 +42,7 @@ function statCard({ label, labelColor, border, content }) {
   return `
   <div class="panel stat-dial" style="border-color: ${border};">
     ${content}
-    <div class="stat-dial-label" style="font-family: var(--font-display); font-size: 8px; font-weight: 600; color: ${labelColor};">${label}</div>
+    <div class="stat-dial-label" style="font-family: var(--font-title); font-size: 8px; font-weight: 600; color: ${labelColor};">${label}</div>
   </div>`;
 }
 
@@ -80,14 +80,14 @@ function nextButton(state) {
   const up = nextUp(state);
   if (!up) return '';
   const verb = up.kind === 'resume' ? 'Keep going' : 'Next';
-  return `<div style="margin: 0 0 18px;"><a class="btn-primary" data-stats-next href="#/mission/${up.mission.id}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 1px; font-size: 13px;">${verb}: ${esc(simpleTitle(up.mission))} &#9654;</a></div>`;
+  return `<div style="margin: 0 0 18px;"><a class="btn-primary" data-stats-next href="#/mission/${up.mission.id}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 0.3px; font-size: 13px; line-height: 1.2;">${verb}: ${esc(simpleTitle(up.mission))} &#9654;</a></div>`;
 }
 
 function findingCard({ label, value, color, tint }) {
   return `
   <div class="panel stat-finding" style="border-color: ${tint};">
     <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: ${color}; text-shadow: 0 0 8px ${tint};">${value}</div>
-    <div style="font-family: var(--font-display); font-size: 8px; font-weight: 600; letter-spacing: 2px; color: rgba(237,239,243,0.4); margin-top: 6px;">${label}</div>
+    <div style="font-family: var(--font-title); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: rgba(237,239,243,0.4); margin-top: 6px;">${label}</div>
   </div>`;
 }
 

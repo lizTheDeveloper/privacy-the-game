@@ -215,7 +215,7 @@ function renderReveal(msg, record) {
   const correctBg = isCorrect ? 'rgba(198,255,0,0.06)' : 'rgba(255,45,155,0.06)';
   const correctBorder = isCorrect ? 'rgba(198,255,0,0.2)' : 'rgba(255,45,155,0.2)';
   const answerLabel = msg.answer === 'pretext' ? 'FAKE' : 'REAL';
-  const label = (text) => `<div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.5); letter-spacing: 2px; margin: 12px 0 6px;">${text}</div>`;
+  const label = (text) => `<div style="font-family: var(--font-title); font-size: 8px; color: rgba(0,229,255,0.5); letter-spacing: 1px; margin: 12px 0 6px;">${text}</div>`;
 
   // What the player typed under THE TELL, beside the real tells.
   const yours = record.tell
@@ -239,7 +239,7 @@ function renderReveal(msg, record) {
 
   return `
   <div data-quiz-reveal="${msg.id}" role="status" style="scroll-margin-top: 12px; margin-top: 16px; padding: 16px; background: ${correctBg}; border: 1px solid ${correctBorder};">
-    <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: ${correctColor}; letter-spacing: 2px;">
+    <div style="font-family: var(--font-title); font-size: 12px; font-weight: 700; color: ${correctColor}; letter-spacing: 1px;">
       ${isCorrect ? '✓ CORRECT' : '✗ WRONG'} — THIS IS ${answerLabel}
     </div>
     ${yours}
@@ -258,7 +258,7 @@ function getNextCuratedMessage(quiz) {
   return CURATED_MESSAGES.find(m => !quiz.curated[m.id]);
 }
 
-const btnStyle = (color, rgb) => `flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; color: ${color}; border-color: rgba(${rgb},0.3); background: rgba(${rgb},0.05);`;
+const btnStyle = (color, rgb) => `flex: 1; text-align: center; padding: 14px; cursor: pointer; font-family: var(--font-title); line-height: normal; font-size: 12px; font-weight: 700; letter-spacing: 1px; color: ${color}; border-color: rgba(${rgb},0.3); background: rgba(${rgb},0.05);`;
 
 // The verdict buttons and THE TELL box for a message not yet answered.
 function verdictForm(msg, mode, simple = false) {
@@ -268,7 +268,7 @@ function verdictForm(msg, mode, simple = false) {
   return `
         <div style="margin-top: 20px;">
           <div style="margin-bottom: 12px;">
-            <div style="font-family: var(--font-display); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 2px; margin-bottom: 6px;">${simple ? 'WHAT GAVE IT AWAY?' : 'THE TELL'}</div>
+            <div style="font-family: var(--font-title); font-size: 8px; color: rgba(0,229,255,0.4); letter-spacing: 1px; margin-bottom: 6px;">${simple ? 'WHAT GAVE IT AWAY?' : 'THE TELL'}</div>
             <input type="text" ${tellAttr}="${msg.id}" placeholder="${placeholder}" style="width: 100%; padding: 10px 14px; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); color: var(--offwhite); font-family: var(--font-body); font-size: 13px; outline: none;">
           </div>
           <div style="display: flex; gap: 12px; margin-bottom: 16px;">
@@ -287,7 +287,7 @@ function bankHeader(quiz) {
   const answers = Object.values(quiz.quizAnswers || {});
   return `
       <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="font-family: var(--font-display); font-size: 9px; color: var(--amber); letter-spacing: 2px;">QUIZ MODE</div>
+        <div style="font-family: var(--font-title); font-size: 9px; color: var(--amber); letter-spacing: 1px;">QUIZ MODE</div>
         <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.4);">${answers.length} answered · ${answers.filter((a) => a.correct).length} correct</div>
       </div>`;
 }
@@ -315,7 +315,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
     // The message just answered, with its verdict, the tells and NEXT.
     const head = showing.mode === 'bank'
       ? bankHeader(quiz)
-      : `<div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${CURATED_MESSAGES.indexOf(revealMsg) + 1} OF ${progress.total}</div>`;
+      : `<div style="margin-bottom: 12px; font-family: var(--font-title); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 1px;">${CURATED_MESSAGES.indexOf(revealMsg) + 1} OF ${progress.total}</div>`;
     content = `
       ${head}
       ${renderMessageCard(revealMsg)}
@@ -324,7 +324,7 @@ export function renderPhishingQuiz(state, { random = Math.random } = {}) {
   } else if (!curatedDone) {
     const msg = getNextCuratedMessage(quiz);
     content = `
-      <div style="margin-bottom: 12px; font-family: var(--font-display); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 2px;">${progress.answered + 1} OF ${progress.total}</div>
+      <div style="margin-bottom: 12px; font-family: var(--font-title); font-size: 9px; color: rgba(0,229,255,0.4); letter-spacing: 1px;">${progress.answered + 1} OF ${progress.total}</div>
       ${renderMessageCard(msg)}
       ${verdictForm(msg, 'curated', simple)}`;
   } else if (showsCuratedResult(quiz)) {

@@ -7,9 +7,10 @@
   --midnight: #090B10;
   --offwhite: #EDEFF3;
 
-  --font-display: 'Orbitron', sans-serif;
-  /* Titles and headings: easier to read than Orbitron (players' readability complaints, 2026-11). */
+  /* Every word in the game is IBM Plex Sans (players' readability complaints, 2026-11): titles,
+     buttons, tabs, labels and badges. Orbitron is only the RECLAIM CITY logo (tests/plex-everywhere.test.js). */
   --font-title: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-logo: 'Orbitron', sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -81,33 +82,34 @@ img { image-rendering: pixelated; }
 }
 
 .stat-label {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
   font-size: 7px;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .section-label {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
   font-size: 8px;
   font-weight: 600;
-  letter-spacing: 3px;
+  letter-spacing: 1px;
 }
 
 .btn-primary {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
   font-size: 11px;
   font-weight: 700;
   color: var(--midnight);
   background: var(--cyan);
   padding: 14px 28px;
   cursor: pointer;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   border: none;
   box-shadow: 0 0 20px rgba(0, 229, 255, 0.35), 0 4px 0 #009bb3;
 }
 
 .btn-secondary {
-  font-family: var(--font-display);
+  font-family: var(--font-title);
+  line-height: 1.2;
   font-size: 10px;
   font-weight: 600;
   color: var(--cyan);
@@ -115,7 +117,7 @@ img { image-rendering: pixelated; }
   border: 1px solid rgba(0, 229, 255, 0.3);
   padding: 10px 20px;
   cursor: pointer;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .badge {
@@ -208,7 +210,7 @@ img { image-rendering: pixelated; }
 .building-link { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; min-width: 44px; min-height: 44px; padding: 6px 6px 8px; text-decoration: none; color: inherit; border: 1px solid rgba(0,229,255,0.28); background: rgba(0,229,255,0.04); }
 .building-link:hover, .building-link:active { border-color: var(--cyan); background: rgba(0,229,255,0.09); }
 .building-link:focus-visible { outline: 1px solid var(--cyan); outline-offset: 2px; }
-.building-badge { font-family: var(--font-display); font-size: 8px; font-weight: 700; letter-spacing: 1px; color: #00151a; background: var(--cyan); padding: 3px 6px; box-shadow: 0 0 8px rgba(0,229,255,0.35); }
+.building-badge { font-family: var(--font-title); font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: #00151a; background: var(--cyan); padding: 3px 6px; box-shadow: 0 0 8px rgba(0,229,255,0.35); }
 .building-badge--new { animation: building-badge-pulse 1.8s ease-in-out infinite; }
 @keyframes building-badge-pulse { 0%, 100% { box-shadow: 0 0 4px rgba(0,229,255,0.3); } 50% { box-shadow: 0 0 14px rgba(0,229,255,0.85); } }
 @media (prefers-reduced-motion: reduce) { .building-badge--new { animation: none; } }
@@ -217,7 +219,7 @@ img { image-rendering: pixelated; }
 .building-seals { font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.7); }
 .building-seals--all { color: var(--lime); }
 .skyline-hint { font-size: 12px; line-height: 1.5; color: rgba(237,239,243,0.6); text-align: center; margin: -6px auto 12px; max-width: 34em; }
-.skyline-hint b { color: var(--cyan); font-family: var(--font-display); font-size: 9px; letter-spacing: 1px; }
+.skyline-hint b { color: var(--cyan); font-family: var(--font-title); font-size: 9px; letter-spacing: 0.5px; }
 
 /* Building interior: a cutaway, one column, top to bottom */
 .interior { padding: 12px 16px 24px; font-family: var(--font-mono); color: var(--offwhite); }
@@ -238,7 +240,7 @@ img { image-rendering: pixelated; }
 .floor--desk { border-left-color: #9FB6FF; }
 .floor--ground { border-left-color: var(--magenta); }
 .floor--alcove { border-left-color: #FFD76A; background: rgba(40,32,12,0.45); }
-.floor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; cursor: pointer; list-style: none; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.floor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; cursor: pointer; list-style: none; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 .floor-head::-webkit-details-marker { display: none; }
 .floor-chev { color: rgba(237,239,243,0.45); transition: transform 150ms ease; }
 .floor:not([open]) .floor-chev { transform: rotate(-90deg); }
@@ -261,7 +263,7 @@ img { image-rendering: pixelated; }
 .ant-bars--warn .bar.on { background: var(--amber); }
 .ant-bars--crit .bar.on { background: var(--magenta); }
 
-.interior-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; margin-top: 6px; padding: 6px 12px; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; background: var(--cyan); color: var(--midnight); text-decoration: none; }
+.interior-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; margin-top: 6px; padding: 6px 12px; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; background: var(--cyan); color: var(--midnight); text-decoration: none; }
 .interior-btn--quiet { margin-top: 0; background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 /* The open door first and lit (Liz 2026-11-20). One bright button on the screen: the first open
    door's SEAL IT (or the worst roof row's Fix it); every other one outlined. */
@@ -341,7 +343,7 @@ img { image-rendering: pixelated; }
 .entry--sealed .entry-lock { color: var(--lime); }
 .entry--open .entry-lock { color: var(--amber); }
 .entry--beyond .entry-lock, .entry--not-checked .entry-lock { color: rgba(237,239,243,0.45); }
-.entry-where { font-family: var(--font-display); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.entry-where { font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .entry-actors { display: flex; flex-direction: column; color: #fff; font-weight: 700; }
 .entry-actor { overflow-wrap: anywhere; }
 .entry-note { font-size: 11px; }
@@ -375,7 +377,7 @@ img { image-rendering: pixelated; }
 
 /* Your devices (roof) */
 .devices { margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(0,229,255,0.12); }
-.devices-title { font-family: var(--font-display); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.devices-title { font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .devices-list { list-style: none; margin: 6px 0; padding: 0; }
 .device { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
 .device-name { overflow-wrap: anywhere; min-width: 0; }
@@ -404,7 +406,7 @@ img { image-rendering: pixelated; }
 /* Scout's district welcome: the lead line, then MORE for the rest */
 .intro-more > summary { list-style: none; cursor: pointer; }
 .intro-more > summary::-webkit-details-marker { display: none; }
-.intro-more-toggle { font-family: var(--font-display); font-style: normal; font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35); padding: 2px 6px; margin-left: 4px; vertical-align: 1px; }
+.intro-more-toggle { font-family: var(--font-title); font-style: normal; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35); padding: 2px 6px; margin-left: 4px; vertical-align: 1px; }
 .intro-more-toggle::before { content: 'MORE ▾'; }
 .intro-more[open] .intro-more-toggle::before { content: 'LESS ▴'; }
 
@@ -412,7 +414,7 @@ img { image-rendering: pixelated; }
    At 900px and up the whole line shows, as it always did. */
 .scout-remind { display: inline; }
 [data-scout-line]:has(.scout-remind[open]) .scout-cut-quote { display: none; }
-.scout-remind > summary { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-display); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); }
+.scout-remind > summary { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-title); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); }
 /* Open from 900px by script (data-open-desktop, app.js); there the tap isn't needed. */
 @media (min-width: 900px) {
   .scout-remind > summary { display: none; }
@@ -437,7 +439,7 @@ img { image-rendering: pixelated; }
    it, so on desktop it flows in the paragraph); the 50-player rule is drawn as dots
    (aria-hidden). From 900px the slides flow as one paragraph, the list shown, as it always did. */
 .explainer-more { margin-top: 8px; }
-.explainer-more > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+.explainer-more > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 .explainer-more > summary::-webkit-details-marker { display: none; }
 .explainer-more > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .explainer-more:not([open]) + .explainer-more-text { display: none; }
@@ -458,7 +460,7 @@ img { image-rendering: pixelated; }
 /* Your City: the three dials and four findings. From 900px, as they always were. */
 .stats-dials { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .stat-dial { flex: 1 1 240px; padding: 24px; text-align: center; }
-.stat-dial-label { letter-spacing: 2px; }
+.stat-dial-label { letter-spacing: 1px; }
 .stat-ring-value { font-size: 26px; }
 .stat-streak { height: 120px; margin: 0 auto 14px; }
 .stat-streak-value { font-size: 40px; }
@@ -574,7 +576,7 @@ img { image-rendering: pixelated; }
 .brief-intel { padding: 20px; margin-bottom: 24px; }
 .brief-steps { padding: 20px; margin-bottom: 28px; }
 .brief-scout { display: flex; flex-direction: column; align-items: center; }
-.brief-scout-name { font-family: var(--font-display); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+.brief-scout-name { font-family: var(--font-title); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
 .brief-scout-bubble { background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; font-size: 14px; color: rgba(237,239,243,0.7); line-height: 1.6; font-style: italic; }
 .brief-last { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
 .brief-more { margin-top: 10px; }
@@ -587,10 +589,10 @@ img { image-rendering: pixelated; }
   /* A later intel or step slide says which panel it continues. */
   .brief-deck .brief-intel:not(.is-first)::before, .brief-deck .brief-steps:not(.is-first)::before {
     display: block;
-    font-family: var(--font-display);
+    font-family: var(--font-title);
     font-size: 8px;
     font-weight: 600;
-    letter-spacing: 3px;
+    letter-spacing: 1px;
     margin-bottom: 10px;
   }
   .brief-deck .brief-intel:not(.is-first)::before { content: 'THREAT INTEL'; color: rgba(0,229,255,0.5); }
@@ -656,7 +658,7 @@ img { image-rendering: pixelated; }
 .entry-line::after { content: '▸'; margin-left: auto; color: rgba(237,239,243,0.45); }
 .entry-fold[open] > .entry-line::after { content: '▾'; }
 .entry-lock--line { flex: 0 0 auto; width: 28px; height: 28px; font-size: 13px; }
-.entry-line-where { flex: 0 0 auto; font-family: var(--font-display); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.entry-line-where { flex: 0 0 auto; font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .entry-line-who { min-width: 0; color: #fff; font-weight: 700; overflow-wrap: anywhere; }
 @media (max-width: 899px) {
   .desk--tabled { display: none; }
@@ -681,7 +683,7 @@ img { image-rendering: pixelated; }
 @media (min-width: 900px) { .phone-only { display: none !important; } }
 /* .phone-fold: a <details data-open-desktop> closed on a phone, open from 900px by script with
    its summary hidden, so desktop shows the text where it always was. */
-.phone-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; list-style: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+.phone-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; list-style: none; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 .phone-fold > summary::-webkit-details-marker { display: none; }
 .phone-fold > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .phone-fold > summary::after { content: ' ▾'; white-space: pre; }
@@ -690,7 +692,7 @@ img { image-rendering: pixelated; }
 /* .more-fold + .more-fold-text: the text sits right after the <details>, not in it, so on desktop
    it flows on in the same paragraph (as the city explainer's list does). */
 .more-fold { display: inline; }
-.more-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; margin-left: 4px; cursor: pointer; list-style: none; font-family: var(--font-display); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); vertical-align: middle; }
+.more-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; margin-left: 4px; cursor: pointer; list-style: none; font-family: var(--font-title); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); vertical-align: middle; }
 .more-fold > summary::-webkit-details-marker { display: none; }
 .more-fold > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .more-fold:not([open]) + .more-fold-text { display: none; }
@@ -853,7 +855,7 @@ img { image-rendering: pixelated; }
 .focus-one-step { margin: 12px 0 16px; }
 .focus-actions { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin: 20px 0 8px; }
 .focus-actions--quiet { align-items: flex-start; gap: 4px; margin-top: 8px; }
-.focus-go { width: 100%; text-align: center; text-decoration: none; padding: 18px 20px; font-size: 13px; box-sizing: border-box; display: block; }
+.focus-go { width: 100%; text-align: center; text-decoration: none; padding: 18px 20px; font-size: 13px; line-height: 1.2; box-sizing: border-box; display: block; }
 .focus-actions .btn-secondary { padding: 14px 20px; font-size: 11px; }
 .focus-notnow { align-self: center; font-size: 13px; color: rgba(237,239,243,0.45); text-decoration: none; padding: 10px; }
 .focus-tools { margin-top: 28px; padding-top: 16px; border-top: 1px solid rgba(0,229,255,0.1); }
@@ -1198,7 +1200,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
    the rest is quiet. What's next is a way back, not the screen's next step: an outline. */
 .hud { position: relative; z-index: 50; background: linear-gradient(180deg, rgba(9,11,16,0.97) 0%, rgba(9,11,16,0.86) 100%); border-bottom: 1px solid rgba(0,229,255,0.1); }
 .hud-bar { display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 6px 12px; box-sizing: border-box; }
-.hud-brand { flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--cyan); letter-spacing: 1.5px; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 40px rgba(0, 229, 255, 0.15); }
+.hud-brand { flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; font-family: var(--font-logo); font-size: 13px; font-weight: 800; color: var(--cyan); letter-spacing: 1.5px; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 40px rgba(0, 229, 255, 0.15); }
 .hud-tagline { display: none; }
 .hud-way { flex: 1 1 auto; min-width: 0; display: flex; justify-content: flex-end; }
 .hud-end { flex: none; display: flex; align-items: center; gap: 6px; }
@@ -1229,7 +1231,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .hud .hud-stats { display: flex; flex-wrap: nowrap; align-items: center; gap: 16px !important; height: 28px; padding: 0 12px; border-top: 1px solid rgba(255, 255, 255, 0.04); overflow: hidden; }
 .hud-stats .hud-stat { display: inline-flex; align-items: baseline; gap: 5px; padding: 0; background: none; border: 0; white-space: nowrap; }
 .hud-stats .stat-value { font-size: 12px; }
-.hud-stats .stat-label { font-size: 8px; letter-spacing: 1.5px; }
+.hud-stats .stat-label { font-size: 8px; letter-spacing: 1px; }
 .hud-stat--lime, .hud-stat--magenta, .hud-stat--amber, .hud-stat--cyan, .hud-stat--progress { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); }
 .hud-stats .hud-stat { background: none; border: 0; }
 .hud-stat .stat-label { color: var(--text-dim); }
@@ -1260,14 +1262,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .scout-more-toggle::-webkit-details-marker { display: none; }
 .scout-more[open] .scout-more-caret { display: inline-block; transform: rotate(180deg); }
 .scout-more-text { font-size: 14px; line-height: 1.6; color: var(--offwhite); }
-.scout-name { font-family: var(--font-display); font-size: 7px; font-weight: 700; color: var(--text-dim); margin-top: 3px; letter-spacing: 2px; }
+.scout-name { font-family: var(--font-title); font-size: 7px; font-weight: 700; color: var(--text-dim); margin-top: 3px; letter-spacing: 1px; }
 .scout-action { flex-shrink: 0; display: inline-block; text-align: center; white-space: nowrap; padding: 12px 20px; font-size: 10px; letter-spacing: 1px; }
 .say-name { color: var(--offwhite); font-weight: 700; }
 .say-link { color: var(--cyan); font-weight: 600; }
 
 /* Labels, eyebrows and tags: grey. (.section-label is coloured inline on many screens.) */
 .section-label { color: var(--text-quiet) !important; }
-.screen-eyebrow { font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--text-quiet); }
+.screen-eyebrow { font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); }
 .tag-quiet { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); padding: 4px 12px; }
 .badge--quiet, .badge--bonus { color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border-color: var(--line-quiet); }
 .badge--skip { color: var(--text-dim); }
@@ -1315,7 +1317,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
    the button (screens/district.js). */
 .next-up { display: flex; align-items: center; gap: 12px; margin: 12px 24px 0; padding: 10px 12px 10px 14px; border: 1px solid rgba(0, 229, 255, 0.55); background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
 .next-up-text { flex: 1; min-width: 0; }
-.next-up-label { display: block; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-quiet); margin-bottom: 3px; }
+.next-up-label { display: block; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); margin-bottom: 3px; }
 .next-up-name { font-size: 14px; font-weight: 600; color: var(--offwhite); line-height: 1.35; }
 .next-up--simple .next-up-label { display: inline; font-family: inherit; font-size: 16px; letter-spacing: 0; color: var(--offwhite); margin: 0; }
 .next-up--simple .next-up-name { font-size: 16px; }
@@ -1388,7 +1390,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 /* Flagged passwords left (display only): "96% · 2 passwords to change" under the district bar. */
 .resets-left-note { font-size: 13px; color: var(--amber); margin-top: 6px; line-height: 1.4; }
 /* The last flagged password changed: a moment on the panel, in this browser only. */
-.pm-all-changed { font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--lime); text-shadow: 0 0 12px rgba(198,255,0,0.45); margin-bottom: 10px; animation: pm-all-changed-pop 0.6s ease-out; }
+.pm-all-changed { font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--lime); text-shadow: 0 0 12px rgba(198,255,0,0.45); margin-bottom: 10px; animation: pm-all-changed-pop 0.6s ease-out; }
 .pm-celebrate { box-shadow: 0 0 0 1px rgba(198,255,0,0.5), 0 0 24px rgba(198,255,0,0.25); }
 @keyframes pm-all-changed-pop { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .pm-all-changed { animation: none; } }

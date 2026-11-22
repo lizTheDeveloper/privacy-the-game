@@ -293,7 +293,7 @@ describe('The Whole City', () => {
 
   it('place names are words, not cyan (they aren\'t links)', () => {
     const html = renderCityTogether(fresh(), { collective: { status: 'ready', data: DATA } });
-    const row = html.match(/letter-spacing: 1px; color: ([^;]+);">Chicago</);
+    const row = html.match(/letter-spacing: [\d.]+px; color: ([^;]+);">Chicago</);
     expect(row[1]).toBe('var(--offwhite)');
   });
 });

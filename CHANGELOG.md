@@ -2,6 +2,17 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.47.0 (2026-11-21): IBM Plex Sans everywhere but the logo
+
+7.46.0 moved the titles to IBM Plex Sans. The owner asked for the rest too: "replace Orbitron everywhere — except the logo." Now every word in the game is in **IBM Plex Sans**, in Simple and Advanced. Only the **RECLAIM CITY** logo stays in Orbitron: in the top bar, on the start screen, on the Focus music page and on the share cards.
+
+- **What changed:** the buttons, the SURVEY / RECON / FORTIFY / RECLAIM tabs, the MORE folds, the back links, the small labels and badges (THREAT INTEL, NEXT UP, SECURED, the floor names in a building, CHAPTER 1 COMPLETE, CORRECT, 1 OF 12), the top bar's INTEGRITY / EXPOSURE / STREAK, the big figures on The Whole City, the city's shortcut buttons and its "// ENTER" tags, and the PRISM, broker sky and leak pages' labels. On the share cards, DISTRICT LIBERATED (and the Whole City card's heading and big number) are in Plex now. The cards still say the same words.
+- **Closer letters.** Orbitron was spaced 1–4px apart. Capital-letter labels are now 0.5–1px, and names in ordinary letters 0.3px.
+- **Nothing grew.** Plex's line is the same height as Orbitron's at most sizes. Where it was 1px taller, the line is set so it isn't. On a 390px phone no button is taller, nothing goes off the side, and the bright button is where it was or higher: 44–64px higher on Recon (START now fits beside each mission's name), 50–61px higher on the milestone and 52px higher on the broker sky.
+- **The same:** the words, capital letters, colours, glow and text sizes. Numbers and codes stay in JetBrains Mono.
+- The page loads two Orbitron weights instead of six.
+- Nothing new is tracked or sent.
+
 ## 7.46.0 (2026-11-21): Titles in IBM Plex Sans
 
 Players said the titles were hard to read. The game's titles and headings were in Orbitron, a wide, square display font. They're now in **IBM Plex Sans**, a plain font that's easy to read, in both Simple and Advanced.

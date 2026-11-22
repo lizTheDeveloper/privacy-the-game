@@ -415,7 +415,7 @@ function getReturnLine(lastVisit) {
 // HUD floats over the map and its buttons fill the top right (wider screens).
 function renderWelcomeBack(text, where) {
   if (!text) return '';
-  return `<div data-welcome-back class="welcome-back welcome-back--${where}" style="margin: 8px 20px 0; padding: 8px 14px; background: rgba(9,11,16,0.92); border: 1px solid rgba(255,159,0,0.3); font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.5;"><span style="font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--amber); margin-right: 8px;">WELCOME BACK</span>${escAttr(text)}</div>`;
+  return `<div data-welcome-back class="welcome-back welcome-back--${where}" style="margin: 8px 20px 0; padding: 8px 14px; background: rgba(9,11,16,0.92); border: 1px solid rgba(255,159,0,0.3); font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.5;"><span style="font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--amber); margin-right: 8px;">WELCOME BACK</span>${escAttr(text)}</div>`;
 }
 
 // The city's one bright button names the mission it opens (Liz 2026-11-20: "one way forward"):
@@ -673,7 +673,7 @@ const STYLE = `
     @keyframes cityBlink { to { visibility: hidden; } }
 
     .city-actions { position: absolute; top: 92px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 40px); }
-    .city-btn { text-decoration: none; font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 7px 14px;
+    .city-btn { text-decoration: none; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
     /* Shortcuts, not the next step: quiet outlines in one neutral color (the colour language, style.css). */
@@ -715,7 +715,7 @@ const STYLE = `
     .city-cluster.is-secured .city-lot { animation: cityGroundPulse 3s ease-in-out infinite; }
     @keyframes cityGroundPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
     .city-cluster::after { content: attr(data-name) ' // ENTER'; position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
-      font-family: var(--font-display); font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--cyan); white-space: nowrap;
+      font-family: var(--font-title); font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
       padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.92); box-shadow: 0 0 12px rgba(0,229,255,0.25);
       opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; }
     .city-cluster:hover { transform: translateY(-5px) scale(var(--s)); filter: brightness(1.25); z-index: 40; }
