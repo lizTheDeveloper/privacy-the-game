@@ -52,7 +52,7 @@ const STYLE = `<style>
 .star-card .star-card-note{font-size:12px;color:rgba(237,239,243,0.75)}
 .star-card-opens{margin:2px 0 6px;font-size:13px;color:var(--offwhite)}
 .star-card .star-card-none{color:#FF2D9B;font-weight:700}
-.star-card .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin:12px 0 4px}
+.star-card .label{font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin:12px 0 4px}
 .star-card a{color:var(--cyan)}
 .star-card .star-card-go a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--cyan);border-radius:6px;text-decoration:none}
 .star-card-list{margin:0;padding-left:18px}
@@ -73,7 +73,7 @@ const STYLE = `<style>
 .constellation-controls{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:6px}
 @media (max-width:359.98px){.constellation-controls{top:auto;bottom:8px;flex-direction:row}.constellation-scout{right:8px}.broker-map .map-head{font-size:12px;margin-top:6px}.broker-map .map-sub{margin-bottom:6px}}
 .constellation-zoom{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--offwhite);background:rgba(9,11,16,0.82);border:1px solid rgba(0,229,255,0.35);border-radius:8px;cursor:pointer;padding:0}
-.constellation-zoom--reset{font-size:10px;letter-spacing:1px}
+.constellation-zoom--reset{font-size:11px;letter-spacing:1px}
 .constellation-zoom:focus-visible,.constellation-star:focus-visible,.constellation-list:focus-visible,.residency-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .constellation-pick{min-height:22px;margin:8px 0 0;font-family:var(--font-mono);font-size:13px;color:var(--offwhite);overflow-wrap:anywhere}
 .constellation-list{min-height:44px;margin-top:6px;padding:0 14px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--cyan);background:transparent;border:1px solid rgba(0,229,255,0.3);cursor:pointer}
@@ -83,7 +83,7 @@ const STYLE = `<style>
 .map-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 0 4px;padding:0;list-style:none;font-size:12px;color:rgba(237,239,243,0.7)}
 .map-legend li{display:flex;align-items:center;gap:6px}
 .map-panel{margin-top:14px;padding:12px 14px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.6;color:var(--offwhite);overflow-wrap:anywhere}
-.map-panel .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin-bottom:6px}
+.map-panel .label{font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin-bottom:6px}
 .map-panel a{color:var(--cyan)}
 .residency-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .residency-btn{min-height:44px;padding:0 16px}
@@ -108,7 +108,7 @@ ${TICK_CSS}
 ${QUIZ_CSS}
 ${LADDER_CSS}
 ${SATELLITE_CARD_CSS}
-.constellation-sats-head{margin:10px 0 0;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6)}
+.constellation-sats-head{margin:10px 0 0;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6)}
 @media (min-width:900px){.constellation-wrap.has-side{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}}
 </style>`;
 

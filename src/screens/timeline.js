@@ -77,9 +77,9 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
       <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(26,31,43,0.4); border: 1px solid rgba(0,229,255,0.08); margin-bottom: 4px;">
         <div style="flex: 1;">
           <div style="font-size: 12px; color: var(--offwhite); font-weight: 500;">${esc(era.label)}</div>
-          <div style="font-family: var(--font-mono); font-size: 9px; color: rgba(237,239,243,0.35); margin-top: 2px;">${era.startYear}–${era.endYear}</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 2px;">${era.startYear}–${era.endYear}</div>
         </div>
-        <div style="font-family: var(--font-mono); font-size: 10px; color: ${color}; font-weight: 600;">${esc(actLabel)}</div>
+        <div style="font-family: var(--font-mono); font-size: 11px; color: ${color}; font-weight: 600;">${esc(actLabel)}</div>
       </div>`;
     }).join('');
 
@@ -89,14 +89,14 @@ function renderPlatformCard(state, platform, lead = false, inner = '') {
         ${platformIcon(platform, bState)}
         <div style="flex: 1;">
           <div style="font-family: var(--font-title); line-height: 1.2; font-size: 13px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(platform.name)}</div>
-          <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(0,229,255,0.6); margin-top: 3px;">Joined ${profile.joinYear} · ${yearsOn} year${yearsOn === 1 ? '' : 's'} of history</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(0,229,255,0.6); margin-top: 3px;">Joined ${profile.joinYear} · ${yearsOn} year${yearsOn === 1 ? '' : 's'} of history</div>
         </div>
         <button type="button" class="btn-secondary" data-action="edit-social-profile" data-platform="${platform.id}" style="min-height: 44px; padding: 0 16px;">EDIT</button>
       </div>
-      <div style="font-family: var(--font-title); font-size: 7px; font-weight: 600; letter-spacing: 1px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
+      <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: rgba(0,229,255,0.4); margin-bottom: 8px;">YOUR ERAS</div>
       ${eraRows}
       <div style="margin-top: 12px; text-align: center;">
-        <a href="#/district/${esc(account.district)}?tab=reclaim" style="font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 0.5px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
+        <a href="#/district/${esc(account.district)}?tab=reclaim" style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: #00E5FF; padding: 8px 16px; border: 1px solid rgba(0,229,255,0.3); background: rgba(0,229,255,0.08); text-decoration: none;">START REVIEW MISSIONS</a>
       </div>
     </div>`;
   }
@@ -138,7 +138,7 @@ export function renderSocialForm(platformId, profile = null) {
   const year = profile?.joinYear ?? null;
   return `
   <div id="social-profile-form" data-platform="${platformId}" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,229,255,0.2);">
-    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 0.5px; margin-bottom: 16px;">YOUR ${esc(platform.name.toUpperCase())} HISTORY</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; color: #00E5FF; letter-spacing: 0.5px; margin-bottom: 16px;">YOUR ${esc(platform.name.toUpperCase())} HISTORY</div>
 
     <div style="margin-bottom: 20px;">
       <label for="social-join-year" style="${FORM_LABEL}">What year did you join?</label>
@@ -168,7 +168,7 @@ export function renderEraQuestions(joinYear, answers = []) {
   const eras = getEras(joinYear);
   return eras.map((era, i) => `
     <div data-era="${i}" style="margin-bottom: 16px;">
-      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; color: var(--cyan); margin-bottom: 4px;">${esc(era.label).toUpperCase()}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--cyan); margin-bottom: 4px;">${esc(era.label).toUpperCase()}</div>
       <div style="font-family: var(--font-mono); font-size: 13px; color: var(--offwhite); margin-bottom: 10px;">${era.startYear}–${era.endYear}</div>
       ${ACTIVITY_LEVELS.map((a) => activityRow(`era-${i}`, a, answers?.[i] === a.value)).join('')}
     </div>
@@ -268,7 +268,7 @@ export function renderTimeline(state, ui = {}) {
     ${TIMELINE_CSS}${renderHud(state)}
     <div style="padding: 20px 24px 0;">
       <div style="display: flex; align-items: center; gap: 16px;">
-        <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 0.5px; text-decoration: none;">&#8592; DISTRICT</a>
+        <a href="#/district/square" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 0.5px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
           <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">SOCIAL TIMELINE</div>
           ${simple ? '' : '<div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Map your social media history, so your review starts where most of your posts are.</div>'}

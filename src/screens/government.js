@@ -89,7 +89,7 @@ export const GOV_CSS = `<style>
 .gov-ruler .bar i{display:block;height:100%;background:linear-gradient(90deg,rgba(255,45,155,0.35),${MAGENTA});box-shadow:0 0 10px rgba(255,45,155,0.5)}
 .gov-ruler .what{grid-area:what;font-size:12px;color:rgba(237,239,243,0.6)}
 .gov-ruler .what a{color:var(--cyan)}
-.gov-axis{position:relative;height:18px;margin-left:354px;font-family:var(--font-mono);font-size:10px;color:rgba(237,239,243,0.45)}
+.gov-axis{position:relative;height:18px;margin-left:354px;font-family:var(--font-mono);font-size:11px;color:rgba(237,239,243,0.45)}
 .gov-axis span{position:absolute;transform:translateX(-50%)}
 .gov-ruler summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--cyan)}
 @media (max-width:520px){.gov-ruler li{grid-template-columns:1fr;grid-template-areas:'num' 'bar' 'what'}.gov-axis{margin-left:0}}
@@ -144,6 +144,22 @@ function reachOf(graph, id) {
   return out;
 }
 
+// The phone's map is drawn 420 units wide into about 364px, so 13 units is the smallest that reads
+// at 11px (7.48.0). A note two to a row wraps at its spaces, 22 characters a line, two lines at most.
+const FS = 13;
+const NOTE_CHARS = 22;
+function noteLines(note) {
+  const lines = [''];
+  for (const word of String(note).split(' ')) {
+    const last = lines[lines.length - 1];
+    if (!last || `${last} ${word}`.length <= NOTE_CHARS) lines[lines.length - 1] = last ? `${last} ${word}` : word;
+    else lines.push(word);
+  }
+  if (lines.length <= 2) return lines;
+  const second = `${lines[1]} ${lines.slice(2).join(' ')}`;
+  return [lines[0], `${second.slice(0, NOTE_CHARS - 1).trimEnd()}…`];
+}
+
 function tierSvg(graph, selected, { simple = false, focus = null } = {}) {
   const W = 420;
   const cols = 2;
@@ -159,19 +175,21 @@ function tierSvg(graph, selected, { simple = false, focus = null } = {}) {
     ...(simple && !focus ? [] : agencyTiers),
   ];
   const bw = (W - 44) / cols;
-  const bh = 46;
   const pos = new Map();
   const heads = [];
   let y = 96;
   for (const t of tiers) {
-    heads.push(`<text x="${W / 2}" y="${y}" font-size="11" letter-spacing="3" text-anchor="middle" fill="${CYAN}" fill-opacity="0.55">${esc(t.label)}</text>`);
+    heads.push(`<text x="${W / 2}" y="${y}" font-size="${FS}" letter-spacing="2" text-anchor="middle" fill="${CYAN}" fill-opacity="0.55">${esc(t.label)}</text>`);
     y += 12;
     const c = t.one ? 1 : cols;
     const w = t.one ? W - 32 : bw;
+    // A note two to a row takes two lines when it needs them; the boxes in that tier grow to fit.
+    const notes = t.nodes.map((node) => (node.note && !t.one ? noteLines(node.note) : null));
+    const bh = notes.some((l) => l && l.length > 1) ? 61 : 46;
     t.nodes.forEach((node, i) => {
       const inRow = Math.min(c, t.nodes.length - Math.floor(i / c) * c);
       const x0 = (W - inRow * w - (inRow - 1) * 12) / 2;
-      pos.set(node.id, { ...node, x: x0 + (i % c) * (w + 12), y: y + Math.floor(i / c) * (bh + 10), w, h: bh, wide: t.one });
+      pos.set(node.id, { ...node, x: x0 + (i % c) * (w + 12), y: y + Math.floor(i / c) * (bh + 10), w, h: bh, wide: t.one, lines: notes[i] });
     });
     y += Math.ceil(t.nodes.length / c) * (bh + 10) + 30;
   }
@@ -209,8 +227,8 @@ function tierSvg(graph, selected, { simple = false, focus = null } = {}) {
     return `<g class="gov-node${on ? ' is-on' : ''}" data-action="gov-select" data-node="${esc(p.id)}" tabindex="0" role="button" aria-pressed="${on}" aria-label="${esc(p.label)}">`
       + `<rect class="gov-node-box" x="${n(p.x)}" y="${n(p.y)}" width="${n(p.w)}" height="${p.h}" rx="2" fill="rgba(9,11,16,0.94)" stroke="${colour}" stroke-opacity="${on ? 1 : 0.55}" stroke-width="${on ? 2.2 : 1.2}"/>`
       + `<rect x="${n(p.x)}" y="${n(p.y)}" width="3" height="${p.h}" fill="${colour}"/>`
-      + `<text x="${n(p.x + 11)}" y="${n(p.y + (p.note ? 20 : 28))}" font-size="${p.label.length > 17 ? 12 : 13.5}" font-weight="700" fill="${on ? LIME : colour}">${esc(p.label)}</text>`
-      + (p.note ? `<text x="${n(p.x + 11)}" y="${n(p.y + 37)}" font-size="${p.wide ? 12 : 10}" fill="${p.wide ? PALE : 'rgba(237,239,243,0.55)'}">${esc(!p.wide && String(p.note).length > 24 ? `${String(p.note).slice(0, 23)}…` : p.note)}</text>` : '')
+      + `<text x="${n(p.x + 11)}" y="${n(p.y + (p.note ? 20 : 28))}" font-size="${p.label.length > 17 ? FS : 13.5}" font-weight="700" fill="${on ? LIME : colour}">${esc(p.label)}</text>`
+      + (p.note ? (p.lines ?? [String(p.note)]).map((l, j) => `<text x="${n(p.x + 11)}" y="${n(p.y + 37 + j * 15)}" font-size="${FS}" fill="${p.wide ? PALE : 'rgba(237,239,243,0.55)'}">${esc(l)}</text>`).join('') : '')
       + '</g>';
   }).join('');
   return `<svg viewBox="0 0 ${W} ${n(y)}" role="group" aria-label="Map of who gets your data, top to bottom: where it leaves you, the pipes, the agencies, and who checks" xmlns="http://www.w3.org/2000/svg">${core}${heads.join('')}${paths.join('')}${packets.join('')}${boxes}</svg>`;

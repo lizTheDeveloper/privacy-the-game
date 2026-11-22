@@ -37,7 +37,7 @@ export function renderBuilding(accountId, buildingState, size = 64, { href, glow
   <div style="position: relative; display: inline-block; text-align: center;">
     <img src="${src}" style="display: block; margin: 0 auto; width: ${size}px; height: auto; filter: ${filter};">
     ${scar}
-    ${showName ? `<div style="font-family: var(--font-title); line-height: 1.2; font-size: 8px; letter-spacing: 0.5px; text-align: center; color: rgba(237,239,243,0.7); margin-top: 4px;">${account?.name || accountId}</div>` : ''}
+    ${showName ? `<div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; letter-spacing: 0.5px; text-align: center; color: rgba(237,239,243,0.7); margin-top: 4px;">${account?.name || accountId}</div>` : ''}
   </div>`;
   if (!href) return building;
   const name = account?.name || accountId;

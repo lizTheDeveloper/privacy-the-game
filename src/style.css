@@ -83,13 +83,13 @@ img { image-rendering: pixelated; }
 
 .stat-label {
   font-family: var(--font-title);
-  font-size: 7px;
+  font-size: 11px;
   letter-spacing: 0.5px;
 }
 
 .section-label {
   font-family: var(--font-title);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 1px;
 }
@@ -110,7 +110,7 @@ img { image-rendering: pixelated; }
 .btn-secondary {
   font-family: var(--font-title);
   line-height: 1.2;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--cyan);
   background: rgba(0, 229, 255, 0.08);
@@ -122,7 +122,7 @@ img { image-rendering: pixelated; }
 
 .badge {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   padding: 3px 8px;
   border: 1px solid;
@@ -156,7 +156,7 @@ img { image-rendering: pixelated; }
   div:has(> .hud-stat) { flex-wrap: wrap; gap: 8px !important; }
   .hud-stat { padding: 3px 8px; }
   .stat-value { font-size: 11px; }
-  .stat-label { font-size: 6px; }
+  .stat-label { font-size: 11px; }
   div[style*="padding: 10px 20px"],
   div[style*="padding: 16px 24px"],
   div[style*="padding: 20px 24px"],
@@ -210,23 +210,23 @@ img { image-rendering: pixelated; }
 .building-link { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; min-width: 44px; min-height: 44px; padding: 6px 6px 8px; text-decoration: none; color: inherit; border: 1px solid rgba(0,229,255,0.28); background: rgba(0,229,255,0.04); }
 .building-link:hover, .building-link:active { border-color: var(--cyan); background: rgba(0,229,255,0.09); }
 .building-link:focus-visible { outline: 1px solid var(--cyan); outline-offset: 2px; }
-.building-badge { font-family: var(--font-title); font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: #00151a; background: var(--cyan); padding: 3px 6px; box-shadow: 0 0 8px rgba(0,229,255,0.35); }
+.building-badge { font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #00151a; background: var(--cyan); padding: 3px 6px; box-shadow: 0 0 8px rgba(0,229,255,0.35); }
 .building-badge--new { animation: building-badge-pulse 1.8s ease-in-out infinite; }
 @keyframes building-badge-pulse { 0%, 100% { box-shadow: 0 0 4px rgba(0,229,255,0.3); } 50% { box-shadow: 0 0 14px rgba(0,229,255,0.85); } }
 @media (prefers-reduced-motion: reduce) { .building-badge--new { animation: none; } }
 .building-link--compact { gap: 2px; padding: 4px 4px 5px; border-color: rgba(0,229,255,0.16); background: rgba(0,229,255,0.02); }
-.building-link--compact .building-seals { font-size: 9px; }
-.building-seals { font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.7); }
+.building-link--compact .building-seals { font-size: 11px; }
+.building-seals { font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.7); }
 .building-seals--all { color: var(--lime); }
 .skyline-hint { font-size: 12px; line-height: 1.5; color: rgba(237,239,243,0.6); text-align: center; margin: -6px auto 12px; max-width: 34em; }
-.skyline-hint b { color: var(--cyan); font-family: var(--font-title); font-size: 9px; letter-spacing: 0.5px; }
+.skyline-hint b { color: var(--cyan); font-family: var(--font-title); font-size: 11px; letter-spacing: 0.5px; }
 
 /* Building interior: a cutaway, one column, top to bottom */
 .interior { padding: 12px 16px 24px; font-family: var(--font-mono); color: var(--offwhite); }
 .interior-back { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; text-decoration: none; }
 .interior-title { font-family: var(--font-title); line-height: 1.2; font-size: 18px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; margin-top: 14px; text-shadow: 0 0 12px rgba(0,229,255,0.45); overflow-wrap: anywhere; }
 .interior-sub { font-size: 11px; color: rgba(237,239,243,0.5); margin-top: 4px; }
-.interior-meter { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 10px; letter-spacing: 1px; margin: 10px 0 14px; color: rgba(237,239,243,0.7); }
+.interior-meter { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 11px; letter-spacing: 1px; margin: 10px 0 14px; color: rgba(237,239,243,0.7); }
 .interior-meter b { color: #fff; }
 .interior .dim { color: rgba(237,239,243,0.45); }
 .interior .ok { color: var(--lime); }
@@ -240,7 +240,7 @@ img { image-rendering: pixelated; }
 .floor--desk { border-left-color: #9FB6FF; }
 .floor--ground { border-left-color: var(--magenta); }
 .floor--alcove { border-left-color: #FFD76A; background: rgba(40,32,12,0.45); }
-.floor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; cursor: pointer; list-style: none; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.floor-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; cursor: pointer; list-style: none; font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 .floor-head::-webkit-details-marker { display: none; }
 .floor-chev { color: rgba(237,239,243,0.45); transition: transform 150ms ease; }
 .floor:not([open]) .floor-chev { transform: rotate(-90deg); }
@@ -263,7 +263,7 @@ img { image-rendering: pixelated; }
 .ant-bars--warn .bar.on { background: var(--amber); }
 .ant-bars--crit .bar.on { background: var(--magenta); }
 
-.interior-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; margin-top: 6px; padding: 6px 12px; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; background: var(--cyan); color: var(--midnight); text-decoration: none; }
+.interior-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; margin-top: 6px; padding: 6px 12px; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 1px; background: var(--cyan); color: var(--midnight); text-decoration: none; }
 .interior-btn--quiet { margin-top: 0; background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 /* The open door first and lit (Liz 2026-11-20). One bright button on the screen: the first open
    door's SEAL IT (or the worst roof row's Fix it); every other one outlined. */
@@ -325,7 +325,7 @@ img { image-rendering: pixelated; }
 @media (prefers-reduced-motion: reduce) { .leak-chip > summary span { transition: none; } }
 
 .slip { border: 1px dashed rgba(159,182,255,0.4); background: rgba(13,20,32,0.8); padding: 8px 10px; margin-top: 8px; }
-.slip-stamp { display: inline-block; max-width: 100%; margin: 0 0 6px; padding: 1px 5px; border: 1px solid #9FB6FF; color: #9FB6FF; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; transform: rotate(-3deg); overflow-wrap: anywhere; }
+.slip-stamp { display: inline-block; max-width: 100%; margin: 0 0 6px; padding: 1px 5px; border: 1px solid #9FB6FF; color: #9FB6FF; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; transform: rotate(-3deg); overflow-wrap: anywhere; }
 .slip-who { color: #9FB6FF; font-weight: 700; }
 .slip-note { font-size: 11px; }
 .slip-gets { margin-top: 4px; }
@@ -343,7 +343,7 @@ img { image-rendering: pixelated; }
 .entry--sealed .entry-lock { color: var(--lime); }
 .entry--open .entry-lock { color: var(--amber); }
 .entry--beyond .entry-lock, .entry--not-checked .entry-lock { color: rgba(237,239,243,0.45); }
-.entry-where { font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.entry-where { font-family: var(--font-title); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .entry-actors { display: flex; flex-direction: column; color: #fff; font-weight: 700; }
 .entry-actor { overflow-wrap: anywhere; }
 .entry-note { font-size: 11px; }
@@ -351,7 +351,7 @@ img { image-rendering: pixelated; }
 .entry-fix { color: var(--amber); }
 
 .interior-sources { margin-top: 4px; font-size: 11px; }
-.interior-sources summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: rgba(0,229,255,0.7); list-style: none; }
+.interior-sources summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: rgba(0,229,255,0.7); list-style: none; }
 .interior-sources summary::-webkit-details-marker { display: none; }
 .interior-sources summary::before { content: '▸ '; }
 .interior-sources[open] summary::before { content: '▾ '; }
@@ -377,7 +377,7 @@ img { image-rendering: pixelated; }
 
 /* Your devices (roof) */
 .devices { margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(0,229,255,0.12); }
-.devices-title { font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.devices-title { font-family: var(--font-title); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .devices-list { list-style: none; margin: 6px 0; padding: 0; }
 .device { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
 .device-name { overflow-wrap: anywhere; min-width: 0; }
@@ -406,7 +406,7 @@ img { image-rendering: pixelated; }
 /* Scout's district welcome: the lead line, then MORE for the rest */
 .intro-more > summary { list-style: none; cursor: pointer; }
 .intro-more > summary::-webkit-details-marker { display: none; }
-.intro-more-toggle { font-family: var(--font-title); font-style: normal; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35); padding: 2px 6px; margin-left: 4px; vertical-align: 1px; }
+.intro-more-toggle { font-family: var(--font-title); font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35); padding: 2px 6px; margin-left: 4px; vertical-align: 1px; }
 .intro-more-toggle::before { content: 'MORE ▾'; }
 .intro-more[open] .intro-more-toggle::before { content: 'LESS ▴'; }
 
@@ -414,7 +414,7 @@ img { image-rendering: pixelated; }
    At 900px and up the whole line shows, as it always did. */
 .scout-remind { display: inline; }
 [data-scout-line]:has(.scout-remind[open]) .scout-cut-quote { display: none; }
-.scout-remind > summary { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-title); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); }
+.scout-remind > summary { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-title); font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); }
 /* Open from 900px by script (data-open-desktop, app.js); there the tap isn't needed. */
 @media (min-width: 900px) {
   .scout-remind > summary { display: none; }
@@ -439,7 +439,7 @@ img { image-rendering: pixelated; }
    it, so on desktop it flows in the paragraph); the 50-player rule is drawn as dots
    (aria-hidden). From 900px the slides flow as one paragraph, the list shown, as it always did. */
 .explainer-more { margin-top: 8px; }
-.explainer-more > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+.explainer-more > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 .explainer-more > summary::-webkit-details-marker { display: none; }
 .explainer-more > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .explainer-more:not([open]) + .explainer-more-text { display: none; }
@@ -509,7 +509,7 @@ img { image-rendering: pixelated; }
 .deck-dot.is-current { background: var(--cyan); box-shadow: var(--glow-cyan); }
 .deck-progress { flex: 1 1 auto; min-width: 0; height: 3px; background: rgba(237, 239, 243, 0.15); overflow: hidden; }
 .deck-progress-fill { display: block; height: 100%; background: var(--cyan); box-shadow: var(--glow-cyan); transition: width 0.2s ease; }
-.deck-count { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: rgba(237, 239, 243, 0.55); flex: 0 0 auto; }
+.deck-count { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: rgba(237, 239, 243, 0.55); flex: 0 0 auto; }
 /* Named dots (the saints): a row of their own above BACK / NEXT, each a button with the name. */
 .deck-controls--named { flex-wrap: wrap; }
 .deck-controls--named .deck-count { font-size: 13px; color: var(--text-strong); }
@@ -576,7 +576,7 @@ img { image-rendering: pixelated; }
 .brief-intel { padding: 20px; margin-bottom: 24px; }
 .brief-steps { padding: 20px; margin-bottom: 28px; }
 .brief-scout { display: flex; flex-direction: column; align-items: center; }
-.brief-scout-name { font-family: var(--font-title); font-size: 9px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+.brief-scout-name { font-family: var(--font-title); font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 16px; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
 .brief-scout-bubble { background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; font-size: 14px; color: rgba(237,239,243,0.7); line-height: 1.6; font-style: italic; }
 .brief-last { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
 .brief-more { margin-top: 10px; }
@@ -590,7 +590,7 @@ img { image-rendering: pixelated; }
   .brief-deck .brief-intel:not(.is-first)::before, .brief-deck .brief-steps:not(.is-first)::before {
     display: block;
     font-family: var(--font-title);
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 1px;
     margin-bottom: 10px;
@@ -604,7 +604,7 @@ img { image-rendering: pixelated; }
     content: attr(data-label);
     display: block;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.08em;
     color: rgba(0,229,255,0.6);
@@ -638,7 +638,7 @@ img { image-rendering: pixelated; }
   align-items: center;
   min-height: 44px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--cyan);
@@ -646,7 +646,7 @@ img { image-rendering: pixelated; }
 .saint-story > summary::before, .desk-more > summary::before { content: '▸ '; white-space: pre; }
 .saint-story[open] > summary::before, .desk-more[open] > summary::before { content: '▾ '; }
 .desk-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; line-height: 1.4; table-layout: fixed; }
-.desk-table thead th { text-align: left; padding: 4px 4px 6px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #9FB6FF; vertical-align: bottom; }
+.desk-table thead th { text-align: left; padding: 4px 4px 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #9FB6FF; vertical-align: bottom; }
 .desk-table tbody { border-top: 1px dashed rgba(159,182,255,0.4); }
 .desk-cell { padding: 8px 4px 0; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 .desk-who { color: #9FB6FF; font-weight: 700; }
@@ -658,7 +658,7 @@ img { image-rendering: pixelated; }
 .entry-line::after { content: '▸'; margin-left: auto; color: rgba(237,239,243,0.45); }
 .entry-fold[open] > .entry-line::after { content: '▾'; }
 .entry-lock--line { flex: 0 0 auto; width: 28px; height: 28px; font-size: 13px; }
-.entry-line-where { flex: 0 0 auto; font-family: var(--font-title); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
+.entry-line-where { flex: 0 0 auto; font-family: var(--font-title); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: rgba(237,239,243,0.55); }
 .entry-line-who { min-width: 0; color: #fff; font-weight: 700; overflow-wrap: anywhere; }
 @media (max-width: 899px) {
   .desk--tabled { display: none; }
@@ -683,7 +683,7 @@ img { image-rendering: pixelated; }
 @media (min-width: 900px) { .phone-only { display: none !important; } }
 /* .phone-fold: a <details data-open-desktop> closed on a phone, open from 900px by script with
    its summary hidden, so desktop shows the text where it always was. */
-.phone-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; list-style: none; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+.phone-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; list-style: none; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
 .phone-fold > summary::-webkit-details-marker { display: none; }
 .phone-fold > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .phone-fold > summary::after { content: ' ▾'; white-space: pre; }
@@ -692,7 +692,7 @@ img { image-rendering: pixelated; }
 /* .more-fold + .more-fold-text: the text sits right after the <details>, not in it, so on desktop
    it flows on in the same paragraph (as the city explainer's list does). */
 .more-fold { display: inline; }
-.more-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; margin-left: 4px; cursor: pointer; list-style: none; font-family: var(--font-title); font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); vertical-align: middle; }
+.more-fold > summary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; margin-left: 4px; cursor: pointer; list-style: none; font-family: var(--font-title); font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); vertical-align: middle; }
 .more-fold > summary::-webkit-details-marker { display: none; }
 .more-fold > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .more-fold:not([open]) + .more-fold-text { display: none; }
@@ -719,7 +719,7 @@ img { image-rendering: pixelated; }
 .qq-signs > summary::-webkit-details-marker { display: none; }
 .qq-signs > summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
 .qq-signs[open] { padding-bottom: 12px; }
-.qq-badge { display: inline-block; font-size: 8px; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255,255,255,0.03); border-color: var(--line-quiet); }
+.qq-badge { display: inline-block; font-size: 11px; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255,255,255,0.03); border-color: var(--line-quiet); }
 .qq-desc { margin-top: 6px; font-size: 14px; line-height: 1.5; color: rgba(237,239,243,0.85); }
 /* Surveys on a phone: one question, a chip per account (district.js). */
 .survey-ask { font-size: 14px; line-height: 1.5; color: var(--offwhite); margin-bottom: 10px; }
@@ -729,7 +729,7 @@ img { image-rendering: pixelated; }
 .survey-chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .survey-chip-mark { display: inline-block; min-width: 10px; font-weight: 700; }
 .survey-chip--soon { opacity: 0.55; cursor: default; }
-.survey-chip-soon { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; }
+.survey-chip-soon { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; }
 /* Scout's district welcome: only its first sentence before MORE on a phone. */
 @media (max-width: 899px) { .intro-lead-more { display: none; } }
 @media (min-width: 900px) { .intro-lead-phone { display: none; } }
@@ -743,7 +743,7 @@ img { image-rendering: pixelated; }
 /* ── Reading levels and the step walkthrough (utils/reading.js, components/walkthrough.js) ── */
 .mission-trail { list-style: none; display: flex; align-items: center; gap: 6px; margin: 0 0 16px; padding: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.5px; color: rgba(237,239,243,0.45); flex-wrap: wrap; }
 .mission-trail li { display: flex; align-items: center; gap: 6px; }
-.mission-trail-n { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(237,239,243,0.25); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+.mission-trail-n { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(237,239,243,0.25); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
 .mission-trail .is-past { color: var(--lime); }
 .mission-trail .is-past .mission-trail-n { border-color: var(--lime); }
 .mission-trail .is-now { color: var(--offwhite); font-weight: 700; }
@@ -816,7 +816,7 @@ img { image-rendering: pixelated; }
 .walk-step.is-done .walk-body { opacity: 0.5; text-decoration: line-through; text-decoration-color: rgba(237,239,243,0.35); }
 .walk-step.is-skipped .walk-body { opacity: 0.55; }
 .walk-step.is-skipped .walk-check { color: rgba(237,239,243,0.5); border-color: rgba(237,239,243,0.25); }
-.walk-tag { font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.5); border: 1px solid rgba(237,239,243,0.2); padding: 1px 6px; }
+.walk-tag { font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.5); border: 1px solid rgba(237,239,243,0.2); padding: 1px 6px; }
 .walk-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
 .walk-done { padding: 12px 20px; }
 .walk-help { margin-top: 10px; padding: 10px 12px; background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); font-size: 14px; line-height: 1.6; color: rgba(237,239,243,0.85); }
@@ -897,7 +897,7 @@ img { image-rendering: pixelated; }
 .focus-all li.is-done .walk-check { background: var(--lime); border-color: var(--lime); color: var(--midnight); }
 .focus-actions--quiet .walk-link { min-height: 36px; }
 .brief-steps-mode .walk-progress { margin-bottom: 10px; }
-.focus-bonus { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px; margin: 8px 0; }
+.focus-bonus { display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--magenta); background: rgba(255,45,155,0.08); border: 1px solid rgba(255,45,155,0.3); padding: 4px 12px; letter-spacing: 1px; margin: 8px 0; }
 .focus-recon-note { font-size: 14px; color: var(--offwhite); line-height: 1.6; margin: 10px 0; border-left: 2px solid var(--magenta); padding-left: 10px; }
 
 /* ---------- Simplest: phone-app conventions (Liz 2026-11-17) ----------
@@ -963,7 +963,7 @@ img { image-rendering: pixelated; }
 .next-city { display: inline-block; font-size: 15px; }
 /* Focus music, while it plays: a note in the top bar that stops it (its name is the label and the tooltip). */
 .hud-music { font-family: var(--font-body); font-size: 17px; font-weight: 600; color: var(--cyan); background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.5); border-radius: 10px; min-height: 44px; min-width: 44px; padding: 0 10px; cursor: pointer; }
-.hud-dollar { display: inline-flex; align-items: center; justify-content: center; width: 11px; height: 11px; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-body); font-size: 8px; font-weight: 700; line-height: 1; letter-spacing: 0; }
+.hud-dollar { display: inline-flex; align-items: center; justify-content: center; width: 11px; height: 11px; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-body); font-size: 11px; font-weight: 700; line-height: 1; letter-spacing: 0; }
 /* "I don't have Gmail" and Simple's "My password is already strong": plain words on the quiet
    button (Liz 2026-11-18), at a quiet button's size, so they don't weigh as much as START. */
 .focus-actions .btn-secondary.not-mine, .focus-actions .btn-secondary.already-plain { font-family: var(--font-body); font-size: 16px; font-weight: 600; letter-spacing: 0; line-height: 1.3; padding: 14px 20px; text-transform: none; overflow-wrap: anywhere; }
@@ -1165,15 +1165,15 @@ a { color: var(--cyan); }
 .btn-primary:hover { background: #5CEFFF; }
 .btn-primary:active { transform: translateY(3px); background: #C2FAFF; box-shadow: 0 0 30px rgba(0, 229, 255, 0.7), 0 1px 0 #009bb3; }
 .btn-primary:focus-visible { outline: 3px solid var(--offwhite); outline-offset: 3px; }
-.btn-primary.btn-sm { padding: 8px 16px; font-size: 9px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3), 0 3px 0 #009bb3; }
-.btn-primary.btn-xs { padding: 6px 14px; font-size: 8px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 0 2px 0 #009bb3; }
+.btn-primary.btn-sm { padding: 8px 16px; font-size: 11px; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3), 0 3px 0 #009bb3; }
+.btn-primary.btn-xs { padding: 6px 14px; font-size: 11px; box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 0 2px 0 #009bb3; }
 .btn-primary.btn-sm:active, .btn-primary.btn-xs:active { box-shadow: 0 0 22px rgba(0, 229, 255, 0.7), 0 0 0 #009bb3; }
 
 /* Everything else you can tap: an outline, words in off-white. */
 .btn-secondary { color: var(--text-strong); background: transparent; border-color: rgba(0, 229, 255, 0.4); text-decoration: none; transition: transform 90ms ease, background-color 140ms ease, border-color 140ms ease; }
 .btn-secondary:hover { border-color: rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.06); }
-.btn-secondary.btn-sm { padding: 8px 16px; font-size: 9px; }
-.btn-secondary.btn-xs { padding: 6px 14px; font-size: 8px; }
+.btn-secondary.btn-sm { padding: 8px 16px; font-size: 11px; }
+.btn-secondary.btn-xs { padding: 6px 14px; font-size: 11px; }
 
 /* Pressed: down a little, and a flash of cyan. */
 :is(.btn-secondary, .city-btn, .hud-next, .hud-progress, .hud-more, .hud-menu-item, .hud-music, .simple-back, .simple-pill, .finder-opt, .survey-chip, .focus-ask-opt, .walk-gear-chip, .deck-btn, .interior-btn, .top-tool, .building-link, .read-level, .candle-btn):active:not(:disabled) {
@@ -1212,7 +1212,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .hud-progress-bar { width: 36px; height: 6px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(198, 255, 0, 0.35); overflow: hidden; }
 .hud-progress-bar > span { display: block; height: 100%; background: var(--lime); }
 .hud-progress-pct { color: var(--lime); }
-.hud-progress-go { font-size: 10px; }
+.hud-progress-go { font-size: 11px; }
 /* More, and its panel. */
 .hud-more-wrap { position: relative; }
 .hud-more { min-height: 44px; min-width: 44px; padding: 0 12px; font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text-strong); background: transparent; border: 1px solid var(--line-quiet); border-radius: 10px; white-space: nowrap; cursor: pointer; }
@@ -1226,12 +1226,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .hud-menu-item[aria-pressed="true"] { color: var(--cyan); border-color: rgba(0, 229, 255, 0.5); }
 .hud-menu .hud-patreon { font-weight: 400; }
 .hud-menu .hud-studio { font-size: 14px; font-weight: 400; color: var(--text-quiet); border-color: transparent; }
-.hud-dollar { width: 14px; height: 14px; font-size: 10px; }
+.hud-dollar { width: 14px; height: 14px; font-size: 11px; }
 /* Advanced mode's scores: one thin line under the bar that scrolls away with the page. Each keeps its meaning colour on the number only. */
 .hud .hud-stats { display: flex; flex-wrap: nowrap; align-items: center; gap: 16px !important; height: 28px; padding: 0 12px; border-top: 1px solid rgba(255, 255, 255, 0.04); overflow: hidden; }
 .hud-stats .hud-stat { display: inline-flex; align-items: baseline; gap: 5px; padding: 0; background: none; border: 0; white-space: nowrap; }
 .hud-stats .stat-value { font-size: 12px; }
-.hud-stats .stat-label { font-size: 8px; letter-spacing: 1px; }
+.hud-stats .stat-label { font-size: 11px; letter-spacing: 1px; }
 .hud-stat--lime, .hud-stat--magenta, .hud-stat--amber, .hud-stat--cyan, .hud-stat--progress { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); }
 .hud-stats .hud-stat { background: none; border: 0; }
 .hud-stat .stat-label { color: var(--text-dim); }
@@ -1246,7 +1246,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 @media (min-width: 900px) {
   .hud-bar { gap: 14px; padding: 6px 20px; }
   .hud-brand { font-size: 16px; letter-spacing: 3px; }
-  .hud-tagline { display: inline; margin-left: 14px; font-family: var(--font-mono); font-size: 9px; font-weight: 400; color: var(--text-dim); letter-spacing: 2px; text-shadow: none; }
+  .hud-tagline { display: inline; margin-left: 14px; font-family: var(--font-mono); font-size: 11px; font-weight: 400; color: var(--text-dim); letter-spacing: 2px; text-shadow: none; }
   .hud .hud-stats, .hud-ask { padding-left: 20px; padding-right: 20px; }
 }
 
@@ -1262,15 +1262,15 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .scout-more-toggle::-webkit-details-marker { display: none; }
 .scout-more[open] .scout-more-caret { display: inline-block; transform: rotate(180deg); }
 .scout-more-text { font-size: 14px; line-height: 1.6; color: var(--offwhite); }
-.scout-name { font-family: var(--font-title); font-size: 7px; font-weight: 700; color: var(--text-dim); margin-top: 3px; letter-spacing: 1px; }
-.scout-action { flex-shrink: 0; display: inline-block; text-align: center; white-space: nowrap; padding: 12px 20px; font-size: 10px; letter-spacing: 1px; }
+.scout-name { font-family: var(--font-title); font-size: 11px; font-weight: 700; color: var(--text-dim); margin-top: 3px; letter-spacing: 1px; }
+.scout-action { flex-shrink: 0; display: inline-block; text-align: center; white-space: nowrap; padding: 12px 20px; font-size: 11px; letter-spacing: 1px; }
 .say-name { color: var(--offwhite); font-weight: 700; }
 .say-link { color: var(--cyan); font-weight: 600; }
 
 /* Labels, eyebrows and tags: grey. (.section-label is coloured inline on many screens.) */
 .section-label { color: var(--text-quiet) !important; }
-.screen-eyebrow { font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); }
-.tag-quiet { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); padding: 4px 12px; }
+.screen-eyebrow { font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); }
+.tag-quiet { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-quiet); padding: 4px 12px; }
 .badge--quiet, .badge--bonus { color: var(--text-quiet); background: rgba(255, 255, 255, 0.03); border-color: var(--line-quiet); }
 .badge--skip { color: var(--text-dim); }
 .bonus-word { color: var(--text-quiet); font-weight: 700; }
@@ -1299,6 +1299,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .mission-row + .mission-row { margin-top: 4px; }
 .mission-row--lead { border-color: rgba(0, 229, 255, 0.55); background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
 .mission-row--done { opacity: 0.55; }
+/* A waiting account's building and its name (11px since 7.48.0): at most 72px, the name wrapping in it, so a
+   long name (Google Account) doesn't squeeze the words beside it. */
+.mission-row--gate > div:first-child { flex: 0 0 auto; max-width: 72px; overflow-wrap: break-word; }
+/* Its GO TO FORTIFY may take two lines, so the words beside it keep their room. */
+.mission-row--gate > .btn-secondary { white-space: normal !important; max-width: 104px; text-align: center; line-height: 1.2; }
 .facility-row { border-bottom: 1px solid rgba(237, 239, 243, 0.06); }
 .facility-row--lead { background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
 
@@ -1317,7 +1322,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
    the button (screens/district.js). */
 .next-up { display: flex; align-items: center; gap: 12px; margin: 12px 24px 0; padding: 10px 12px 10px 14px; border: 1px solid rgba(0, 229, 255, 0.55); background: rgba(0, 229, 255, 0.07); box-shadow: inset 3px 0 0 var(--cyan); }
 .next-up-text { flex: 1; min-width: 0; }
-.next-up-label { display: block; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); margin-bottom: 3px; }
+.next-up-label { display: block; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--text-quiet); margin-bottom: 3px; }
 .next-up-name { font-size: 14px; font-weight: 600; color: var(--offwhite); line-height: 1.35; }
 .next-up--simple .next-up-label { display: inline; font-family: inherit; font-size: 16px; letter-spacing: 0; color: var(--offwhite); margin: 0; }
 .next-up--simple .next-up-name { font-size: 16px; }
@@ -1337,7 +1342,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .next-up-where { display: block; font-size: 13px; color: var(--text-quiet); margin-top: 2px; }
 /* What the district says around its missions, after them. */
 .district-notes { padding-bottom: 8px; }
-.intro-dismiss { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.intro-dismiss { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; cursor: pointer; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
 .intro-fold > summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-size: 14px; color: var(--text-strong); border: 1px solid var(--line-quiet); }
 .intro-fold > summary::-webkit-details-marker { display: none; }
 .intro-fold > summary::after { content: '▾'; color: var(--cyan); }
@@ -1353,6 +1358,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .milestone-stats > div { flex: 1 1 130px; min-width: 0 !important; padding: 12px 10px !important; }
   .milestone-stats > div > div:first-child { font-size: 28px !important; }
   .milestone-city .fill-bar--big { margin-bottom: 8px; }
+  /* The share card's preview nearly as wide as the page, so the card's 21px words show at 11px or more. */
+  .milestone-card-frame { padding-left: 8px !important; padding-right: 8px !important; }
 }
 /* The browser warning's "How to fix": an amber outline, so the screen keeps one filled button. */
 .bw-more { color: var(--amber); background: transparent; border: 1px solid var(--amber); }
@@ -1385,7 +1392,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .done-fold[open] > summary::after { content: '▴'; }
 .list-all-done { font-size: 16px; color: var(--lime); padding: 4px 0; }
 /* READY (nothing started): plain grey words, not a box that looks like a button (both modes). */
-.status-quiet { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; color: var(--text-quiet); white-space: nowrap; flex-shrink: 0; }
+.status-quiet { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-quiet); white-space: nowrap; flex-shrink: 0; }
 
 /* Flagged passwords left (display only): "96% · 2 passwords to change" under the district bar. */
 .resets-left-note { font-size: 13px; color: var(--amber); margin-top: 6px; line-height: 1.4; }

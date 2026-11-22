@@ -2,6 +2,18 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.48.0 (2026-11-21): no words under 11px
+
+IBM Plex Sans (7.47.0) is narrower than Orbitron, with shorter capitals, so the small labels looked smaller still. The owner: no readable text under **11px**, in any font, on a phone, in Simple and Advanced.
+
+- **Raised to 11px:** 168 sizes from 6px to 10.5px across the game: IN A ROW and BEST on the quiz, SECURED by the district's %, SCOUT, SHARE CARD, the garage's THREAT ASSESSMENT, YOUR ERAS, the section labels, the building badges, MORE ▾, THE TELLS, the top bar's INTEGRITY / EXPOSURE / STREAK, the building's floor and entry labels, the ticket stamps, the sources folds, the city's shortcut buttons and readout, and every other small label. The city map's district names went from 9.5px to 12px (The Master Keys 10.5px to 13px), so they stay bigger than the 11px status beside them.
+- **Drawn text too.** The broker sky's satellite initials and star names are 11px. On a phone, the PRISM page draws its diagram narrower (360 wide instead of 600), so the years, company names, PRISM and NSA + FBI read at 12px or more; a computer still gets the wide one. The government map's phone copy draws its headings and notes at 11px, and a note too long for one line takes two (it was cut off after 23 letters).
+- **Share cards:** every word is drawn at 21px or more (the logo 22px), so the card still reads at 11px when the milestone screen shows it about 322px wide, which it now does on a phone. A stats line too long for the card breaks onto up to three lines where its dots were. The words are the same whatever your checks found.
+- **Layouts that moved:** a waiting account's building name on Fortify and Reclaim (Advanced) wraps under its building, and its GO TO FORTIFY can take two lines, so the words beside them keep their room. Nothing goes off the side of a 390px screen. No tap target got smaller.
+- **Bright button, first screen (390×844, before → after).** Simple: city 252→252, district Survey 1051→1072, Recon 374→391, Fortify 278→295, Reclaim 278→295, building 769→769, broker sky 675→677, milestone 724→736. Advanced: city 280→280, Survey 1077→1098, Recon 411→428, Fortify 306→323, Reclaim 306→323, building 1130→1181, milestone 634→646. None moved off the first screen.
+- **Focus music** now loads the game's own font link and uses its tokens, so its RECLAIM CITY logo is in Orbitron (it was in a fallback face), the track name and buttons in Plex, the rest in Inter.
+- `tests/min-font-size.test.js` fails on any `font-size` (or `font:` shorthand) under 11px in `src/`, any template size under 11px, the broker sky's or the phone maps' drawn sizes under 11px, and any share-card word under 21px. Its allowlist for non-words is empty.
+
 ## 7.47.0 (2026-11-21): IBM Plex Sans everywhere but the logo
 
 7.46.0 moved the titles to IBM Plex Sans. The owner asked for the rest too: "replace Orbitron everywhere — except the logo." Now every word in the game is in **IBM Plex Sans**, in Simple and Advanced. Only the **RECLAIM CITY** logo stays in Orbitron: in the top bar, on the start screen, on the Focus music page and on the share cards.

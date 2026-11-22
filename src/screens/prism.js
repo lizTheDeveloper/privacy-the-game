@@ -23,10 +23,12 @@ const STYLE = `<style>
 .prism .prism-sub{margin:0 0 14px;font-family:var(--font-mono);font-size:11px;letter-spacing:2px;color:rgba(237,239,243,0.55)}
 .prism-diagram{display:block;width:100%;height:auto;margin:6px 0 4px;background:radial-gradient(ellipse at 60% 50%,#151a28 0%,#090B10 70%);border:1px solid rgba(255,45,155,0.2);border-radius:8px}
 .prism-diagram text{font-family:'JetBrains Mono',ui-monospace,monospace}
+.prism-diagram[data-fit=narrow]{display:none}
+@media (max-width:639px){.prism-diagram[data-fit=wide]{display:none}.prism-diagram[data-fit=narrow]{display:block}}
 @media (prefers-reduced-motion:no-preference){.prism-diagram .beam{stroke-dasharray:4 6;animation:prism-flow 2.4s linear infinite}@keyframes prism-flow{to{stroke-dashoffset:-20}}}
 .prism-key{font-size:11px;color:rgba(237,239,243,0.55);margin:0 0 14px}
 .prism-panel{margin-top:14px;padding:14px 16px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.65;overflow-wrap:anywhere}
-.prism-panel .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,45,155,0.75);margin-bottom:6px}
+.prism-panel .label{font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,45,155,0.75);margin-bottom:6px}
 .prism-panel p{margin:6px 0}
 .prism-panel a{color:var(--cyan)}
 .prism-companies{list-style:none;margin:0;padding:0}
@@ -53,13 +55,23 @@ const STYLE = `<style>
 </style>`;
 
 // Nine beams from the companies on the left into a prism, one bright beam out to the NSA. A company
-// the player has an account with glows magenta.
+// the player has an account with glows magenta. Two drawings: 600 units wide for a computer, and
+// 360 for a phone (shown under 640px), so no word in it reads under 11px on a 390px phone (7.48.0).
+const WIDE = { W: 600, yearX: 10, yearFs: 13, nameX: 58, nameFs: 17, dotX: 222, px: 360, into: -30,
+  tri: [-30, 56, 30, -62, 90, 56], prismFs: 15, prismLs: 3, prismY: 42, out: [70, 160], nsaX: 168, nsaFs: 18, fbiFs: 13, fbiY: 26 };
+const NARROW = { W: 360, yearX: 4, yearFs: 12, nameX: 42, nameFs: 14, dotX: 146, px: 206, into: -16,
+  tri: [-30, 46, 16, -50, 62, 46], prismFs: 12, prismLs: 1, prismY: 34, out: [48, 88], nsaX: 92, nsaFs: 15, fbiFs: 12, fbiY: 24 };
+
 function diagram(state) {
+  return drawDiagram(state, WIDE, 'wide') + drawDiagram(state, NARROW, 'narrow');
+}
+
+function drawDiagram(state, g, fit) {
   const rows = PRISM_PROVIDERS.length;
   const top = 30;
   const step = 32;
   const h = top * 2 + step * (rows - 1);
-  const px = 360;
+  const px = g.px;
   const py = h / 2;
   const beams = [];
   const nodes = [];
@@ -67,19 +79,20 @@ function diagram(state) {
     const y = top + i * step;
     const yours = p.accounts.some((id) => mine(state, id));
     const colour = yours ? '#FF2D9B' : '#00E5FF';
-    beams.push(`<line class="beam" x1="232" y1="${y}" x2="${px - 30}" y2="${py}" stroke="${colour}" stroke-opacity="${yours ? 0.85 : 0.35}" stroke-width="${yours ? 2 : 1.2}"/>`);
-    nodes.push(`<circle cx="222" cy="${y}" r="${yours ? 6 : 4.5}" fill="${colour}"/>`
-      + `<text x="10" y="${y + 5}" font-size="13" fill="rgba(237,239,243,0.45)">${p.since}</text>`
-      + `<text x="58" y="${y + 6}" font-size="17" fill="${yours ? '#FF2D9B' : '#EDEFF3'}">${esc(p.name.replace(/ \(.*\)$/, ''))}${yours ? ' ◂' : ''}</text>`);
+    beams.push(`<line class="beam" x1="${g.dotX + 10}" y1="${y}" x2="${px + g.into}" y2="${py}" stroke="${colour}" stroke-opacity="${yours ? 0.85 : 0.35}" stroke-width="${yours ? 2 : 1.2}"/>`);
+    nodes.push(`<circle cx="${g.dotX}" cy="${y}" r="${yours ? 6 : 4.5}" fill="${colour}"/>`
+      + `<text x="${g.yearX}" y="${y + 5}" font-size="${g.yearFs}" fill="rgba(237,239,243,0.45)">${p.since}</text>`
+      + `<text x="${g.nameX}" y="${y + 6}" font-size="${g.nameFs}" fill="${yours ? '#FF2D9B' : '#EDEFF3'}">${esc(p.name.replace(/ \(.*\)$/, ''))}${yours ? ' ◂' : ''}</text>`);
   });
-  const prism = `<path d="M${px - 30} ${py + 56} L${px + 30} ${py - 62} L${px + 90} ${py + 56} Z" fill="rgba(255,45,155,0.12)" stroke="#FF2D9B" stroke-width="2"/>`
-    + `<text x="${px + 30}" y="${py + 42}" font-size="15" font-weight="700" text-anchor="middle" fill="#FF2D9B" letter-spacing="3">PRISM</text>`;
-  const out = `<line class="beam" x1="${px + 70}" y1="${py}" x2="${px + 160}" y2="${py}" stroke="#FF2D9B" stroke-width="5" stroke-opacity="0.9"/>`
-    + `<text x="${px + 168}" y="${py + 6}" font-size="18" font-weight="700" fill="#EDEFF3">NSA</text>`
-    + `<text x="${px + 168}" y="${py + 26}" font-size="12" fill="rgba(237,239,243,0.55)">+ FBI</text>`;
+  const [ax, ay, bx, by, cx, cy] = g.tri;
+  const prism = `<path d="M${px + ax} ${py + ay} L${px + bx} ${py + by} L${px + cx} ${py + cy} Z" fill="rgba(255,45,155,0.12)" stroke="#FF2D9B" stroke-width="2"/>`
+    + `<text x="${px + bx}" y="${py + g.prismY}" font-size="${g.prismFs}" font-weight="700" text-anchor="middle" fill="#FF2D9B" letter-spacing="${g.prismLs}">PRISM</text>`;
+  const out = `<line class="beam" x1="${px + g.out[0]}" y1="${py}" x2="${px + g.out[1]}" y2="${py}" stroke="#FF2D9B" stroke-width="5" stroke-opacity="0.9"/>`
+    + `<text x="${px + g.nsaX}" y="${py + 6}" font-size="${g.nsaFs}" font-weight="700" fill="#EDEFF3">NSA</text>`
+    + `<text x="${px + g.nsaX}" y="${py + g.fbiY}" font-size="${g.fbiFs}" fill="rgba(237,239,243,0.55)">+ FBI</text>`;
   const count = PRISM_PROVIDERS.filter((p) => p.accounts.some((id) => mine(state, id))).length;
   const aria = `Diagram: the nine companies named in the PRISM slides, from Microsoft in 2007 to Apple in 2012, feeding one beam to the NSA. You have accounts with ${count} of them.`;
-  return `<svg class="prism-diagram" viewBox="0 0 600 ${h}" role="img" aria-label="${esc(aria)}" xmlns="http://www.w3.org/2000/svg">${beams.join('')}${nodes.join('')}${prism}${out}</svg>`;
+  return `<svg class="prism-diagram" data-fit="${fit}" viewBox="0 0 ${g.W} ${h}" role="img" aria-label="${esc(aria)}" xmlns="http://www.w3.org/2000/svg">${beams.join('')}${nodes.join('')}${prism}${out}</svg>`;
 }
 
 function companies(state) {

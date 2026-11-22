@@ -103,7 +103,7 @@ function cityScore(city, { simple = false } = {}) {
   return `
   <div class="panel" style="padding: 24px; margin-bottom: 16px; text-align: center; border-color: rgba(198,255,0,0.1);">
     ${ringChart({ fraction: f.pct / 100, color: '#C6FF00', glow: 'rgba(198,255,0,0.4)', track: 'rgba(198,255,0,0.08)', value: `${fmt(f.pct)}%`, unit: '' })}
-    <div style="font-family: var(--font-title); font-size: 8px; font-weight: 600; color: rgba(198,255,0,0.5); letter-spacing: 1px;">${simple ? 'LEAKED EMAILS FIXED' : 'CITY FORTIFIED'}</div>
+    <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; color: rgba(198,255,0,0.5); letter-spacing: 1px;">${simple ? 'LEAKED EMAILS FIXED' : 'CITY FORTIFIED'}</div>
     <details class="phone-fold fortified-what" data-fold="fortified-what" data-open-desktop><summary>What's this?</summary><div style="${MUTED} margin-top: 10px;">Of email addresses found in a known breach by everyone in places with enough players to count, this share has been fixed.</div></details>
   </div>`;
 }
@@ -199,8 +199,8 @@ function board(data, yoursId) {
     const players = isNum(p.players) ? `${fmt(p.players)} players` : '';
     return `
     <div ${yours ? 'data-yours="true"' : ''} style="display: flex; gap: 14px; align-items: center; padding: 8px 10px; ${yours ? 'border: 1px solid rgba(255,45,155,0.4); background: rgba(255,45,155,0.05);' : ''}">
-      <div style="flex: 1; font-family: var(--font-title); line-height: 1.2; font-size: 10px; letter-spacing: 0.3px; color: ${yours ? '#FF2D9B' : 'var(--offwhite)'};">${esc(p.label)}</div>
-      <div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.4);">${players}</div>
+      <div style="flex: 1; font-family: var(--font-title); line-height: 1.2; font-size: 11px; letter-spacing: 0.3px; color: ${yours ? '#FF2D9B' : 'var(--offwhite)'};">${esc(p.label)}</div>
+      <div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.4);">${players}</div>
       <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 48px; text-align: right; color: #C6FF00;">${pct}</div>
     </div>`;
   }).join('');
@@ -215,7 +215,7 @@ function board(data, yoursId) {
 function breachMap(city) {
   const rows = (city.byAddress || []).filter((a) => isNum(a.breachRatePct)).map((a) => `
     <div style="display: flex; align-items: center; gap: 14px;">
-      <div style="width: 140px; flex-shrink: 0; font-family: var(--font-title); line-height: 1.2; font-size: 10px; letter-spacing: 0.3px; color: #FF2D9B;">${esc(a.label || a.id)}</div>
+      <div style="width: 140px; flex-shrink: 0; font-family: var(--font-title); line-height: 1.2; font-size: 11px; letter-spacing: 0.3px; color: #FF2D9B;">${esc(a.label || a.id)}</div>
       <div style="flex: 1; height: 4px; background: rgba(255,45,155,0.08);"><div style="width: ${Math.min(100, Math.max(0, a.breachRatePct))}%; height: 100%; background: #FF2D9B; box-shadow: 0 0 6px rgba(255,45,155,0.3);"></div></div>
       <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 44px; text-align: right; color: #FF2D9B;">${fmt(a.breachRatePct)}%</div>
     </div>`).join('');
@@ -287,7 +287,7 @@ function footer(data) {
   if (isNum(city.ghosts)) tail.push(`${fmt(city.ghosts)} people have gone ghost`);
   if (isNum(city.optedOut)) tail.push(`${fmt(city.optedOut)} opted out`);
   if (tail.length) lines.push(`${tail.join(' · ')}.`);
-  return `<div style="font-family: var(--font-mono); font-size: 10px; color: rgba(237,239,243,0.35); line-height: 1.8;">${lines.map((l) => `<div>${l}</div>`).join('')}</div>`;
+  return `<div style="font-family: var(--font-mono); font-size: 11px; color: rgba(237,239,243,0.35); line-height: 1.8;">${lines.map((l) => `<div>${l}</div>`).join('')}</div>`;
 }
 
 export function renderCityTogether(state, { collective, whoami, notice } = {}) {

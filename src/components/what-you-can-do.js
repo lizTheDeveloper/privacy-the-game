@@ -78,7 +78,7 @@ export function whatYouCanDo(state, ids, { primary = true, lede = '', label = 'W
 export const WYCD_CSS = `<style>
 .wycd{margin-top:14px;padding:14px 16px;background:rgba(26,31,43,0.5);border:1px solid rgba(0,229,255,0.3);border-left:3px solid var(--cyan);color:var(--offwhite)}
 .wycd--inline{margin-top:14px;padding:12px 0 0;background:none;border:0;border-top:1px solid rgba(255,255,255,0.08)}
-.wycd-label{font-family:var(--font-title);line-height:1.2;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--cyan);margin-bottom:6px}
+.wycd-label{font-family:var(--font-title);line-height:1.2;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--cyan);margin-bottom:6px}
 .wycd-lede{margin:0 0 10px;font-size:15px;line-height:1.5;color:var(--offwhite)}
 .wycd-all-done{color:var(--lime);font-weight:700}
 .wycd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}

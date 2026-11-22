@@ -81,7 +81,7 @@
     }
     /* Bottom left, above Scout (Advanced mode's score strip is under the top bar). */
     .city-readout { position: absolute; bottom: 122px; left: 40px; z-index: 30; display: flex; align-items: center; gap: 10px;
-      font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
     .city-readout b { color: var(--text-quiet); font-weight: 600; }
     .city-readout .sep { color: var(--text-dim); }
     .city-readout__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); }
@@ -89,7 +89,7 @@
     @keyframes cityBlink { to { visibility: hidden; } }
 
     .city-actions { position: absolute; top: 92px; right: 20px; z-index: 30; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: calc(100% - 40px); }
-    .city-btn { text-decoration: none; font-family: var(--font-title); font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 7px 14px;
+    .city-btn { text-decoration: none; font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 7px 14px;
       border: 1px solid; position: relative; transition: box-shadow 150ms ease, background 150ms ease, transform 150ms ease;
       clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
     /* Shortcuts, not the next step: quiet outlines in one neutral color (the colour language, style.css). */
@@ -131,7 +131,7 @@
     .city-cluster.is-secured .city-lot { animation: cityGroundPulse 3s ease-in-out infinite; }
     @keyframes cityGroundPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
     .city-cluster::after { content: attr(data-name) ' // ENTER'; position: absolute; left: 50%; bottom: var(--peak); transform: translate(-50%, 4px);
-      font-family: var(--font-title); font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
+      font-family: var(--font-title); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--cyan); white-space: nowrap;
       padding: 5px 9px; border: 1px solid rgba(0,229,255,0.5); background: rgba(5,7,16,0.92); box-shadow: 0 0 12px rgba(0,229,255,0.25);
       opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 6; }
     .city-cluster:hover { transform: translateY(-5px) scale(var(--s)); filter: brightness(1.25); z-index: 40; }
@@ -165,7 +165,7 @@
     .city-label--left .city-label__tick::after { right: -3px; }
     .city-label--right .city-label__tick { left: -18px; transform: scaleX(-1); }
     .city-label--right .city-label__tick::after { right: -3px; }
-    .city-label__head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1.5px; }
+    .city-label__head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; }
     .city-label__code { color: var(--text-dim); }
     .city-label__status { font-weight: 700; padding-left: 8px; position: relative; }
     .city-label__status::before { content: ''; position: absolute; left: 0; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
@@ -175,9 +175,9 @@
     .is-occupied .city-label__status::before { background: var(--magenta); }
     .is-contested .city-label__status::before { background: var(--cyan); }
     .is-secured .city-label__status { color: var(--lime); }
-    .city-label__name { margin-top: 5px; font-family: var(--font-title); line-height: 1.2; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-strong);
+    .city-label__name { margin-top: 5px; font-family: var(--font-title); line-height: 1.2; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-strong);
       white-space: nowrap; }
-    .city-label--master .city-label__name { font-size: 10.5px; }
+    .city-label--master .city-label__name { font-size: 13px; }
     /* The district the next mission is in: the one lit card. The rest are quiet until they are done. */
     .city-label--next { opacity: 1; border-color: rgba(0,229,255,0.6); background: linear-gradient(160deg, rgba(0,40,52,0.92), rgba(16,22,38,0.88)); }
     .city-label--next .city-label__name { color: var(--cyan); text-shadow: 0 0 12px rgba(0,229,255,0.5); }
@@ -192,11 +192,11 @@
     .city-label__bar i.lit:nth-child(n+7) { background: linear-gradient(90deg, #8ff58a, #C6FF00); border-color: rgba(198,255,0,0.5); box-shadow: 0 0 5px rgba(198,255,0,0.5); }
     .is-secured .city-label__bar { animation: cityBarGlow 2.4s ease-in-out infinite; }
     @keyframes cityBarGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); } }
-    .city-label__pct { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; min-width: 28px; text-align: right; color: var(--text-quiet); }
+    .city-label__pct { font-family: var(--font-mono); font-size: 11px; font-weight: 700; min-width: 28px; text-align: right; color: var(--text-quiet); }
     .is-contested .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.4); }
     .is-secured .city-label__pct { color: var(--lime); text-shadow: 0 0 8px rgba(198,255,0,0.6); }
-    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 1px; color: var(--text-dim); }
-    .city-label__start { margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(0,229,255,0.3); font-family: var(--font-mono); font-size: 8px; font-weight: 700;
+    .city-label__sub { margin-top: 4px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); }
+    .city-label__start { margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(0,229,255,0.3); font-family: var(--font-mono); font-size: 11px; font-weight: 700;
       letter-spacing: 1.5px; color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.7); }
     .city-start-pulse { border-color: rgba(0,229,255,0.35); animation: cityStartPulse 1.6s ease-in-out infinite; }
     @keyframes cityStartPulse {
@@ -229,7 +229,7 @@
       .city-scout .scout-action { white-space: normal; font-size: 13px; line-height: 1.35; padding: 14px 16px; }
       .city-actions { position: relative; top: auto; right: auto; max-width: none; justify-content: flex-start; flex-wrap: wrap; row-gap: 8px; padding: 4px 14px 28px; }
       .city-actions__head { position: static; width: 100%; height: auto; margin: 0 0 2px; overflow: visible; clip: auto; white-space: normal; font-family: var(--font-body); font-size: 16px; font-weight: 700; letter-spacing: 0; color: var(--text-strong); }
-      .city-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-size: 10px; }
+      .city-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-size: 11px; }
       .city-readout { position: relative; top: auto; bottom: auto; left: auto; padding: 4px 14px 0; flex-wrap: wrap; row-gap: 4px; }
       .city-skyline { position: relative; height: 420px; margin-top: -40px; }
       .city-iso { top: 192px; transform: scale(0.8); }

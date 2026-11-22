@@ -8,9 +8,9 @@ import { leaksForAccount } from '../data/leaks/index.js';
 // A badge's words in markup: AT&T and GOOGLE & YAHOO keep their ampersands.
 const amp = (s) => String(s).replace(/&(?![a-z]+;|#\d+;)/gi, '&amp;');
 
-const TAG = 'display:inline-flex;align-items:center;gap:4px;min-height:22px;margin-left:8px;padding:1px 7px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px;text-decoration:none;border-radius:3px;vertical-align:middle';
+const TAG = 'display:inline-flex;align-items:center;gap:4px;min-height:22px;margin-left:8px;padding:1px 7px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;text-decoration:none;border-radius:3px;vertical-align:middle';
 // On a building's own page (Advanced) the badges sit on their own row and are tall enough to tap.
-const TALL = ';min-height:44px;margin-left:0;padding:4px 10px;font-size:10px';
+const TALL = ';min-height:44px;margin-left:0;padding:4px 10px;font-size:11px';
 const COLOURS = {
   named: 'color:#FF2D9B;border:1px solid rgba(255,45,155,0.6);background:rgba(255,45,155,0.1)',
   next: 'color:#FF2D9B;border:1px solid rgba(255,45,155,0.6);background:rgba(255,45,155,0.1)',

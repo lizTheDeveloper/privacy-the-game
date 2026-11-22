@@ -42,8 +42,8 @@ function banksHref(missionId) {
 function outLink(url, label, missionId, primary) {
   const action = missionId ? ` data-action="bank-note-open" data-mission="${esc(missionId)}"` : '';
   const style = primary
-    ? 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: #090B10; background: var(--cyan);'
-    : 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35);';
+    ? 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: #090B10; background: var(--cyan);'
+    : 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35);';
   return `<a class="bank-note-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer"${action} style="${style}">${label} &#8599;</a>`;
 }
 
@@ -80,7 +80,7 @@ function anyBankSteps(open, label = 'WORKS AT ANY BANK') {
   // With no saved address these are the way through: open on a desktop, one tap away on a phone
   // (data-open-desktop), where the panel sits under the step slides.
   return `<details class="bank-note-any" data-any-bank${open ? ' data-open-desktop' : ''} style="margin-top: 14px;">
-    <summary style="cursor: pointer; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: rgba(0,229,255,0.7); min-height: 32px;">${label}</summary>
+    <summary style="cursor: pointer; font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: rgba(0,229,255,0.7); min-height: 32px;">${label}</summary>
     <ol style="margin: 10px 0 0; padding-left: 20px; font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.55;">${items}</ol>
   </details>`;
 }
@@ -206,8 +206,8 @@ export function renderBankNotesScreen(state, { from = null, editId = null, error
         ${line('Reset', reset)}
       </div>
       <div style="display: flex; gap: 8px; flex-shrink: 0;">
-        <button type="button" class="btn-secondary bank-note-edit" data-action="bank-note-edit" data-note="${esc(n.id)}" style="min-height: 40px; padding: 8px 14px; font-size: 9px;">EDIT</button>
-        <button type="button" class="btn-secondary bank-note-delete" data-action="bank-note-delete" data-note="${esc(n.id)}" style="min-height: 40px; padding: 8px 14px; font-size: 9px; color: var(--magenta); border-color: rgba(255,45,155,0.35);">DELETE</button>
+        <button type="button" class="btn-secondary bank-note-edit" data-action="bank-note-edit" data-note="${esc(n.id)}" style="min-height: 40px; padding: 8px 14px; font-size: 11px;">EDIT</button>
+        <button type="button" class="btn-secondary bank-note-delete" data-action="bank-note-delete" data-note="${esc(n.id)}" style="min-height: 40px; padding: 8px 14px; font-size: 11px; color: var(--magenta); border-color: rgba(255,45,155,0.35);">DELETE</button>
       </div>
     </div>`;
   }).join('') : `<div style="font-size: 13px; color: rgba(237,239,243,0.55); line-height: 1.6; padding: 8px 0;">Nothing saved yet. Add each bank, card, brokerage or exchange you log in to.</div>`;

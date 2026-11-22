@@ -72,7 +72,7 @@ export function renderMilestone(state, districtId) {
     <div style="position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, rgba(198,255,0,0.03) 40%, transparent 70%); pointer-events: none;"></div>
     <div class="milestone-top" style="position: relative; text-align: center; padding-top: 44px;">
       <div style="margin-bottom: 12px;">${scoutSprite('hug', { size: 64, style: 'filter: drop-shadow(0 0 6px rgba(0,229,255,0.3));' })}</div>
-      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 1px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 11px; font-weight: 600; color: var(--lime); letter-spacing: 1px; text-shadow: 0 0 12px rgba(198,255,0,0.4);">CHAPTER ${district.chapter} COMPLETE</div>
     </div>
     <div style="position: relative; text-align: center; margin-top: 16px;">
       <div class="milestone-word" style="font-family: var(--font-title); font-size: 56px; font-weight: 900; letter-spacing: 0.5px; line-height: 1.1; color: var(--lime); text-shadow: 0 0 30px rgba(198,255,0,0.4), 0 0 60px rgba(198,255,0,0.15);">${resetsLeft ? 'MISSIONS DONE' : 'LIBERATED'}</div>
@@ -87,15 +87,15 @@ export function renderMilestone(state, districtId) {
     <div class="milestone-stats" style="position: relative; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px;">
       <div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(198,255,0,0.06); border: 1px solid rgba(198,255,0,0.25);">
         <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--lime); text-shadow: 0 0 15px rgba(198,255,0,0.3);">${accountsSecured}</div>
-        <div style="font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--lime); margin-top: 6px;">ACCOUNTS SECURED</div>
+        <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--lime); margin-top: 6px;">ACCOUNTS SECURED</div>
       </div>
       ${addressesBreached === null ? '' : `<div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(255,159,0,0.06); border: 1px solid rgba(255,159,0,0.25);">
         <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--amber); text-shadow: 0 0 15px rgba(255,159,0,0.3);">${addressesBreached}</div>
-        <div style="font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: rgba(255,159,0,0.6); margin-top: 6px;">${addressesBreached === 1 ? 'ADDRESS' : 'ADDRESSES'} FOUND IN A BREACH</div>
+        <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: rgba(255,159,0,0.6); margin-top: 6px;">${addressesBreached === 1 ? 'ADDRESS' : 'ADDRESSES'} FOUND IN A BREACH</div>
       </div>`}
       ${simple ? '' : `<div style="min-width: 150px; padding: 20px 28px; text-align: center; background: rgba(255,255,255,0.03); border: 1px solid var(--line-quiet);">
         <div style="font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--offwhite);">${integrity}<span style="font-size: 18px; color: var(--text-dim);">%</span></div>
-        <div style="font-family: var(--font-title); font-size: 9px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); margin-top: 6px;">CITY INTEGRITY</div>
+        <div style="font-family: var(--font-title); font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--text-quiet); margin-top: 6px;">CITY INTEGRITY</div>
       </div>`}
     </div>
     ${simple ? `<div class="milestone-city-wrap" style="position: relative; max-width: 512px; margin: -20px auto 24px;">${cityBar(state)}</div>` : ''}
@@ -105,10 +105,10 @@ export function renderMilestone(state, districtId) {
       ${continueLink}
     </div>
     <div data-share-status role="status" aria-live="polite" style="min-height: 20px; margin: 12px 0 20px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--offwhite);"></div>
-    <div style="position: relative; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 28px 36px 24px; width: 512px; max-width: 100%; margin: 0 auto 32px; box-shadow: 0 0 20px rgba(0,229,255,0.05);">
-      <div style="position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: #090B10; padding: 2px 12px; font-family: var(--font-title); font-size: 7px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px;">SHARE CARD</div>
+    <div class="milestone-card-frame" style="position: relative; background: rgba(26,31,43,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 28px 36px 24px; width: 512px; max-width: 100%; margin: 0 auto 32px; box-shadow: 0 0 20px rgba(0,229,255,0.05);">
+      <div style="position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: #090B10; padding: 2px 12px; font-family: var(--font-title); font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px;">SHARE CARD</div>
       <div id="milestone-card-preview" style="width: 100%; aspect-ratio: 600 / 315; background: #05070b; border: 1px solid rgba(0,229,255,0.1); display: flex; align-items: center; justify-content: center;">
-        <span style="font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 3px; color: var(--text-dim);">CARD PREVIEW</span>
+        <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 3px; color: var(--text-dim);">CARD PREVIEW</span>
       </div>
     </div>
     ${supportNote('milestone')}
