@@ -42,8 +42,8 @@ function banksHref(missionId) {
 function outLink(url, label, missionId, primary) {
   const action = missionId ? ` data-action="bank-note-open" data-mission="${esc(missionId)}"` : '';
   const style = primary
-    ? 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-decoration: none; color: #090B10; background: var(--cyan);'
-    : 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-decoration: none; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35);';
+    ? 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: #090B10; background: var(--cyan);'
+    : 'display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; color: var(--cyan); border: 1px solid rgba(0,229,255,0.35);';
   return `<a class="bank-note-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer"${action} style="${style}">${label} &#8599;</a>`;
 }
 
@@ -80,7 +80,7 @@ function anyBankSteps(open, label = 'WORKS AT ANY BANK') {
   // With no saved address these are the way through: open on a desktop, one tap away on a phone
   // (data-open-desktop), where the panel sits under the step slides.
   return `<details class="bank-note-any" data-any-bank${open ? ' data-open-desktop' : ''} style="margin-top: 14px;">
-    <summary style="cursor: pointer; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 2px; color: rgba(0,229,255,0.7); min-height: 32px;">${label}</summary>
+    <summary style="cursor: pointer; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: rgba(0,229,255,0.7); min-height: 32px;">${label}</summary>
     <ol style="margin: 10px 0 0; padding-left: 20px; font-size: 13px; color: rgba(237,239,243,0.8); line-height: 1.55;">${items}</ol>
   </details>`;
 }
@@ -266,7 +266,7 @@ export function renderBankNotesCard(state) {
       <a class="bank-note-card" href="#/vault/banks" style="display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 14px 16px; text-decoration: none; background: rgba(198,255,0,0.04); border: 1px solid rgba(198,255,0,0.3);">
         <span aria-hidden="true" style="font-size: 22px;">&#127974;</span>
         <span style="flex: 1; min-width: 0;">
-          <span style="display: block; font-family: var(--font-display); font-size: 12px; font-weight: 800; color: var(--lime); letter-spacing: 2px;">YOUR BANK NOTES${n ? ` · ${n}` : ''}</span>
+          <span style="display: block; font-family: var(--font-title); font-size: 12px; font-weight: 800; color: var(--lime); letter-spacing: 1px;">YOUR BANK NOTES${n ? ` · ${n}` : ''}</span>
           <span style="display: block; font-size: 13px; color: var(--offwhite); margin-top: 4px; line-height: 1.5;">${n ? 'Where each of your banks logs in and resets. Add or edit.' : 'More than one bank? Note where each logs in and resets, and the missions link there.'}</span>
           <span style="display: block; font-size: 11px; color: rgba(237,239,243,0.5); margin-top: 2px; line-height: 1.5;">Saved only in this browser. No analytics.</span>
         </span>

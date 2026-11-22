@@ -3,6 +3,22 @@
 // The address printed on every card: where the game is live (checked 2026-11-06).
 export const CARD_URL = 'play.multiversegames.ai/reclaim-city/';
 
+// The RECLAIM CITY wordmark is the only Orbitron on a card (it's the logo); every other word is
+// IBM Plex Sans, as in the game. The words never depend on what the player's checks found.
+const PLEX = '"IBM Plex Sans", sans-serif';
+const LOGO_FONT = '700 20px Orbitron, sans-serif';
+const KICKER_FONT = `600 11px ${PLEX}`;
+const CARD_FONTS = [LOGO_FONT, KICKER_FONT, `700 32px ${PLEX}`, `800 56px ${PLEX}`];
+
+// A canvas draws in whatever face is loaded at that moment, and the card's Orbitron 700 is used
+// nowhere else on the page, so the screens that share a card ask for its fonts as they open
+// (app.js). Not awaited when sharing: a wait there could cost the tap its clipboard permission.
+// Never throws.
+export function loadCardFonts(fonts = globalThis.document?.fonts) {
+  if (!fonts?.load) return Promise.resolve();
+  return Promise.all(CARD_FONTS.map((f) => fonts.load(f).catch(() => null))).then(() => {}, () => {});
+}
+
 // One line under the share button saying what happened to the card.
 export function shareStatusText(result) {
   if (!result?.ok) return 'Couldn’t make the card in this browser. Nothing was copied or saved.';
@@ -42,19 +58,19 @@ export function generateMilestoneCard(districtName, stats) {
   ctx.textAlign = 'center';
 
   ctx.fillStyle = '#00E5FF';
-  ctx.font = '700 20px Orbitron, sans-serif';
+  ctx.font = LOGO_FONT;
   ctx.fillText('RECLAIM CITY', 300, 62);
 
   ctx.fillStyle = '#FF2D9B';
-  ctx.font = '600 11px Orbitron, sans-serif';
+  ctx.font = KICKER_FONT;
   ctx.fillText('DISTRICT LIBERATED', 300, 94);
 
   let nameSize = 32;
   ctx.fillStyle = '#EDEFF3';
-  ctx.font = `700 ${nameSize}px "IBM Plex Sans", sans-serif`;
+  ctx.font = `700 ${nameSize}px ${PLEX}`;
   while (name && ctx.measureText(name).width > 520 && nameSize > 16) {
     nameSize -= 2;
-    ctx.font = `700 ${nameSize}px "IBM Plex Sans", sans-serif`;
+    ctx.font = `700 ${nameSize}px ${PLEX}`;
   }
   ctx.fillText(name, 300, 152);
 
@@ -90,19 +106,19 @@ export function generateStatCard({ kicker = '', big = '', what = '', sub = '' } 
   ctx.textAlign = 'center';
 
   ctx.fillStyle = '#00E5FF';
-  ctx.font = '700 20px Orbitron, sans-serif';
+  ctx.font = LOGO_FONT;
   ctx.fillText('RECLAIM CITY', 300, 56);
 
   ctx.fillStyle = '#FF2D9B';
-  ctx.font = '600 11px Orbitron, sans-serif';
+  ctx.font = KICKER_FONT;
   ctx.fillText(String(kicker).toUpperCase(), 300, 88);
 
   let size = 56;
   ctx.fillStyle = '#C6FF00';
-  ctx.font = `800 ${size}px Orbitron, sans-serif`;
+  ctx.font = `800 ${size}px ${PLEX}`;
   while (ctx.measureText(String(big)).width > 520 && size > 24) {
     size -= 4;
-    ctx.font = `800 ${size}px Orbitron, sans-serif`;
+    ctx.font = `800 ${size}px ${PLEX}`;
   }
   ctx.fillText(String(big), 300, 158);
 

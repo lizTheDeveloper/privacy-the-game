@@ -153,7 +153,7 @@ function renderAddCard() {
         <line x1="6" y1="16" x2="26" y2="16" stroke="#00E5FF" stroke-width="2" stroke-linecap="round"></line>
       </svg>
     </div>
-    <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 2px;">ADD VEHICLE</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 1px;">ADD VEHICLE</div>
     <div style="font-size: 11px; color: rgba(237,239,243,0.35); margin-top: 8px; text-align: center; line-height: 1.5;">Select your car's make and model to start reclaiming your data.</div>
   </div>`;
 }
@@ -167,7 +167,7 @@ export function renderAddForm() {
 
   return `
   <div id="add-vehicle-form" style="background: rgba(26,31,43,0.7); border: 1px solid rgba(0,229,255,0.25); padding: 24px; margin-top: 16px; box-shadow: 0 0 30px rgba(0,229,255,0.05);">
-    <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 3px; margin-bottom: 20px;">ADD A VEHICLE</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 700; color: #00E5FF; letter-spacing: 1px; margin-bottom: 20px;">ADD A VEHICLE</div>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
       <div>
         <label for="vehicle-make" style="${LABEL}">Make</label>
@@ -194,7 +194,7 @@ export function renderAddForm() {
       </div>
     </div>
     <div id="threat-preview" hidden style="background: rgba(255,45,155,0.04); border: 1px solid rgba(255,45,155,0.15); padding: 14px 16px; margin-bottom: 20px;">
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 2px; color: rgba(255,45,155,0.6); margin-bottom: 8px;">THREAT ASSESSMENT</div>
+      <div style="font-family: var(--font-title); font-size: 7px; font-weight: 600; letter-spacing: 1px; color: rgba(255,45,155,0.6); margin-bottom: 8px;">THREAT ASSESSMENT</div>
       <div id="threat-text" style="font-size: 13px; color: rgba(237,239,243,0.65); line-height: 1.6;"></div>
     </div>
     <div data-vehicle-msg role="status" hidden style="font-size: 13px; color: var(--amber); line-height: 1.6; margin-bottom: 12px;"></div>
@@ -229,7 +229,7 @@ export function nextCarOptOut(state) {
 function simpleGo(state) {
   const m = nextCarOptOut(state);
   if (m) {
-    return `<a class="btn-primary" data-garage-next href="#/mission/${esc(m.id)}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 1px;">Next opt-out: ${esc(m.title)} ›</a>
+    return `<a class="btn-primary" data-garage-next href="#/mission/${esc(m.id)}/briefing" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; text-transform: none; letter-spacing: 0.3px;">Next opt-out: ${esc(m.title)} ›</a>
       <p style="font-size: 14px; color: var(--offwhite); margin: 8px 0 0;">Opens the “${esc(m.title)}” mission.</p>`;
   }
   const any = (state.vehicles || []).length > 0;
@@ -247,7 +247,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
   // grid only when the bright button is an opt-out.
   const addCard = !simple || nextCarOptOut(state) ? renderAddCard() : '';
   const grid = vehicles.length || addCard ? `
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: 3px; color: rgba(0,229,255,0.4); margin-bottom: 16px;">YOUR VEHICLES ${vehicles.length > 0 ? `(${vehicles.length})` : ''}</div>
+      <div style="font-family: var(--font-title); font-size: 8px; font-weight: 600; letter-spacing: 1px; color: rgba(0,229,255,0.4); margin-bottom: 16px;">YOUR VEHICLES ${vehicles.length > 0 ? `(${vehicles.length})` : ''}</div>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
         ${cards}
         ${addCard}
@@ -257,7 +257,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
   <div class="scanlines" style="min-height: 100vh; background: linear-gradient(180deg, #090B10 0%, #0d1018 40%, #121828 100%);">
     ${renderHud(state)}
     <div style="padding: 20px 24px 0;">
-      <a href="#/district/freeway" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
+      <a href="#/district/freeway" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 0.5px; text-decoration: none;">&#8592; DISTRICT</a>
       <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4); margin-top: 14px;">YOUR GARAGE</div>
       ${simpleLead(GARAGE_LEAD)}
       ${simpleGo(state)}
@@ -274,7 +274,7 @@ export function renderGarage(state, { confirmRemove = null } = {}) {
     ${renderHud(state)}
     <div style="padding: 20px 24px 0;">
       <div style="display: flex; align-items: center; gap: 16px;">
-        <a href="#/district/freeway" style="flex-shrink: 0; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px; text-decoration: none;">&#8592; DISTRICT</a>
+        <a href="#/district/freeway" style="flex-shrink: 0; padding: 8px 14px; font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: #00E5FF; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); letter-spacing: 0.5px; text-decoration: none;">&#8592; DISTRICT</a>
         <div style="flex: 1;">
           <div style="font-family: var(--font-title); line-height: 1.2; font-size: 22px; font-weight: 800; color: #00E5FF; letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(0,229,255,0.4);">VEHICLE GARAGE</div>
           <div style="font-size: 12px; color: rgba(237,239,243,0.5); margin-top: 4px;">Your connected vehicles. Add cars to see what data they share and opt out.</div>

@@ -81,7 +81,7 @@ export function renderGhost(state, view = {}) {
   if (readLevel(state) === 'simplest') return simpleGhost(state, view);
   return shell(state, `
   <div style="text-align: center; padding: 44px 24px 0;">
-    <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 4px;">ONE LAST JOB</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: var(--lime); letter-spacing: 1px;">ONE LAST JOB</div>
     <div style="font-family: var(--font-title); line-height: 1.2; font-size: 48px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">
@@ -115,7 +115,7 @@ export function renderGhostEarly(state, view = {}) {
     : `<button class="btn-primary" data-action="go-ghost-early">GO GHOST NOW</button>`;
   return shell(state, `
   <div style="text-align: center; padding: 44px 24px 0;">
-    <div style="font-family: var(--font-display); font-size: 10px; font-weight: 600; color: var(--magenta); letter-spacing: 4px;">BEFORE THE CITY IS YOURS</div>
+    <div style="font-family: var(--font-title); line-height: 1.2; font-size: 10px; font-weight: 600; color: var(--magenta); letter-spacing: 1px;">BEFORE THE CITY IS YOURS</div>
     <div style="font-family: var(--font-title); line-height: 1.2; font-size: 48px; font-weight: 900; letter-spacing: 0.5px; color: var(--cyan); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-top: 12px;">GO GHOST</div>
   </div>
   <div style="max-width: 640px; margin: 24px auto 0; padding: 0 24px;">

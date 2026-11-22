@@ -8,7 +8,8 @@ import { setReadLevel } from '../src/utils/reading.js';
 
 // The owner (2026-11-21): "can we switch the font for like, district titles from that one to
 // IBM PLEX SANS - we have gotten some readability complaints". Titles and headings use
-// --font-title (IBM Plex Sans); small labels, badges, buttons and the logo stay Orbitron.
+// --font-title (IBM Plex Sans). Since 7.47.0 everything else is Plex too and only the logo is
+// Orbitron (tests/plex-everywhere.test.js).
 
 const html = readFileSync(new URL('../src/index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
@@ -22,9 +23,9 @@ describe('titles in IBM Plex Sans', () => {
     expect(link).toContain('family=Inter');
   });
 
-  it('a --font-title token; --font-display is still Orbitron', () => {
+  it('a --font-title token; Orbitron is only the logo token', () => {
     expect(css).toMatch(/--font-title: 'IBM Plex Sans', system-ui, sans-serif;/);
-    expect(css).toMatch(/--font-display: 'Orbitron', sans-serif;/);
+    expect(css).toMatch(/--font-logo: 'Orbitron', sans-serif;/);
   });
 
   it('district, building and mission titles use it, with Plex-sized tracking', () => {
@@ -35,10 +36,11 @@ describe('titles in IBM Plex Sans', () => {
     }
   });
 
-  it('small labels, buttons and the logo stay Orbitron', () => {
-    for (const sel of ['.btn-primary', '.btn-secondary', '.section-label', '.building-badge', '.interior-btn', '.floor-head', '.entry-where', '.hud-brand']) {
-      expect(rule(sel), sel).toContain('font-family: var(--font-display)');
+  it('small labels and buttons are Plex now (7.47.0); the logo stays Orbitron', () => {
+    for (const sel of ['.btn-primary', '.btn-secondary', '.section-label', '.building-badge', '.interior-btn', '.floor-head', '.entry-where']) {
+      expect(rule(sel), sel).toContain('font-family: var(--font-title)');
     }
+    expect(rule('.hud-brand')).toContain('font-family: var(--font-logo)');
   });
 
   it('the city map’s district names, in both modes', () => {
@@ -58,7 +60,7 @@ describe('the share card', () => {
   let saved;
   afterEach(() => { globalThis.document = saved; });
 
-  it('draws the district name in Plex; the wordmark and kicker stay Orbitron; the words are unchanged', () => {
+  it('draws the district name and kicker in Plex; the wordmark stays Orbitron; the words are unchanged', () => {
     saved = globalThis.document;
     const drawn = [];
     const ctx = new Proxy({ font: '', measureText: (t) => ({ width: String(t).length * 10 }), fillText(t) { drawn.push([String(t), ctx.font]); },
@@ -71,6 +73,6 @@ describe('the share card', () => {
     const fontOf = (t) => drawn.find(([x]) => x === t)?.[1];
     expect(fontOf('THE MASTER KEYS')).toMatch(/"IBM Plex Sans"/);
     expect(fontOf('RECLAIM CITY')).toMatch(/Orbitron/);
-    expect(fontOf('DISTRICT LIBERATED')).toMatch(/Orbitron/);
+    expect(fontOf('DISTRICT LIBERATED')).toMatch(/"IBM Plex Sans"/);
   });
 });

@@ -220,7 +220,7 @@ ${main}
 
       <div class="brief-side" style="flex: 1 1 240px; background: rgba(26,31,43,0.4); border-left: 1px solid rgba(0,229,255,0.1); padding: 24px; flex-direction: column; align-items: center;">
         ${briefingScout(scoutFeeling)}
-        <div class="scout-name" style="font-size: 9px; margin-bottom: 16px; letter-spacing: 3px;">SCOUT</div>
+        <div class="scout-name" style="font-size: 9px; margin-bottom: 16px; letter-spacing: 1px;">SCOUT</div>
         <div style="background: rgba(9,11,16,0.6); border: 1px solid rgba(0,229,255,0.15); padding: 14px; width: 100%; margin-bottom: 20px;">
           <div style="font-size: 13px; color: rgba(237,239,243,0.6); line-height: 1.6; font-style: italic;">${scoutLine}</div>
         </div>
@@ -429,7 +429,7 @@ function loreEntry(state, missionId) {
 }
 
 const LORE_LABEL = '<div class="section-label" style="color: rgba(255,159,0,0.5); margin-bottom: 8px;">INTEL</div>';
-const loreTitle = (lore) => `<div class="section-label brief-lore-title" style="font-family: var(--font-display); font-size: 9px; font-weight: 700; color: rgba(255,159,0,0.7); letter-spacing: 1px; margin-bottom: 6px;">${lore.title}</div>`;
+const loreTitle = (lore) => `<div class="section-label brief-lore-title" style="font-family: var(--font-title); font-size: 9px; font-weight: 700; color: rgba(255,159,0,0.7); letter-spacing: 0.5px; margin-bottom: 6px;">${lore.title}</div>`;
 const loreText = (text, attrs = '') => `<div style="font-size: 12px; color: rgba(237,239,243,0.5); line-height: 1.6;"${attrs}>${text}</div>`;
 
 function renderLoreSection(lore) {

@@ -32,7 +32,7 @@ const STYLE = `<style>
 .big-check .big-check-filter{display:block;width:100%;box-sizing:border-box;min-height:44px;margin:0 0 12px;padding:0 12px;font-family:var(--font-mono);font-size:16px;color:var(--offwhite);background:rgba(26,31,43,0.7);border:1px solid rgba(0,229,255,0.3);border-radius:6px}
 .big-check .big-check-filter:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .big-check details{margin:0 0 8px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:8px}
-.big-check summary{display:list-item;box-sizing:border-box;min-height:44px;padding:12px 14px;line-height:20px;font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--cyan);cursor:pointer}
+.big-check summary{display:list-item;box-sizing:border-box;min-height:44px;padding:12px 14px;line-height:20px;font-family:var(--font-title);font-size:12px;font-weight:700;letter-spacing:0.3px;color:var(--cyan);cursor:pointer}
 .big-check summary:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
 .big-check-rows{list-style:none;margin:0;padding:0 14px 6px}
 .big-check-row{padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);font-size:13px;line-height:1.6;color:var(--offwhite)}

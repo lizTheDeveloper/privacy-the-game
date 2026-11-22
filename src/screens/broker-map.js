@@ -52,7 +52,7 @@ const STYLE = `<style>
 .star-card .star-card-note{font-size:12px;color:rgba(237,239,243,0.75)}
 .star-card-opens{margin:2px 0 6px;font-size:13px;color:var(--offwhite)}
 .star-card .star-card-none{color:#FF2D9B;font-weight:700}
-.star-card .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(0,229,255,0.6);margin:12px 0 4px}
+.star-card .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin:12px 0 4px}
 .star-card a{color:var(--cyan)}
 .star-card .star-card-go a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;color:#090B10;background:var(--cyan);border-radius:6px;text-decoration:none}
 .star-card-list{margin:0;padding-left:18px}
@@ -83,7 +83,7 @@ const STYLE = `<style>
 .map-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 0 4px;padding:0;list-style:none;font-size:12px;color:rgba(237,239,243,0.7)}
 .map-legend li{display:flex;align-items:center;gap:6px}
 .map-panel{margin-top:14px;padding:12px 14px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.6;color:var(--offwhite);overflow-wrap:anywhere}
-.map-panel .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(0,229,255,0.6);margin-bottom:6px}
+.map-panel .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6);margin-bottom:6px}
 .map-panel a{color:var(--cyan)}
 .residency-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .residency-btn{min-height:44px;padding:0 16px}
@@ -108,7 +108,7 @@ ${TICK_CSS}
 ${QUIZ_CSS}
 ${LADDER_CSS}
 ${SATELLITE_CARD_CSS}
-.constellation-sats-head{margin:10px 0 0;font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(0,229,255,0.6)}
+.constellation-sats-head{margin:10px 0 0;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(0,229,255,0.6)}
 @media (min-width:900px){.constellation-wrap.has-side{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}}
 </style>`;
 

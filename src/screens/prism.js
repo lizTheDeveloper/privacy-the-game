@@ -26,12 +26,12 @@ const STYLE = `<style>
 @media (prefers-reduced-motion:no-preference){.prism-diagram .beam{stroke-dasharray:4 6;animation:prism-flow 2.4s linear infinite}@keyframes prism-flow{to{stroke-dashoffset:-20}}}
 .prism-key{font-size:11px;color:rgba(237,239,243,0.55);margin:0 0 14px}
 .prism-panel{margin-top:14px;padding:14px 16px;background:rgba(26,31,43,0.5);border:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.65;overflow-wrap:anywhere}
-.prism-panel .label{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,45,155,0.75);margin-bottom:6px}
+.prism-panel .label{font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,45,155,0.75);margin-bottom:6px}
 .prism-panel p{margin:6px 0}
 .prism-panel a{color:var(--cyan)}
 .prism-companies{list-style:none;margin:0;padding:0}
 .prism-companies li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-.prism-companies .co{font-family:var(--font-display);font-weight:700;letter-spacing:1px;min-width:110px}
+.prism-companies .co{font-family:var(--font-title);font-weight:700;letter-spacing:0.3px;min-width:110px}
 .prism-companies .yr{font-family:var(--font-mono);font-size:11px;color:rgba(255,45,155,0.8)}
 .prism-companies .acct{display:inline-flex;align-items:center;min-height:32px;padding:0 8px;font-size:12px;color:var(--offwhite);text-decoration:none;border:1px solid rgba(0,229,255,0.25);border-radius:4px}
 .prism-companies .acct--mine{border-color:#FF2D9B;color:#FF2D9B}

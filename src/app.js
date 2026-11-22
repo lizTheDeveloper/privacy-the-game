@@ -19,7 +19,7 @@ import { keyActivationTarget } from './utils/keyboard.js';
 import { ACCOUNTS } from './data/accounts.js';
 import { DISTRICTS } from './data/districts.js';
 import { hasInterior } from './data/interiors/index.js';
-import { generateMilestoneCard, shareMilestoneCard, shareStatCard, shareStatusText } from './utils/milestone-card.js';
+import { generateMilestoneCard, loadCardFonts, shareMilestoneCard, shareStatCard, shareStatusText } from './utils/milestone-card.js';
 import { renderCityMap } from './screens/city-map.js';
 import { renderDistrict, settleNextUp, districtVisited } from './screens/district.js';
 import { renderBuildingInterior } from './screens/building.js';
@@ -437,7 +437,7 @@ function modeChoice() {
 function renderWelcome() {
   return `
   <div class="scanlines" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px;">
-    <div style="font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
+    <div class="welcome-logo" style="font-family: var(--font-logo); font-size: 42px; font-weight: 800; color: var(--cyan); letter-spacing: 6px; text-shadow: 0 0 24px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);">RECLAIM CITY</div>
     <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-quiet); letter-spacing: 5px; margin-top: 12px;">A DATA PRIVACY GAME</div>
     <p style="max-width: 440px; font-size: 15px; line-height: 1.7; color: rgba(237,239,243,0.8); margin-top: 32px;">Secure your accounts, opt out of data brokers, and learn to spot scams &mdash; one mission at a time. Every action you take is real.</p>
     ${choosingMode ? modeChoice() : `<button type="button" data-action="begin-game" class="btn-primary" style="margin-top: 40px; display: inline-block;">PLAY &mdash; IT'S FREE</button>`}
@@ -527,6 +527,7 @@ function render(route, cause = RENDER_CAUSE.REFRESH) {
     if (route.screen === 'district') settleNextUp(app, window.innerHeight);
     // The share card is drawn as the milestone opens, not left an empty frame until SHARE CARD.
     if (route.screen === 'milestone') drawMilestonePreview(route.params.districtId);
+    if (route.screen === 'together') loadCardFonts();
     initDecks(app, decksBefore);
     syncNowPlaying(route);
     // The Big Check's line is drawn once the data is in; then it's seen.
@@ -1444,6 +1445,8 @@ function drawMilestonePreview(districtId) {
   const district = DISTRICTS.find((d) => d.id === districtId);
   const preview = document.getElementById('milestone-card-preview');
   if (!district || !preview) return;
+  // Fonts that land after this draw fire 'loadingdone', which draws the preview again.
+  loadCardFonts();
   try {
     const canvas = generateMilestoneCard(district.name, districtCardStats(districtId));
     canvas.style.width = '100%';
