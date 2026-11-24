@@ -1,0 +1,645 @@
+<title>Reclaim the Estate</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Trocchi&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700&display=swap">
+<style>
+/* Layout: a phone-frame prototype on a night-green field (from Castle Quest's crest), with a screen index + design notes beside it. Single deliberate look: parchment game world inside, forest night outside. */
+:root {
+  --night: #132a21;
+  --forest: #1f4a3a;
+  --forest-2: #2b5e4a;
+  --gold: #c9a24a;
+  --gold-soft: #e7d29a;
+  --parchment: #efe3c6;
+  --parchment-2: #e5d5b0;
+  --paper: #f8f1df;
+  --ink: #23261f;
+  --ink-soft: #5b5a4c;
+  --brick: #b4643c;
+  --brick-dim: #8d7a6a;
+  --olive: #6f7f3c;
+  --lake: #8eaab2;
+  --stone: #b9aa8e;
+  --stall: #9a8f7a;
+  --display: 'Trocchi', Georgia, 'Times New Roman', serif;
+  --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --label: 'Syne', 'IBM Plex Sans', system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+[hidden] { display: none !important; }
+body {
+  background: var(--night);
+  background-image: radial-gradient(circle at 20% 10%, #1c3a2e 0, transparent 40%), radial-gradient(circle at 85% 80%, #1a3529 0, transparent 45%);
+  color: var(--parchment);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.page {
+  display: flex; gap: 40px; justify-content: center; align-items: flex-start;
+  padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 1100px; margin: 0 auto;
+}
+/* ---------- side panel ---------- */
+.side { flex: 1 1 320px; max-width: 380px; min-width: 0; display: flex; flex-direction: column; gap: 22px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); }
+.eyebrow { font-family: var(--label); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.side h1 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.1; margin: 6px 0 8px; color: var(--paper); text-wrap: balance; }
+.side p { margin: 0; color: #cfc6ad; max-width: 60ch; }
+.tag { display: inline-block; border: 1px solid var(--gold); color: var(--gold-soft); border-radius: 999px; padding: 2px 10px; font-size: 12px; margin-top: 10px; }
+.index { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #2f5545; padding-top: 14px; }
+.index button {
+  all: unset; cursor: pointer; display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: baseline;
+  padding: 7px 10px; border-radius: 6px; color: #d8cfb6; font-size: 14px;
+}
+.index button span:first-child { font-family: var(--label); font-size: 11px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.index button:hover { background: #1d3b30; }
+.index button:focus-visible { outline: 2px solid var(--gold); }
+.index button[aria-current="true"] { background: var(--forest); color: var(--paper); }
+.note { background: #1a3329; border: 1px solid #2f5545; border-radius: 10px; padding: 14px 16px; }
+.note h2 { font-family: var(--label); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; font-weight: 700; }
+.note p { font-size: 14px; }
+
+/* ---------- phone ---------- */
+.phone-wrap { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.phone {
+  width: 380px; max-width: 100%; height: 780px; max-height: calc(100vh - 80px); min-height: 620px;
+  background: var(--parchment); color: var(--ink);
+  border-radius: 38px; border: 10px solid #0c1a14; box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 1px #3a5d4e;
+  overflow: hidden; position: relative; display: flex; flex-direction: column;
+}
+.hint { font-size: 12px; color: #a99f84; }
+.screen { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+.screen::-webkit-scrollbar { width: 0; }
+.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 18px 10px; background: var(--forest); color: var(--paper);
+}
+.bar .back { all: unset; cursor: pointer; font-size: 14px; color: var(--gold-soft); padding: 4px 0; }
+.bar .back:focus-visible { outline: 2px solid var(--gold); }
+.bar h3 { font-family: var(--display); font-weight: 400; font-size: 18px; margin: 0; }
+.pct { font-family: var(--label); font-weight: 700; font-size: 13px; color: var(--gold-soft); font-variant-numeric: tabular-nums; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--paper); border-top: 1px solid var(--parchment-2); }
+.tabs button { all: unset; cursor: pointer; text-align: center; padding: 9px 0 12px; font-family: var(--label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.tabs button svg { display: block; margin: 0 auto 3px; }
+.tabs button[aria-current="true"] { color: var(--forest); font-weight: 700; }
+.tabs button:focus-visible { outline: 2px solid var(--forest); outline-offset: -2px; }
+
+.pad { padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 14px; }
+h4 { font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1.2; margin: 0; text-wrap: balance; }
+.lbl { font-family: var(--label); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+.muted { color: var(--ink-soft); font-size: 13px; }
+p { margin: 0; }
+
+.btn { all: unset; cursor: pointer; box-sizing: border-box; text-align: center; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 15px; }
+.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.btn.primary { background: var(--forest); color: var(--paper); }
+.btn.primary:hover { background: var(--forest-2); }
+.btn.ghost { border: 1.5px solid var(--forest); color: var(--forest); }
+.btn.quiet { color: var(--ink-soft); font-weight: 500; font-size: 14px; padding: 8px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > .btn { flex: 1 1 auto; }
+
+/* steward */
+.steward { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; background: var(--paper); border: 1px solid var(--parchment-2); border-radius: 12px; padding: 10px 12px; }
+.steward p { font-size: 14px; }
+.steward b { font-family: var(--label); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--forest); display: block; margin-bottom: 2px; }
+
+/* map */
+.map-hud { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; background: var(--forest); color: var(--paper); }
+.map-hud .title { font-family: var(--display); font-size: 19px; line-height: 1.1; }
+.map-hud .sub { font-size: 12px; color: var(--gold-soft); }
+.meter { height: 6px; background: #163628; border-radius: 3px; overflow: hidden; margin-top: 6px; width: 120px; }
+.meter i { display: block; height: 100%; background: var(--gold); transition: width .8s ease; }
+.crew-dots { display: flex; }
+.crew-dots span { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--ink); border: 2px solid var(--forest); margin-left: -7px; }
+#estate-svg { display: block; width: 100%; height: auto; }
+#estate-svg .hit { cursor: pointer; }
+#estate-svg .hit:focus-visible { outline: none; }
+#estate-svg .hit:focus-visible .pill rect { stroke: var(--gold); stroke-width: 2.5; }
+.next-card { background: var(--paper); border: 1.5px solid var(--forest); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+
+/* wing */
+.phase { display: flex; flex-direction: column; gap: 8px; }
+.phase-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--parchment-2); padding-bottom: 4px; }
+.mission { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 10px; background: var(--paper); border: 1px solid var(--parchment-2); }
+.mission:focus-visible { outline: 2px solid var(--forest); }
+.mission .t { font-weight: 600; font-size: 14.5px; line-height: 1.3; }
+.mission .m { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.mission.done { background: transparent; }
+.mission.done .t { color: var(--ink-soft); }
+.mission.stalled { background: repeating-linear-gradient(135deg, var(--paper) 0 10px, #eee3c9 10px 20px); border-style: dashed; border-color: var(--stall); }
+.mission.locked { opacity: .6; cursor: default; }
+.chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; margin-right: 4px; vertical-align: 1px; }
+.chip.open { background: #dfe6c8; color: #3f4a1d; }
+.chip.claimed { background: #d6e3dc; color: var(--forest); }
+.chip.stalled { background: #e8dcc0; color: #6a5a3a; border: 1px dashed var(--stall); }
+.chip.mine { background: var(--forest); color: var(--paper); }
+.chip.done { background: transparent; color: var(--olive); border: 1px solid var(--olive); }
+
+/* briefing */
+.brief-head { background: var(--forest); color: var(--paper); padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.brief-head .lbl { color: var(--gold-soft); }
+.brief-head h4 { color: var(--paper); font-size: 24px; }
+.why { font-size: 15px; }
+.steps { counter-reset: s; display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 8px; font-size: 14.5px; }
+.steps li::before { content: counter(s); width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+.term { font-style: italic; border-bottom: 1px dotted var(--ink-soft); }
+.facts { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
+.facts b { color: var(--ink); font-weight: 600; }
+.caution { font-size: 13px; border-left: 3px solid var(--brick); padding: 4px 0 4px 10px; color: #5a4535; }
+
+/* debrief */
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+legend { font-weight: 600; font-size: 15px; margin-bottom: 6px; padding: 0; }
+.choice { display: flex; align-items: center; gap: 10px; background: var(--paper); border: 1.5px solid var(--parchment-2); border-radius: 10px; padding: 10px 12px; cursor: pointer; font-size: 14.5px; }
+.choice:has(input:checked) { border-color: var(--forest); background: #e3eadf; }
+.choice input { accent-color: var(--forest); width: 18px; height: 18px; margin: 0; }
+textarea { font: inherit; font-size: 14px; border: 1.5px solid var(--parchment-2); border-radius: 10px; padding: 10px; background: var(--paper); color: var(--ink); resize: vertical; min-height: 64px; }
+textarea:focus-visible { outline: 2px solid var(--forest); }
+.attach { display: flex; align-items: center; gap: 10px; border: 1.5px dashed var(--stone); border-radius: 10px; padding: 10px 12px; font-size: 14px; color: var(--ink-soft); }
+
+/* celebrate */
+.celebrate { background: var(--forest); color: var(--paper); min-height: 100%; display: flex; flex-direction: column; gap: 16px; padding: 22px 18px 28px; }
+.celebrate h4 { color: var(--paper); font-size: 28px; text-align: center; }
+.plaque { align-self: center; background: linear-gradient(#d7b862, #b8923c); color: #2a2412; border-radius: 6px; padding: 12px 20px; text-align: center; box-shadow: inset 0 0 0 2px #8c6c24, 0 6px 14px rgba(0,0,0,.3); max-width: 280px; }
+.plaque .lbl { color: #4d3f18; }
+.plaque .pt { font-family: var(--display); font-size: 18px; line-height: 1.2; margin: 4px 0; }
+.celebrate .steward { background: #234f3e; border-color: #31624f; color: var(--paper); }
+.celebrate .steward b { color: var(--gold-soft); }
+.room-scene { display: block; width: 100%; max-width: 320px; height: auto; margin: 0 auto; }
+
+/* book / crew / me */
+.entry { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--parchment-2); }
+.entry .t { font-size: 14px; }
+.entry .t b { font-weight: 600; }
+.entry .when { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.doc { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12.5px; background: var(--paper); border: 1px solid var(--parchment-2); border-radius: 6px; padding: 3px 8px; }
+.kudos { all: unset; cursor: pointer; font-size: 12.5px; color: var(--forest); font-weight: 600; margin-top: 6px; display: inline-flex; gap: 5px; align-items: center; padding: 2px 0; }
+.kudos[aria-pressed="true"] { color: var(--brick); }
+.kudos:focus-visible { outline: 2px solid var(--forest); }
+.av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 13px; color: var(--ink); }
+.member { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; background: var(--paper); border: 1px solid var(--parchment-2); border-radius: 12px; padding: 10px 12px; }
+.member .av { width: 38px; height: 38px; }
+.private { display: flex; gap: 8px; align-items: center; background: #e3eadf; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--forest); }
+.invite { background: var(--paper); border: 1.5px dashed var(--forest); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.code { font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 13px; background: var(--parchment-2); border-radius: 6px; padding: 6px 8px; word-break: break-all; }
+
+/* join */
+.join { background: var(--forest); color: var(--paper); min-height: 100%; display: flex; flex-direction: column; }
+.join .pad { flex: 1; justify-content: flex-end; }
+.join h4 { color: var(--paper); font-size: 30px; }
+.join p { color: #dcd3b8; }
+.join .steward { background: #234f3e; border-color: #31624f; color: var(--paper); }
+.join .steward b { color: var(--gold-soft); }
+.join .btn.primary { background: var(--gold); color: var(--ink); }
+.join .btn.quiet { color: var(--gold-soft); }
+
+.toast { position: absolute; left: 14px; right: 14px; bottom: 74px; background: var(--ink); color: var(--paper); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; box-shadow: 0 8px 20px rgba(0,0,0,.3); z-index: 5; }
+
+@media (max-width: 820px) {
+  .page { flex-direction: column; align-items: center; gap: 24px; padding-block: 20px 40px; }
+  .side { position: static; max-width: 420px; width: 100%; flex: none; }
+  .phone-wrap { width: 100%; }
+  .phone { width: 100%; max-width: 400px; height: 720px; max-height: none; border-width: 6px; border-radius: 28px; }
+  .side .index { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@keyframes glow { from { opacity: 0 } to { opacity: 1 } }
+.lit { animation: glow 1.2s ease both; }
+</style>
+
+<div class="page">
+  <aside class="side">
+    <div>
+      <div class="eyebrow">Concept prototype · for Castle Quest</div>
+      <h1>Reclaim the Estate</h1>
+      <p>A crew restores an abandoned estate room by room. Every room is a real step toward owning and living on the land. Tap through the phone, or jump to a screen below.</p>
+      <span class="tag">Campaign: Three Lakes Estate, Umbria</span>
+    </div>
+    <nav class="index" id="index" aria-label="Screens"></nav>
+    <div class="note" aria-live="polite">
+      <h2 id="note-title">Design note</h2>
+      <p id="note-body"></p>
+    </div>
+    <p class="hint">Built by The Multiverse School. Sample crew and missions. Legal, tax and visa steps are placeholders until reviewed by a professional.</p>
+  </aside>
+
+  <div class="phone-wrap">
+    <div class="phone" id="phone">
+      <div class="screen" id="screen"></div>
+      <nav class="tabs" id="tabs" aria-label="App sections"></nav>
+    </div>
+    <div class="hint">Everything is clickable</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------------- data ----------------
+  const CREW = [
+    { id: 'you', name: 'You', init: 'Y', color: '#c9a24a' },
+    { id: 'ana', name: 'Ana', init: 'A', color: '#d9a58b' },
+    { id: 'theo', name: 'Theo', init: 'T', color: '#a7c0a0' },
+    { id: 'priya', name: 'Priya', init: 'P', color: '#c4b2d6' },
+    { id: 'marcus', name: 'Marcus', init: 'M', color: '#9fbccc' },
+    { id: 'jo', name: 'Jo', init: 'J', color: '#e1c88a' },
+  ];
+  const who = id => CREW.find(c => c.id === id);
+
+  // Wings mapped onto the real Three Lakes property
+  const WINGS = [
+    { id: 'crossroads', name: 'The Crossroads', job: 'Crew', blurb: 'Who we are, what we want, how we decide.', state: 'restored' },
+    { id: 'villa', name: 'The Villa', job: 'Research', blurb: 'The six-bedroom villa. Find out what is actually true about the land.', state: 'scaffold' },
+    { id: 'press', name: 'The Olive Press', job: 'Money & ownership', blurb: '500 olive trees. Budget, contributors, and who holds the land.', state: 'overgrown' },
+    { id: 'cellars', name: 'The Cellars', job: 'Due diligence', blurb: 'Surveys, title, the notaio. Look under everything.', state: 'overgrown' },
+    { id: 'hub', name: 'The Hub', job: 'Governance', blurb: 'The old 15-car garage becomes the co-working hub and rooftop. Bylaws live here.', state: 'overgrown' },
+    { id: 'village', name: 'The Village', job: 'Relocation', blurb: 'Twenty apartments. Visas, residency and moving your life.', state: 'overgrown' },
+    { id: 'table', name: 'The Long Table', job: 'Move-in', blurb: 'The restaurant and pools. Closing, keys, first season.', state: 'overgrown' },
+  ];
+
+  let M = [
+    // crossroads (done)
+    { id: 'c1', wing: 'crossroads', phase: 'Dream', t: 'Each of us writes three non-negotiables', type: 'Crew', status: 'done', by: 'crew', min: 20 },
+    { id: 'c2', wing: 'crossroads', phase: 'Commit', t: 'Sign the crew charter', type: 'Crew', status: 'done', by: 'crew', min: 15 },
+    // villa
+    { id: 'v1', wing: 'villa', phase: 'Dream', t: 'What do we each need from the land?', type: 'Crew', status: 'done', by: 'crew', min: 20 },
+    { id: 'v2', wing: 'villa', phase: 'Research', t: 'Visit notes: Damanhur', type: 'Solo', status: 'done', by: 'theo', min: 30 },
+    { id: 'v3', wing: 'villa', phase: 'Research', t: 'Visit notes: Tertulia', type: 'Solo', status: 'done', by: 'ana', min: 30 },
+    { id: 'zoning', wing: 'villa', phase: 'Research', t: 'Find out what the land is zoned for', type: 'Solo', status: 'open', min: 25, featured: true },
+    { id: 'v5', wing: 'villa', phase: 'Research', t: 'Map the comune: who decides what, and when', type: 'Pair', status: 'claimed', by: 'priya', min: 30, ago: '2 days' },
+    { id: 'staff', wing: 'villa', phase: 'Research', t: 'Ask the restaurant staff what they need to stay', type: 'Pair', status: 'stalled', by: 'marcus', min: 25, ago: '16 days' },
+    { id: 'v7', wing: 'villa', phase: 'Prepare', t: 'Compare the three shortlisted properties side by side', type: 'Solo', status: 'open', min: 30 },
+    { id: 'v8', wing: 'villa', phase: 'Commit', t: 'Crew decision: choose the target property', type: 'Decision', status: 'locked', min: 15, lock: 'Opens when Research is done' },
+    // press
+    { id: 'p1', wing: 'press', phase: 'Dream', t: 'What should owning this feel like? Shares, use rights, or a trust', type: 'Crew', status: 'open', min: 20 },
+    { id: 'p2', wing: 'press', phase: 'Research', t: 'Write down your real monthly budget (private)', type: 'Personal', status: 'open', min: 20 },
+    { id: 'p3', wing: 'press', phase: 'Research', t: 'Compare: housing co-op, APS association, company, foundation', type: 'Solo', status: 'claimed', by: 'jo', min: 30, ago: '4 days' },
+    // cellars
+    { id: 'd1', wing: 'cellars', phase: 'Research', t: 'Get two quotes for a structural survey', type: 'Solo', status: 'locked', min: 25, lock: 'Opens when we choose a target property' },
+    { id: 'd2', wing: 'cellars', phase: 'Research', t: 'Request the visura catastale (title record)', type: 'Solo', status: 'locked', min: 25, lock: 'Opens when we choose a target property' },
+    // hub
+    { id: 'h1', wing: 'hub', phase: 'Dream', t: 'Read about three decision methods: consensus, consent, sociocracy', type: 'Solo', status: 'open', min: 25 },
+    { id: 'h2', wing: 'hub', phase: 'Prepare', t: 'Draft: what happens when someone leaves', type: 'Pair', status: 'locked', min: 30, lock: 'Opens after The Olive Press' },
+    // village
+    { id: 'r1', wing: 'village', phase: 'Research', t: 'Find which visa route fits you (private)', type: 'Personal', status: 'open', min: 30 },
+    { id: 'r2', wing: 'village', phase: 'Prepare', t: 'Get your codice fiscale (Italian tax code)', type: 'Personal', status: 'open', min: 20 },
+    // table
+    { id: 't1', wing: 'table', phase: 'Commit', t: 'Sign the compromesso and pay the caparra (deposit)', type: 'Decision', status: 'locked', min: 30, lock: 'Opens after due diligence' },
+  ];
+
+  let BOOK = [
+    { by: 'theo', t: 'filed <b>Visit notes: Damanhur</b> in The Villa', doc: 'damanhur-visit.pdf', when: '21 Nov 2026', kudos: 4 },
+    { by: 'ana', t: 'filed <b>Visit notes: Tertulia</b> in The Villa', doc: 'tertulia-notes.md', when: '19 Nov 2026', kudos: 3 },
+    { by: 'crew', t: 'restored <b>The Crossroads</b>. Crew charter signed by all six.', doc: 'crew-charter.pdf', when: '12 Nov 2026', kudos: 6 },
+    { by: 'jo', t: 'claimed <b>Compare legal structures</b> in The Olive Press', when: '20 Nov 2026', kudos: 1 },
+  ];
+
+  const S = { screen: 'join', wing: 'villa', mission: 'zoning', toast: '', kudosGiven: {} };
+
+  const NOTES = {
+    join: ['Joining a crew', 'No sign-up wall. You join from an invite link a friend sends. The Steward greets you, and the very first thing you see is how far the crew has already got, so it never feels like starting from zero.'],
+    estate: ['The estate map', 'The real Three Lakes property drawn as a game map. Each building is one phase of getting the land. Overgrown means nobody has started; scaffolding means work is underway; lit windows mean done. The headline number is the crew\'s, not yours.'],
+    wing: ['A wing and its missions', 'Missions are 15 to 30 minutes each, grouped Dream, Research, Prepare, Commit. Every claim is visible so nobody duplicates work. A claim that sits too long turns into "help wanted" scaffolding: anyone can pick it up, and nobody is named as having failed.'],
+    brief: ['Mission briefing', 'Same shape as Reclaim City: why it matters, exact steps, real links out, and a time estimate. Anything legal, tax or visa says to check with a professional. "Not yet" costs nothing; "Hand off" puts it back for the crew.'],
+    debrief: ['Field report', 'Not a checkbox. The answers become the crew\'s real project record, and the document goes in the Estate Book where the notaio will want it later. Flagging something lets the crew know it needs a conversation.'],
+    done: ['Room restored', 'The room lights up for the whole crew and gets a plaque with your name on it. Ownership and recognition, not points. The Steward names your work to everyone.'],
+    book: ['The Estate Book', 'A shared log of every report, document and decision. It doubles as the actual project archive, so the game produces something useful even if the deal falls through. Kudos thank a specific piece of work. There are no totals and no rankings.'],
+    crew: ['The crew', 'See what everyone is working on. No leaderboard, no streaks. The invite link is how a crew grows.'],
+    me: ['Personal missions', 'Visas, budgets and health stay private. The crew sees only "on track" or "needs help", so people can ask for support without exposing their finances.'],
+  };
+  const ORDER = [['join','Join the crew'],['estate','Estate map'],['wing','The Villa'],['brief','Mission briefing'],['debrief','Field report'],['done','Room restored'],['book','Estate Book'],['crew','Crew'],['me','My missions']];
+
+  // ---------------- helpers ----------------
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const wingM = id => M.filter(m => m.wing === id);
+  const wingPct = id => { const ms = wingM(id); return ms.length ? Math.round(100 * ms.filter(m => m.status === 'done').length / ms.length) : 0; };
+  const totalPct = () => Math.round(100 * M.filter(m => m.status === 'done').length / M.length);
+  const wingState = id => { const p = wingPct(id); if (p === 100) return 'restored'; if (wingM(id).some(m => m.status !== 'open' && m.status !== 'locked')) return 'scaffold'; return 'overgrown'; };
+  const avatar = (id, size) => {
+    if (id === 'crew') return `<span class="av" style="background:var(--gold);${size ? `width:${size}px;height:${size}px` : ''}" aria-hidden="true">✦</span>`;
+    const c = who(id); return `<span class="av" style="background:${c.color};${size ? `width:${size}px;height:${size}px` : ''}" aria-hidden="true">${c.init}</span>`;
+  };
+
+  function stewardSVG(size = 44) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="21" fill="#1f4a3a" stroke="#c9a24a" stroke-width="2"/><circle cx="22" cy="24" r="9" fill="#e6c9a8"/><path d="M11 19c2-7 20-7 22 0z" fill="#6f7f3c"/><rect x="9" y="18" width="26" height="3" rx="1.5" fill="#5a6a2c"/><circle cx="19" cy="24" r="1.2" fill="#23261f"/><circle cx="25" cy="24" r="1.2" fill="#23261f"/><path d="M19 28q3 2 6 0" stroke="#23261f" stroke-width="1.2" fill="none"/><path d="M14 37q8-6 16 0v4H14z" fill="#b4643c"/><g transform="translate(30 30)"><circle r="3" fill="none" stroke="#c9a24a" stroke-width="1.6"/><path d="M2.5 1.5l5 5M6 5l-1.5 1.5" stroke="#c9a24a" stroke-width="1.6"/></g></svg>`;
+  }
+  const steward = (line, name = 'Ilde, the Steward') => `<div class="steward">${stewardSVG()}<div><b>${name}</b><p>${line}</p></div></div>`;
+
+  // ---------------- estate SVG ----------------
+  function building(x, y, w, h, state, opts = {}) {
+    const wall = state === 'restored' ? '#d9a77a' : state === 'scaffold' ? '#c8ab8a' : '#a99a86';
+    const roof = state === 'restored' ? '#b4643c' : state === 'scaffold' ? '#9e6e52' : '#7f6d60';
+    const win = state === 'restored' ? '#f4d27a' : '#4a4238';
+    let g = `<g>`;
+    g += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${wall}" stroke="#5b4a3a" stroke-width="1"/>`;
+    if (opts.flat) g += `<rect x="${x - 3}" y="${y - 5}" width="${w + 6}" height="6" fill="${roof}" stroke="#5b4a3a" stroke-width="1"/>`;
+    else g += `<polygon points="${x - 4},${y} ${x + w / 2},${y - (opts.peak || 16)} ${x + w + 4},${y}" fill="${roof}" stroke="#5b4a3a" stroke-width="1"/>`;
+    const floors = opts.floors || 1, cols = opts.cols || Math.max(2, Math.floor(w / 16));
+    for (let f = 0; f < floors; f++) for (let c = 0; c < cols; c++) {
+      const wx = x + (w / cols) * c + (w / cols) / 2 - 3, wy = y + 6 + f * (h / floors);
+      g += `<rect class="${state === 'restored' ? 'lit' : ''}" x="${wx}" y="${wy}" width="6" height="8" fill="${win}" stroke="#5b4a3a" stroke-width=".6"/>`;
+    }
+    if (state === 'overgrown') {
+      for (let i = 0; i < 6; i++) g += `<circle cx="${x + (i * 37 % w)}" cy="${y + h - 2 - (i * 13 % (h * .6))}" r="${3 + (i % 3)}" fill="#55663a" opacity=".85"/>`;
+    }
+    if (state === 'scaffold') {
+      const sx = x + w * .45, sw = w * .5;
+      g += `<g stroke="#7a5a2a" stroke-width="1.2" fill="none"><rect x="${sx}" y="${y - 6}" width="${sw}" height="${h + 6}"/><line x1="${sx}" y1="${y + h / 2}" x2="${sx + sw}" y2="${y + h / 2}"/><line x1="${sx}" y1="${y - 6}" x2="${sx + sw}" y2="${y + h}"/><line x1="${sx + sw}" y1="${y - 6}" x2="${sx}" y2="${y + h}"/></g>`;
+    }
+    return g + `</g>`;
+  }
+  function olive(x, y, state) {
+    const c = state === 'restored' ? '#7c8f45' : state === 'scaffold' ? '#728047' : '#6b6e4f';
+    return `<g><rect x="${x - 1}" y="${y}" width="2" height="6" fill="#6b5236"/><ellipse cx="${x}" cy="${y - 2}" rx="7" ry="5" fill="${c}" stroke="#4a5a2a" stroke-width=".6"/></g>`;
+  }
+  function pill(x, y, wing) {
+    const p = wingPct(wing.id), label = wing.name.replace('The ', '');
+    const w = Math.max(64, label.length * 6.4 + 34);
+    return `<g class="pill" transform="translate(${x - w / 2} ${y})"><rect width="${w}" height="20" rx="10" fill="#f8f1df" stroke="#1f4a3a" stroke-width="1.2"/><text x="9" y="14" font-family="Syne, sans-serif" font-weight="700" font-size="10.5" fill="#1f4a3a">${esc(label)}</text><text x="${w - 8}" y="14" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#5b5a4c">${p}%</text></g>`;
+  }
+  function estateSVG() {
+    const st = id => wingState(id);
+    let s = `<svg id="estate-svg" viewBox="0 0 360 470" role="img" aria-label="Map of the Three Lakes Estate">`;
+    s += `<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9dcc0"/><stop offset="1" stop-color="#efe3c6"/></linearGradient>
+      <pattern id="maplines" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 20h40M20 0v40" stroke="#d8c7a0" stroke-width=".5"/></pattern></defs>`;
+    s += `<rect width="360" height="470" fill="url(#sky)"/><rect width="360" height="470" fill="url(#maplines)" opacity=".7"/>`;
+    // lake + hills
+    s += `<path d="M0 58 Q90 44 180 52 T360 50 V74 H0z" fill="#8eaab2" opacity=".9"/><text x="330" y="66" text-anchor="end" font-family="Trocchi, serif" font-size="10" fill="#3f5c64" font-style="italic">Lago Trasimeno</text>`;
+    s += `<path d="M0 82 Q60 66 130 80 T260 74 T360 80 V470 H0z" fill="#cdbf8f"/><path d="M0 120 Q90 98 200 112 T360 104 V470 H0z" fill="#c4b682" opacity=".8"/>`;
+    // compass
+    s += `<g transform="translate(36 112)" opacity=".75"><circle r="15" fill="none" stroke="#1f4a3a" stroke-width="1"/><path d="M0-16L3-3 0 0-3-3z" fill="#1f4a3a"/><path d="M0 16L3 3 0 0-3 3z" fill="#c9a24a"/><path d="M-16 0L-3-3 0 0-3 3zM16 0L3-3 0 0 3 3z" fill="#8d7a6a"/><text y="-19" text-anchor="middle" font-size="8" font-family="Syne, sans-serif" fill="#1f4a3a">N</text></g>`;
+    // road
+    s += `<path d="M196 470 C200 430 150 420 160 390 S230 350 200 320 S140 280 180 250 S240 210 205 180" fill="none" stroke="#e8dab4" stroke-width="10" stroke-linecap="round"/><path d="M196 470 C200 430 150 420 160 390 S230 350 200 320 S140 280 180 250 S240 210 205 180" fill="none" stroke="#bfae84" stroke-width="1" stroke-dasharray="3 5"/>`;
+    // villa
+    s += `<g class="hit" data-wing="villa" tabindex="0" role="button" aria-label="The Villa, ${wingPct('villa')}% restored">${building(180, 118, 74, 46, st('villa'), { floors: 2, cols: 5, peak: 18 })}<rect x="258" y="140" width="34" height="18" rx="2" fill="#8eb4bd" stroke="#5b4a3a" stroke-width=".8"/>${pill(220, 172, WINGS[1])}</g>`;
+    // long table: restaurant + two pools
+    s += `<g class="hit" data-wing="table" tabindex="0" role="button" aria-label="The Long Table, ${wingPct('table')}% restored">${building(52, 150, 62, 30, st('table'), { cols: 4 })}<rect x="120" y="160" width="30" height="16" rx="2" fill="${st('table') === 'overgrown' ? '#8a9a8a' : '#8eb4bd'}" stroke="#5b4a3a" stroke-width=".8"/><rect x="60" y="188" width="40" height="14" rx="2" fill="${st('table') === 'overgrown' ? '#8a9a8a' : '#8eb4bd'}" stroke="#5b4a3a" stroke-width=".8"/>${pill(98, 208, WINGS[6])}</g>`;
+    // hub: long low garage with rooftop
+    s += `<g class="hit" data-wing="hub" tabindex="0" role="button" aria-label="The Hub, ${wingPct('hub')}% restored">${building(222, 232, 104, 24, st('hub'), { flat: true, cols: 7 })}${pill(274, 262, WINGS[4])}</g>`;
+    // cellars: arched door into the hill
+    s += `<g class="hit" data-wing="cellars" tabindex="0" role="button" aria-label="The Cellars, ${wingPct('cellars')}% restored"><path d="M120 252 Q140 222 168 252z" fill="#b2a374" stroke="#5b4a3a" stroke-width="1"/><path d="M136 252 v-10 a8 8 0 0 1 16 0 v10z" fill="${st('cellars') === 'restored' ? '#f4d27a' : '#4a4238'}" stroke="#5b4a3a" stroke-width="1"/>${st('cellars') === 'overgrown' ? '<circle cx="128" cy="248" r="4" fill="#55663a"/><circle cx="160" cy="246" r="3" fill="#55663a"/>' : ''}${pill(144, 260, WINGS[3])}</g>`;
+    // village: cluster of small houses
+    let v = '';
+    [[24, 300], [60, 292], [96, 302], [36, 334], [76, 330]].forEach(([x, y]) => v += building(x, y, 26, 18, st('village'), { cols: 2, peak: 9 }));
+    s += `<g class="hit" data-wing="village" tabindex="0" role="button" aria-label="The Village, ${wingPct('village')}% restored">${v}${pill(68, 360, WINGS[5])}</g>`;
+    // olive press + grove
+    let o = building(234, 318, 40, 22, st('press'), { cols: 2, peak: 10 });
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) o += olive(212 + c * 22 + (r % 2) * 8, 360 + r * 18, st('press'));
+    s += `<g class="hit" data-wing="press" tabindex="0" role="button" aria-label="The Olive Press, ${wingPct('press')}% restored">${o}${pill(282, 414, WINGS[2])}</g>`;
+    // crossroads: gate + signpost
+    const cr = st('crossroads');
+    s += `<g class="hit" data-wing="crossroads" tabindex="0" role="button" aria-label="The Crossroads, ${wingPct('crossroads')}% restored"><rect x="150" y="410" width="6" height="30" fill="#8a7458"/><rect x="214" y="410" width="6" height="30" fill="#8a7458"/><path d="M150 412 Q185 396 220 412" fill="none" stroke="#5b4a3a" stroke-width="3"/>${cr === 'restored' ? '<path d="M157 414 Q185 402 213 414" fill="none" stroke="#c9a24a" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="153" cy="407" r="3" fill="#f4d27a" class="lit"/><circle cx="217" cy="407" r="3" fill="#f4d27a" class="lit"/>' : ''}<rect x="240" y="436" width="3" height="22" fill="#6b5236"/><path d="M228 438h26l5 4-5 4h-26z" fill="#e8dab4" stroke="#5b4a3a" stroke-width=".8"/>${pill(100, 446, WINGS[0])}</g>`;
+    // little people near restored wings
+    if (cr === 'restored') s += `<g fill="#1f4a3a"><circle cx="182" cy="428" r="2.5"/><rect x="180.5" y="430" width="3" height="7"/><circle cx="192" cy="430" r="2.5"/><rect x="190.5" y="432" width="3" height="7"/></g>`;
+    if (st('villa') === 'restored') s += `<g fill="#1f4a3a"><circle cx="200" cy="198" r="2.5"/><rect x="198.5" y="200" width="3" height="7"/></g>`;
+    return s + `</svg>`;
+  }
+
+  // ---------------- screens ----------------
+  const R = {};
+
+  R.join = () => `<div class="join">
+    <div style="padding:28px 18px 0">${estateMini()}</div>
+    <div class="pad">
+      <div class="lbl" style="color:var(--gold-soft)">You're invited · Three Lakes crew</div>
+      <h4>Ana asked you to help reclaim the estate.</h4>
+      <p>Six people are restoring a 60-room estate near Lago Trasimeno, one small task at a time. Each one takes 15 to 30 minutes. The crew is already ${totalPct()}% of the way.</p>
+      ${steward('Benvenuto. I\'ve kept this place for thirty years with nobody to give it to. Come, I\'ll show you around.')}
+      <button class="btn primary" data-go="estate">Join the crew</button>
+      <button class="btn quiet" data-go="estate">Just look around first</button>
+    </div></div>`;
+  function estateMini() {
+    return `<svg viewBox="0 0 200 90" style="width:100%;height:auto" aria-hidden="true"><path d="M0 40 Q50 30 100 36 T200 34 V50 H0z" fill="#8eaab2" opacity=".5"/><path d="M0 60 Q60 44 120 56 T200 52 V90 H0z" fill="#2b5e4a"/>${building(78, 52, 44, 22, 'overgrown', { cols: 3, peak: 12 })}<g fill="#c9a24a"><circle cx="20" cy="12" r="1.2"/><circle cx="60" cy="6" r="1"/><circle cx="150" cy="10" r="1.3"/><circle cx="180" cy="20" r="1"/></g></svg>`;
+  }
+
+  R.estate = () => {
+    const nxt = M.find(m => m.featured && m.status === 'open') || M.find(m => m.status === 'open');
+    const stalled = M.find(m => m.status === 'stalled');
+    return `<div class="map-hud"><div><div class="title">Three Lakes Estate</div><div class="sub">${totalPct()}% restored by the crew</div><div class="meter"><i style="width:${totalPct()}%"></i></div></div>
+      <div class="crew-dots" aria-label="Crew of ${CREW.length}">${CREW.map(c => `<span style="background:${c.color}">${c.init}</span>`).join('')}</div></div>
+      ${estateSVG()}
+      <div class="pad">
+        ${stalled ? steward(`The question for the restaurant staff has been waiting a while. Marcus got busy, and that happens. Anyone have 25 minutes this week?`) : steward('Everything that was waiting has been picked up. Good crew.')}
+        ${nxt ? `<div class="next-card"><div class="lbl">Good next step for you</div><div style="font-weight:600">${esc(nxt.t)}</div><div class="muted">${WINGS.find(w => w.id === nxt.wing).name} · about ${nxt.min} min · ${nxt.type}</div><button class="btn primary" data-mission="${nxt.id}">See the briefing</button></div>` : ''}
+      </div>`;
+  };
+
+  R.wing = () => {
+    const w = WINGS.find(x => x.id === S.wing), ms = wingM(w.id);
+    const phases = ['Dream', 'Research', 'Prepare', 'Commit'].filter(p => ms.some(m => m.phase === p));
+    const icon = m => {
+      if (m.status === 'done') return `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="2" fill="#d9a77a" stroke="#5b4a3a"/><rect x="7" y="9" width="5" height="6" fill="#f4d27a"/><rect x="14" y="9" width="5" height="6" fill="#f4d27a"/></svg>`;
+      if (m.status === 'locked') return `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="6" y="11" width="14" height="11" rx="2" fill="#a99a86"/><path d="M9 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#5b4a3a" stroke-width="2"/></svg>`;
+      if (m.status === 'stalled') return `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g stroke="#9a8f7a" stroke-width="1.6" fill="none" stroke-dasharray="2 2"><rect x="4" y="4" width="18" height="18"/><path d="M4 4l18 18M22 4L4 22"/></g></svg>`;
+      if (m.status === 'claimed') return `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g stroke="#7a5a2a" stroke-width="1.6" fill="none"><rect x="4" y="4" width="18" height="18"/><path d="M4 13h18M4 4l18 18"/></g></svg>`;
+      return `<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="2" fill="#a99a86" stroke="#5b4a3a"/><circle cx="7" cy="19" r="3" fill="#55663a"/><circle cx="20" cy="18" r="3.5" fill="#55663a"/></svg>`;
+    };
+    const status = m => {
+      if (m.status === 'done') return `<span class="chip done">Restored</span>${m.by === 'crew' ? 'by the whole crew' : 'by ' + who(m.by).name}`;
+      if (m.status === 'locked') return esc(m.lock);
+      if (m.status === 'stalled') return `<span class="chip stalled">Help wanted</span>Marcus claimed this ${m.ago} ago`;
+      if (m.status === 'claimed' && m.by === 'you') return `<span class="chip mine">You're on it</span>about ${m.min} min`;
+      if (m.status === 'claimed') return `<span class="chip claimed">${who(m.by).name} is on it</span>${m.ago} ago`;
+      return `<span class="chip open">Open</span>${m.type} · about ${m.min} min`;
+    };
+    return `<div class="bar"><button class="back" data-go="estate">‹ Estate</button><h3>${w.name}</h3><span class="pct">${wingPct(w.id)}%</span></div>
+      <div class="pad">
+        <div><div class="lbl">${esc(w.job)}</div><p style="margin-top:4px">${esc(w.blurb)}</p></div>
+        <div class="meter" style="width:100%;background:var(--parchment-2)"><i style="width:${wingPct(w.id)}%"></i></div>
+        ${phases.map(p => `<div class="phase"><div class="phase-head"><span class="lbl">${p}</span><span class="muted">${ms.filter(m => m.phase === p && m.status === 'done').length} of ${ms.filter(m => m.phase === p).length}</span></div>
+          ${ms.filter(m => m.phase === p).map(m => `<button class="mission ${m.status}" ${m.status === 'locked' ? 'aria-disabled="true"' : `data-mission="${m.id}"`}>${icon(m)}<span><span class="t">${esc(m.t)}</span><span class="m" style="display:block">${status(m)}</span></span></button>`).join('')}
+        </div>`).join('')}
+      </div>`;
+  };
+
+  const BRIEFS = {
+    zoning: {
+      why: 'Before we fall in love with a property, we need to know what the land is allowed to be. In Italy every building has an official permitted use, the <span class="term">destinazione d\'uso</span>. Hospitality, farm and residential are different categories. If the restaurant and apartments aren\'t zoned for what we want, changing that can take months and real money.',
+      steps: ['Ask the seller\'s agent for the property\'s cadastral references (<span class="term">foglio</span> and <span class="term">particella</span>). They\'re on every listing file.', 'Look the parcels up in the comune\'s urban plan (<span class="term">PRG</span>, the town\'s land-use plan) or ask the comune\'s technical office.', 'Write down the permitted use for the villa, the apartments and the restaurant. Note anything that says agricultural only.'],
+      facts: [['Time', 'about 25 min'], ['Type', 'Solo'], ['Wing', 'The Villa']],
+      caution: 'This is a first look, not legal advice. Anything surprising goes to the crew\'s geometra or notaio before we act on it.',
+      line: 'Zoning. Dull word, but it\'s killed more dream estates than bad roofs ever did.'
+    },
+    staff: {
+      why: 'The restaurant is already staffed by people from the area. They know the land, the suppliers and the comune better than any of us. If we buy this place, we want them to stay, and we should ask them what that would take before we write a business plan around them.',
+      steps: ['Pair up with someone who speaks Italian, or bring a translation app.', 'Message or call the restaurant manager. Ask three questions: what would make you stay, what worries you about new owners, what does the kitchen need.', 'Write up what you heard. Keep their words, not your interpretation.'],
+      facts: [['Time', 'about 25 min'], ['Type', 'Pair'], ['Wing', 'The Villa']],
+      caution: 'Be clear we are not the owners yet and are not making promises.',
+      line: 'Marcus started this and life got in the way. If you pick it up, I\'ll tell him it\'s in good hands.'
+    }
+  };
+  const genericBrief = m => ({
+    why: 'A full briefing for this mission comes from Castle Quest\'s real task list. It will explain why this step matters and what to do, with links to the official sources.',
+    steps: ['Read the background the crew has gathered so far.', 'Do the real-world step.', 'Come back and file a short report.'],
+    facts: [['Time', `about ${m.min} min`], ['Type', m.type], ['Wing', WINGS.find(w => w.id === m.wing).name]],
+    caution: m.type === 'Personal' ? 'Only you see your answers. The crew sees whether you\'re on track.' : '',
+    line: 'I\'ll have more to say about this one once the crew writes it up properly.'
+  });
+
+  R.brief = () => {
+    const m = M.find(x => x.id === S.mission), b = BRIEFS[m.id] || genericBrief(m), w = WINGS.find(x => x.id === m.wing);
+    let actions;
+    if (m.status === 'done') actions = `<p class="muted">Restored ${m.by === 'crew' ? 'by the whole crew' : 'by ' + who(m.by).name}. The report is in the Estate Book.</p><button class="btn ghost" data-go="book">Open the Estate Book</button>`;
+    else if (m.status === 'stalled') actions = `<button class="btn primary" data-act="pickup">Pick this up</button><p class="muted" style="text-align:center">Marcus will get a note that you took it over. No hard feelings either way.</p>`;
+    else if (m.status === 'claimed' && m.by !== 'you') actions = `<p class="muted">${who(m.by).name} is on this. You can send encouragement or offer to pair.</p><button class="btn ghost" data-act="offer">Offer to help ${who(m.by).name}</button>`;
+    else if (m.status === 'claimed' && m.by === 'you') actions = `<button class="btn primary" data-go="debrief">I'm back. File my report</button><div class="row"><button class="btn ghost" data-act="go">Open the comune's site</button></div><div class="row"><button class="btn quiet" data-act="notyet">Not yet</button><button class="btn quiet" data-act="handoff">Hand off</button></div>`;
+    else actions = `<button class="btn primary" data-act="claim">Claim it and go do it</button><div class="row"><button class="btn quiet" data-act="notyet">Not yet</button></div>`;
+    return `<div class="bar"><button class="back" data-wing-go="${w.id}">‹ ${w.name}</button><span class="pct">${m.phase}</span></div>
+      <div class="brief-head"><div class="lbl">${esc(w.name)} · ${m.phase}</div><h4>${esc(m.t)}</h4></div>
+      <div class="pad">
+        <div class="facts">${b.facts.map(([k, v]) => `<span>${k} <b>${esc(v)}</b></span>`).join('')}</div>
+        <div><div class="lbl" style="margin-bottom:4px">Why it matters</div><p class="why">${b.why}</p></div>
+        <div><div class="lbl" style="margin-bottom:8px">Your move</div><ol class="steps">${b.steps.map(s => `<li><span>${s}</span></li>`).join('')}</ol></div>
+        ${b.caution ? `<p class="caution">${b.caution}</p>` : ''}
+        ${steward(b.line)}
+        ${actions}
+      </div>`;
+  };
+
+  R.debrief = () => {
+    const m = M.find(x => x.id === S.mission);
+    return `<div class="bar"><button class="back" data-go="brief">‹ Briefing</button><h3>Field report</h3><span></span></div>
+      <form class="pad" id="debrief-form">
+        <div><div class="lbl">${esc(WINGS.find(w => w.id === m.wing).name)}</div><h4 style="font-size:19px;margin-top:2px">${esc(m.t)}</h4></div>
+        <fieldset><legend>What is the land zoned for?</legend>
+          <label class="choice"><input type="radio" name="zone" id="z1" value="1" checked> Hospitality and residential, as we hoped</label>
+          <label class="choice"><input type="radio" name="zone" id="z2" value="2"> Mixed: some parts are agricultural only</label>
+          <label class="choice"><input type="radio" name="zone" id="z3" value="3"> Couldn't find out yet</label>
+        </fieldset>
+        <fieldset><legend>Anything the crew should talk about?</legend>
+          <textarea id="debrief-notes" aria-label="Notes for the crew">The apartment village is listed as agriturismo, which is a farm-stay licence. Ask the geometra whether long-term residents fit under it.</textarea>
+        </fieldset>
+        <div class="attach"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M13 6l-6 6a2 2 0 0 0 3 3l7-7a4 4 0 0 0-6-6l-7 7a6 6 0 0 0 8 8l5-5" fill="none" stroke="#5b5a4c" stroke-width="1.6"/></svg><span>prg-extract-trasimeno.pdf <span class="muted">· 1.2 MB</span></span></div>
+        <label class="choice"><input type="checkbox" id="flag" checked> Flag this for the next crew call</label>
+        <button class="btn primary" type="submit">File the report</button>
+      </form>`;
+  };
+
+  R.done = () => `<div class="celebrate">
+      <div class="lbl" style="text-align:center;color:var(--gold-soft)">The Villa · room restored</div>
+      <svg class="room-scene" viewBox="0 0 320 170" aria-hidden="true">
+        <rect width="320" height="170" fill="#183d30"/>
+        <g fill="#c9a24a"><circle cx="30" cy="20" r="1.4"/><circle cx="90" cy="12" r="1"/><circle cx="250" cy="18" r="1.4"/><circle cx="290" cy="40" r="1"/><circle cx="170" cy="8" r="1"/></g>
+        <path d="M0 150 Q160 120 320 150 V170 H0z" fill="#2b5e4a"/>
+        <rect x="90" y="70" width="140" height="80" fill="#d9a77a" stroke="#5b4a3a"/>
+        <polygon points="82,70 160,36 238,70" fill="#b4643c" stroke="#5b4a3a"/>
+        ${[0, 1, 2, 3].map(i => `<rect class="lit" style="animation-delay:${.2 + i * .25}s" x="${104 + i * 32}" y="84" width="16" height="20" fill="#f4d27a" stroke="#5b4a3a"/>`).join('')}
+        ${[0, 1, 3].map(i => `<rect class="lit" style="animation-delay:${1.2 + i * .2}s" x="${104 + i * 32}" y="116" width="16" height="20" fill="#f4d27a" stroke="#5b4a3a"/>`).join('')}
+        <rect x="168" y="116" width="16" height="34" fill="#6b4a2a" stroke="#5b4a3a"/>
+        <g class="lit" style="animation-delay:1.8s" fill="#efe3c6"><circle cx="60" cy="140" r="4"/><rect x="57" y="144" width="6" height="12"/><circle cx="262" cy="138" r="4"/><rect x="259" y="142" width="6" height="12"/></g>
+      </svg>
+      <h4>The lights are on.</h4>
+      <div class="plaque"><div class="lbl">Restored by</div><div class="pt">You</div><div style="font-size:12px">Zoning check · 24 Nov 2026</div></div>
+      ${steward('The whole crew can see what you found. And the farm-stay licence question is a good catch. Better now than at the notaio\'s desk.')}
+      <p style="text-align:center;color:var(--gold-soft);font-size:14px">The Villa is now ${wingPct('villa')}% restored. The estate is ${totalPct()}%.</p>
+      <button class="btn primary" style="background:var(--gold);color:var(--ink)" data-go="estate">Back to the estate</button>
+      <button class="btn quiet" style="color:var(--gold-soft)" data-go="book">See it in the Estate Book</button>
+    </div>`;
+
+  R.book = () => `<div class="bar"><span></span><h3>Estate Book</h3><span class="pct">${BOOK.length} entries</span></div>
+    <div class="pad" style="gap:0">
+      <p class="muted" style="margin-bottom:8px">Every report, document and decision the crew has made. This is also the project archive. Export it any time.</p>
+      ${BOOK.map((e, i) => `<div class="entry">${avatar(e.by)}<div><div class="t"><b>${e.by === 'crew' ? 'The crew' : who(e.by).name}</b> ${e.t}</div><div class="when">${e.when}</div>
+        ${e.doc ? `<span class="doc">▤ ${esc(e.doc)}</span>` : ''}
+        ${e.by !== 'you' ? `<div><button class="kudos" data-kudos="${i}" aria-pressed="${!!S.kudosGiven[i]}">${S.kudosGiven[i] ? '♥ Thanked' : '♡ Thank'} · ${e.kudos + (S.kudosGiven[i] ? 1 : 0)}</button></div>` : ''}
+      </div></div>`).join('')}
+    </div>`;
+
+  R.crew = () => {
+    const on = id => M.filter(m => m.by === id && (m.status === 'claimed' || m.status === 'stalled'));
+    return `<div class="bar"><span></span><h3>The crew</h3><span class="pct">${CREW.length}</span></div>
+    <div class="pad">
+      ${CREW.map(c => { const o = on(c.id); return `<div class="member">${avatar(c.id)}<div style="min-width:0"><div style="font-weight:600">${c.name}</div><div class="muted">${o.length ? (o[0].status === 'stalled' ? 'Busy lately · ' : 'On: ') + esc(o[0].t) : 'Free to pick something up'}</div></div><span></span></div>`; }).join('')}
+      <div class="invite"><div class="lbl">Grow the crew</div><p style="font-size:14px">Anyone with this link can join the Three Lakes crew.</p><div class="code">reclaim.estate/join/three-lakes-7QK2</div><button class="btn ghost" data-act="copy">Copy invite link</button></div>
+      <p class="muted">No leaderboard. Thank people for specific work in the Estate Book instead.</p>
+    </div>`;
+  };
+
+  R.me = () => {
+    const mine = M.filter(m => m.type === 'Personal' || m.by === 'you');
+    return `<div class="bar"><span></span><h3>My missions</h3><span></span></div>
+    <div class="pad">
+      <div class="private"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="8" width="12" height="9" rx="2" fill="#1f4a3a"/><path d="M6 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#1f4a3a" stroke-width="1.8"/></svg><span>Personal missions are private. The crew only sees <b>On track</b> or <b>Needs help</b>.</span></div>
+      ${mine.map(m => `<button class="mission ${m.status}" data-mission="${m.id}"><span class="av" style="background:var(--parchment-2);width:28px;height:28px;font-size:11px">${m.type === 'Personal' ? '◐' : '◆'}</span><span><span class="t">${esc(m.t)}</span><span class="m" style="display:block">${WINGS.find(w => w.id === m.wing).name} · ${m.status === 'done' ? 'Restored' : m.status === 'claimed' ? 'In progress' : 'about ' + m.min + ' min'}</span></span></button>`).join('')}
+      <div><div class="lbl" style="margin-bottom:8px">What the crew sees about you</div>
+        <div class="row"><button class="btn ghost" data-act="status-ok" style="flex:1">On track</button><button class="btn quiet" data-act="status-help" style="flex:1;border:1.5px solid var(--parchment-2)">Needs help</button></div></div>
+      ${steward('Visas are slow for everyone. If you get stuck, say "needs help" and the crew will know without knowing your business.')}
+    </div>`;
+  };
+
+  // ---------------- render ----------------
+  const TABS = [['estate', 'Estate', '<path d="M3 17V9l7-5 7 5v8h-5v-5H8v5z" fill="none" stroke="currentColor" stroke-width="1.6"/>'], ['book', 'Book', '<path d="M4 3h9a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z M4 14a3 3 0 0 1 3-3h9" fill="none" stroke="currentColor" stroke-width="1.6"/>'], ['crew', 'Crew', '<circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="8" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 17c0-3 2.5-5 5-5s5 2 5 5M12 13c3 0 5 1.5 5 4" fill="none" stroke="currentColor" stroke-width="1.6"/>'], ['me', 'Me', '<circle cx="10" cy="7" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 17c0-3.5 3-5.5 6-5.5s6 2 6 5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>']];
+
+  function render() {
+    const scr = $('#screen');
+    scr.innerHTML = R[S.screen]() + (S.toast ? `<div class="toast" role="status">${S.toast}</div>` : '');
+    scr.scrollTop = 0;
+    const tabActive = { estate: 'estate', wing: 'estate', brief: 'estate', debrief: 'estate', book: 'book', crew: 'crew', me: 'me' }[S.screen];
+    const tabs = $('#tabs');
+    tabs.hidden = S.screen === 'join' || S.screen === 'done';
+    tabs.innerHTML = TABS.map(([id, label, path]) => `<button data-go="${id}" aria-current="${tabActive === id}"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">${path}</svg>${label}</button>`).join('');
+    $('#index').innerHTML = ORDER.map(([id, label], i) => `<button data-jump="${id}" aria-current="${S.screen === id}"><span>${String(i + 1).padStart(2, '0')}</span><span>${label}</span></button>`).join('');
+    const n = NOTES[S.screen]; $('#note-title').textContent = n[0]; $('#note-body').textContent = n[1];
+    if (S.toast) { const t = S.toast; setTimeout(() => { if (S.toast === t) { S.toast = ''; const el = scr.querySelector('.toast'); if (el) el.remove(); } }, 3200); }
+  }
+  function go(screen, extra = {}) { Object.assign(S, { screen, toast: '' }, extra); render(); }
+  const toast = msg => { S.toast = msg; render(); };
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-jump],[data-mission],[data-wing-go],[data-act],[data-kudos],.hit');
+    if (!t) return;
+    if (t.dataset.jump) {
+      const id = t.dataset.jump;
+      if (id === 'wing') return go('wing', { wing: 'villa' });
+      if (id === 'brief' || id === 'debrief') { const z = M.find(m => m.id === 'zoning'); if (z.status === 'open') z.status = 'claimed', z.by = 'you'; return go(id, { mission: 'zoning' }); }
+      if (id === 'done') { completeZoning(); return go('done', { mission: 'zoning' }); }
+      return go(id);
+    }
+    if (t.dataset.go) return go(t.dataset.go);
+    if (t.dataset.wingGo) return go('wing', { wing: t.dataset.wingGo });
+    if (t.classList.contains('hit')) return go('wing', { wing: t.dataset.wing });
+    if (t.dataset.mission) return go('brief', { mission: t.dataset.mission });
+    if (t.dataset.kudos) { const i = t.dataset.kudos; S.kudosGiven[i] = !S.kudosGiven[i]; return render(); }
+    const m = M.find(x => x.id === S.mission);
+    switch (t.dataset.act) {
+      case 'claim': m.status = 'claimed'; m.by = 'you'; BOOK.unshift({ by: 'you', t: `claimed <b>${esc(m.t)}</b>`, when: '24 Nov 2026', kudos: 0 }); return toast('Claimed. The crew can see you\'re on it.');
+      case 'pickup': m.status = 'claimed'; m.by = 'you'; return toast('It\'s yours now. Marcus has been told, kindly.');
+      case 'go': return toast('In the real app this opens the comune\'s site in a new tab. Come back when you\'re done.');
+      case 'notyet': return go('estate', { toast: 'No problem. It\'ll be here when you have 25 minutes.' });
+      case 'handoff': m.status = 'open'; delete m.by; return go('wing', { wing: m.wing, toast: 'Handed back to the crew. Thanks for being honest about your time.' });
+      case 'offer': return toast(`Sent ${who(m.by).name} an offer to pair.`);
+      case 'copy': {
+        const link = 'reclaim.estate/join/three-lakes-7QK2';
+        if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => toast('Invite link copied.'), () => toast('Select the link above to copy it.'));
+        else toast('Select the link above to copy it.');
+        return;
+      }
+      case 'status-ok': return toast('The crew sees: On track.');
+      case 'status-help': return toast('The crew sees: Needs help. Ilde will ask who can pair with you.');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('hit')) { e.preventDefault(); go('wing', { wing: e.target.dataset.wing }); }
+  });
+  document.addEventListener('submit', e => {
+    if (e.target.id !== 'debrief-form') return;
+    e.preventDefault();
+    completeZoning();
+    go('done');
+  });
+  function completeZoning() {
+    const z = M.find(m => m.id === 'zoning');
+    if (z.status === 'done') return;
+    z.status = 'done'; z.by = 'you'; z.featured = false;
+    BOOK.unshift({ by: 'you', t: 'filed <b>Find out what the land is zoned for</b> in The Villa. Flagged: farm-stay licence on the apartments.', doc: 'prg-extract-trasimeno.pdf', when: '24 Nov 2026', kudos: 2 });
+  }
+
+  render();
+})();
+</script>

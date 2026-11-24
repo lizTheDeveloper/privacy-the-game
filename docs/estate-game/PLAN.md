@@ -9,6 +9,7 @@ Spec: [2026-11-24-reclaim-the-estate-design.md](2026-11-24-reclaim-the-estate-de
 - [x] Write the design spec draft
 
 ## Step 2: Alignment with Castle Quest
+- [x] Clickable prototype of the core loop (prototype.html)
 - [ ] Send the structure proposal (open-source engine + Castle Quest campaign)
 - [ ] Get Castle Quest's real task list for the Three Lakes deal
 - [ ] Agree who reviews legal, tax and visa mission content

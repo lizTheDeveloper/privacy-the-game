@@ -30,6 +30,10 @@ Reclaim the Estate turns that work into a shared restoration game. A crew restor
 | Liberation % | Restoration %, per wing and for the whole estate | `fill-bar.js`, `hud.js` |
 | Single player, local state | **Crew (multiplayer), shared state** | **New. The main build cost.** |
 
+## Wings on the Real Property (from the prototype)
+
+In the prototype (`docs/estate-game/prototype.html`) the wings are drawn as real parts of Three Lakes, which reads better than abstract rooms: The Crossroads (Crew), The Villa (Research), The Olive Press (Money & ownership), The Cellars (Due diligence), The Hub, the old 15-car garage (Governance), The Village, the 20 apartments (Relocation), The Long Table, the restaurant and pools (Move-in). The Steward is named Ilde. Other campaigns would map the same seven phases onto their own buildings.
+
 ## The Main Difference: A Crew, Not a Solo Player
 
 Reclaim City is about *your* accounts. This game is about a *group* project. That changes three things:
