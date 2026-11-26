@@ -19,6 +19,7 @@ import { readLevel, readLevelChosen, intelFor, visibleSteps, gearQuestions, prog
 import { topTools } from '../components/top-tools.js';
 import { walkStepRow, walkProgress, gearAsk, passwordPlaceAsk, missionTrail, pathChips, helpPanel, devicesAsk, devicesAnswered, missionNeedsDevices, placeChip, placeSay } from '../components/walkthrough.js';
 import { plainText } from '../utils/readability.js';
+import { htmlLines } from '../utils/voice-line.js';
 import { FIELD_KIT_URL, FIELD_CLASS_URL, FIELD_PLAYBOOK_TITLES } from '../data/missions-field-shared.js';
 import { wasOpened } from '../utils/opened-steps.js';
 import { notMineLabel } from '../data/not-mine.js';
@@ -728,6 +729,13 @@ function setupCard(state, mission, allSteps) {
   return `${place}${gearAsk(state, unanswered)}${skip}`;
 }
 
+// What Read it to me says on a Simple mission's "Before you start" card, line by line
+// (scripts/voice-lines.mjs lists the lines of a card with nothing answered yet).
+export function setupSay(state, mission) {
+  const allSteps = mission.simple?.steps?.length ? mission.simple.steps : missionSteps(mission, state);
+  return htmlLines(setupCard(state, mission, allSteps));
+}
+
 // Simple: where the passwords are. Two places: the steps' chips say it, and the first card keeps
 // the way to change it. One place (or none yet): the line as before.
 function simplePlaceAsk(state, mission, steps, current) {
@@ -803,7 +811,7 @@ function stepModePage(p) {
   if (simple && setup) {
     return pageShell(state, p, `
       <div class="focus-card focus-setup" data-setup-card>${setup}</div>
-`, 'brief-steps-mode brief-simple', top, topTools(state, level, [plainText(setup)], upcoming));
+`, 'brief-steps-mode brief-simple', top, topTools(state, level, htmlLines(setup), upcoming));
   }
   if (simple) {
     const simpleBody = `

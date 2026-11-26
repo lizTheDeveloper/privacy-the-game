@@ -9,7 +9,10 @@ import { fileURLToPath } from 'node:url';
 import { MISSIONS } from '../src/data/missions.js';
 import * as DIALOGUE from '../src/data/dialogue.js';
 import { DEBRIEF_GREETINGS } from '../src/screens/debrief.js';
-import { shortQuestionLabel } from '../src/screens/briefing.js';
+import { shortQuestionLabel, setupSay } from '../src/screens/briefing.js';
+import { PM_BURST_STEPS } from '../src/utils/debrief.js';
+import { createInitialState } from '../src/state.js';
+import { setReadLevel, setGear } from '../src/utils/reading.js';
 import { voiceId, voiceText } from '../src/utils/voice-line.js';
 import { WHEN_OPENS, COME_BACK, COME_BACK_MORE, previewText } from '../src/components/site-preview.js';
 
@@ -23,11 +26,21 @@ function strings(value, out, depth = 0) {
   else if (typeof value === 'object') for (const v of Object.values(value)) strings(v, out, depth + 1);
 }
 
+// A Simple mission's "Before you start" card, before anything is answered and once the phone and
+// computer are (the card then asks the rest). Only the questions, their choices and the skip
+// button: a line that repeats an answer ("Showing steps for Ring") is never listed, so what a
+// player picked never leaves the browser. iPhone and Mac keep the same passwords, so the card
+// has no devices note (it names the player's devices).
+const SIMPLE = setReadLevel(createInitialState(), 'simplest');
+const SETUP_STATES = [SIMPLE, setGear(setGear(SIMPLE, 'phone', 'iphone'), 'computer', 'mac')];
+
 export function collectVoiceLines() {
   const texts = [];
+  texts.push(...PM_BURST_STEPS);
   for (const m of MISSIONS) {
     if (m.legacy) continue;
     texts.push(m.lead, m.simple?.lead, m.briefing, m.simple?.scout);
+    for (const st of SETUP_STATES) texts.push(...setupSay(st, m));
     strings(m.scoutDialog, texts);
     const steps = [...(m.steps || []), ...(m.simple?.steps || []), ...Object.values(m.stepsByManager || {}).flat()];
     // How a step reads in the "When it opens:" list of a link step before it (a step after any

@@ -26,3 +26,11 @@ export function voiceId(text) {
   }
   return h.toString(16).padStart(16, '0');
 }
+
+// A card's words as the lines Read it to me says: one per heading, paragraph, question, button or
+// link, so each is its own recording. A whole card read as one line (the Simple "Before you
+// start" card, which joins whatever questions are still open) would never match a recording.
+const BLOCK = /<\/?(?:div|p|h[1-6]|button|summary|details|a|li|ul|ol|section)\b[^>]*>/gi;
+export function htmlLines(html) {
+  return String(html ?? '').split(BLOCK).map((t) => plainText(t)).filter((t) => /[a-z0-9]/i.test(t));
+}

@@ -5,11 +5,15 @@ import { voiceId, voiceText } from '../src/utils/voice-line.js';
 import { renderBriefing } from '../src/screens/briefing.js';
 import { renderDebrief } from '../src/screens/debrief.js';
 import { createInitialState, markMissionStarted } from '../src/state.js';
-import { setReadLevel } from '../src/utils/reading.js';
+import { setReadLevel, setGear, markStep } from '../src/utils/reading.js';
+import { PM_BURST_STEPS } from '../src/utils/debrief.js';
 import { MISSIONS } from '../src/data/missions.js';
 
 const LIST = JSON.parse(readFileSync(VOICE_LINES_FILE, 'utf8'));
 const decode = (s) => s.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+const allLines = (html, attr) => [...html.matchAll(new RegExp(`${attr}="([^"]*)"`, 'g'))].flatMap((m) => JSON.parse(decode(m[1])));
+// A line Scout can't have: no letters (a report's "1", "2", "3"; the browser says a digit fine).
+const voiceable = (l) => /[a-z]/i.test(voiceText(l));
 const readLines = (html) => {
   const m = /data-say-lines="([^"]*)"/.exec(html);
   return m ? JSON.parse(decode(m[1])) : null;
@@ -44,6 +48,54 @@ describe('Scout’s recorded lines (Liz 2026-11-17)', () => {
       }
     }
     expect(missing).toEqual([]);
+  });
+
+  // Every mission, both levels: the briefing, the Simple "Before you start" card (nothing answered,
+  // then the phone and computer answered), every step in turn, and the report (Liz 2026-11-25:
+  // the setup cards and "Change the next 3" were read in the browser's voice).
+  it('everything Read it to me says on every mission, step by step, is on the list', () => {
+    const missing = new Set();
+    const check = (html, where) => {
+      for (const attr of ['data-say-lines', 'data-say-next']) {
+        for (const l of allLines(html, attr)) if (voiceable(l) && !LIST[voiceId(l)]) missing.add(`${where}: ${l}`);
+      }
+    };
+    for (const m of MISSIONS.filter((x) => !x.legacy)) {
+      for (const level of ['simplest', 'full']) {
+        const s0 = setReadLevel(createInitialState(), level);
+        check(renderBriefing(s0, m.id), `${m.id} ${level} briefing`);
+        check(renderDebrief(s0, m.id), `${m.id} ${level} report`);
+        const started = markMissionStarted(s0, m.id);
+        check(renderBriefing(started, m.id), `${m.id} ${level} first screen`);
+        check(renderBriefing(setGear(setGear(started, 'phone', 'iphone'), 'computer', 'mac'), m.id), `${m.id} ${level} setup`);
+        let s = { ...started, stepProgress: { ...started.stepProgress, [m.id]: { ...started.stepProgress?.[m.id], setup: 'skipped' } } };
+        for (let i = 0; i < 40; i++) {
+          const html = renderBriefing(s, m.id);
+          check(html, `${m.id} ${level} step ${i + 1}`);
+          const key = /data-step-card data-step-key="([^"]*)"/.exec(html)?.[1];
+          if (!key) break;
+          s = markStep(s, m.id, decode(key), 'done');
+        }
+      }
+    }
+    expect([...missing]).toEqual([]);
+  }, 60_000); // ~2s alone; several times that beside the rest of the suite
+
+  it('a Simple setup card is read line by line, and a line with an answer in it is never listed', () => {
+    const m = MISSIONS.find((x) => x.id === 'smart_camera-reclaim-storage');
+    const s = markMissionStarted(setReadLevel(createInitialState(), 'simplest'), m.id);
+    const lines = readLines(renderBriefing(s, m.id));
+    expect(lines).toContain('Which camera do you have? Then you only see your steps.');
+    expect(lines).toContain('Skip this. Show me all the steps.');
+    for (const l of lines) expect(LIST[voiceId(l)], l).toBeTruthy();
+    // Answered: "Showing steps for Ring" says what the player has, so the browser reads it.
+    const answered = readLines(renderBriefing(setGear(setGear(s, 'phone', 'iphone'), 'computer', 'mac'), m.id));
+    for (const l of [...answered, ...Object.values(LIST)]) expect(l).not.toMatch(/^Showing steps for|^What (phone|computer) do you (have|use)\? \S/);
+  });
+
+  it('"Change the next 3" is on the list; its line naming the player’s own accounts is not', () => {
+    for (const t of PM_BURST_STEPS) expect(LIST[voiceId(t)], t).toBeTruthy();
+    expect(Object.values(LIST).some((t) => /^Start with the ones that are in the city too/.test(t))).toBe(false);
   });
 });
 
