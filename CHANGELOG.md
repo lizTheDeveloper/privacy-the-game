@@ -2,6 +2,15 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.48.1 (2026-11-25): Scout reads the setup cards and "Change the next 3"
+
+Read it to me played seven of Scout's lines in the browser's voice instead of his, because they were never on his list, so they were never recorded.
+
+- **Simple's "Before you start" card** (the device questions on the password missions, the camera, tracker and phone-company missions): it was read as one long line, every question, choice and button joined together, which no recording could match. It is read line by line now: the heading, why we ask, each question, each choice, and "Skip this. Show me all the steps." Those are on the list. A line that repeats your answer ("Showing steps for Ring", "What phone do you have? iPhone.") is still read by the browser, so what you picked never leaves it.
+- **"Change the next 3"**: its last three steps (the order to change passwords in, compromised before reused, delete the joke entries) are on the list. The step that names your own flagged accounts stays off it.
+- 42 new lines, 1,186 characters, recorded ahead of players.
+- `tests/voice-lines.test.js` now walks every mission at both levels (briefing, the setup card before and after the device questions, every step in turn, the report) and fails on any line Read it to me would say that isn't on the list. Lines with no letters (a report's "1", "2", "3") are left to the browser, as before.
+
 ## 7.48.0 (2026-11-21): no words under 11px
 
 IBM Plex Sans (7.47.0) is narrower than Orbitron, with shorter capitals, so the small labels looked smaller still. The owner: no readable text under **11px**, in any font, on a phone, in Simple and Advanced.

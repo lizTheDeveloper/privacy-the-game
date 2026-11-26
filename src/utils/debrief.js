@@ -170,6 +170,14 @@ export function missionSteps(mission, state) {
   return mission.steps;
 }
 
+// The steps "Change the next 3" always ends with. Fixed words, so they are on Scout's list
+// (scripts/voice-lines.mjs); the in-city line names the player's own accounts and never is.
+export const PM_BURST_STEPS = [
+  'Change the next 3, in this order: 1) email accounts, 2) bank, payment and money apps, 3) anything you use to sign in to other things (Apple, Google, Microsoft or Facebook logins), 4) shopping with saved cards, 5) social, 6) the rest',
+  'Within your manager, do compromised or leaked passwords before reused ones, and reused before weak',
+  'Test logins and joke passwords with nothing real behind them? Delete the entry (or close the account) instead of changing it',
+];
+
 // "Change the next 3": open the report, then the order to work in. Accounts
 // here that the manager flagged come first (they're among the email/money ones).
 function pmBurstSteps(mission, state) {
@@ -184,9 +192,7 @@ function pmBurstSteps(mission, state) {
     // Its words change as resets are filed: a fixed key keeps its tick (utils/step-key.js).
     steps.push({ key: 'pm-burst-in-city', text: `Start with the ones that are in the city too: ${inCity.join(', ')} — and file each one’s Password Reset mission as you go` });
   }
-  steps.push({ text: 'Change the next 3, in this order: 1) email accounts, 2) bank, payment and money apps, 3) anything you use to sign in to other things (Apple, Google, Microsoft or Facebook logins), 4) shopping with saved cards, 5) social, 6) the rest' });
-  steps.push({ text: 'Within your manager, do compromised or leaked passwords before reused ones, and reused before weak' });
-  steps.push({ text: 'Test logins and joke passwords with nothing real behind them? Delete the entry (or close the account) instead of changing it' });
+  for (const text of PM_BURST_STEPS) steps.push({ text });
   return steps;
 }
 
