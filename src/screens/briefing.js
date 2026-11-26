@@ -95,7 +95,7 @@ export function renderBriefing(state, missionId, opts = {}) {
     site: stepSite(missionStepList, i, account),
     ask: stepAsk(state, mission, step),
     lead: placeChip(missionStepList, i, { changesOnly: true }),
-    extra: i === bankAt ? renderBankStep(state, mission) : '',
+    extra: (i === bankAt ? renderBankStep(state, mission) : '') + modeSwitch(state, step, { primary: false }),
   }).replace('class="btn-primary walk-done"', 'class="btn-secondary walk-done"');
   const stepRows = missionStepList.map((step, i) => stepRow(step, i));
   const steps = stepRows.join('');
@@ -690,6 +690,18 @@ function stepCardText(mission, step, simple = null, preview = null) {
   return `<div class="focus-step-text">${pathText(step.text)}</div>${where}${step.url ? sitePreviewHtml(preview, { simple: Boolean(simple) }) : ''}${link}${notes}`;
 }
 
+// A step that turns a reading mode on (step.mode; Thanksgiving with Grandma's "Show Grandma Simple
+// mode", Liz 2026-11-25): the same switch as under More, one tap from the step. Once it is on, the
+// step says so, and DONE is the bright button. Local only, like every reading choice.
+export function modeSwitch(state, step, { primary = true } = {}) {
+  if (!step?.mode || !READ_LEVELS.includes(step.mode)) return '';
+  const label = READ_LEVEL_LABELS[step.mode];
+  if (readLevel(state) === step.mode) {
+    return `<p class="focus-mode-on" data-mode-on="${step.mode}">&#10003; ${label} is on. <span>You can change it under More.</span></p>`;
+  }
+  return `<div class="focus-mode"><button type="button" class="${primary ? 'btn-primary focus-go' : 'btn-secondary'}" data-action="read-level" data-level="${step.mode}" data-mode-switch>TURN ON ${label.toUpperCase()}</button></div>`;
+}
+
 // The site opens in a new tab, which on a phone looks like leaving the game; say how to get
 // back (Liz 2026-11-18). Phones: Back closes the new tab and comes back here. Computers: the tab.
 const BACK_HINT = `<p class="simple-tab-hint" data-tab-hint><span class="on-touch">It opens a new page. When you’re done there, tap <b>Back</b> to come back here.</span><span class="on-mouse">It opens in a new tab. When you’re done there, come back to this tab.</span></p>`;
@@ -757,7 +769,8 @@ function stepModePage(p) {
   const opened = Boolean(step && (!step.url || wasOpened(mission.id, key) || marks[key] === 'done'));
   const simpleCard = simple && step ? { opened, where: simpleWhere(missionStepList, current) } : null;
   const showDone = !simple || opened;
-  const askWaiting = Boolean(step) && stepAskPending(state, mission, step);
+  // A mode step (step.mode) whose mode is still off: its switch is the bright button, DONE waits.
+  const askWaiting = Boolean(step) && (stepAskPending(state, mission, step) || Boolean(step.mode && readLevel(state) !== step.mode));
   // A step that opens a site says first what to do there (the site covers the game on a phone).
   const preview = step ? sitePreview(missionStepList, current, { max: PREVIEW_MAX[level] || PREVIEW_MAX.full }) : null;
   // Read it to me: the step, any note shown open on its card (the password check's "Is this
@@ -789,6 +802,7 @@ function stepModePage(p) {
         ${placeChip(missionStepList, current)}${stepCardText(mission, step, simpleCard, preview)}
         ${bankHere}
         ${accountSite(mission, missionStepList, p.goUrl)}
+        ${modeSwitch(state, step)}
         ${showDone ? stepAsk(state, mission, step, sends) : ''}
         ${showDone ? `<button class="${askWaiting ? 'btn-secondary' : 'btn-primary'} focus-go focus-done" data-action="step-done" data-mission="${mission.id}" data-step="${key}"${sends ? ' data-sends' : ''}>${sends ? 'DONE &#10003; SEND TO SCOUT' : 'DONE &#10003;'}</button>` : ''}
         <div class="simple-pills">

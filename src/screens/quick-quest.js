@@ -1,4 +1,4 @@
-import { QUICK_QUESTS } from '../data/quests.js';
+import { questsInOrder, isFeatured } from '../data/quests.js';
 import { DISTRICTS } from '../data/districts.js';
 import { MISSIONS, missionDistrict } from '../data/missions.js';
 import { renderHud } from '../components/hud.js';
@@ -42,12 +42,18 @@ function districtLabel(quest) {
   return district ? district.name.toUpperCase() : quest.targetDistrict.toUpperCase();
 }
 
-function renderQuestCard(state, quest) {
+// A featured quest's tag ("THIS WEEK"), beside its name, while it is featured.
+function featuredTag(quest, now) {
+  return isFeatured(quest, now) ? `<span class="qq-featured-tag">${esc(quest.featured.tag || 'NEW')}</span>` : '';
+}
+
+function renderQuestCard(state, quest, now) {
   const to = questTarget(state, quest);
+  const featured = isFeatured(quest, now);
   return `
-  <a href="${esc(to.href)}" class="panel" data-quest="${esc(quest.id)}" style="display: block; padding: 18px 20px; text-decoration: none; border: 1px solid rgba(0,229,255,0.12); transition: border-color 0.15s, background 0.15s;">
+  <a href="${esc(to.href)}" class="panel${featured ? ' qq-featured' : ''}" data-quest="${esc(quest.id)}"${featured ? ' data-featured' : ''} style=""display: block; padding: 18px 20px; text-decoration: none; border: 1px solid rgba(0,229,255,0.12); transition: border-color 0.15s, background 0.15s;">
     <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
-      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(quest.title)}</div>
+      <div style="font-family: var(--font-title); line-height: 1.2; font-size: 14px; font-weight: 700; color: var(--offwhite); letter-spacing: 0.5px;">${esc(quest.title)}</div>${featuredTag(quest, now)}
       <div class="badge" style="letter-spacing: 1px; font-size: 11px; color: rgba(0,229,255,0.6); background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.15); flex-shrink: 0;">${districtLabel(quest)}</div>
     </div>
     <div style="font-size: 12px; line-height: 1.5; color: rgba(237,239,243,0.5);">${esc(quest.description)}</div>
@@ -58,12 +64,14 @@ function renderQuestCard(state, quest) {
 // On a phone: one list that scrolls, a row per problem. The row is the link: the problem in
 // plain words and where it takes you. What it looks like (and its district) open from the ?
 // beside it. From 900px the cards above.
-function questRow(state, quest) {
+function questRow(state, quest, now) {
   const to = questTarget(state, quest);
-  return `<li class="qq-row" data-quest="${esc(quest.id)}"><a class="qq-go" href="${esc(to.href)}"><span class="qq-name">${esc(quest.title)}</span><span class="qq-to">Takes you to: <span class="qq-to-name">${esc(to.label)}</span></span></a><details class="qq-signs" data-fold="qq-${esc(quest.id)}"><summary aria-label="What it looks like: ${esc(quest.title)}">?</summary><div class="badge qq-badge">${districtLabel(quest)}</div><div class="qq-desc">${esc(quest.description)}</div></details></li>`;
+  const featured = isFeatured(quest, now);
+  return `<li class="qq-row${featured ? ' qq-featured' : ''}" data-quest="${esc(quest.id)}"${featured ? ' data-featured' : ''}><a class="qq-go" href="${esc(to.href)}">${featuredTag(quest, now)}<span class="qq-name">${esc(quest.title)}</span><span class="qq-to">Takes you to: <span class="qq-to-name">${esc(to.label)}</span></span></a><details class="qq-signs" data-fold="qq-${esc(quest.id)}"><summary aria-label="What it looks like: ${esc(quest.title)}">?</summary><div class="badge qq-badge">${districtLabel(quest)}</div><div class="qq-desc">${esc(quest.description)}</div></details></li>`;
 }
 
-export function renderQuickQuest(state) {
+export function renderQuickQuest(state, { now = new Date() } = {}) {
+  const quests = questsInOrder(now);
   return `
   <div class="scanlines">
     ${renderHud(state)}
@@ -76,9 +84,9 @@ export function renderQuickQuest(state) {
         </div>
       </div>
       <div class="desktop-only qq-list" style="display: grid; gap: 10px; max-width: 640px;">
-        ${QUICK_QUESTS.map((q) => renderQuestCard(state, q)).join('')}
+        ${quests.map((q) => renderQuestCard(state, q, now)).join('')}
       </div>
-      <div class="phone-only"><ul class="qq-rows">${QUICK_QUESTS.map((q) => questRow(state, q)).join('')}</ul></div>
+      <div class="phone-only"><ul class="qq-rows">${quests.map((q) => questRow(state, q, now)).join('')}</ul></div>
     </div>
   </div>`;
 }

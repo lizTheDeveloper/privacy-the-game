@@ -8,9 +8,12 @@ import { missionsInProgress, visibleSteps, progressFor, intelFor, simpleTitle } 
 import { esc } from './stats.js';
 import { fillBar } from '../components/fill-bar.js';
 import { confetti } from '../components/celebrate.js';
-import { missionDistrict } from '../data/missions.js';
 import { calcChapterProgress } from '../utils/calc.js';
 import { saveNote } from '../components/browser-warning.js';
+import { QUICK_QUESTS, isFeatured } from '../data/quests.js';
+import { questTarget } from './quick-quest.js';
+import { MISSIONS, missionDistrict } from '../data/missions.js';
+import { isMissionDoneIn } from '../utils/mission-status.js';
 
 // Good news gets confetti (Liz 2026-11-18: "a little bit more celebration when things are good").
 const GOOD = new Set(['happy', 'proud', 'hug']);
@@ -98,7 +101,19 @@ function nextCard(state, up, first) {
     </section>`;
 }
 
-export function renderNext(state, { filed = null, notMine = null } = {}) {
+// A featured Quick Quest (Thanksgiving with Grandma) gets one quiet line under the card, while it is
+// featured and its mission isn't done, so Simple players find it from their home screen. The card's
+// START stays the one bright button. Not when the card is already that mission (shownId).
+export function featuredNudge(state, now = new Date(), shownId = null) {
+  return QUICK_QUESTS.filter((q) => isFeatured(q, now) && q.featured.nudge).map((q) => {
+    const to = questTarget(state, q);
+    const mission = to.missionId && MISSIONS.find((m) => m.id === to.missionId);
+    if (!mission || mission.id === shownId || isMissionDoneIn(state, mission)) return '';
+    return `<a class="focus-notnow next-featured" href="${esc(to.href)}" data-featured-quest="${esc(q.id)}">${esc(q.featured.nudge)} &#9654;</a>`;
+  }).join('');
+}
+
+export function renderNext(state, { filed = null, notMine = null, now = new Date() } = {}) {
   const up = nextUp(state);
   const anyDone = Object.values(state.missions || {}).some((m) => m?.status);
   const good = Boolean(filed && GOOD.has(filed.reaction?.feeling));
@@ -123,6 +138,7 @@ export function renderNext(state, { filed = null, notMine = null } = {}) {
       ${sent}${dropped}
       ${districtBar(state, missionDistrict(findMission(state, filed?.id) || up?.mission || {}) || '', barMission(state, filed, up))}
       ${nextCard(state, up, !anyDone && !sent)}
+      ${featuredNudge(state, now, up?.mission?.id)}
       <p class="next-saved">${saveNote('next')} This page will show you what's next.</p>
       <a class="focus-notnow next-city" href="#/city">See the whole city</a>
     </div>

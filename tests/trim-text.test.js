@@ -133,7 +133,9 @@ describe('the trim CSS', () => {
 
 describe('Quick Quest: one list on a phone, a row per problem', () => {
   const html = renderQuickQuest(createInitialState());
-  const rows = [...html.matchAll(/<li class="qq-row" data-quest="[^"]+">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+  // A featured quest's row (Thanksgiving with Grandma) carries qq-featured and its tag before the name.
+  const rows = [...html.matchAll(/<li class="qq-row(?: qq-featured)?" data-quest="[^"]+"(?: data-featured)?>([\s\S]*?)<\/li>/g)]
+    .map((m) => m[1].replace(/<span class="qq-featured-tag">[^<]*<\/span>/, ''));
 
   it('the desktop list is marked desktop-only; the rows are phone-only; no slides', () => {
     expect(html).toMatch(/<div class="desktop-only qq-list"/);

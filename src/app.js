@@ -1547,8 +1547,11 @@ app.addEventListener('click', async (e) => {
   } else if (action === 'read-level') {
     // Local only: how much someone likes to read stays on this phone (utils/reading.js).
     setState(setReadLevel(state, el.dataset.level));
+    const fromStep = 'modeSwitch' in el.dataset;
     renderCurrentRoute();
-    app.querySelector(`[data-action="read-level"][data-level="${CSS.escape(el.dataset.level)}"]`)?.focus({ preventScroll: true });
+    // From a step's own switch (Thanksgiving with Grandma): the step's DONE is next.
+    if (fromStep) (app.querySelector('[data-step-card] .focus-done') || app.querySelector('[data-mode-on]'))?.focus?.({ preventScroll: true });
+    else app.querySelector(`[data-action="read-level"][data-level="${CSS.escape(el.dataset.level)}"]`)?.focus({ preventScroll: true });
   } else if (action === 'read-offer') {
     const offer = OFFER_LINES[el.dataset.offer];
     if (offer) {

@@ -153,6 +153,7 @@ export const MISSION_LEADS = {
   "device_security-reclaim-app-permissions": "See which apps can use your camera, mic and contacts, or know where you are.",
   "scam_defense-recon-phishing-eye": "Learn the quick check that spots most fake emails.",
   "scam_defense-fortify-tools": "Turn on a few free tools that quietly cut tracking.",
+  "scam_defense-fortify-holiday-grandma": "Help Grandma stop scam callers, with a family code word and a phone PIN.",
   "border_prep-fortify-clean-email": "Make a new email address that no one can tie to you.",
   "border_prep-fortify-recovery-path": "Add your new email as a way back into your main accounts.",
   "border_prep-reclaim-travel-device": "Sign out of everything on the phone you will travel with.",

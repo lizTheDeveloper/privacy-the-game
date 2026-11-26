@@ -2,6 +2,16 @@
 
 Reclaim City's releases. Versions before 7.13.0 are described in their pull requests and commit messages (`git log`).
 
+## 7.49.0 (2026-11-25): Thanksgiving with Grandma
+
+The owner, the day before Thanksgiving: "one of those quick quests that helps grandma, like what can you do during Thanksgiving if you're hanging out with grandma, show them or make sure that they know about Reclaim City's Simple mode."
+
+- **A new Quick Quest, Thanksgiving with Grandma**, first in the list with a THIS WEEK tag from 2026-11-19 to 2026-11-30. After that it stays in the list like any other quest. It goes straight to a new Scam Defense mission in The Perimeter, built from the owner's holiday guide ("Cybersecurity for Grandma: 2026 Holiday Edition", themultiverse.school/x/home-for-the-holidays), the FTC's "Scammers Use Fake Emergencies To Steal Your Money", and the district's own Lock Down Your Phone Number. It is one quest with one closing question ("Did you do this with Grandma?"), in 31 small steps, each one physical action (the owner: "more, smaller steps"): turn on Simple mode and show Grandma Read it to me; put Reclaim City on Grandma's home screen and start it in Simple mode (a first visit asks Simple or Advanced); pick a family code word, say it out loud, agree when to ask for it; write a "Help me" paper (your number, one more family number, the code word, "Hang up, call them back at a number you already have.") and put it by her phone; call her phone company on speaker, ask for an account PIN, write it somewhere private (never on the "Help me" paper, which anyone in the house can read), ask for port-out protection (T-Mobile's Port Out Protection, AT&T's Wireless Account Lock, Verizon's Number Lock); and open the holiday guide. It names its actors: scam callers who pretend to be family, and SIM-swap crews. Steps about Grandma's phone start "If Grandma has an iPhone", not "iPhone:", so the player's own device filter never hides them.
+- **Simple mode in one tap, from the step.** The first step card has the same switch as under More. In Advanced mode, TURN ON SIMPLE MODE is the bright button and DONE waits as an outline. In Simple mode the card says "Simple mode is on" and DONE is the bright button. A step can carry `mode` for this.
+- **What's next** (Simple's home) has one quiet line under its card while the quest is featured and not done: "Seeing Grandma for Thanksgiving? Help her stay safe from scam callers". The card's button is still the only bright one.
+- **It never lowers a score.** It is a bonus (`optional`) that is `seasonal`, so integrity and exposure count it only once it is done, like the bonuses that unlock later. A finished city stays at 100%, and no district's % moves.
+- `tests/thanksgiving-quest.test.js` covers the placement and dates, the target, the scores, the switch at both modes and What's next.
+
 ## 7.48.1 (2026-11-25): Scout reads the setup cards and "Change the next 3"
 
 Read it to me played seven of Scout's lines in the browser's voice instead of his, because they were never on his list, so they were never recorded.

@@ -7,7 +7,33 @@ const fixThenCheck = (acct, check) => [`${acct}-fortify-password`, `${acct}${che
 // Email: the account's password reset, else its breach check (the reset unlocks after it).
 const emailFix = (accts) => accts.flatMap((a) => fixThenCheck(a, '-recon-breach'));
 
+// A quest can be featured for a while (`featured`: from and until, ISO dates, local time): it goes to
+// the top of the list with a "THIS WEEK" tag, and What's next (Simple's home) links to it. Outside
+// its dates it stays in the list as a quest like any other (never removed).
+export function isFeatured(quest, now = new Date()) {
+  const f = quest?.featured;
+  if (!f) return false;
+  const t = now.getTime();
+  return (!f.from || t >= new Date(`${f.from}T00:00:00`).getTime())
+    && (!f.until || t < new Date(`${f.until}T00:00:00`).getTime());
+}
+
+// The list in the order it shows: featured quests first, the rest as written.
+export function questsInOrder(now = new Date()) {
+  return [...QUICK_QUESTS.filter((q) => isFeatured(q, now)), ...QUICK_QUESTS.filter((q) => !isFeatured(q, now))];
+}
+
 export const QUICK_QUESTS = [
+  // Liz 2026-11-25, the day before Thanksgiving: "one of those quick quests that helps grandma".
+  // Featured from the week before Thanksgiving to the Monday after it (until is the first day off).
+  {
+    id: 'holiday-grandma',
+    title: 'Thanksgiving with Grandma',
+    description: 'Seeing family this week? Show Grandma Simple mode, pick a family code word, and lock her phone number with her phone company.',
+    targetDistrict: 'perimeter',
+    targetMissions: ['scam_defense-fortify-holiday-grandma'],
+    featured: { from: '2026-11-19', until: '2026-12-01', tag: 'THIS WEEK', nudge: 'Seeing Grandma for Thanksgiving? Help her stay safe from scam callers' },
+  },
   {
     id: 'email-hacked',
     title: 'My email got hacked',
