@@ -33,11 +33,12 @@ function weightedScore(missions, isDone) {
 
 // Bonus missions that unlock later (optional + mission.unlock) count toward
 // integrity and exposure only once done, so unlocking one never lowers a
-// score. A core mission that unlocks (the password-manager report) counts
-// like any core mission once it is in play.
+// score. So do seasonal bonuses (optional + mission.seasonal: Thanksgiving with
+// Grandma), added for every save at once. A core mission that unlocks (the
+// password-manager report) counts like any core mission once it is in play.
 function scoredMissions(state) {
   return MISSIONS.filter((m) => m.phase !== 'survey' && isMissionInPlay(state, m)
-    && (!(m.unlock && m.optional) || isMissionDoneIn(state, m)));
+    && (!((m.unlock || m.seasonal) && m.optional) || isMissionDoneIn(state, m)));
 }
 
 export function calcIntegrity(state) {

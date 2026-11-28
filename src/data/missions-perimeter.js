@@ -28,6 +28,11 @@ const PHISHING_DEBRIEF = [
   },
 ];
 
+// Thanksgiving with Grandma (the Quick Quest that leads to it: data/quests.js).
+export const HOLIDAY_GRANDMA_ID = "scam_defense-fortify-holiday-grandma";
+// Liz's holiday guide, "Cybersecurity for Grandma: 2026 Holiday Edition" (from lizthe.dev/cybersecurity-guides).
+export const HOLIDAY_GUIDE_URL = "https://themultiverse.school/x/home-for-the-holidays";
+
 function scoutAction(completed, alreadyDone, na) {
   return {
     "completed": completed,
@@ -233,6 +238,98 @@ export const PERIMETER_MISSIONS = [
       ),
     },
     estimatedMinutes: 8,
+  },
+  // Thanksgiving with Grandma (Liz 2026-11-25: "one of those quick quests that helps grandma,
+  // like what can you do during Thanksgiving if you're hanging out with grandma, show them or
+  // make sure that they know about Reclaim City's Simple mode"). Things to do together at the
+  // table. Sources: Liz's holiday guide (themultiverse.school/x/home-for-the-holidays: the family
+  // password, the "Help me" paper, "Hang up. Call them back at a number you already have."), the
+  // FTC's "Scammers Use Fake Emergencies To Steal Your Money", and this district's own
+  // Lock Down Your Phone Number. Steps say "Grandma", never "her" alone, so they read right
+  // whoever is holding the phone.
+  // A bonus that counts only once done (seasonal): added for everyone at once, it must never lower
+  // a finished city's integrity or a district's % (utils/calc.js).
+  {
+    id: HOLIDAY_GRANDMA_ID,
+    accountId: "scam_defense",
+    phase: "fortify",
+    optional: true,
+    seasonal: true,
+    title: "Thanksgiving with Grandma",
+    briefing: "Scam callers pretend to be a grandchild or other family member in trouble. They say it's urgent, may ask her to keep it secret, and want money fast, by gift card, wire, crypto or a payment app (FTC). Some use AI to copy a loved one's voice. A SIM-swap crew goes after her phone number instead: they call her phone company, say they are her, and move her number to their SIM card, so the codes her bank texts her go to them. None of this needs her to be a tech expert. It needs a few things done together while the family is in one room: Reclaim City on her phone in Simple mode, so it is easy for her to use; a family code word; a \"Help me\" paper by her phone; and a PIN and port-out protection with her phone company.",
+    // One physical action a step (Liz 2026-11-25: "more, smaller steps"), so a Level 2-3 reader, or
+    // Grandma herself, never has to work out what comes next. Device steps start "If Grandma has",
+    // not "iPhone:", because the player's own devices (the device filter) aren't Grandma's.
+    steps: [
+      // This phone: Simple mode.
+      { text: "Turn on Simple mode with the button on this card.", mode: "simplest", help: "If this card says “Simple mode is on”, it is already on. It is also under More, at the top of the screen." },
+      { text: "Look at the screen with Grandma: one step at a time, and one big button." },
+      { text: "Tap “Read it to me” at the top: Scout reads each step out loud.", help: "On a phone it says “Read”. Tap it again to stop." },
+      // Grandma's phone: Reclaim City on her home screen, in Simple mode.
+      { text: "On Grandma’s phone, open the web browser: Safari or Chrome.", elsewhere: true },
+      { text: "Tap the address bar at the top of the browser.", help: "On some iPhones the bar is at the bottom of the screen." },
+      { text: "Type play.multiversegames.ai/reclaim-city in the bar.", help: "Then tap Go on the keyboard." },
+      { text: "If Grandma has an iPhone: tap the Share button, a square with an arrow.", help: "Can’t see it? Tap “•••” next to the address bar first." },
+      { text: "If Grandma has an iPhone: tap “Add to Home Screen”.", help: "Can’t see it? Scroll down the list." },
+      { text: "If Grandma has an iPhone: tap “Add”." },
+      { text: "If Grandma has an Android phone: tap ⋮ at the top right of Chrome." },
+      { text: "If Grandma has an Android phone: tap “Add to Home screen”.", help: "Some phones say “Install app” instead." },
+      { text: "On Grandma’s home screen, tap the new Reclaim City icon." },
+      { text: "Tap “PLAY — IT’S FREE”." },
+      { text: "Tap “Simple mode”.", help: "It is the first, bright button: “Fewer words, one step at a time”." },
+      // A family code word.
+      { text: "Pick a family code word together.", help: "Any word only the family knows. Skip pet names and words anyone could find online.", note: [
+        { label: "Why a code word?", text: "Scam callers pretend to be a grandchild or other family member in trouble. They say it’s urgent and ask for money fast. Some use AI to copy a family member’s voice. The code word tells Grandma it is really you." },
+      ] },
+      { text: "Both of you say the code word out loud, once." },
+      { text: "Agree when to ask for it: when someone calls saying they’re family and need money.", note: [
+        { label: "If they can’t say it", open: true, text: "Hang up. Call them back at a number you already have." },
+      ] },
+      // The "Help me" paper.
+      { text: "Get a piece of paper and a pen." },
+      { text: "Write your name and phone number on it." },
+      { text: "Write one more family member’s name and phone number." },
+      { text: "Write the code word." },
+      { text: "Write what to do if a caller can’t say it: “Hang up, call them back at a number you already have.”" },
+      { text: "Put the paper by Grandma’s phone.", help: "Put it where she sits when she talks on the phone." },
+      // A PIN with her phone company (this district's Lock Down Your Phone Number, at the table).
+      { text: "Find the name of Grandma’s phone company on her phone bill.", elsewhere: true, help: "No bill nearby? Ask Grandma who she pays for her phone.", note: [
+        { label: "Why?", text: "A SIM-swap crew calls the phone company, says they are Grandma, and moves her number to their phone. Then the codes her bank texts her go to them. An account PIN and port-out protection block that call." },
+      ] },
+      { text: "Find the phone company’s customer service number on the bill.", help: "No bill? Type the company’s website address yourself and find the number there. Never use a number from a text." },
+      { text: "Call that number together, on speaker." },
+      { text: "Grandma says: “I want to add an account PIN to my account.”", help: "The company may ask Grandma questions first, to check it is her." },
+      { text: "Pick the PIN together. Don’t use her birthday.", help: "The company says how many numbers it needs." },
+      { text: "Write the PIN somewhere separate and private, not on the “Help me” paper. A note in her wallet or a drawer only she uses works.", help: "The “Help me” paper sits by the phone, where anyone in the house can read it. It keeps the phone numbers and the code word only." },
+      { text: "Grandma says: “I also want port-out protection, so no one can move my number.”", help: "If they say they don’t have it, ask for a supervisor.", note: [
+        { label: "Other names for it", text: "T-Mobile calls it “Port Out Protection”. AT&T calls it “Wireless Account Lock”. Verizon calls it “Number Lock”. The “Lock Down Your Phone Number” mission, here in The Perimeter, shows where each company puts it." },
+      ] },
+      // More from Liz's guide.
+      { text: "Open the “Cybersecurity for Grandma” holiday guide for more to do together.", url: HOLIDAY_GUIDE_URL, note: [
+        { label: "What’s in it?", text: "More fixes to do with Grandma: a password manager, two-step sign-in for her email, cleaning up apps she doesn’t use, and more." },
+      ] },
+    ],
+    debriefQs: [
+      {
+        id: "action",
+        label: "Did you do this with Grandma?",
+        options: [
+          { value: "completed", text: "We did it", severity: "safe" },
+          { value: "already-done", text: "She already had these", severity: "safe" },
+          { value: "not-applicable", text: "Not seeing her this year", severity: "safe" },
+          { value: "later", text: "We’ll do it later", severity: "skip" },
+        ],
+      },
+    ],
+    scoutDialog: {
+      briefing: "\"Holidays put the whole family in one room. That's the best time for this. You don't have to make Grandma an expert. A code word, a paper by her phone and a PIN with her phone company make her a much harder target for scam callers and SIM-swap crews.\"",
+      debrief: scoutAction(
+        "\"Code word picked, paper by the phone, number locked. The next scam caller who rings Grandma hits a wall. Happy Thanksgiving.\"",
+        "\"Grandma was ahead of us. Make sure the code word is still one only the family knows.\"",
+        "\"Not seeing her this year? A phone call works too. The code word and the phone company PIN can both be done over the phone.\"",
+      ),
+    },
+    estimatedMinutes: 25,
   },
 
   // ══════════════════════════════════════════════════════

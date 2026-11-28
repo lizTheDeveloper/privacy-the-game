@@ -506,6 +506,8 @@
     "https://www.theguardian.com/uk-news/2013/aug/01/nsa-paid-gchq-spying-edward-snowden": "200, read, 2026-10-29",
     "https://theintercept.com/2014/05/19/data-pirates-caribbean-nsa-recording-every-cell-phone-call-bahamas/": "200, read, 2026-10-29",
     "https://theintercept.com/2021/04/02/ice-database-surveillance-lexisnexis/": "200, read, 2026-10-29",
+    "https://themultiverse.school/x/home-for-the-holidays": "curl 200, read 2026-11-25 (Liz’s “Cybersecurity for Grandma: 2026 Holiday Edition”)",
+    "https://play.multiversegames.ai/reclaim-city": "curl 301 to https://play.multiversegames.ai/reclaim-city/ (200), 2026-11-25: the game itself, typed on Grandma’s phone",
     "https://www.reuters.com/article/us-dea-sod-idUSBRE97409R20130805": "Reuters bot wall (401) in a browser 2026-10-29; headline confirmed by search (Bangor Daily News reprint, Wikipedia: Parallel construction)",
     "https://www.wsj.com/articles/irs-used-cellphone-location-data-to-try-to-find-suspects-11592587815": "WSJ refuses automated browsers 2026-10-29; headline confirmed by search (Vice, IAPP, Fox Business coverage)",
     "https://fedscoop.com/irs-investigation-cellphone-location-data/": "200, read, 2026-10-29",

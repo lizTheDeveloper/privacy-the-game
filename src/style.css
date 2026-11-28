@@ -721,6 +721,13 @@ img { image-rendering: pixelated; }
 .qq-signs[open] { padding-bottom: 12px; }
 .qq-badge { display: inline-block; font-size: 11px; letter-spacing: 1px; color: var(--text-quiet); background: rgba(255,255,255,0.03); border-color: var(--line-quiet); }
 .qq-desc { margin-top: 6px; font-size: 14px; line-height: 1.5; color: rgba(237,239,243,0.85); }
+.qq-featured { border-color: rgba(255,159,0,0.55) !important; background: rgba(255,159,0,0.06) !important; }
+.qq-featured-tag { display: inline-block; align-self: flex-start; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--amber); border: 1px solid rgba(255,159,0,0.45); padding: 2px 8px; }
+/* A step that switches the reading mode (Thanksgiving with Grandma): the switch, or that it is on. */
+.focus-mode { margin: 12px 0 4px; }
+.focus-mode-on { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0 4px; font-size: 15px; line-height: 1.4; color: var(--lime); }
+.focus-mode-on span { color: var(--text-quiet); font-size: 14px; }
+.next-featured { display: block; margin: 4px auto 0; max-width: 34em; text-align: center; font-size: 15px; color: var(--amber); }
 /* Surveys on a phone: one question, a chip per account (district.js). */
 .survey-ask { font-size: 14px; line-height: 1.5; color: var(--offwhite); margin-bottom: 10px; }
 .survey-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
